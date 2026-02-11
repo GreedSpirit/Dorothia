@@ -1,5 +1,8 @@
+using Unity.VectorGraphics;
 using Unity.VisualScripting;
+using UnityEditor.Build.Content;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class TitleManager : MonoBehaviour
@@ -16,11 +19,18 @@ public class TitleManager : MonoBehaviour
         }
 
         instance = this;
+
     }
 
     [SerializeField] private OptionPopup optionPopup;
     public void OnClickOptionPopup()
     {
-        optionPopup.OpenPopup();    
+        optionPopup.OpenPopup();
     }
+
+    public void GameStart()
+    {
+        SceneManager.LoadScene("TInGameScene");
+    }
+
 }
