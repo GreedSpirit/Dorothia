@@ -84,6 +84,8 @@ public class MonsterSpawnManager : MonoBehaviour
         float minDistance = 1.2f;       // 몬스터 간 최소 간격
         int maxAttemptsPerMonster = 10; // 뿌릴 몬스터 위치 찾기 재시도 횟수(겹침방지)
 
+        float mapHalfSize = _spawnAreaProvider.MapHalfSize;
+
         List<Vector3> usedPositions = new();
 
         for (int i = 0; i < spawnCount; i++)
@@ -98,6 +100,10 @@ public class MonsterSpawnManager : MonoBehaviour
             {
                 Vector2 randomCircle = Random.insideUnitCircle * maxRadius;
                 candidate = centerPos + new Vector3(randomCircle.x, 0f, randomCircle.y);
+
+                //맵 경계 Clamp
+                candidate.x = Mathf.Clamp(candidate.x, -mapHalfSize, mapHalfSize);
+                candidate.z = Mathf.Clamp(candidate.z, -mapHalfSize, mapHalfSize);
 
                 bool overlaps = false;
                 foreach (var pos in usedPositions)
