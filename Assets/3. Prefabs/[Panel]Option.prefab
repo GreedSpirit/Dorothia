@@ -498,8 +498,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 8896037858198474210}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.593, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -628,7 +628,7 @@ GameObject:
   - component: {fileID: 5693031045969665706}
   - component: {fileID: 1705139434003494467}
   m_Layer: 5
-  m_Name: '[Text]SFXVolumn'
+  m_Name: '[Text]SFXVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -923,7 +923,7 @@ RectTransform:
   m_Father: {fileID: 3990501529250843208}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -975,7 +975,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7266443136343361482}
   m_Layer: 5
-  m_Name: MainVolumn
+  m_Name: MainVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1398,7 +1398,7 @@ GameObject:
   - component: {fileID: 8259132536515388282}
   - component: {fileID: 2488621589068516471}
   m_Layer: 5
-  m_Name: '[Slider]MainVolumn'
+  m_Name: '[Slider]MainVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1524,7 +1524,7 @@ GameObject:
   - component: {fileID: 8900229403863674273}
   - component: {fileID: 5037096190491643602}
   m_Layer: 5
-  m_Name: '[Slider]SFXVolumn'
+  m_Name: '[Slider]SFXVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1935,7 +1935,7 @@ GameObject:
   - component: {fileID: 1698838448073001328}
   - component: {fileID: 5927070500682810628}
   m_Layer: 5
-  m_Name: '[Text]MainVolumn'
+  m_Name: '[Text]MainVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2070,7 +2070,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3037107812507807297}
   m_Layer: 5
-  m_Name: SFXVolumn
+  m_Name: SFXVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2211,7 +2211,7 @@ RectTransform:
   m_Father: {fileID: 1278151701365082570}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2638,7 +2638,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &68481295274775433
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2683,10 +2683,10 @@ MonoBehaviour:
   backgroundBtn: {fileID: 3618273804299786762}
   closeBtn: {fileID: 6333066328354169094}
   saveBtn: {fileID: 2762948351648443189}
-  language: {fileID: 2323334281295219605}
-  mainVolumn: {fileID: 2488621589068516471}
-  bgmVolumn: {fileID: 7392211218467988852}
-  sfxVolumn: {fileID: 5037096190491643602}
+  languageDropdown: {fileID: 0}
+  mainVolumeSlider: {fileID: 0}
+  bgmVolumeSlider: {fileID: 0}
+  sfxVolumeSlider: {fileID: 0}
 --- !u!1 &5628662636385020731
 GameObject:
   m_ObjectHideFlags: 0
@@ -2794,8 +2794,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3328443053281993838}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.593, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2906,7 +2906,7 @@ RectTransform:
   m_Father: {fileID: 5389125967782920132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3106,8 +3106,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5741725732247795718}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.593, y: 0}
+  m_AnchorMax: {x: 0.593, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3745,7 +3745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2869136724539124978}
   m_Layer: 5
-  m_Name: BGMVolumn
+  m_Name: BGMVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3819,7 +3819,7 @@ GameObject:
   - component: {fileID: 6197996002532445043}
   - component: {fileID: 7392211218467988852}
   m_Layer: 5
-  m_Name: '[Slider]BGMVolumn'
+  m_Name: '[Slider]BGMVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3910,7 +3910,7 @@ GameObject:
   - component: {fileID: 4092876955796043802}
   - component: {fileID: 5068301419232884251}
   m_Layer: 5
-  m_Name: '[Text]BGMVolumn'
+  m_Name: '[Text]BGMVolume'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
