@@ -18,7 +18,7 @@ public enum EquipmentStatus
 {
     HealthPoint, AttackPoint, AttackSpeed, CriticalRate, CriticalDamage, Defense, MagicDefense, HealthRegeneration, MoveSpeed
 }
-public class Equipment : MonoBehaviour
+public class Equipment
 {
     public EquipmentPart equipPart;          // 해당 장비의 장착 부위입니다.
     public EquipmentRarity equipmentRarity;  // 해당 장비의 레어도입니다.
@@ -27,6 +27,7 @@ public class Equipment : MonoBehaviour
 
     public int ID;                     // 동일 장비여도 ID값을 통해 구분하기 위함 (임시값)
     public int EquippedSlotIndex = -1; // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
+    public string name;
     public bool isEquipped = false;    // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
 
     /// <summary>

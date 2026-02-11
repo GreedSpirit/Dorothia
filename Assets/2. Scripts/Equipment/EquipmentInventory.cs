@@ -26,7 +26,9 @@ public class EquipmentInventory : MonoBehaviour
 
         //그 리스트가 이미 해당 장비를 포함했다면 장비 중인 것이므로 실패를 반환합니다.
         if (list.Contains(equip))
+        {
             return false;
+        }
 
         //그 리스트가 16개의 값을 이미 담고 있거나 그 이상을 담았을 경우 (테스트용) 범위를 넘어갔으므로 실패를 반환합니다.
         if (list.Count >= 16)
