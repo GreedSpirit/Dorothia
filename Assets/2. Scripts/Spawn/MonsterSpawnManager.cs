@@ -233,7 +233,8 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private MonsterController CreateMonster(MonsterController prefabKey)
     {
-        MonsterController monster = Instantiate(prefabKey);
+        MonsterController monster =
+        Instantiate(prefabKey, RuntimeRootManager.Monsters);
         monster.gameObject.SetActive(false);
         return monster;
     }
@@ -298,7 +299,7 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private SimpleProjectile CreateProjectile(GameObject prefab)
     {
-        GameObject gameObject = Instantiate(prefab);
+        GameObject gameObject = Instantiate(prefab, RuntimeRootManager.Projectiles);
         gameObject.SetActive(false);
 
         SimpleProjectile projectile = gameObject.GetComponent<SimpleProjectile>();
