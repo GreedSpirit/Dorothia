@@ -44,6 +44,14 @@ public class FusePanel : MonoBehaviour
             return;
         }
 
+        if(inventory.GetInventoryIndex(mainEquipment) == inventory.GetInventoryIndex(subEquipmentOne)||
+            inventory.GetInventoryIndex(mainEquipment) == inventory.GetInventoryIndex(subEquipmentTwo)||
+            inventory.GetInventoryIndex(subEquipmentOne) == inventory.GetInventoryIndex(subEquipmentTwo))
+        {
+            Debug.Log("동일한 장비를 중복으로 사용하실 수 없습니다.");
+            return;
+        }
+
         int randomNumber = Random.Range(1, 101);
         int successNumber = CheckFuseSuccessRate(mainEquipment);
         Debug.Log($"{randomNumber} / {successNumber}");

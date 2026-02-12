@@ -60,4 +60,9 @@ public class EquipmentInventory : MonoBehaviour
     {
         return invDic[part];
     }
+
+   public int GetInventoryIndex(Equipment equip)
+    {
+        return invDic[equip.equipPart].IndexOf(equip);
+    }
 }
