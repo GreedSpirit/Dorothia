@@ -2,7 +2,7 @@
 using System;
 
 [Serializable]
-public class Equip_Ugrade_GoldData : ICSVLoad, ITableKey
+public class Equip_Upgrade_GoldData : ICSVLoad, ITableKey
 {
     public int equip_rank { get; set; }
     public float equip_rank_value { get; set; }
