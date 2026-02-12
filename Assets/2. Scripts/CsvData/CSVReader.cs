@@ -9,7 +9,7 @@ public class CSVReader
         List<T> list = new List<T>();
         TextAsset data = Resources.Load<TextAsset>(file);
 
-        // 헤더로 사용할 줄 수 (상단 IgnoreHeaderCount 무시)
+        // 헤더로 사용할 줄 수 (상단 IgnoreHeaderCount줄만큼 무시)
         const int IgnoreHeaderCount = 4;
 
         if (data == null)
@@ -36,12 +36,11 @@ public class CSVReader
             }
             // 데이터가 비어있으면 건너뛰기
             if (values.Length == 0 || string.IsNullOrWhiteSpace(values[0])) continue;
-            string firstCol = values[0].Trim();
             
             try
             {
                 T entry = new T();
-                entry.LoadFromCsv(values); // 각 데이터 클래스의 파싱 로직 실행
+                entry.LoadFromCsv(values); // 각 데이터 클래스의 LoadFromCsv 실행
                 list.Add(entry);
             }
             catch (Exception e)
