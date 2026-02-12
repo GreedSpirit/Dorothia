@@ -19,7 +19,6 @@ public class MonsterData : ScriptableObject
     [Header("Chase / Attack")]
     public float attackRange = 1.8f;
     public float attackCooldown = 1.0f;
-
     public float preferredRange = 6.0f;
 
     [Header("NavMesh / Avoidance")]

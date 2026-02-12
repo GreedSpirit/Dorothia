@@ -7,9 +7,10 @@ public class MonsterRangedAttack : MonsterAttackBase
         if (target == null || !target.IsAlive)
             return;
 
-        MonsterData data = _owner.Data;
+        //MonsterData data = _owner.Data;
+        var stats = _owner.Stats;
 
-        if (data.projectilePrefab == null)
+        if (stats.ProjectilePrefab == null)
         {
             Debug.LogWarning("[MonsterRangedAttack] 투사체 프리팹 없음");
             return;
@@ -23,7 +24,7 @@ public class MonsterRangedAttack : MonsterAttackBase
 
         //투사체풀
         SimpleProjectile projectile =
-            _owner.SpawnManager.GetProjectile(data.projectilePrefab);
+            _owner.SpawnManager.GetProjectile(stats.ProjectilePrefab);
 
         projectile.transform.position = spawnPos;
 
@@ -32,11 +33,11 @@ public class MonsterRangedAttack : MonsterAttackBase
 
         projectile.Initialize(
             direction,
-            data.projectileSpeed,
-            data.damage,
-            data.projectileLifeTime,
+            stats.ProjectileSpeed,
+            stats.Damage,
+            stats.ProjectileLifeTime,
             _owner.SpawnManager,
-            data.projectilePrefab
+            stats.ProjectilePrefab
         );
     }
 }

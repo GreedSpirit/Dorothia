@@ -7,6 +7,6 @@ public class MonsterMeleeAttack : MonsterAttackBase
         if (target == null || !target.IsAlive)
             return;
 
-        target.ApplyDamage(_owner.Data.damage);
+        target.ApplyDamage(_owner.Stats.Damage);
     }
 }

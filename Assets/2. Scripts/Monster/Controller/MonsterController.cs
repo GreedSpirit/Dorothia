@@ -11,11 +11,13 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class MonsterController : MonoBehaviour, IMonster
 {
-    [Header("Data")]
-    [SerializeField] private MonsterData _data;     // 스탯 및 타입 정보
+    [Header("Editor Data")]
+    [SerializeField] private MonsterData _data;     // 에디터 테스트용 데이터
 
     [Header("HitCollider")]
     [SerializeField] private Collider _hitCollider; // 피격 판정용 콜라이더
+
+    private IMonsterStats _stats;                   // 인터페이스 기반 스탯
 
     private MonsterSpawnManager _owner;             // 스폰매니저
     private IMonsterTarget _target;                 // 추격대상(플레이어)
@@ -31,7 +33,8 @@ public class MonsterController : MonoBehaviour, IMonster
     //어떤 프리펩풀로 반환할지 식별용 키
     private MonsterController _poolKeyPrefab;
 
-    public MonsterData Data => _data;
+    //public MonsterData Data => _data;
+    public IMonsterStats Stats => _stats;
     public MonsterSpawnManager SpawnManager => _owner;
 
     private void Awake()
@@ -59,11 +62,13 @@ public class MonsterController : MonoBehaviour, IMonster
 
         if (_data == null)
         {
-            Debug.LogError("[MonsterController] - MonsterData 없음");
+            Debug.LogError("[MonsterController] MonsterData 없음");
             return;
         }
 
-        _hp = _data.maxHp; // 체력 초기화
+        _stats = new MonsterStatsFromSO(_data); // SO -> 인터페이스 어댑터 생성
+
+        _hp = _stats.MaxHp; // 체력 초기화
         _lastAttackTime = -999f; // 즉시 공격방지
 
         ApplyNavMeshSettings();
@@ -80,11 +85,11 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private void ApplyNavMeshSettings()
     {
-        _agent.speed = _data.moveSpeed;
-        _agent.radius = _data.agentRadius;
+        _agent.speed = _stats.MoveSpeed;
+        _agent.radius = _stats.AgentRadius;
         
         //RVO 충돌 우선순위 랜덤화 -> 군집 이동할때 자연스러움 증가
-        _agent.avoidancePriority = Random.Range(_data.avoidancePriorityMin, _data.avoidancePriorityMax + 1);
+        _agent.avoidancePriority = Random.Range(_stats.AvoidancePriorityMin, _stats.AvoidancePriorityMax + 1);
 
         _agent.isStopped = false;
         _agent.ResetPath();
@@ -171,10 +176,10 @@ public class MonsterController : MonoBehaviour, IMonster
         float distance = DistanceXZ(transform.position, _target.Transform.position);
 
         //최단경로 및 원거리공격 유지
-        if (_data.archetype == MonsterArchetype.Ranged)
+        if (_stats.Archetype == MonsterArchetype.Ranged)
         {
             //원거리: 일정 거리 이상일 때만 접근
-            if (distance > _data.preferredRange)
+            if (distance > _stats.PreferredRange)
                 _agent.SetDestination(_target.Transform.position);
             else
                 _agent.ResetPath();
@@ -187,7 +192,7 @@ public class MonsterController : MonoBehaviour, IMonster
 
         RotateToTarget(_target.Transform.position);
 
-        if (distance <= _data.attackRange)
+        if (distance <= _stats.AttackRange)
             ChangeState(MonsterState.Attack);
     }
 
@@ -203,14 +208,14 @@ public class MonsterController : MonoBehaviour, IMonster
         RotateToTarget(_target.Transform.position);
 
         //사거리 밖이면 다시 추격
-        if (distance > _data.attackRange)
+        if (distance > _stats.AttackRange)
         {
             ChangeState(MonsterState.Chase);
             return;
         }
 
         //사거리 안이면 계속 공격
-        if (Time.time - _lastAttackTime >= _data.attackCooldown)
+        if (Time.time - _lastAttackTime >= _stats.AttackCooldown)
         {
             DoAttack();
             _lastAttackTime = Time.time;
@@ -239,7 +244,7 @@ public class MonsterController : MonoBehaviour, IMonster
         if (_attack != null)
             _attack.PerformAttack(_target);
         else
-            _target.ApplyDamage(_data.damage);
+            _target.ApplyDamage(_stats.Damage);
     }
 
     public void TakeDamage(int amount)
@@ -257,7 +262,7 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
 
         Quaternion look = Quaternion.LookRotation(direction.normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, look, Time.deltaTime * _data.rotateSpeed);
+        transform.rotation = Quaternion.Slerp(transform.rotation, look, Time.deltaTime * _stats.RotateSpeed);
     }
 
     private float DistanceXZ(Vector3 a, Vector3 b)
