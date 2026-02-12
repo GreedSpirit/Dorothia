@@ -81,14 +81,14 @@ public class DataManager : MonoBehaviour
         Equip_RankDict = LoadAndCreateDict(CSVReader.Read<Equip_RankData>("Equip_Rank"), out Dictionary<string, Equip_RankData> tempEquip_RankKeyDict);
         Equip_RankKeyDict = tempEquip_RankKeyDict;
 
-        Equip_SetDict = LoadAndCreateDict(CSVReader.Read<Equip_SetData>("Equip_Set"), out Dictionary<string, Equip_SetData> tempEquip_SetKeyDict);
-        Equip_SetKeyDict = tempEquip_SetKeyDict;
+        //Equip_SetDict = LoadAndCreateDict(CSVReader.Read<Equip_SetData>("Equip_Set"), out Dictionary<string, Equip_SetData> tempEquip_SetKeyDict);
+        //Equip_SetKeyDict = tempEquip_SetKeyDict;
 
         Equip_StatusDict = LoadAndCreateDict(CSVReader.Read<Equip_StatusData>("Equip_Status"), out Dictionary<string, Equip_StatusData> tempEquip_StatusKeyDict);
         Equip_StatusKeyDict = tempEquip_StatusKeyDict;
 
-        Equip_Upgrade_GoldDict = LoadAndCreateDict(CSVReader.Read<Equip_Upgrade_GoldData>("Equip_Upgrade_Gold"), out Dictionary<string, Equip_Upgrade_GoldData> tempEquip_Upgrade_GoldKeyDict);
-        Equip_Upgrade_GoldKeyDict = tempEquip_Upgrade_GoldKeyDict;
+        //Equip_Upgrade_GoldDict = LoadAndCreateDict(CSVReader.Read<Equip_Upgrade_GoldData>("Equip_Upgrade_Gold"), out Dictionary<string, Equip_Upgrade_GoldData> tempEquip_Upgrade_GoldKeyDict);
+        //Equip_Upgrade_GoldKeyDict = tempEquip_Upgrade_GoldKeyDict;
 
         Equip_UpgradeDict = LoadAndCreateDict(CSVReader.Read<Equip_UpgradeData>("Equip_Upgrade"), out Dictionary<string, Equip_UpgradeData> tempEquip_UpgradeKeyDict);
         Equip_UpgradeKeyDict = tempEquip_UpgradeKeyDict;
