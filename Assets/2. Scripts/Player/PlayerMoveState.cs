@@ -1,32 +1,33 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PlayerMoveState : IPlayerState<PlayerCtrl>
 {
     public void Enter(PlayerCtrl player)
     {
+        player.NavMesh.ResetPath();
         player.Anima.SetBool("Run", true);
     }
 
     public void Execute(PlayerCtrl player)
     {
-        //ÀÔ·Â°ª ¹Ş¾Æ¿À±â
+        //ì…ë ¥ê°’ ë°›ì•„ì˜¤ê¸°
         Vector2 input = player.MoveInput;
 
-        //ÀÌµ¿ ¹æÇâ °è»ê
+        //ì´ë™ ë°©í–¥ ê³„ì‚°
         Vector3 moveDir = player.transform.forward * input.y + player.transform.right * input.x;
 
-        //´ë°¢¼±ÀÌµ¿½Ã 1º¸´ÙÄ¿Áü
+        //ëŒ€ê°ì„ ì´ë™ì‹œ 1ë³´ë‹¤ì»¤ì§
         if (moveDir.sqrMagnitude > 1f)
         {
-            //±æÀÌ 1·Î ¼öÁ¤
+            //ê¸¸ì´ 1ë¡œ ìˆ˜ì •
             moveDir.Normalize();
         }
 
-        //ÇÃ·¹ÀÌ¾î ÀÌµ¿¼Óµµ °è»ê
+        //í”Œë ˆì´ì–´ ì´ë™ì†ë„ ê³„ì‚°
         float speed = player.PlayerStats.Speed;
         moveDir *= speed;
 
-        //ÀÌµ¿¼Óµµ Àû¿ë
+        //ì´ë™ì†ë„ ì ìš©
         player.transform.position += moveDir * Time.deltaTime;
     }
 
