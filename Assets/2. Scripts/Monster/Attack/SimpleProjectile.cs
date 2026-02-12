@@ -12,6 +12,8 @@ public class SimpleProjectile : MonoBehaviour
     private MonsterSpawnManager _owner;
     private GameObject _poolKey;
 
+    private bool _isReleased;
+
     public void Initialize(
         Vector3 direction,
         float speed,
@@ -28,6 +30,8 @@ public class SimpleProjectile : MonoBehaviour
 
         _owner = owner;
         _poolKey = poolKey;
+
+        _isReleased = false;
     }
 
     private void Update()
@@ -52,6 +56,18 @@ public class SimpleProjectile : MonoBehaviour
 
     private void Release()
     {
-        _owner.ReleaseProjectile(this, _poolKey);
+        if (_isReleased)
+            return;
+
+        _isReleased = true;
+
+        if (_owner != null && _poolKey != null)
+        {
+            _owner.ReleaseProjectile(this, _poolKey);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

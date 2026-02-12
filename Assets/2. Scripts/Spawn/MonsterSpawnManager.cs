@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.Pool;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Pool;
 
 /// <summary>
 /// 몬스터의 생성과 오브젝트 풀 관리
@@ -140,6 +141,16 @@ public class MonsterSpawnManager : MonoBehaviour
             //맵 경계 Clamp
             candidate.x = Mathf.Clamp(candidate.x, -mapHalfSize, mapHalfSize);
             candidate.z = Mathf.Clamp(candidate.z, -mapHalfSize, mapHalfSize);
+
+            //지형 높이 보정
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+            {
+                candidate = hit.position;
+            }
+            else
+            {
+                continue; // NavMesh가 아니면 다음 시도
+            }
 
             bool overlap = false;
             for (int i = 0; i < used.Count; i++)
@@ -289,8 +300,17 @@ public class MonsterSpawnManager : MonoBehaviour
     {
         GameObject gameObject = Instantiate(prefab);
         gameObject.SetActive(false);
-        return gameObject.GetComponent<SimpleProjectile>();
+
+        SimpleProjectile projectile = gameObject.GetComponent<SimpleProjectile>();
+
+        if (projectile == null) 
+        {
+            Debug.LogError($"[MonsterSpawnManager] 투사체프리팹 없음");
+        }
+
+        return projectile;
     }
+
     private void OnGetProjectile(SimpleProjectile proj)
     {
         proj.gameObject.SetActive(true);
