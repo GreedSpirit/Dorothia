@@ -3,7 +3,6 @@ using UnityEngine.AI;
 
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
-    NavMeshAgent _navMesh;
     TestEnemy _target;
     float _timer = 0f;
     float _resetTimer = 1f;
@@ -15,8 +14,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         _timer = 0f;
         _resetTimer = 1f;
         _target = null;
-        _navMesh = player.NavMesh;
-        _navMesh.ResetPath();
+        player.NavMesh.ResetPath();
     }
 
     public void Execute(PlayerCtrl player)
@@ -36,7 +34,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         if (_target == null)
         {
             //경로 초기화
-            _navMesh.ResetPath();
+            player.NavMesh.ResetPath();
             return;
         }
 
@@ -46,30 +44,34 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
-            _navMesh.ResetPath();
+            player.NavMesh.ResetPath();
 
             //타겟방향으로 회전
             Vector3 dir = (_target.transform.position - player.transform.position).normalized;
             player.transform.rotation = Quaternion.LookRotation(dir);
 
-
+            Debug.Log("공격");
             player.Anima.SetTrigger("Attack");
             //히트박스콜라이더 온
+
+            //리턴시켜서 타겟으로 이동 안시키도록
+            return;
         }
 
-        //위상황들 다 통과하면 타겟찾기
+        //위상황들 다 통과하면 타겟으로 이동
         else
         {
             //타겟으로 이동
-            _navMesh.SetDestination(_target.transform.position);
+            player.NavMesh.SetDestination(_target.transform.position);
 
+            Debug.Log("달리기");
             player.Anima.SetBool("Run", true);
         }
     }
 
     public void Exit(PlayerCtrl player)
     {
-        _navMesh.ResetPath();
+        player.NavMesh.ResetPath();
     }
 
     

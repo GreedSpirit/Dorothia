@@ -66,6 +66,7 @@ public class PlayerCtrl : MonoBehaviour
         if (_isAutoMode && _moveInput.sqrMagnitude < 0.001f)
         {
             ChangeState(_autoState);
+            Debug.Log("오토스테이트");
         }
 
         //오토모드가 켜져있으면서 입력들어오면
@@ -107,12 +108,13 @@ public class PlayerCtrl : MonoBehaviour
     public void ChangeAutoMode()
     {
         _isAutoMode = !_isAutoMode;
-        Debug.Log(_isAutoMode);
+        Debug.Log($"AutoMode: {_isAutoMode}, Current State: {_currentState.GetType().Name}");
     }
 
 
     public void ChangeState(IPlayerState<PlayerCtrl> newState)
     {
+        Debug.Log($"상태 변경: {_currentState.GetType().Name} → {newState.GetType().Name}");
         //상태아웃시키고 전환
         _currentState.Exit(this);
         _currentState = newState;

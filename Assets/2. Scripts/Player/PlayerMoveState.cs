@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerMoveState : IPlayerState<PlayerCtrl>
 {
@@ -33,6 +34,7 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
 
     public void Exit(PlayerCtrl player)
     {
+        player.NavMesh.ResetPath();
         player.Anima.SetBool("Run", false);
     }
 }
