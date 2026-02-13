@@ -7,9 +7,9 @@ public class PlayerTargetDummy : MonoBehaviour, IMonsterTarget
     public Transform Transform => transform;
     public bool IsAlive => _hp > 0;
 
-    public void ApplyDamage(int amout)
+    public void ApplyDamage(int amount)
     {
-        _hp -= amout;
-        Debug.Log($"Damaged: {amout}, HP: {_hp}");
+        _hp -= amount;
+        Debug.Log($"Damaged: {amount}, HP: {_hp}");
     }
 }
