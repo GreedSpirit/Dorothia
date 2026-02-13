@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class EquipmentInventory : MonoBehaviour
 {
-    Dictionary<EquipmentPart, List<Equipment>> invDic = new Dictionary<EquipmentPart, List<Equipment>>(); // 장착 부위에 맞는 인벤토리를 담을 Dictionary
+    Dictionary<Equip_Type, List<Equipment>> invDic = new Dictionary<Equip_Type, List<Equipment>>(); // 장착 부위에 맞는 인벤토리를 담을 Dictionary
 
     private void Awake()
     {
         //각 장착 부위마다 새롭게 인벤토리를 지정해줍니다.
-        foreach(EquipmentPart part in System.Enum.GetValues(typeof(EquipmentPart)))
+        foreach(Equip_Type part in System.Enum.GetValues(typeof(Equip_Type)))
         {
             invDic.Add(part, new List<Equipment>());
         }
@@ -22,7 +22,7 @@ public class EquipmentInventory : MonoBehaviour
     public bool AddEquipment(Equipment equip)
     {
         //획득한 장비의 장착 부위와 일치하는 리스트를 받아옵니다.
-        var list = invDic[equip.equipPart];
+        var list = invDic[equip.equip_type];
 
         //그 리스트가 이미 해당 장비를 포함했다면 장비 중인 것이므로 실패를 반환합니다.
         if (list.Contains(equip))
@@ -48,7 +48,7 @@ public class EquipmentInventory : MonoBehaviour
     public bool RemoveEquipment(Equipment equip)
     {
         //해당 사전에서 해당 장비의 장착 부위의 리스트를 받아, 해당 값을 제거하는 것을 시도합니다.
-        return invDic[equip.equipPart].Remove(equip);
+        return invDic[equip.equip_type].Remove(equip);
     }
 
     /// <summary>
@@ -56,13 +56,13 @@ public class EquipmentInventory : MonoBehaviour
     /// </summary>
     /// <param name="part">인벤토리를 받아올 장착 부위</param>
     /// <returns>해당 장착 부위와 일치하는 인벤토리</returns>
-    public List<Equipment> GetInventory(EquipmentPart part)
+    public List<Equipment> GetInventory(Equip_Type part)
     {
         return invDic[part];
     }
 
    public int GetInventoryIndex(Equipment equip)
     {
-        return invDic[equip.equipPart].IndexOf(equip);
+        return invDic[equip.equip_type].IndexOf(equip);
     }
 }
