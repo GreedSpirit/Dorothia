@@ -1,74 +1,121 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class PlayerCtrl : MonoBehaviour
 {
-
-    //ÇÁ·ÎÆÛÆ¼
+    //í”„ë¡œí¼í‹°
     public Vector2 MoveInput => _moveInput;
     public PlayerStats PlayerStats => _playerStats;
     public Animator Anima => _anima;
+    public NavMeshAgent NavMesh => _navMesh;
+    public bool IsAutoMode => _isAutoMode;
+    public float EnemyFindRange => _enemyFindRange;
+    public float AttackRange => _attackRange;
+
 
     [SerializeField] PlayerStats _playerStats;
-    //µå·¡±× »ç°Å¸®
-    [SerializeField] float dragDistance = 100f;
+
+    [SerializeField] LayerMask _enemyLayer;
+
+    //ë“œë˜ê·¸ ì‚¬ê±°ë¦¬
+    [SerializeField] float _dragDistance = 100f;
+
+    //ì  íƒì§€ë²”ìœ„
+    [SerializeField] float _enemyFindRange = 20f;
+
+    //ê³µê²©ì‹¤í–‰ë²”ìœ„
+    [SerializeField] float _attackRange = 1f;
 
     Animator _anima;
+    NavMeshAgent _navMesh;
 
-    //ÀÔ·Â°ª ÀúÀåº¯¼ö
+    //ì˜¤í† ëª¨ë“œ ì²´í¬ìš©ë³€ìˆ˜
+    bool _isAutoMode = false;
+
+    //ì…ë ¥ê°’ ì €ì¥ë³€ìˆ˜
     Vector2 _moveInput;
     Vector2 _currentInput;
     Vector2 _touchStart;
 
-    //»óÅÂ
+    //ìƒíƒœ
     IPlayerState<PlayerCtrl> _currentState;
     PlayerMoveState _moveState;
     PlayerIdleState _idleState;
+    PlayerAutoState _autoState;
 
 
     private void Awake()
     {
         _anima = GetComponent<Animator>();
+        _navMesh = GetComponent<NavMeshAgent>();
         
 
-        //»óÅÂµé Ä³½Ì
+        //ìƒíƒœë“¤ ìºì‹±
         _moveState = new PlayerMoveState();
         _idleState = new PlayerIdleState();
+        _autoState = new PlayerAutoState();
 
-        //»óÅÂ ÃÊ±âÈ­
+        //ìƒíƒœ ì´ˆê¸°í™”
         _currentState = _idleState;
         _currentState.Enter(this);
     }
-
-    void Start()
-    {
-        
-    }
-
-    
     void Update()
     {
-        if (_moveInput.sqrMagnitude > 0.001f)
+        //ì˜¤í† ëª¨ë“œê°€ í™œì„±í™”ë˜ì–´ìˆê³  ì…ë ¥ì´ ì•ˆë“¤ì–´ì˜¤ë©´
+        if (_isAutoMode && _moveInput.sqrMagnitude < 0.001f)
+        {
+            ChangeState(_autoState);
+            Debug.Log("ì˜¤í† ìŠ¤í…Œì´íŠ¸");
+        }
+
+        //ì˜¤í† ëª¨ë“œê°€ ì¼œì ¸ìˆìœ¼ë©´ì„œ ì…ë ¥ë“¤ì–´ì˜¤ë©´
+        else if (_isAutoMode && _moveInput.sqrMagnitude > 0.001f)
         {
             ChangeState(_moveState);
-            Debug.Log("¹«ºê»óÅÂ");
+            Debug.Log("ë¬´ë¸Œìƒíƒœ");
         }
 
-        //Å°¸¦ ¶Ã´Ù¸é
+        //ìˆ˜ë™ëª¨ë“œ
+        else if (!_isAutoMode && _moveInput.sqrMagnitude > 0.001f)
+        {
+            ChangeState(_moveState);
+        }
+        //í‚¤ë¥¼ ë—ë‹¤ë©´
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasReleasedThisFrame)
         {
-            //ÃÊ±âÈ­ÈÄ »óÅÂÀüÈ¯
+            //ì´ˆê¸°í™”í›„ ìƒíƒœì „í™˜
+            _navMesh.ResetPath();
             _moveInput = Vector2.zero;
-            ChangeState(_idleState);
+
+            //ì˜¤í† ëª¨ë“œë©´ ì˜¤í† ëª¨ë“œë¡œ
+            if (_isAutoMode)
+            {
+                ChangeState(_autoState);
+            }
+            else
+            {
+                ChangeState(_idleState);
+            }
         }
-        _currentState.Execute(this);
+            _currentState.Execute(this);
     }
 
+
+    
+
+    //ì˜¤í† /ìˆ˜ë™ëª¨ë“œ ì „í™˜ìš© í† ê¸€
+    public void ChangeAutoMode()
+    {
+        _isAutoMode = !_isAutoMode;
+        Debug.Log($"AutoMode: {_isAutoMode}, Current State: {_currentState.GetType().Name}");
+    }
 
 
     public void ChangeState(IPlayerState<PlayerCtrl> newState)
     {
-        //»óÅÂ¾Æ¿ô½ÃÅ°°í ÀüÈ¯
+        Debug.Log($"ìƒíƒœ ë³€ê²½: {_currentState.GetType().Name} â†’ {newState.GetType().Name}");
+        //ìƒíƒœì•„ì›ƒì‹œí‚¤ê³  ì „í™˜
         _currentState.Exit(this);
         _currentState = newState;
         _currentState.Enter(this);
@@ -78,7 +125,7 @@ public class PlayerCtrl : MonoBehaviour
     {
         if (ctx.started)
         {
-            //ÅÍÄ¡ ½ÃÀÛ À§Ä¡ ÀúÀå
+            //í„°ì¹˜ ì‹œì‘ ìœ„ì¹˜ ì €ì¥
             _touchStart = ctx.ReadValue<Vector2>();
         }
 
@@ -86,22 +133,37 @@ public class PlayerCtrl : MonoBehaviour
         {
             Vector2 current = ctx.ReadValue<Vector2>();
 
-            //¹æÇâ°è»ê
+            //ë°©í–¥ê³„ì‚°
             Vector2 delta = current - _touchStart;
 
-            //µå·¡±×°Å¸®Á¦ÇÑ
-            float distance = Mathf.Min(delta.magnitude, dragDistance);
+            //ë“œë˜ê·¸ê±°ë¦¬ì œí•œ
+            float distance = Mathf.Min(delta.magnitude, _dragDistance);
 
-            //¹æÇâÀû¿ë
-            _moveInput = delta.normalized * (distance / dragDistance);
+            //ë°©í–¥ì ìš©
+            _moveInput = delta.normalized * (distance / _dragDistance);
+        }
+
+        if (ctx.canceled)
+        {
+            _moveInput = Vector2.zero;
         }
     }
 
-    //¿¡µğÅÍ»ó Ã¼Å©¿ë ±âÁî¸ğ
+    //ì—ë””í„° ì²´í¬ìš© ê¸°ì¦ˆëª¨
     void OnDrawGizmos()
     {
+        //ì´ë™ë°©í–¥
         Gizmos.color = Color.red;
         Vector3 dir = new Vector3(_moveInput.x, 0, _moveInput.y);
         Gizmos.DrawLine(transform.position, transform.position + dir);
+
+        //íƒì§€ë²”ìœ„
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(transform.position, _enemyFindRange);
+
+        //ê³µê²©ë²”ìœ„
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(transform.position, _attackRange);
+
     }
 }

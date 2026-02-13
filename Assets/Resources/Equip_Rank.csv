@@ -1,5 +1,9 @@
-장비의 등급 관리,,,"장비의 등급 (1. 일반, 2. 희귀, 3. 레어, 4. 전설, 5. 신화)"
-장비의 등급 ,장비의 등급별 스테이터스 상승값,장비 승급의 기본 성공 값,장비 승급 실패 시 얻는 보정값
-equip_rank,equip_value,equip_success_prob,equip_rank_failure
-int,float,float,float
-1,1,0.8,0.05
+장비의 등급 관리,,,,"장비의 등급 (1. 일반, 2. 희귀, 3. 레어, 4. 전설, 5. 신화)"
+장비의 등급 ID (40001부터 1씩 증가),장비의 등급 ,장비의 등급별 스테이터스 상승값,장비 승급의 기본 성공 값,장비 승급 실패 시 얻는 보정값
+Equip_Rank_ID,Equip_Rank,Equip_Value,Equip_Success_prob,Equip_Rank_Failure
+int,enum,float,float,float
+40001,1,1,0,0
+40002,2,1.1,0.8,0.05
+40003,3,1.2,0.5,0.03
+40004,4,1.4,0.2,0.01
+40005,5,1.7,0.05,0.005
