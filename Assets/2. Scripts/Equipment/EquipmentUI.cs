@@ -11,7 +11,7 @@ public class EquipmentUI : MonoBehaviour
     [SerializeField] InventoryPanel _inventoryPanel;   // 인벤토리를 담당하는 패널
     [SerializeField] CanvasGroup _equipmentUIGroup;    // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
 
-    [SerializeField]private EquipmentPart _currentSelectedPart;        // 현재 인벤토리를 열람할 장착 부위
+    [SerializeField]private Equip_Type _currentSelectedPart;           // 현재 인벤토리를 열람할 장착 부위
     [SerializeField]private EquipSlot _currentSelectedSlot;            // 가장 최근에 누른 장착슬롯
 
     private int _slotIndex;                   //중요! 부위 별 슬롯 인덱스이므로 2개를 장착 가능한 반지의 2번째 반지 슬롯만 1, 나머지는 전부 0으로 두어야 합니다.
@@ -29,14 +29,14 @@ public class EquipmentUI : MonoBehaviour
 
     private void Start()
     {
-        EquipmentPart[] partMapping = new EquipmentPart[]
+        Equip_Type[] partMapping = new Equip_Type[]
         {
-            EquipmentPart.Necklace,
-            EquipmentPart.Clothes,
-            EquipmentPart.Pants,
-            EquipmentPart.Shoes,
-            EquipmentPart.Weapon,
-            EquipmentPart.Gloves
+            Equip_Type.목걸이,
+            Equip_Type.상의,
+            Equip_Type.하의,
+            Equip_Type.신발,
+            Equip_Type.무기,
+            Equip_Type.장갑
         };
 
         // 리스트 순회하면서 AddListener
@@ -48,8 +48,8 @@ public class EquipmentUI : MonoBehaviour
                 _inventoryPanel.Open(partMapping[index], 0);
             });
         }
-        _firstRingButton.onClick.AddListener(() => _inventoryPanel.Open(EquipmentPart.Ring, 0));
-        _secondRingButton.onClick.AddListener(() => _inventoryPanel.Open(EquipmentPart.Ring, 1));
+        _firstRingButton.onClick.AddListener(() => _inventoryPanel.Open(Equip_Type.반지, 0));
+        _secondRingButton.onClick.AddListener(() => _inventoryPanel.Open(Equip_Type.반지, 1));
     }
 
     /// <summary>
