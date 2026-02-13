@@ -148,8 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d7aa229c2cbdd14385eabb4ed90579f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnAreaProvider
-  _mapMin: {x: -30, y: -30}
-  _mapMax: {x: 30, y: 30}
+  _mapHalfSize: 30
   _safeZoneRadius: 6
   _playerCamera: {fileID: 330585545}
   _player: {fileID: 918643908}
@@ -511,6 +510,50 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &570924138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 570924140}
+  - component: {fileID: 570924139}
+  m_Layer: 0
+  m_Name: RuntimeRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &570924139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570924138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a6ef8cb5e49d564caa061007baf0988, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RuntimeRootManager
+--- !u!4 &570924140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570924138}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,11 +612,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 918643908}
+  - component: {fileID: 918643909}
   - component: {fileID: 918643907}
   - component: {fileID: 918643906}
   - component: {fileID: 918643905}
+  - component: {fileID: 918643910}
   m_Layer: 0
-  m_Name: Player
+  m_Name: PlayerDummy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -674,6 +719,46 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &918643909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918643904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a015ddf3ca539164195fda81aa36e948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerTargetDummy
+  _hp: 2097152
+--- !u!54 &918643910
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918643904}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 122
+  m_CollisionDetection: 0
 --- !u!1 &1019266210
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,6 +771,7 @@ GameObject:
   - component: {fileID: 1019266213}
   - component: {fileID: 1019266212}
   - component: {fileID: 1019266211}
+  - component: {fileID: 1019266215}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -787,6 +873,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1019266215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019266210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 1841b27d30fec1b41926b11ddb4000d7, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &1612849592
 GameObject:
   m_ObjectHideFlags: 0
@@ -819,8 +937,13 @@ MonoBehaviour:
   _maxMonsterCount: 120
   _spawnInterval: 3
   _spawnGroupSize: {x: 6, y: 7}
-  _monsterPrefab: {fileID: 2553656415719199407, guid: d6298d2c0212d314e87d668846024061, type: 3}
+  _spawnTable:
+  - prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}
+    weight: 1
+  - prefab: {fileID: 181878253367983839, guid: 346004fc319c44d4fb5d9105459e9fe6, type: 3}
+    weight: 0.2
   _spawnAreaProvider: {fileID: 93869834}
+  _targetProvider: {fileID: 918643909}
 --- !u!4 &1612849594
 Transform:
   m_ObjectHideFlags: 0
@@ -848,3 +971,4 @@ SceneRoots:
   - {fileID: 918643908}
   - {fileID: 93869835}
   - {fileID: 1612849594}
+  - {fileID: 570924140}

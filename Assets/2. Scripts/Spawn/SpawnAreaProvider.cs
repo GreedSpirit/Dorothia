@@ -57,12 +57,14 @@ public class SpawnAreaProvider : MonoBehaviour
 
     private bool IsInsideSafeZone(Vector3 pos)
     {
-        float distance = Vector3.Distance(
-            new Vector3(_player.position.x, 0, _player.position.z),
-            new Vector3(pos.x, 0, pos.z)
-        );
+        if (_player == null)
+            return false;
 
-        return distance < _safeZoneRadius;
+        Vector3 p = _player.position;
+        p.y = 0f;
+        pos.y = 0f;
+
+        return Vector3.Distance(p, pos) < _safeZoneRadius;
     }
 
     /// <summary>
@@ -72,6 +74,9 @@ public class SpawnAreaProvider : MonoBehaviour
     /// <returns></returns>
     private bool IsInPlayerView(Vector3 worldPos)
     {
+        if (_playerCamera == null)
+            return false;
+
         Vector3 viewportPos = _playerCamera.WorldToViewportPoint(worldPos);
 
         return viewportPos.z > 0 &&
