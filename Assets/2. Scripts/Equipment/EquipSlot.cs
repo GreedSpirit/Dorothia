@@ -9,7 +9,7 @@ public enum SlotType
 public class EquipSlot : MonoBehaviour
 {
     public SlotType slotType;                      // 해당 슬롯이 합성용인지, 장비 장착용인지 표기하기 위한 슬롯입니다.
-    public EquipmentPart part;                     // 해당 슬롯이 담당할 장착 부위입니다.
+    public Equip_Type part;                     // 해당 슬롯이 담당할 장착 부위입니다.
     public int slotIndex;                          // 해당 슬롯의 번호입니다. (반지 2슬롯을 대비하여 생성)
     
     public Button button;                          // 해당 슬롯의 버튼입니다.
@@ -45,7 +45,7 @@ public class EquipSlot : MonoBehaviour
         iconImage.sprite = equipped.icon;
         iconImage.enabled = true;
 
-        iconImage.color = RarityColor.GetColor(equipped.equipmentRarity); // 성공 시 한눈에 확인하는 용도.
+        iconImage.color = RarityColor.GetColor(equipped.equipment_Rarity); // 성공 시 한눈에 확인하는 용도.
     }
 
     /// <summary>

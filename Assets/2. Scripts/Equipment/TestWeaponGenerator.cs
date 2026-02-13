@@ -18,23 +18,29 @@ public class TestWeaponGenerator : MonoBehaviour
         int rng = Random.Range(1, 401);
 
         //90% 확률에 맞게 10%만큼의 범위 내에 들어왔을 때 생성하도록 합니다.
-        if(rng > 360)
+        if(rng < 41)
         {
+
             //테스트 장비를 생성합니다.
-            Equipment testWeapon = new Equipment
+            EquipData _equipData = DataManager.Instance.GetData<EquipData>(50001);
+            Equipment testWeapon = new Equipment(_equipData, Equip_Rank.일반);
+
+            if (_equipData != null)
             {
-                equipPart = EquipmentPart.Weapon,
-                equipmentRarity = EquipmentRarity.Normal,
-                icon = weaponSprite,
-                name = "테스트용 무기"
-            };
+                Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
+                Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 종류 : {testWeapon.equip_type}");
+            }
+            testWeapon.equip_type = _equipData.Equip_Type;
+            testWeapon.equip_name = _equipData.Equip_Name;
+
+            testWeapon.icon = weaponSprite;
 
             //해당 장비를 인벤토리에 넣습니다.
             equipmentInventory.AddEquipment(testWeapon);
             Debug.Log("장비 획득 성공!");
         }
 
-        int count = equipmentInventory.GetInventory(EquipmentPart.Weapon).Count;
+        int count = equipmentInventory.GetInventory(Equip_Type.무기).Count;
         Debug.Log($"현재 인벤토리의 무기 개수: {count}");
     }
 }

@@ -14,23 +14,23 @@ public static class RarityColor
     /// </summary>
     /// <param name="rarity">장비의 레어도</param>
     /// <returns>해당 레어도에 맞는 색상</returns>
-    public static Color GetColor(EquipmentRarity rarity)
+    public static Color GetColor(Equip_Rank rarity)
     {
         switch(rarity)
         {
-            case EquipmentRarity.Normal:
+            case Equip_Rank.일반:
                 return _normalColor;
 
-            case EquipmentRarity.Uncommon:
+            case Equip_Rank.희귀:
                 return _uncommonColor;
 
-            case EquipmentRarity.Rare:
+            case Equip_Rank.레어:
                 return _rareColor;
 
-            case EquipmentRarity.Legendary:
+            case Equip_Rank.전설:
                 return _legendaryColor;
 
-            case EquipmentRarity.Mythic:
+            case Equip_Rank.신화:
                 return _mythicColor;
 
             default:
