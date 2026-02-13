@@ -1,17 +1,8 @@
 ﻿using UnityEngine;
 using System;
 
-public enum Skill_Rank
-{
-    일반 = 1,
-    희귀 = 2,
-    레어 = 3,
-    전설 = 4,
-    신화 = 5,
-}
-
 [Serializable]
-public class Skill_Upgrade_ScrapData : ICSVLoad, ITableKey
+public class Skill_Upgrade_GoldData : ICSVLoad, ITableKey
 {
     public Skill_Rank Skill_Rank { get; set; }
     public int Skill_Rank_Value { get; set; }
@@ -22,8 +13,8 @@ public class Skill_Upgrade_ScrapData : ICSVLoad, ITableKey
 
     public void LoadFromCsv(string[] values)
     {
-        // 0: Skill_Rank (enum)
-        if(values.Length > 0 && Enum.TryParse(values[0], out Skill_Rank Rank)) Skill_Rank = Rank;
+        // 0: Skill_Rank (Skill_Rank)
+        if(values.Length > 0 && Enum.TryParse(values[0], out Skill_Rank v0)) Skill_Rank = v0;
         // 1: Skill_Rank_Value (int)
         if (values.Length > 1 && int.TryParse(values[1], out int v1)) Skill_Rank_Value = v1;
         // 2: Skill_Upgrade_Value (float)

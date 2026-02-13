@@ -1,17 +1,6 @@
 ﻿using UnityEngine;
 using System;
 
-public enum Equip_Type
-{
-    무기 = 1,
-    상의 = 2,
-    하의 = 3,
-    장갑 = 4,
-    신발 = 5,
-    목걸이 = 6,
-    반지 = 7,
-}
-
 [Serializable]
 public class EquipData : ICSVLoad, ITableKey
 {
@@ -41,8 +30,8 @@ public class EquipData : ICSVLoad, ITableKey
         if (values.Length > 0 && int.TryParse(values[0], out int v0)) Equip_Id = v0;
         // 1: Equip_Name (string)
         if (values.Length > 1) Equip_Name = values[1];
-        // 2: Equip_Type (enum)
-        if(values.Length > 2 && Enum.TryParse(values[2], out Equip_Type Type)) Equip_Type = Type;
+        // 2: Equip_Type (Equip_Type)
+        if(values.Length > 2 && Enum.TryParse(values[2], out Equip_Type v2)) Equip_Type = v2;
         // 3: Equip_HP (float)
         if (values.Length > 3 && float.TryParse(values[3], out float v3)) Equip_Hp = v3;
         // 4: Equip_ATK (float)

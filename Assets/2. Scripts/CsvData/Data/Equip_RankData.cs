@@ -1,15 +1,6 @@
 ﻿using UnityEngine;
 using System;
 
-public enum Equip_Rank
-{
-    일반 = 1,
-    희귀 = 2,
-    레어 = 3,
-    전설 = 4,
-    신화 = 5,
-}
-
 [Serializable]
 public class Equip_RankData : ICSVLoad, ITableKey
 {
@@ -26,7 +17,7 @@ public class Equip_RankData : ICSVLoad, ITableKey
     {
         // 0: Equip_Rank_ID (int)
         if (values.Length > 0 && int.TryParse(values[0], out int v0)) Equip_Rank_Id = v0;
-        // 1: Equip_Rank (enum)
+        // 1: Equip_Rank (Equip_Rank)
         if(values.Length > 0 && Enum.TryParse(values[1], out Equip_Rank v1)) Equip_Rank = v1;
         // 2: Equip_Value (float)
         if (values.Length > 2 && float.TryParse(values[2], out float v2)) Equip_Value = v2;
