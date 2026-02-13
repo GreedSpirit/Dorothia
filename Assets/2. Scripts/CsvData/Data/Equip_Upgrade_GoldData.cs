@@ -14,7 +14,7 @@ public class Equip_Upgrade_GoldData : ICSVLoad, ITableKey
 
     public void LoadFromCsv(string[] values)
     {
-        // 0: equip_rank (Enum)
+        // 0: equip_rank (Equip_Rank)
         if (values.Length > 0 && Enum.TryParse(values[0], out Equip_Rank v0)) Equip_Rank = v0;
         // 1: equip_rank_value (float)
         if (values.Length > 1 && float.TryParse(values[1], out float v1)) Equip_Rank_Value = v1;

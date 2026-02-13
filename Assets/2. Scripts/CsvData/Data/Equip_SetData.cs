@@ -24,7 +24,7 @@ public class Equip_SetData : ICSVLoad, ITableKey
         if (values.Length > 2) Equip_Set_Need_Name = values[2];
         // 3: Equip_Set_Need_Nember (int)
         if (values.Length > 3 && int.TryParse(values[3], out int v3)) Equip_Set_Need_Number = v3;
-        // 4: Affection_Equip_Set (int)
+        // 4: Affection_Equip_Set (Status)
         if (values.Length > 4 && Enum.TryParse(values[4], out Status v4)) Affection_Equip_Set = v4;
         // 5: Affection_Equip_Set_Value (float)
         if (values.Length > 5 && float.TryParse(values[5], out float v5)) Affection_Equip_Set_Value = v5;

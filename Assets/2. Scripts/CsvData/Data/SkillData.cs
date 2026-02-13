@@ -6,9 +6,9 @@ public class SkillData : ICSVLoad, ITableKey
 {
     public int Job_Skill_Id { get; set; }
     public string Skill_Name { get; set; }
-    public int Skill_Type { get; set; }
+    public Skill_Type Skill_Type { get; set; }
     public float Skill_Cooltime { get; set; }
-    public int Skill_Target { get; set; }
+    public Skill_Target Skill_Target { get; set; }
     public int Skill_Status_Id { get; set; }
     public string Skill_Icon { get; set; }
     public string Skill_Sfx_Patch { get; set; }
@@ -24,12 +24,12 @@ public class SkillData : ICSVLoad, ITableKey
         if (values.Length > 0 && int.TryParse(values[0], out int v0)) Job_Skill_Id = v0;
         // 1: skill_name (string)
         if (values.Length > 1) Skill_Name = values[1];
-        // 2: skill_type (int)
-        if (values.Length > 2 && int.TryParse(values[2], out int v2)) Skill_Type = v2;
+        // 2: skill_type (Skill_Type)
+        if (values.Length > 2 && Enum.TryParse(values[2], out Skill_Type v2)) Skill_Type = v2;
         // 3: skill_cooltime (float)
         if (values.Length > 3 && float.TryParse(values[3], out float v3)) Skill_Cooltime = v3;
-        // 4: skill_target (int)
-        if (values.Length > 4 && int.TryParse(values[4], out int v4)) Skill_Target = v4;
+        // 4: skill_target (Skill_Target)
+        if (values.Length > 4 && Enum.TryParse(values[4], out Skill_Target v4)) Skill_Target = v4;
         // 5: skill_status_id (int)
         if (values.Length > 5 && int.TryParse(values[5], out int v5)) Skill_Status_Id = v5;
         // 6: skill_icon (string)
