@@ -26,18 +26,32 @@ public class DataManager : MonoBehaviour
         _tables.Clear();
         // 1:1 데이터 로드 => LoadData 사용
         LoadData<TempData>("Temp");
-
+        
+        //Skill 테이블
         LoadData<SkillData>("Skill");
         LoadData<Skill_RankData>("Skill_Rank");
         LoadData<Skill_StatusData>("Skill_Status");
         LoadData<Skill_UpgradeData>("Skill_Upgrade");
         LoadData<Skill_Upgrade_GoldData>("Skill_Upgrade_Gold");
 
+        //Equip 테이블
         LoadData<EquipData>("Equip");
         LoadData<Equip_BreakData>("Equip_Break");
         LoadData<Equip_LevelData>("Equip_level");
         LoadData<Equip_RankData>("Equip_Rank");
         LoadData<Equip_UpgradeData>("Equip_Upgrade");
+
+        //Character 테이블
+        LoadData<CharacterData>("Character");
+        LoadData<Character_RankData>("Character_Rank");
+        LoadData<Character_AnimationData>("Character_Animation");
+        LoadData<Character_LevelupData>("Character_Levelup");
+        LoadData<Character_StatsData>("Character_Stats");
+        LoadData<Character_UpgradeData>("Character_Upgrade");
+
+        //Monster 테이블
+
+        //Stage 테이블
         
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");
