@@ -1,20 +1,5 @@
 ﻿using UnityEngine;
 using System;
-
-public enum Status
-{
-    체력 = 1,
-    공격력 = 2,
-    마법공격력 = 3,
-    공격속도 = 4,
-    크리티컬확률 = 5,
-    크리티컬데미지 = 6,
-    방어력 = 7,
-    마법저항력 = 8,
-    체력재생력 = 9,
-    이동속도 = 10
-}
-
 [Serializable]
 public class Skill_StatusData : ICSVLoad, ITableKey
 {

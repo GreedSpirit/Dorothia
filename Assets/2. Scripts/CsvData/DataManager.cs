@@ -37,8 +37,9 @@ public class DataManager : MonoBehaviour
         LoadData<Equip_BreakData>("Equip_Break");
         LoadData<Equip_LevelData>("Equip_level");
         LoadData<Equip_RankData>("Equip_Rank");
-        //LoadData<Equip_StatusData>("Equip_Status");
         LoadData<Equip_UpgradeData>("Equip_Upgrade");
+
+        
 
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");
