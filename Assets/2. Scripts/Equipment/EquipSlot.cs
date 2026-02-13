@@ -13,7 +13,8 @@ public class EquipSlot : MonoBehaviour
     public int slotIndex;                          // 해당 슬롯의 번호입니다. (반지 2슬롯을 대비하여 생성)
     
     public Button button;                          // 해당 슬롯의 버튼입니다.
-    public Image iconImage;                        // 해당 슬롯에 사용될 아이콘 이미지입니다.C
+    public Image iconImage;                        // 해당 슬롯에 사용될 아이콘 이미지입니다.
+    public Sprite iconSprite;                      // 아무것도 장착되지 않은 상태의 기본 스프라이트입니다.
 
     public Equipment equipped;                     // 현재 장착되어있는 장비입니다.
 
@@ -45,7 +46,7 @@ public class EquipSlot : MonoBehaviour
         iconImage.sprite = equipped.icon;
         iconImage.enabled = true;
 
-        iconImage.color = RarityColor.GetColor(equipped.equipment_Rarity); // 성공 시 한눈에 확인하는 용도.
+        iconImage.color = RarityColor.GetColor((Rarity)equipped.equipment_Rarity); // 성공 시 한눈에 확인하는 용도.
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class EquipSlot : MonoBehaviour
     public void ClearSlot()
     {
         equipped = null;
-        iconImage.sprite = null;
+        iconImage.sprite = iconSprite;
         iconImage.color = Color.white;
     }
 }

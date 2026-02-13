@@ -3,7 +3,7 @@
 public class EquipmentUpgrade
 {
     public int equip_Upgrade;
-    public string equip_Upgrade_Section;
+    public Equip_Upgrade_Section equip_Upgrade_Section;
     public float equip_Success_prob;
     public float equip_Value;
     public float equip_Upgrade_Failure;
