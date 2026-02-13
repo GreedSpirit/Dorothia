@@ -50,8 +50,15 @@ public class DataManager : MonoBehaviour
         LoadData<Character_UpgradeData>("Character_Upgrade");
 
         //Monster 테이블
+        LoadData<Monster_Data>("Monster");
+        LoadData<Monster_SpawnData>("Monster_Spawn");
+        LoadData<Monster_ValueData>("Monster_Value");
 
         //Stage 테이블
+        LoadData<StageData>("Stage");
+        LoadData<Stage_RewardData>("Stage_Reward");
+        LoadData<Stage_SectionData>("Stage_Section");
+        LoadData<Equip_Drop_RankData>("Equip_Drop_Rank");
         
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");
