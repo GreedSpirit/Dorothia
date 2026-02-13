@@ -11,6 +11,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class MonsterController : MonoBehaviour, IMonster
 {
+    public static event System.Action<float> OnMonsterKilledLifeTime;
+
     [Header("Editor Data")]
     [SerializeField] private MonsterData _data;     // 에디터 테스트용 데이터
 
@@ -30,10 +32,11 @@ public class MonsterController : MonoBehaviour, IMonster
     private int _hp;
     private float _lastAttackTime;
 
+    private float _spawnTime;                       // 생존시간 계산
+
     //어떤 프리펩풀로 반환할지 식별용 키
     private MonsterController _poolKeyPrefab;
 
-    //public MonsterData Data => _data;
     public IMonsterStats Stats => _stats;
     public MonsterSpawnManager SpawnManager => _owner;
 
@@ -67,6 +70,8 @@ public class MonsterController : MonoBehaviour, IMonster
         }
 
         _stats = new MonsterStatsFromSO(_data); // SO -> 인터페이스 어댑터 생성
+
+        _spawnTime = Time.time; // 생존시간 측정 시작
 
         _hp = _stats.MaxHp; // 체력 초기화
         _lastAttackTime = -999f; // 즉시 공격방지
@@ -229,6 +234,10 @@ public class MonsterController : MonoBehaviour, IMonster
 
         if (_hitCollider != null)
             _hitCollider.enabled = false;
+
+        //동적 스폰용 생존시간 이벤트 발행
+        float lifeTime = Mathf.Max(0.01f, Time.time - _spawnTime);
+        OnMonsterKilledLifeTime?.Invoke(lifeTime);
 
         Invoke(nameof(ForceDespawn), 1f); // 1초후 풀 반환
     }

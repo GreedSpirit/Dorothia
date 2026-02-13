@@ -732,6 +732,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerTargetDummy
   _hp: 2097152
+  _attackRange: 8
+  _damagePerSecond: 100
+  _monsterLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!54 &918643910
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -935,7 +940,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawnManager
   _maxMonsterCount: 120
-  _spawnInterval: 3
   _spawnGroupSize: {x: 6, y: 7}
   _spawnTable:
   - prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}

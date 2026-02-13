@@ -14,7 +14,6 @@ public class MonsterSpawnManager : MonoBehaviour
 {
     [Header("Spawn Settings")]
     [SerializeField] private int _maxMonsterCount = 120; // 최대 몬스터 수
-    [SerializeField] private float _spawnInterval = 3f; // 스폰 주기
     [SerializeField] private Vector2Int _spawnGroupSize = new Vector2Int(6, 7); // 군집 내 개체수
 
     [Header("Spawn Table")]
@@ -34,16 +33,38 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private readonly Dictionary<GameObject, ObjectPool<SimpleProjectile>> _projectilePools = new(); // 투사체풀
 
+    //동적 스폰
+    private SpawnMetricsCollector _metrics;
+    private ISpawnPolicy _policy;
+
     private void Awake()
     {
         _target = _targetProvider as IMonsterTarget;
         if (_target == null)
             Debug.LogError("[MonsterSpawnManager] TargetProvider 설정");
+
+        _metrics = new SpawnMetricsCollector(windowSize: 20);
+        _policy = new DynamicSpawnPolicy(minCount: 30, softMaxCount: 100);
+    }
+
+    private void OnEnable()
+    {
+        MonsterController.OnMonsterKilledLifeTime += HandleMonsterKilled;
+    }
+
+    private void OnDisable()
+    {
+        MonsterController.OnMonsterKilledLifeTime -= HandleMonsterKilled;
     }
 
     private void Start()
     {
         StartNormalSpawn();
+    }
+
+    private void HandleMonsterKilled(float lifeTime)
+    {
+        _metrics.RecordTTK(lifeTime);
     }
 
     #region 스폰 컨트롤
@@ -65,8 +86,40 @@ public class MonsterSpawnManager : MonoBehaviour
     {
         while (_isSpawning)
         {
-            yield return new WaitForSeconds(_spawnInterval);
-            TrySpawnGroup();
+            //동적 기반으로 값계산
+            SpawnMetrics metrics = _metrics.GetMetrics();
+            float interval = _policy.GetSpawnInterval(metrics, _currentMonsterCount);
+
+            yield return new WaitForSeconds(interval);
+
+            //최대치면 스폰 안되게
+            if (_currentMonsterCount >= _maxMonsterCount) 
+                continue;
+            if (_spawnTable == null || _spawnTable.Count == 0) 
+                continue;
+            if (_spawnAreaProvider == null)
+                continue;
+            if (_target == null || !_target.IsAlive)
+                continue;
+
+            if (!_spawnAreaProvider.TryGetSpawnPosition(out Vector3 centerPos))
+                continue;
+
+            //기본 군집 크기 유지
+            int baseGroupSize = Random.Range(
+                _spawnGroupSize.x,
+                _spawnGroupSize.y + 1);
+
+            //동적 배율 적용
+            float multiplier =
+                _policy.GetSpawnMultiplier(metrics, _currentMonsterCount);
+
+            int finalSpawnCount = Mathf.Clamp(
+                Mathf.RoundToInt(baseGroupSize * multiplier),
+                1,
+                _maxMonsterCount - _currentMonsterCount);
+
+            TrySpawnCluster(centerPos, finalSpawnCount);
         }
     }
     #endregion
@@ -75,20 +128,8 @@ public class MonsterSpawnManager : MonoBehaviour
     /// <summary>
     /// 군집 단위 스폰
     /// </summary>
-    private void TrySpawnGroup()
+    private void TrySpawnCluster(Vector3 centerPos, int amount)
     {
-        if (_currentMonsterCount >= _maxMonsterCount)
-            return;
-
-        if (_spawnTable == null || _spawnTable.Count == 0)
-            return;
-
-        int spawnCount = Random.Range(_spawnGroupSize.x, _spawnGroupSize.y + 1);
-
-        //그룹 중심점은 1회만 계산
-        if (!_spawnAreaProvider.TryGetSpawnPosition(out Vector3 centerPos))
-            return;
-
         float maxRadius = 2.8f;
         float minDistance = 1.2f;
         int maxAttemptsPerMonster = 12;
@@ -97,7 +138,7 @@ public class MonsterSpawnManager : MonoBehaviour
 
         List<Vector3> usedPositions = new();
 
-        for (int i = 0; i < spawnCount; i++)
+        for (int i = 0; i < amount; i++)
         {
             if (_currentMonsterCount >= _maxMonsterCount)
                 break;
@@ -106,8 +147,9 @@ public class MonsterSpawnManager : MonoBehaviour
             if (entry == null || entry.prefab == null)
                 continue;
 
-            if (!TryGetClusterPosition(centerPos, mapHalfSize, maxRadius, minDistance, 
-                maxAttemptsPerMonster, usedPositions, out Vector3 spawnPos))
+            if (!TryGetClusterPosition(
+                    centerPos, mapHalfSize, maxRadius, minDistance, maxAttemptsPerMonster,
+                    usedPositions, out Vector3 spawnPos))
                 continue;
 
             //프리팹 키 기반 풀에서 Get
@@ -143,7 +185,7 @@ public class MonsterSpawnManager : MonoBehaviour
             candidate.z = Mathf.Clamp(candidate.z, -mapHalfSize, mapHalfSize);
 
             //지형 높이 보정
-            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
                 candidate = hit.position;
             }
