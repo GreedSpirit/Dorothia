@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+public enum Rarity { Normal = 1, Uncommon, Rare, Legendary, Mythtic }
 //인스펙터에 들어가는 클래스가 아닌, 규칙을 위한 클래스이므로 MonoBehaviour을 사용하지 않습니다.
 public static class RarityColor
 {
@@ -14,23 +15,23 @@ public static class RarityColor
     /// </summary>
     /// <param name="rarity">장비의 레어도</param>
     /// <returns>해당 레어도에 맞는 색상</returns>
-    public static Color GetColor(EquipmentRarity rarity)
+    public static Color GetColor(Rarity rarity)
     {
         switch(rarity)
         {
-            case EquipmentRarity.Normal:
+            case Rarity.Normal:
                 return _normalColor;
 
-            case EquipmentRarity.Uncommon:
+            case Rarity.Uncommon:
                 return _uncommonColor;
 
-            case EquipmentRarity.Rare:
+            case Rarity.Rare:
                 return _rareColor;
 
-            case EquipmentRarity.Legendary:
+            case Rarity.Legendary:
                 return _legendaryColor;
 
-            case EquipmentRarity.Mythic:
+            case Rarity.Mythtic:
                 return _mythicColor;
 
             default:

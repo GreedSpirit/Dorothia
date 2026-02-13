@@ -13,7 +13,7 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] EquipmentInventory _equipmentInventory;     // 인벤토리
     [SerializeField] CanvasGroup _inventoryPanelGroup;           // 패널 자신을 넣으면 되는, 캔버스 그룹 제어용.
 
-    private EquipmentPart _currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
+    private Equip_Type _currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
 
     [SerializeField] GameObject _equipButtons;
     [SerializeField] GameObject _fuseButtons;
@@ -36,7 +36,7 @@ public class InventoryPanel : MonoBehaviour
     /// 인자값으로 받은 장착 부위에 맞는 인벤토리를 엽니다.
     /// </summary>
     /// <param name="part">인벤토리를 확인하고자 하는 장착 부위</param>
-    public void Open(EquipmentPart part, int slotIndex)
+    public void Open(Equip_Type part, int slotIndex)
     {
         //현재 장착 부위를 인자값으로 받아온 값과 일치시킵니다.
         _currentPart = part;
