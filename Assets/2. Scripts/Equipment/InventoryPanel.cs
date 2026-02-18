@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum InventoryStatus
 {
@@ -13,7 +14,7 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] EquipmentInventory _equipmentInventory;     // 인벤토리
     [SerializeField] CanvasGroup _inventoryPanelGroup;           // 패널 자신을 넣으면 되는, 캔버스 그룹 제어용.
 
-    private Equip_Type _currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
+    public Equip_Type _currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
 
     [SerializeField] GameObject _equipButtons;
     [SerializeField] GameObject _fuseButtons;

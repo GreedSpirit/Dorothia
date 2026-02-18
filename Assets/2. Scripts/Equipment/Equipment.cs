@@ -23,13 +23,17 @@ public class Equipment
 
     //equip_rank
     //▼ 일반 : 1, 희귀 : 2, 레어 : 3, 전설 : 4, 신화 : 5
-    public Equip_Rank equipment_Rarity;               // 장비의 레어도입니다. 데이터에서 받아온 등급의 값의 가독성을 높이기 위해 열거형을 사용합니다.
-    public EquipmentRank rankData;                    // 레어도에 따른 다른 데이터값을 저장한 클래스입니다.
+    public int equipment_Rarity;                      // 장비의 레어도입니다. 데이터에서 받아온 등급의 값의 가독성을 높이기 위해 열거형을 사용합니다.
 
     //equip_Upgrade
-
+    public int equip_Upgrade_Value;
 
     public int equip_set_id;
+
+    public int equip_level;
+
+    public int equip_Upgrade;
+    public int equip_Upgrade_Count;
 
     public int EquippedSlotIndex = -1; // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
     public bool isEquipped = false;    // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
@@ -65,7 +69,7 @@ public class Equipment
     /// </summary>
     /// <param name="equipData">id값을 통해 데이터 테이블로부터 빼온 장비 id값</param>
     /// <param name="rarity">해당 장비의 등급</param>
-    public Equipment(EquipData equipData, Equip_Rank rarity)
+    public Equipment(EquipData equipData, int rarity, int equipLevel)
     {
 
         #region equipData로부터 받아올 값
@@ -92,10 +96,16 @@ public class Equipment
 
         #region 등급에 따라 받아올 값
         equipment_Rarity = rarity;                                                                                       // 장비 등급
-        rankData = new EquipmentRank(DataManager.Instance.GetData<Equip_RankData>((int)equipment_Rarity + 40000));       // 해당 장비 등급에 따른 속성값들
+        //rankData = new EquipmentRank(DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity));       // 해당 장비 등급에 따른 속성값들
         #endregion
 
-        
+        equip_set_id = EquipmentSetEffectManager.Instance.ApplySetEffects(equip_name);
+
+        equip_level = equipLevel;
+
+        equip_Upgrade = 0;
+        equip_Upgrade_Count = 0;
+
     }
 
     /// <summary>

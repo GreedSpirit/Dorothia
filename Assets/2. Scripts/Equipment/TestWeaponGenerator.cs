@@ -6,6 +6,7 @@ public class TestWeaponGenerator : MonoBehaviour
 {
     [SerializeField] private EquipmentInventory equipmentInventory;           // 현재 사용할 인벤토리.
     [SerializeField] Sprite weaponSprite;                                     // 획득 무기에 적용할 스프라이트.
+    [SerializeField] InventoryPanel inventoryPanel;                           // 갱신해야 할 인벤토리.
 
     public void Test()
     {
@@ -15,17 +16,25 @@ public class TestWeaponGenerator : MonoBehaviour
             return;
         }
 
+        if(!EquipmentSetEffectManager.Instance.isActived)
+        {
+            EquipmentSetEffectManager.Instance.isActived = true;
+            EquipmentSetEffectManager.Instance.AddAllSets();
+        }
+
         //랜덤 숫자를 생성합니다. (90% 확률로 미획득, 1.25% 확률로 부위별 획득 - 현재는 전부 무기로.)
         int rng = Random.Range(1, 401);
 
         //90% 확률에 맞게 10%만큼의 범위 내에 들어왔을 때 생성하도록 합니다.
         if(rng < 41)
         {
+            //10% 범위 내에서 8개로 나눠, 1.25%의 드랍율을 맞추겠습니다.
             int result = (rng - 1) / 5;
             EquipData _equipData = new EquipData();
 
             switch (result)
             {
+                //1을 더했을 때 각각의 장착 부위가 되도록 생성합니다. 8번은 열거형 값에 존재하지 않으므로 7번을 중복 사용했습니다.
                 case 0:
                     _equipData = DataManager.Instance.GetData<EquipData>(50001);
                     break;
@@ -52,12 +61,13 @@ public class TestWeaponGenerator : MonoBehaviour
                     break;
 
             }
-            Equipment testWeapon = new Equipment(_equipData, Equip_Rank.일반);
+            Equipment testWeapon = new Equipment(_equipData, 40001, 1);
 
             if (_equipData != null)
             {
                 Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
-                Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 종류 : {testWeapon.equip_type}");
+                Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 착용레벨 : {testWeapon.equip_level}");
+                Debug.Log($"강화 : {testWeapon.equip_Upgrade}");
             }
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
@@ -67,6 +77,11 @@ public class TestWeaponGenerator : MonoBehaviour
             //해당 장비를 인벤토리에 넣습니다.
             equipmentInventory.AddEquipment(testWeapon);
             Debug.Log("장비 획득 성공!");
+
+            if(inventoryPanel._currentPart != 0)
+            {
+                inventoryPanel.Refresh();
+            }
         }
 
         int count = equipmentInventory.GetInventory(Equip_Type.무기).Count;

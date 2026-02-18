@@ -35,6 +35,7 @@ public class EquipSlot : MonoBehaviour
     /// </summary>
     public void UpdatePartUI()
     {
+        var equipData = DataManager.Instance.GetData<Equip_RankData>(equipped.equipment_Rarity);
         if (equipped == null)
         {
             // 장비가 없으면 아이콘 비활성화
@@ -46,7 +47,7 @@ public class EquipSlot : MonoBehaviour
         iconImage.sprite = equipped.icon;
         iconImage.enabled = true;
 
-        iconImage.color = RarityColor.GetColor((Rarity)equipped.equipment_Rarity); // 성공 시 한눈에 확인하는 용도.
+        iconImage.color = RarityColor.GetColor((Rarity)equipData.Equip_Rank); // 성공 시 한눈에 확인하는 용도.
     }
 
     /// <summary>

@@ -73,9 +73,9 @@ public class FusePanel : MonoBehaviour
             Debug.Log("합성에 성공하였습니다! 장비의 레어도가 상승합니다.");
 
             //장비의 레어도를 1 올려, 메인 장비의 레어도를 1 올립니다.
-            int rarity = (int)mainEquipment.equipment_Rarity;
+            int rarity = mainEquipment.equipment_Rarity;
             rarity += 1;
-            mainEquipment.equipment_Rarity = (Equip_Rank)rarity;
+            mainEquipment.equipment_Rarity = rarity;
         }
 
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
@@ -108,23 +108,23 @@ public class FusePanel : MonoBehaviour
         //인자값으로 받은 장비의 레어도에 따라 성공률을 결정합니다. (하드코딩)
         switch (mainEquipment.equipment_Rarity)
         {
-            case Equip_Rank.일반:
+            case 40001:
                 successRate = 90;
                 break;
 
-            case Equip_Rank.희귀:
+            case 40002:
                 successRate = 50;
                 break;
 
-            case Equip_Rank.레어:
+            case 40003:
                 successRate = 25;
                 break;
 
-            case Equip_Rank.전설:
+            case 40004:
                 successRate = 5;
                 break;
 
-            case Equip_Rank.신화:
+            case 40005:
                 successRate = 0;
                 break;
         }
