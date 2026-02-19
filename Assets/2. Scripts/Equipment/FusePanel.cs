@@ -14,7 +14,22 @@ public class FusePanel : MonoBehaviour
     private void Awake()
     {
         //합성 버튼에 합성 기능을 추가합니다.
-        fuseButton.onClick.AddListener(OnClickFuse);   
+        fuseButton.onClick.AddListener(OnClickFuse);
+        mainSlot.OnSlotClicked +=_inventoryPanel.SetTargetSlot;
+        mainSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            mainSlot.OnClickSlot();
+        });
+        subSlot1.OnSlotClicked += _inventoryPanel.SetTargetSlot;
+        subSlot1.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            subSlot1.OnClickSlot();
+        });
+        subSlot2.OnSlotClicked += _inventoryPanel.SetTargetSlot;
+        subSlot2.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            subSlot2.OnClickSlot();
+        });
     }
 
     private void OnClickFuse()
@@ -49,6 +64,14 @@ public class FusePanel : MonoBehaviour
             return;
         }
 
+        //이름도 동일하게!
+        if(mainEquipment.equip_name != subEquipmentOne.equip_name ||
+            mainEquipment.equip_name != subEquipmentTwo.equip_name)
+        {
+            Debug.Log("합성하기 위한 세 장비의 이름이 일치하지 않습니다.");
+            return;
+        }
+
         //세 장비는 전부 다른 칸의 장비여야만 합니다.
         if(inventory.GetInventoryIndex(mainEquipment) == inventory.GetInventoryIndex(subEquipmentOne)||
             inventory.GetInventoryIndex(mainEquipment) == inventory.GetInventoryIndex(subEquipmentTwo)||
@@ -73,9 +96,9 @@ public class FusePanel : MonoBehaviour
             Debug.Log("합성에 성공하였습니다! 장비의 레어도가 상승합니다.");
 
             //장비의 레어도를 1 올려, 메인 장비의 레어도를 1 올립니다.
-            int rarity = (int)mainEquipment.equipment_Rarity;
+            int rarity = mainEquipment.equipment_Rarity;
             rarity += 1;
-            mainEquipment.equipment_Rarity = (Equip_Rank)rarity;
+            mainEquipment.equipment_Rarity = rarity;
         }
 
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
@@ -96,7 +119,7 @@ public class FusePanel : MonoBehaviour
         mainSlot.UpdatePartUI();
 
         //인벤토리를 한 번 갱신합니다.
-        _inventoryPanel.Refresh();
+        _inventoryPanel.onInventoryChanged.Invoke();
     }
 
     //합성 성공률을 확인합니다.
@@ -108,23 +131,23 @@ public class FusePanel : MonoBehaviour
         //인자값으로 받은 장비의 레어도에 따라 성공률을 결정합니다. (하드코딩)
         switch (mainEquipment.equipment_Rarity)
         {
-            case Equip_Rank.일반:
+            case 40001:
                 successRate = 90;
                 break;
 
-            case Equip_Rank.희귀:
+            case 40002:
                 successRate = 50;
                 break;
 
-            case Equip_Rank.레어:
+            case 40003:
                 successRate = 25;
                 break;
 
-            case Equip_Rank.전설:
+            case 40004:
                 successRate = 5;
                 break;
 
-            case Equip_Rank.신화:
+            case 40005:
                 successRate = 0;
                 break;
         }
@@ -139,6 +162,15 @@ public class FusePanel : MonoBehaviour
     /// <param name="value">활성화 여부</param>
     public void SetPanelActiveValue(bool value)
     {
+        if(value == false)
+        {
+            mainSlot.equipped?.CancelFuseMaterial();
+            mainSlot.ClearSlot();
+            subSlot1.equipped?.CancelFuseMaterial();
+            subSlot1.ClearSlot();
+            subSlot2.equipped?.CancelFuseMaterial();
+            subSlot2.ClearSlot();
+        }
         //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
         _fusePanelGroup.alpha = value == true ? 1 : 0;
 
