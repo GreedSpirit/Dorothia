@@ -12,9 +12,9 @@ using UnityEngine.AI;
 public class MonsterController : MonoBehaviour, IMonster
 {
     public static event System.Action<float> OnMonsterKilledLifeTime;
-
-    [Header("Editor Data")]
-    [SerializeField] private MonsterData _data;     // 에디터 테스트용 데이터
+    
+    [Header("Projectile")]
+    [SerializeField] private ProjectileDatabase _projectileDatabase;
 
     [Header("HitCollider")]
     [SerializeField] private Collider _hitCollider; // 피격 판정용 콜라이더
@@ -57,22 +57,42 @@ public class MonsterController : MonoBehaviour, IMonster
     /// <param name="owner"></param>
     /// <param name="target"></param>
     /// <param name="poolKeyPrefab"></param>
-    public void Initialize(MonsterSpawnManager owner, IMonsterTarget target, MonsterController poolKeyPrefab)
+    public void Initialize(
+        MonsterSpawnManager owner, 
+        IMonsterTarget target, 
+        MonsterController poolKeyPrefab, 
+        int monsterId, 
+        ProjectileDatabase projectileDb)
     {
         _owner = owner;
         _target = target;
         _poolKeyPrefab = poolKeyPrefab;
+        _projectileDatabase = projectileDb;
 
-        if (_data == null)
+        if (DataManager.Instance == null)
         {
-            Debug.LogError("[MonsterController] MonsterData 없음");
+            Debug.LogError("[MonsterController] 씬에 DataManager 없음");
             return;
         }
 
-        _stats = new MonsterStatsFromSO(_data); // SO -> 인터페이스 어댑터 생성
+        //CSV 가져오기
+        var monsterData = DataManager.Instance.GetData<Monster_Data>(monsterId);
+        var valueData = DataManager.Instance.GetData<Monster_ValueData>(monsterId);        
+
+        if (monsterData == null || valueData == null)
+        {
+            Debug.LogError($"[MonsterController] CSV 데이터 없음: {monsterId}");
+            return;
+        }
+
+        if (_projectileDatabase == null)
+        {
+            Debug.LogError("ProjectileDatabase NULL");
+        }
+        
+        _stats = new MonsterStatsFromCSV(monsterData, valueData, _projectileDatabase);
 
         _spawnTime = Time.time; // 생존시간 측정 시작
-
         _hp = _stats.MaxHp; // 체력 초기화
         _lastAttackTime = -999f; // 즉시 공격방지
 
@@ -181,7 +201,7 @@ public class MonsterController : MonoBehaviour, IMonster
         float distance = DistanceXZ(transform.position, _target.Transform.position);
 
         //최단경로 및 원거리공격 유지
-        if (_stats.Archetype == MonsterArchetype.Ranged)
+        if (_stats.Archetype == Monster_Kind.원거리형)
         {
             //원거리: 일정 거리 이상일 때만 접근
             if (distance > _stats.PreferredRange)

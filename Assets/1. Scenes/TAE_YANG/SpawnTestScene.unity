@@ -733,7 +733,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerTargetDummy
   _hp: 2097152
   _attackRange: 8
-  _damagePerSecond: 100
+  _damagePerSecond: 50
   _monsterLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -942,12 +942,15 @@ MonoBehaviour:
   _maxMonsterCount: 120
   _spawnGroupSize: {x: 6, y: 7}
   _spawnTable:
-  - prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}
+  - monsterId: 90001
+    prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}
     weight: 1
-  - prefab: {fileID: 181878253367983839, guid: 346004fc319c44d4fb5d9105459e9fe6, type: 3}
-    weight: 0.2
+  - monsterId: 90002
+    prefab: {fileID: 181878253367983839, guid: 346004fc319c44d4fb5d9105459e9fe6, type: 3}
+    weight: 1
   _spawnAreaProvider: {fileID: 93869834}
   _targetProvider: {fileID: 918643909}
+  _projectileDatabase: {fileID: 11400000, guid: d9d18fcdbfcb59e4887d9a61aee48378, type: 2}
 --- !u!4 &1612849594
 Transform:
   m_ObjectHideFlags: 0
@@ -955,6 +958,50 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1612849592}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2027691165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2027691167}
+  - component: {fileID: 2027691166}
+  m_Layer: 0
+  m_Name: DataManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2027691166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027691165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47c729f2994ed5540baff16bd14f02ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DataManager
+--- !u!4 &2027691167
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027691165}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -976,3 +1023,4 @@ SceneRoots:
   - {fileID: 93869835}
   - {fileID: 1612849594}
   - {fileID: 570924140}
+  - {fileID: 2027691167}

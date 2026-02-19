@@ -5,8 +5,8 @@ public class MonsterData : ScriptableObject
 {
     [Header("Identity")]
     public string monsterID = "Monster_Normal_Melee";
-    public MonsterRank rank = MonsterRank.Normal;
-    public MonsterArchetype archetype = MonsterArchetype.Melee;
+    public Monster_Type rank = Monster_Type.일반;
+    public Monster_Kind archetype = Monster_Kind.근접형;
 
     [Header("Stats")]
     public int maxHp = 100;

@@ -3,8 +3,8 @@
 public interface IMonsterStats
 {
     string MonsterID { get; }
-    MonsterRank Rank { get; }
-    MonsterArchetype Archetype { get; }
+    Monster_Type Rank { get; }
+    Monster_Kind Archetype { get; }
 
     int MaxHp { get; }
     float MoveSpeed { get; }
