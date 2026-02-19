@@ -37,6 +37,7 @@ public class Equipment
 
     public int EquippedSlotIndex = -1; // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
     public bool isEquipped = false;    // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
+    public bool isFusing = false;
 
 
     /// <summary>

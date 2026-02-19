@@ -67,7 +67,7 @@ public class TestWeaponGenerator : MonoBehaviour
             {
                 Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
                 Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 착용레벨 : {testWeapon.equip_level}");
-                Debug.Log($"강화 : {testWeapon.equip_Upgrade}");
+                Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}");
             }
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
@@ -78,9 +78,9 @@ public class TestWeaponGenerator : MonoBehaviour
             equipmentInventory.AddEquipment(testWeapon);
             Debug.Log("장비 획득 성공!");
 
-            if(inventoryPanel._currentPart != 0)
+            if(inventoryPanel.currentPart != 0)
             {
-                inventoryPanel.Refresh();
+                inventoryPanel.onInventoryChanged.Invoke();
             }
         }
 

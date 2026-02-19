@@ -14,7 +14,22 @@ public class FusePanel : MonoBehaviour
     private void Awake()
     {
         //합성 버튼에 합성 기능을 추가합니다.
-        fuseButton.onClick.AddListener(OnClickFuse);   
+        fuseButton.onClick.AddListener(OnClickFuse);
+        mainSlot.OnSlotClicked +=_inventoryPanel.SetTargetSlot;
+        mainSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            mainSlot.OnClickSlot();
+        });
+        subSlot1.OnSlotClicked += _inventoryPanel.SetTargetSlot;
+        subSlot1.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            subSlot1.OnClickSlot();
+        });
+        subSlot2.OnSlotClicked += _inventoryPanel.SetTargetSlot;
+        subSlot2.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            subSlot2.OnClickSlot();
+        });
     }
 
     private void OnClickFuse()
@@ -46,6 +61,14 @@ public class FusePanel : MonoBehaviour
             mainEquipment.equipment_Rarity != subEquipmentTwo.equipment_Rarity)
         {
             Debug.Log("합성하기 위한 세 장비의 레어도가 일치하지 않습니다.");
+            return;
+        }
+
+        //이름도 동일하게!
+        if(mainEquipment.equip_name != subEquipmentOne.equip_name ||
+            mainEquipment.equip_name != subEquipmentTwo.equip_name)
+        {
+            Debug.Log("합성하기 위한 세 장비의 이름이 일치하지 않습니다.");
             return;
         }
 
@@ -96,7 +119,7 @@ public class FusePanel : MonoBehaviour
         mainSlot.UpdatePartUI();
 
         //인벤토리를 한 번 갱신합니다.
-        _inventoryPanel.Refresh();
+        _inventoryPanel.onInventoryChanged.Invoke();
     }
 
     //합성 성공률을 확인합니다.

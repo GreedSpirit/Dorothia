@@ -4,7 +4,8 @@ using UnityEngine.UI;
 
 public class EquipEnchant : MonoBehaviour
 {
-    [Header("인벤토리 창의 장비강화 버튼")]
+    [Header("인벤토리 창 관련")]
+    [SerializeField] InventoryPanel _inventoryPanel;
     [SerializeField] Button _enchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
 
     [Header("강화 창 캔버스그룹(패널)")]
@@ -30,18 +31,29 @@ public class EquipEnchant : MonoBehaviour
 
     private void Awake()
     {
+        //강화 버튼에 다음 기능을 추가합니다.
+        // - 강화할 장비 받아오기
+        // - 강화 창 활성화
+        // - 강화 창 갱신하기
         _enchantButton.onClick.AddListener(() =>
         {
-            GetEquipment(EquipmentManager.Instance.GiveEquipmentData());
+            GetEquipment(_inventoryPanel.GiveEquipmentData());
             SetPanelActiveValue(true);
             RefreshEnchantPanel(_equipment);
         });
+
+        //강화 진행 버튼에 다음 기능을 추가합니다.
+        // - 장비 강화 진행
         _proceedEnchantButton.onClick.AddListener(() =>
         {
             Enchant(_equipment);
         });
     }
 
+    /// <summary>
+    /// 강화 창에 강화할 장비를 등록합니다.
+    /// </summary>
+    /// <param name="equip">강화하고자 하는 장비</param>
     public void GetEquipment(Equipment equip)
     {
         _equipment = equip;
@@ -61,6 +73,10 @@ public class EquipEnchant : MonoBehaviour
         _enchantPanel.blocksRaycasts = value;
     }
 
+    /// <summary>
+    /// 장비의 정보가 갱신됨에 따라, 장비 강화 패널의 정보들 또한 갱신시킵니다.
+    /// </summary>
+    /// <param name="equip">강화하고자 하는 장비</param>
     public void RefreshEnchantPanel(Equipment equip)
     {
         //강화를 진행하기 전과 성공 후의 장비를 나타내기 위해, 우선 해당 이미지를 현재 장비와 동일하게 맞춥니다.
@@ -74,40 +90,41 @@ public class EquipEnchant : MonoBehaviour
         _afterEnchantUpgradeValueText.text = $"{equip.equip_Upgrade + 1}";
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
-        //아직 테이블 내에서 특정 조건을 맞춰 가져오는 방식을 알 수 없으므로, 해당 계산은 값을 따로 빼오는 방식으로 진행하겠습니다. (하드코딩)
-        if(equip.equip_Upgrade <= 10)
-        {
-            _costGold = equip.equip_price * equip.equip_Upgrade * GetIntByRarity(equip.equipment_Rarity);
-        }
-        else if(equip.equip_Upgrade > 10 && equip.equip_Upgrade <= 30)
-        {
-            _costGold = (int)(equip.equip_price * Mathf.Pow(equip.equip_Upgrade, 1.2f) * GetIntByRarity(equip.equipment_Rarity));
-        }
-        else if(equip.equip_Upgrade > 30 && equip.equip_Upgrade <= 50)
-        {
-            _costGold = (int)(equip.equip_price * Mathf.Pow(equip.equip_Upgrade, 1.5f) * GetIntByRarity(equip.equipment_Rarity));
-        }
+        float cost = equip.equip_price * Mathf.Pow(equip.equip_Upgrade, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade + 1).Equip_Upgrade_Value)
+                * GetIntByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank);
+        _costGold = cost - (int)cost < 0.5f? (int)cost : (int)cost + 1;
 
+        //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         _costGoldText.text = $"{_costGold}<color=orange>G</color>";
+
+        //현재의 골드량은, (테스트를 위해 임시로 작성한 테스트용)소지 중인 골드 값 뒤에 주황색 G를 붙여 표현합니다.
         _currentGoldText.text = $"{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>";
     }
 
+    /// <summary>
+    /// 장비의 강화를 진행합니다.
+    /// </summary>
+    /// <param name="equip">강화하고자 하는 장비</param>
     public void Enchant(Equipment equip)
     {
+        //현재 장비의 강화 최대치는 50입니다. 50을 달성했으면 반환합니다.
         if(equip.equip_Upgrade >= 50)
         {
             Debug.Log("이미 최대 강화 수치를 달성한 장비입니다!");
             return;
         }
 
+        //현재 소지 중인 골드가 요구하는 골드량보다 부족한 경우 안내하고 반환합니다.
         if (TestGoldAndScrapManager.Instance.testGold < (int)_costGold)
         {
             Debug.Log("소지 골드가 부족합니다.");
             return;
         }
 
+        //우선 골드를 사용합니다.
         TestGoldAndScrapManager.Instance.testGold -= (int)_costGold;
         Debug.Log($"골드를 {_costGold}만큼 소모하여 강화를 시도합니다. 현재 남은 골드는 {TestGoldAndScrapManager.Instance.testGold}입니다.");
+
         //우선 해당 장비에 대한 정보를 먼저 받아옵니다.
         //이때, 테이블 내에서 정의한 것이 "해당 강화도로 만들기 위한 장비 강화 과정"에 사용될 정보라는 것을 기반으로 작성합니다.
         //ex) 강화도 10은 강화도 9에서 강화도 10으로 올라가기 위해 사용하는 정보.

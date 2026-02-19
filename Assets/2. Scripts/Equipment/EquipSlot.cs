@@ -1,4 +1,5 @@
-﻿using Unity.VisualScripting;
+﻿using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,8 +9,10 @@ public enum SlotType
 }
 public class EquipSlot : MonoBehaviour
 {
+    public Action<EquipSlot> OnSlotClicked;        // 슬롯이 클릭되었을 때의 동작을 위한 액션입니다.
+
     public SlotType slotType;                      // 해당 슬롯이 합성용인지, 장비 장착용인지 표기하기 위한 슬롯입니다.
-    public Equip_Type part;                     // 해당 슬롯이 담당할 장착 부위입니다.
+    public Equip_Type part;                        // 해당 슬롯이 담당할 장착 부위입니다.
     public int slotIndex;                          // 해당 슬롯의 번호입니다. (반지 2슬롯을 대비하여 생성)
     
     public Button button;                          // 해당 슬롯의 버튼입니다.
@@ -25,9 +28,10 @@ public class EquipSlot : MonoBehaviour
     /// </summary>
     public void OnClickSlot()
     {
-        equipmentUI.SetSlot(this);
-        //이 슬롯을 기반으로, 해당 슬롯에 맞는 인벤토리를 열도록 EquipmentUI의 메서드를 실행합니다.
-        equipmentUI.OpenInventory(this);
+        OnSlotClicked?.Invoke(this);
+        //equipmentUI.SetSlot(this);
+        ////이 슬롯을 기반으로, 해당 슬롯에 맞는 인벤토리를 열도록 EquipmentUI의 메서드를 실행합니다.
+        //equipmentUI.OpenInventory(this);
     }
 
     /// <summary>
@@ -39,6 +43,7 @@ public class EquipSlot : MonoBehaviour
         if (equipped == null)
         {
             // 장비가 없으면 아이콘 비활성화
+            iconImage.color = Color.white;
             iconImage.enabled = false;
             return;
         }
