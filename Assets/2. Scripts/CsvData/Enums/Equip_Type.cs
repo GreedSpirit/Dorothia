@@ -1,12 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum Equip_Type
 {
-    무기 = 1,
-    상의 = 2,
-    하의 = 3,
-    장갑 = 4,
-    신발 = 5,
-    목걸이 = 6,
-    반지 = 7,
+    Weapon = 1,
+    Clothes = 2,
+    Pants = 3,
+    Gloves = 4,
+    Shoes = 5,
+    Necklace = 6,
+    Ring = 7,
 }

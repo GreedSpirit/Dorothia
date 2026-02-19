@@ -267,6 +267,23 @@ public class InventoryPanel : MonoBehaviour
     {
         if (_targetSlot != null)
         {
+            //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
+            if (_targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
+            {
+                Debug.Log("장착 중인 장비를 합성 재료로 사용할 수 없습니다!");
+                return;
+            }
+
+            //기존 슬롯에 이미 존재하던 장비는 제거합니다.
+            if (_targetSlot.equipped != null && _targetSlot.slotType == SlotType.EquipSlot)
+            {
+                _targetSlot.equipped.UnEquip();
+            }
+            else if(_targetSlot.equipped != null && _targetSlot.slotType == SlotType.FuseSlot)
+            {
+                _targetSlot.equipped.CancelFuseMaterial();
+            }
+
             //대상 슬롯의 장비에 해당 장비를 집어넣습니다.
             _targetSlot.equipped = equip;
 
@@ -276,11 +293,14 @@ public class InventoryPanel : MonoBehaviour
             _targetSlot.iconImage.enabled = true;
             _targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
 
+            //장비 슬롯이라면 장비를 장착합니다.
             if (_targetSlot.slotType == SlotType.EquipSlot)
             {
                 Debug.Log($"{_targetSlot.equipped.equip_name} 장착 완료!");
-                equip.isEquipped = true;
+                
+                equip.SetEquipped(_targetSlot.slotIndex);
             }
+            //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(_targetSlot.slotType == SlotType.FuseSlot)
             {
                 equip.isFusing = true;

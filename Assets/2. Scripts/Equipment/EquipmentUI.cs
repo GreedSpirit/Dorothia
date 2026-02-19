@@ -31,12 +31,12 @@ public class EquipmentUI : MonoBehaviour
     {
         Equip_Type[] partMapping = new Equip_Type[]
         {
-            Equip_Type.목걸이,
-            Equip_Type.상의,
-            Equip_Type.하의,
-            Equip_Type.신발,
-            Equip_Type.무기,
-            Equip_Type.장갑
+            Equip_Type.Necklace,
+            Equip_Type.Clothes,
+            Equip_Type.Pants,
+            Equip_Type.Shoes,
+            Equip_Type.Weapon,
+            Equip_Type.Gloves
         };
 
         // 리스트 순회하면서 AddListener
@@ -52,12 +52,12 @@ public class EquipmentUI : MonoBehaviour
         _firstRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
         {
             _inventoryPanel.SetTargetSlot(_firstRingSlot);
-            _inventoryPanel.Open(Equip_Type.반지, 0);
+            _inventoryPanel.Open(Equip_Type.Ring, 0);
         });
         _secondRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() => 
         {
             _inventoryPanel.SetTargetSlot(_secondRingSlot);
-            _inventoryPanel.Open(Equip_Type.반지, 1);
+            _inventoryPanel.Open(Equip_Type.Ring, 1);
         });
     }
 

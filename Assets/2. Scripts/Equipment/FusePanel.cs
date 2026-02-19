@@ -162,6 +162,15 @@ public class FusePanel : MonoBehaviour
     /// <param name="value">활성화 여부</param>
     public void SetPanelActiveValue(bool value)
     {
+        if(value == false)
+        {
+            mainSlot.equipped?.CancelFuseMaterial();
+            mainSlot.ClearSlot();
+            subSlot1.equipped?.CancelFuseMaterial();
+            subSlot1.ClearSlot();
+            subSlot2.equipped?.CancelFuseMaterial();
+            subSlot2.ClearSlot();
+        }
         //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
         _fusePanelGroup.alpha = value == true ? 1 : 0;
 

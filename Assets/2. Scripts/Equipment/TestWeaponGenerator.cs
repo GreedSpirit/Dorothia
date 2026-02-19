@@ -84,7 +84,7 @@ public class TestWeaponGenerator : MonoBehaviour
             }
         }
 
-        int count = equipmentInventory.GetInventory(Equip_Type.무기).Count;
+        int count = equipmentInventory.GetInventory(Equip_Type.Weapon).Count;
         Debug.Log($"현재 인벤토리의 무기 개수: {count}");
     }
 }

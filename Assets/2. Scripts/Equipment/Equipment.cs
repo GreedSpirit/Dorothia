@@ -6,7 +6,7 @@ using UnityEngine.UI;
 //파츠 별 가지게 될 옵션을 정의하기 위한, 추후 사용할 열거형.
 public enum EquipmentStatus
 {
-    체력 = 1, 공격력, 마법공격력, 공격속도, 크리티컬확률, 크리티컬데미지, 방어력, 마법저항력, 체력재생력, 이동속도
+    HP = 1, ATK, ATK_M, DPS, CC, CD, DEF, DEF_M, HP_Regen, AGI
 }
 public class Equipment
 {
@@ -46,6 +46,11 @@ public class Equipment
     /// <param name="slotIndex">장착할 슬롯(반지 슬롯 대비)</param>
     public void SetEquipped(int slotIndex)
     {
+        if(isEquipped == true)
+        {
+            Debug.Log("이미 장착한 장비입니다.");
+            return;
+        }
         //현재 장비를 장착하는 것이므로 장착 여부를 참으로 설정합니다.
         isEquipped = true;
         
@@ -66,6 +71,14 @@ public class Equipment
     }
 
     /// <summary>
+    /// 합성 칸에 등록했던 장비를 합성 칸에서 빼냅니다.
+    /// </summary>
+    public void CancelFuseMaterial()
+    {
+        isFusing = false;
+    }
+
+    /// <summary>
     /// 데이터의 장비 id와 추가적인 값들을 기반으로, 장비를 생성합니다.
     /// </summary>
     /// <param name="equipData">id값을 통해 데이터 테이블로부터 빼온 장비 id값</param>
@@ -81,16 +94,16 @@ public class Equipment
         equip_model = equipData.Equip_Model;                                      // ?
 
         equip_status = new Dictionary<EquipmentStatus, float>();
-        AddEquipStatus(EquipmentStatus.체력, equipData.Equip_Hp);                           // 체력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.공격력, equipData.Equip_Atk);                        // 공격력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.마법공격력, equipData.Equip_Atk_M);                  // 마법공격력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.공격속도, equipData.Equip_Dps);                      // 공격속도 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.크리티컬확률, equipData.Equip_Crt_Prob);             // 치명타 확률 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.크리티컬데미지, equipData.Equip_Crt_Dmg);            // 치명타 피해량 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.방어력, equipData.Equip_Def);                       // 방어력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.마법저항력, equipData.Equip_Def_M);                 // 마법방어력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.체력재생력, equipData.Equip_Hp_Regen);              // 체력 재생 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.이동속도, equipData.Equip_Agi);                     // 이동속도 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.HP, equipData.Equip_Hp);                           // 체력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.ATK, equipData.Equip_Atk);                        // 공격력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.ATK_M, equipData.Equip_Atk_M);                  // 마법공격력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.DPS, equipData.Equip_Dps);                      // 공격속도 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.CC, equipData.Equip_Crt_Prob);             // 치명타 확률 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.CD, equipData.Equip_Crt_Dmg);            // 치명타 피해량 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.DEF, equipData.Equip_Def);                       // 방어력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.DEF_M, equipData.Equip_Def_M);                 // 마법방어력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.HP_Regen, equipData.Equip_Hp_Regen);              // 체력 재생 스텟 존재할 시 스텟 추가
+        AddEquipStatus(EquipmentStatus.AGI, equipData.Equip_Agi);                     // 이동속도 스텟 존재할 시 스텟 추가
 
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
         #endregion
