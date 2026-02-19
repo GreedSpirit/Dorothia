@@ -90,7 +90,7 @@ public class EquipEnchant : MonoBehaviour
         _afterEnchantUpgradeValueText.text = $"{equip.equip_Upgrade + 1}";
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
-        float cost = equip.equip_price * Mathf.Pow(equip.equip_Upgrade, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade + 1).Equip_Upgrade_Value)
+        float cost = equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
                 * GetIntByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank);
         _costGold = cost - (int)cost < 0.5f? (int)cost : (int)cost + 1;
 

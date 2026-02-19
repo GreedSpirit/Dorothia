@@ -16,12 +16,6 @@ public class TestWeaponGenerator : MonoBehaviour
             return;
         }
 
-        if(!EquipmentSetEffectManager.Instance.isActived)
-        {
-            EquipmentSetEffectManager.Instance.isActived = true;
-            EquipmentSetEffectManager.Instance.AddAllSets();
-        }
-
         //랜덤 숫자를 생성합니다. (90% 확률로 미획득, 1.25% 확률로 부위별 획득 - 현재는 전부 무기로.)
         int rng = Random.Range(1, 401);
 
