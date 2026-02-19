@@ -40,6 +40,8 @@ public class DataManager : MonoBehaviour
         LoadData<Equip_LevelData>("Equip_level");
         LoadData<Equip_RankData>("Equip_Rank");
         LoadData<Equip_UpgradeData>("Equip_Upgrade");
+        LoadData<Equip_Upgrade_GoldData>("Equip_Upgrade_Gold");
+        LoadData<Equip_Rank_GoldData>("Equip_Rank_Gold");
 
         //Character 테이블
         LoadData<CharacterData>("Character");
@@ -62,7 +64,6 @@ public class DataManager : MonoBehaviour
         
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");
-        LoadListData<Equip_Upgrade_GoldData>("Equip_Upgrade_Gold");
     }
 
     private void LoadData<T>(string fileName) where T : ICSVLoad, ITableKey, new()

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 public class EquipmentUI : MonoBehaviour
 {
     [Header("버튼의 리스트")]
-    [SerializeField] List<Button> _partButtons;        // 반지 슬롯을 제외한 나머지 버튼을 등록하기 위한 버튼의 리스트입니다.
-    [SerializeField] Button _firstRingButton;
-    [SerializeField] Button _secondRingButton;
+    [SerializeField] List<EquipSlot> _partSlots;        // 반지 슬롯을 제외한 나머지 버튼을 등록하기 위한 버튼의 리스트입니다.
+    [SerializeField] EquipSlot _firstRingSlot;
+    [SerializeField] EquipSlot _secondRingSlot;
     [SerializeField] InventoryPanel _inventoryPanel;   // 인벤토리를 담당하는 패널
     [SerializeField] CanvasGroup _equipmentUIGroup;    // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
 
@@ -19,9 +19,9 @@ public class EquipmentUI : MonoBehaviour
     private void Awake()
     {
         //인스펙터상의 연결 오류 확인용
-        if (_partButtons == null)
+        if (_partSlots == null)
             Debug.LogError("EquipmentUI - 각 파트별 버튼이 하나도 등록되지 않았습니다!");
-        if (_partButtons.Count != 6)
+        if (_partSlots.Count != 6)
             Debug.LogWarning("EquipmentUI - 파트별 버튼이 모자랍니다!");
         if (_inventoryPanel == null)
             Debug.LogError("EquipmentUI - 장비를 담은 인벤토리 확인용 창이 등록되지 않았습니다!");
@@ -31,25 +31,34 @@ public class EquipmentUI : MonoBehaviour
     {
         Equip_Type[] partMapping = new Equip_Type[]
         {
-            Equip_Type.목걸이,
-            Equip_Type.상의,
-            Equip_Type.하의,
-            Equip_Type.신발,
-            Equip_Type.무기,
-            Equip_Type.장갑
+            Equip_Type.Necklace,
+            Equip_Type.Clothes,
+            Equip_Type.Pants,
+            Equip_Type.Shoes,
+            Equip_Type.Weapon,
+            Equip_Type.Gloves
         };
 
         // 리스트 순회하면서 AddListener
-        for (int i = 0; i < _partButtons.Count; i++)
+        for (int i = 0; i < _partSlots.Count; i++)
         {
             int index = i; // 클로저 문제 때문에 로컬 변수에 저장
-            _partButtons[i].onClick.AddListener(() =>
+            _partSlots[i].gameObject.GetComponent<Button>().onClick.AddListener(() =>
             {
+                _inventoryPanel.SetTargetSlot(_partSlots[index]);
                 _inventoryPanel.Open(partMapping[index], 0);
             });
         }
-        _firstRingButton.onClick.AddListener(() => _inventoryPanel.Open(Equip_Type.반지, 0));
-        _secondRingButton.onClick.AddListener(() => _inventoryPanel.Open(Equip_Type.반지, 1));
+        _firstRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            _inventoryPanel.SetTargetSlot(_firstRingSlot);
+            _inventoryPanel.Open(Equip_Type.Ring, 0);
+        });
+        _secondRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() => 
+        {
+            _inventoryPanel.SetTargetSlot(_secondRingSlot);
+            _inventoryPanel.Open(Equip_Type.Ring, 1);
+        });
     }
 
     /// <summary>

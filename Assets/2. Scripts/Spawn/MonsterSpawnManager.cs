@@ -23,6 +23,9 @@ public class MonsterSpawnManager : MonoBehaviour
     [SerializeField] private SpawnAreaProvider _spawnAreaProvider;
     [SerializeField] private MonoBehaviour _targetProvider;
 
+    [Header("Projectile Database")]
+    [SerializeField] private ProjectileDatabase _projectileDatabase;
+
     private IMonsterTarget _target;
 
     private readonly Dictionary<MonsterController, ObjectPool<MonsterController>> _pools = new(); // 몬스터풀
@@ -42,6 +45,9 @@ public class MonsterSpawnManager : MonoBehaviour
         _target = _targetProvider as IMonsterTarget;
         if (_target == null)
             Debug.LogError("[MonsterSpawnManager] TargetProvider 설정");
+
+        if (_projectileDatabase == null)
+            Debug.LogError("[MonsterSpawnManager] ProjectileDatabase 설정 안됨");
 
         _metrics = new SpawnMetricsCollector(windowSize: 20);
         _policy = new DynamicSpawnPolicy(minCount: 30, softMaxCount: 100);
@@ -159,7 +165,7 @@ public class MonsterSpawnManager : MonoBehaviour
             monster.transform.position = spawnPos;
 
             //Initialize에 poolKeyPrefab을 넘겨서 어느 풀로 돌아갈지
-            monster.Initialize(this, _target, entry.prefab);
+            monster.Initialize(this, _target, entry.prefab, entry.monsterId, _projectileDatabase);
 
             _activeMonsters.Add(monster);
             _currentMonsterCount++;
