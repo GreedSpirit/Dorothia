@@ -10,6 +10,7 @@ public abstract class GremlinBase : MonoBehaviour
     [SerializeField] protected GremlinGrowthConfig growthConfig;
 
     protected float baseValue;
+    protected float currentActionCycle;
 
     public virtual void Init(string id, string name, Rarity tier, int level, float baseValue)
     {
@@ -18,6 +19,8 @@ public abstract class GremlinBase : MonoBehaviour
         this.currentTier = tier;
         this.currentLevel = level;
         this.baseValue = baseValue;
+
+        currentActionCycle = growthConfig.GetTierData(tier).actionCycleTime;
     }
 
     public float GetFinalStat()
