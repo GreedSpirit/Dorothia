@@ -16,6 +16,7 @@ public class Monster_Data : ICSVLoad, ITableKey
     public float Monster_Agi { get; set; }
     public float Monster_Atk_Range { get; set; }
     public string Monster_Model { get; set; }
+    public int Projectile_Id { get; set; }
 
     int ITableKey.Id => Monster_Id;
     string ITableKey.Key => Monster_Id.ToString();
@@ -46,5 +47,7 @@ public class Monster_Data : ICSVLoad, ITableKey
         if (values.Length > 10 && float.TryParse(values[10], out float v10)) Monster_Atk_Range = v10;
         // 11: Monster_Model (string)
         if (values.Length > 11) Monster_Model = values[11];
+        // 12: Projectile_Id (int)
+        if (values.Length > 12 && int.TryParse(values[12], out int v12)) Projectile_Id = v12;
     }
 }
