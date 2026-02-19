@@ -3,18 +3,13 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-//파츠 별 가지게 될 옵션을 정의하기 위한, 추후 사용할 열거형.
-public enum EquipmentStatus
-{
-    HP = 1, ATK, ATK_M, DPS, CC, CD, DEF, DEF_M, HP_Regen, AGI
-}
 public class Equipment
 {
     //CSV 구조도 순서대로 작성합니다!
     //equip
     public int equip_id;                                       // 장비의 ID값입니다.
     public string equip_name;                                  // 장비의 이름입니다.
-    public Dictionary<EquipmentStatus, float> equip_status;    // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
+    public Dictionary<Status, float> equip_status;    // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
     public Equip_Type equip_type;                              // 장비의 타입입니다. int값을 받으면 EquipType 열거형으로 자동 치환하여 가독성을 높입니다.
     public int equip_price;                                    // 장비의 판매가입니다.
     public string equip_model;                                 // 장비의 모델입니다. 모델? 장착 시 외형 변화를 위한 것인가...
@@ -93,27 +88,26 @@ public class Equipment
         equip_icon = equipData.Equip_Icon;                                        // 장비 아이콘
         equip_model = equipData.Equip_Model;                                      // ?
 
-        equip_status = new Dictionary<EquipmentStatus, float>();
-        AddEquipStatus(EquipmentStatus.HP, equipData.Equip_Hp);                           // 체력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.ATK, equipData.Equip_Atk);                        // 공격력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.ATK_M, equipData.Equip_Atk_M);                  // 마법공격력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.DPS, equipData.Equip_Dps);                      // 공격속도 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.CC, equipData.Equip_Crt_Prob);             // 치명타 확률 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.CD, equipData.Equip_Crt_Dmg);            // 치명타 피해량 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.DEF, equipData.Equip_Def);                       // 방어력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.DEF_M, equipData.Equip_Def_M);                 // 마법방어력 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.HP_Regen, equipData.Equip_Hp_Regen);              // 체력 재생 스텟 존재할 시 스텟 추가
-        AddEquipStatus(EquipmentStatus.AGI, equipData.Equip_Agi);                     // 이동속도 스텟 존재할 시 스텟 추가
+        equip_status = new Dictionary<Status, float>();
+        AddEquipStatus(Status.HP, equipData.Equip_Hp);                           // 체력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.ATK, equipData.Equip_Atk);                        // 공격력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.MagicATK, equipData.Equip_Atk_M);                  // 마법공격력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.AttackSpeed, equipData.Equip_Dps);                      // 공격속도 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.CriticalChance, equipData.Equip_Crt_Prob);             // 치명타 확률 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.CriticalDamage, equipData.Equip_Crt_Dmg);            // 치명타 피해량 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.DEF, equipData.Equip_Def);                       // 방어력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.MagicDEF, equipData.Equip_Def_M);                 // 마법방어력 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.HPRegen, equipData.Equip_Hp_Regen);              // 체력 재생 스텟 존재할 시 스텟 추가
+        AddEquipStatus(Status.MoveSpeed, equipData.Equip_Agi);                     // 이동속도 스텟 존재할 시 스텟 추가
 
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
         #endregion
 
         #region 등급에 따라 받아올 값
         equipment_Rarity = rarity;                                                                                       // 장비 등급
-        //rankData = new EquipmentRank(DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity));       // 해당 장비 등급에 따른 속성값들
         #endregion
 
-        equip_set_id = EquipmentSetEffectManager.Instance.ApplySetEffects(equip_name);
+        equip_set_id = GetSetEffect(equip_name);
 
         equip_level = equipLevel;
 
@@ -127,7 +121,7 @@ public class Equipment
     /// </summary>
     /// <param name="equipStatus">장비의 스텟</param>
     /// <param name="equipStatusValue">해당 장비 스텟의 값</param>
-    public void AddEquipStatus(EquipmentStatus equipStatus,float equipStatusValue)
+    public void AddEquipStatus(Status equipStatus,float equipStatusValue)
     {
         //0이 아닌 경우에만 포함시킵니다.
         if(equipStatusValue != 0)
@@ -148,5 +142,25 @@ public class Equipment
             i++;
         }
         return stringBuilder.ToString();
+    }
+
+    public float GetStatus(Status equipStatus)
+    {
+        return equip_status.TryGetValue(equipStatus, out float value) ? value : 0f ;
+    }
+
+    private int GetSetEffect(string equipName)
+    {
+        Dictionary<int, List<Equip_SetData>> allSets = DataManager.Instance.GetListDict<Equip_SetData>();
+        int set_id = 0;
+        foreach(var Set in allSets.Values)
+        {
+            foreach(var item in Set)
+            {
+                if (equipName.Contains(item.Equip_Set_Need_Name))
+                    set_id = item.Equip_Set_Id;
+            }
+        }
+        return set_id;
     }
 }
