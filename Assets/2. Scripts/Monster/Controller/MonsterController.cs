@@ -201,7 +201,7 @@ public class MonsterController : MonoBehaviour, IMonster
         float distance = DistanceXZ(transform.position, _target.Transform.position);
 
         //최단경로 및 원거리공격 유지
-        if (_stats.Archetype == Monster_Kind.원거리형)
+        if (_stats.Archetype == Monster_Kind.Ranged)
         {
             //원거리: 일정 거리 이상일 때만 접근
             if (distance > _stats.PreferredRange)
