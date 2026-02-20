@@ -92,14 +92,14 @@ public static class EquipStatusStaticRule
                 //신발 주요 스테이터스 : 이동속도, 체력재생력
                 MainStatus = new List<Status>
                 {
-                    Status.MoveSpeed,
-                    Status.HPRegen
+                    Status.HPRegen,
+                    Status.MoveSpeed
                 },
                 //신발 보조 스테이터스 : 방어력, 체력
                 SubStatus = new List<Status>
                 {
-                    Status.DEF,
-                    Status.HP
+                    Status.HP,
+                    Status.DEF
                 },
             }
         },
