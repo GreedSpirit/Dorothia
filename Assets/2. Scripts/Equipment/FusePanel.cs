@@ -64,6 +64,15 @@ public class FusePanel : MonoBehaviour
             return;
         }
 
+        //세 장비의 등급이 일치하지 않으면 합성이 불가능합니다.
+        if(mainEquipment.equipment_Rarity == 40005 ||
+            subEquipmentOne.equipment_Rarity == 40005 ||
+            subEquipmentTwo.equipment_Rarity == 40005)
+        {
+            Debug.Log("신화 장비는 합성할 수 없습니다.");
+            return;
+        }
+
         //이름도 동일하게!
         if(mainEquipment.equip_name != subEquipmentOne.equip_name ||
             mainEquipment.equip_name != subEquipmentTwo.equip_name)
@@ -99,6 +108,9 @@ public class FusePanel : MonoBehaviour
             int rarity = mainEquipment.equipment_Rarity;
             rarity += 1;
             mainEquipment.equipment_Rarity = rarity;
+            mainEquipment.AddSubStatusOnUpgrade(DataManager.Instance.GetData<EquipData>(mainEquipment.equip_id),
+                (Rarity)DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity - 1).Equip_Rank,
+                (Rarity)DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity).Equip_Rank);
         }
 
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
