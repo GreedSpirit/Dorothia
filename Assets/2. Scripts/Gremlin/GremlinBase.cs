@@ -14,7 +14,7 @@ public abstract class GremlinBase : MonoBehaviour
     [SerializeField] protected GremlinGrowthConfig growthConfig;
     [SerializeField] protected Transform visualModel;
 
-    [SerializeField] private Transform followTarget;
+    [SerializeField] protected Transform followTarget;
     [SerializeField] private Vector3 followOffset = new Vector3(1.5f, 2.0f, -1.0f);
     [SerializeField] private float smoothTime = 0.3f;
 
@@ -25,14 +25,14 @@ public abstract class GremlinBase : MonoBehaviour
     private Vector3 visualModelStartLocalPos;
 
     //그렘린을 갈아끼거나 할 때 부를 초기화 함수
-    public virtual void Init(string id, string name, Rarity tier, int level, float baseValue, Transform target)
+    public virtual void Init(string id, string name, Rarity tier, int level, float baseValue, Transform player)
     {
         this.id = id;
         this.gremlinName = name;
         this.currentTier = tier;
         this.currentLevel = level;
         this.baseValue = baseValue;
-        this.followTarget = target;
+        this.followTarget = player;
 
         currentActionCycle = growthConfig.GetTierData(tier).actionCycleTime;
         visualModelStartLocalPos = visualModel.localPosition;
