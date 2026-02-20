@@ -2,11 +2,15 @@
 using UnityEngine.AI;
 
 public class PlayerMoveState : IPlayerState<PlayerCtrl>
-{
+{    
     public void Enter(PlayerCtrl player)
     {
+        Debug.Log("무브상태진입");
+        //이전 상태 초기화
         player.NavMesh.ResetPath();
         player.Anima.SetBool("Run", true);
+        player.Anima.SetBool("Attack", false);
+        player.ComboIndex = 0;
     }
 
     public void Execute(PlayerCtrl player)
@@ -14,27 +18,55 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
         //입력값 받아오기
         Vector2 input = player.MoveInput;
 
-        //이동 방향 계산
-        Vector3 moveDir = player.transform.forward * input.y + player.transform.right * input.x;
 
-        //대각선이동시 1보다커짐
-        if (moveDir.sqrMagnitude > 1f)
+        /// <summary>
+        /// 입력값 있는 경우
+        /// </summary>
+        if (input.sqrMagnitude > 0.001f)
         {
-            //길이 1로 수정
-            moveDir.Normalize();
+
+            //카메라 기준 이동 회전값반영해야하니깐 forward right
+            Vector3 camForward = Camera.main.transform.forward;
+            Vector3 camRight = Camera.main.transform.right;
+
+            //y축 0으로 고정
+            camForward.y = 0f;
+            camRight.y = 0f;
+
+            //대각선이동 방향 보정
+            camForward.Normalize();
+            camRight.Normalize();
+
+            //이동방향 계산
+            Vector3 moveDir = camForward * input.y + camRight * input.x;
+
+            //대각선 입력값 1보다 크면 보정
+            if (moveDir.sqrMagnitude > 1f)
+            {
+                moveDir.Normalize();
+            }
+
+            //바라보는 방향으로 회전값 계산
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+
+            //부드럽게회전
+            player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRot, Time.deltaTime * 10f);
+
+            //이동
+            float speed = player.PlayerStats.Speed;
+            player.transform.position += moveDir * speed * Time.deltaTime;
         }
 
-        //플레이어 이동속도 계산
-        float speed = player.PlayerStats.Speed;
-        moveDir *= speed;
 
-        //이동속도 적용
-        player.transform.position += moveDir * Time.deltaTime;
+        
     }
 
     public void Exit(PlayerCtrl player)
     {
         player.NavMesh.ResetPath();
-        player.Anima.SetBool("Run", false);
+        player.ComboIndex = 0;
     }
+
+
+    
 }
