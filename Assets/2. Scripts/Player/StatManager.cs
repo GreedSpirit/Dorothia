@@ -86,7 +86,8 @@ public class StatManager : MonoBehaviour
         // 모든 수치 초기화
         foreach (var stat in stats.Values) stat.ResetModifiers();
 
-
+        // 패시브 스킬 적용
+        ApplyPassiveEffects();
 
         // 장비 효과 적용
         ApplyEquipmentStats();
@@ -94,7 +95,7 @@ public class StatManager : MonoBehaviour
         Debug.Log("모든 스탯 수치가 최신화되었습니다.");
     }
 
-    private void ApplyPassiveEffects()
+    public void ApplyPassiveEffects()
     {
         // 패시브 스킬 적용
         if (SkillManager.Instance != null)
@@ -108,7 +109,7 @@ public class StatManager : MonoBehaviour
         }
     }
 
-    private void ApplyEquipmentStats()
+    public void ApplyEquipmentStats()
     {
         // 장비의 고정 수치는 add에, 세트효과는 multi에 더함
         // stats[type].AddModifier(equip.power, equip.powerPercent);
