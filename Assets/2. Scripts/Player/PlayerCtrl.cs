@@ -30,6 +30,10 @@ public class PlayerCtrl : MonoBehaviour
     //공격실행범위
     [SerializeField] float _attackRange = 1f;
 
+    //히트박스
+    [SerializeField] BoxCollider _hitBox;
+    [SerializeField] BoxCollider _hitBox3;
+
     Animator _anima;
     NavMeshAgent _navMesh;
 
@@ -160,7 +164,7 @@ public class PlayerCtrl : MonoBehaviour
     }
 
     //애니메이션 이벤트 함수
-    public void ResetCombo()
+    public void ResetCombo() //콤보리셋
     {
         ComboIndex = 0;
         _anima.SetInteger("Combo", 0);
@@ -168,13 +172,32 @@ public class PlayerCtrl : MonoBehaviour
 
     }
 
-    public void StartCombo()
+    public void StartCombo() //콤보시작
     {
         ComboIndex++;
         if (ComboIndex >= _maxComboIndex)
         {
             ComboIndex = 0;
         }
+    }
+    public void EnableAttackCollider()  //1,2히트박스활성화
+    {
+        _hitBox.enabled = true;
+    }
+
+    public void DisableAttackCollider() //1,2히트박스 비활성화
+    {
+        _hitBox.enabled = false;
+    }
+
+    public void EnableFinalAttackCollider()  //3히트박스활성화
+    {
+        _hitBox3.enabled = true;
+    }
+
+    public void DisableFinalAttackCollider() //3히트박스 비활성화
+    {
+        _hitBox3.enabled = false;
     }
 
     //에디터 체크용 기즈모

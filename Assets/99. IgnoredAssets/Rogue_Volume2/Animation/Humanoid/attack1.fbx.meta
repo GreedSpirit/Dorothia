@@ -58,15 +58,29 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.9977802
-        functionName: ResetCombo
+      - time: 0
+        functionName: StartCombo
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0
-        functionName: StartCombo
+      - time: 0.1986681
+        functionName: EnableAttackCollider
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.42148533
+        functionName: DisableAttackCollider
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.9977802
+        functionName: ResetCombo
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
         floatParameter: 0

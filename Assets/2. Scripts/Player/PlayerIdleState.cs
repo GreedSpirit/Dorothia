@@ -17,6 +17,14 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
         //적 탐지
         _target = FindEnemy(player);
 
+        //타겟없으면 리턴
+        if (_target == null)
+        {
+            //공격중일수도있으니깐 꺼주기
+            player.Anima.SetBool("Attack", false);
+            return;
+        }
+
         //타겟과 플레이어 거리
         float targetDistance = Vector3.Distance(player.transform.position, _target.transform.position);
 
