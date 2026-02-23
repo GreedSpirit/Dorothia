@@ -90,9 +90,8 @@ public class EquipEnchant : MonoBehaviour
         _afterEnchantUpgradeValueText.text = $"{equip.equip_Upgrade + 1}";
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
-        float cost = equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
-                * equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank);
-        _costGold = cost - (int)cost < 0.5f? (int)cost : (int)cost + 1;
+        _costGold = Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
+                * equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         _costGoldText.text = $"{_costGold}<color=orange>G</color>";
@@ -131,15 +130,15 @@ public class EquipEnchant : MonoBehaviour
         var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade+1);
 
         //성공률을 테이블로부터 받아옵니다.
-        int successChance = (int)(upgradeData.Equip_Success_Prob * 100);
+        float successChance = upgradeData.Equip_Success_Prob * 100;
 
         //보정값을 사용하기로 했다면, 해당 수치만큼 더해줍니다.
         if(_isUsingFailureCount == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
-            if(successChance + equip.equip_Upgrade_Count <= 100)
+            if(successChance + equip.equip_Upgrade_Weight <= 100)
             {
-                successChance += equip.equip_Upgrade_Count;
+                successChance += equip.equip_Upgrade_Weight * 100;
             }
             //초과하는 경우라면, 100을 달성할 값까지만 사용합니다.
             else
@@ -152,7 +151,7 @@ public class EquipEnchant : MonoBehaviour
         int value = Random.Range(1, 101);
 
         //성공률 이하의 수가 나왔다면 성공입니다.
-        if(value <= successChance)
+        if(value <= (int)successChance)
         {
             Debug.Log("강화에 성공하였습니다!");
             
@@ -162,7 +161,7 @@ public class EquipEnchant : MonoBehaviour
             //강화 성공 시 강화 구간이 변경되는 경우에만, 강화 보정치를 초기화합니다.
             if(equip.equip_Upgrade % 10 == 1)
             {
-                equip.equip_Upgrade_Count = 0;
+                equip.equip_Upgrade_Weight = 0;
             }
         }
 
@@ -170,10 +169,17 @@ public class EquipEnchant : MonoBehaviour
         else
         {
             //보정값을 사용한 것이라면, 그만큼 빼 줍니다.
+            if(_isUsingFailureCount == true)
+            {
+                equip.equip_Upgrade_Weight = 0;
+            }
+
             Debug.Log("강화에 실패하였습니다. 보정값을 1 획득합니다.");
 
-            //강화 횟수를 올립니다. 강화 실패 시 얻는 보정값으로 취급합니다.
-            equip.equip_Upgrade_Count++;
+            //강화 보정값을 상승시킵니다. 현재 보정값이 비어있는 데이터가 존재하므로, 0인 경우 0.1f라는 임시 값을 넣어주겠습니다.
+            equip.equip_Upgrade_Weight += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Upgrade_Failure != 0?
+                DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Upgrade_Failure:
+                0.1f;
         }
 
         RefreshEnchantPanel(equip);

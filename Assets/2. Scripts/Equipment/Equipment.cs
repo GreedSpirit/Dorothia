@@ -20,6 +20,7 @@ public class Equipment
     //equip_rank
     //▼ 일반 : 1, 희귀 : 2, 레어 : 3, 전설 : 4, 신화 : 5
     public int equipment_Rarity;                      // 장비의 레어도입니다. 데이터에서 받아온 등급의 값의 가독성을 높이기 위해 열거형을 사용합니다.
+    public float equip_Fuse_Weight;                   // 합성 가중치입니다. 합성에 실패할 때마다 등급에 따른 가중치를 획득합니다.
 
     //equip_Upgrade
     public int equip_Upgrade_Value;
@@ -89,6 +90,7 @@ public class Equipment
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
 
         equipment_Rarity = rarity;                                                                                       // 장비 등급
+        equip_Fuse_Weight = 0;
 
         equip_status = new Dictionary<Status, float>();
         Debug.Log(equipData.Equip_Type);

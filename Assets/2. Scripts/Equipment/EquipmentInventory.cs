@@ -144,9 +144,10 @@ public class EquipmentInventory : MonoBehaviour
             //저장 데이터의 인벤토리 내에 담아둔 장비 저장 데이터를 기반으로 새롭게 장비를 생성합니다.
             Equipment equipment = new Equipment(data.instanceGUID, DataManager.Instance.GetData<EquipData>(data.equipID), data.equipRarity, data.equipLevel);
 
-            //강화 단계와 강화 가중치는 0으로 생성되므로, 해당 값을 대입해줍니다.
+            //강화 단계와 강화 가중치, 합성 가중치는 0으로 생성되므로, 해당 값을 대입해줍니다.
             equipment.equip_Upgrade = data.equipEnchant;
-            equipment.equip_Upgrade_Count = data.enchantWeight;
+            equipment.equip_Upgrade_Weight = data.enchantWeight;
+            equipment.equip_Fuse_Weight = data.fuseWeight;
 
             //장비 Dictionary의 Key값을 저장 데이터의 Equip_Type으로, 그 Key값의 Value로 나오는 리스트의 칸 위치는 저장 데이터의 slotIndex로 하여
             //해당 위치에 방금 생성한 장비를 끼워넣습니다.

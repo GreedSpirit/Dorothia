@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class FusePanel : MonoBehaviour
@@ -10,6 +11,8 @@ public class FusePanel : MonoBehaviour
     [SerializeField] EquipmentInventory inventory;      // 실질적인 인벤토리입니다.
     [SerializeField] CanvasGroup _fusePanelGroup;       // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
     [SerializeField] InventoryPanel _inventoryPanel;    // 인벤토리를 열고 닫기 위한 패널입니다.
+
+    private bool _isUsingWeight;
 
     private void Awake()
     {
@@ -94,7 +97,21 @@ public class FusePanel : MonoBehaviour
         int randomNumber = Random.Range(1, 101);
 
         //성공을 결정할 숫자는, 장비 등급에 따라 결정됩니다.
-        int successNumber = CheckFuseSuccessRate(mainEquipment);
+        float successNumber = CheckFuseSuccessRate(mainEquipment);
+
+        if(_isUsingWeight == true)
+        {
+            //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
+            if (successNumber + mainEquipment.equip_Fuse_Weight <= 100)
+            {
+                successNumber += mainEquipment.equip_Fuse_Weight * 100;
+            }
+            //초과하는 경우라면, 100을 달성할 값까지만 사용합니다.
+            else
+            {
+                successNumber = 100;
+            }
+        }
 
         //디버그를 위한, 확인용 출력입니다.
         Debug.Log($"{randomNumber} / {successNumber}");
@@ -116,7 +133,15 @@ public class FusePanel : MonoBehaviour
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
         else
         {
-            Debug.Log("합성에 실패하였습니다.");
+            Debug.Log($"합성에 실패하였습니다. 가중치를 {DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure}만큼 획득합니다.");
+            //만약 가중치를 사용했다면, 가중치를 0으로 초기화합니다.
+            if(_isUsingWeight == true)
+            {
+                mainEquipment.equip_Fuse_Weight = 0;
+            }
+
+            //실패한 등급 기준 가중치를 획득합니다.
+            mainEquipment.equip_Fuse_Weight += DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity+1).Equip_Rank_Failure;
         }
 
         //재료로 넣은 장비 두 개를 슬롯에서 삭제합니다.
