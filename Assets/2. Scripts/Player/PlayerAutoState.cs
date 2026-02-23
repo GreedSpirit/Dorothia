@@ -1,20 +1,23 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
     TestEnemy _target;
     float _timer = 0f;
     float _resetTimer = 1f;
-    bool _isAttack = false;
 
     public void Enter(PlayerCtrl player)
     {
+        Debug.Log("자동상태진입");
         //설정 초기화
         _timer = 0f;
         _resetTimer = 1f;
         _target = null;
         player.NavMesh.ResetPath();
+        player.Anima.SetBool("Run", false);
+        player.Anima.SetBool("Attack", false);
+        player.Anima.SetInteger("Combo", 0);
+        
     }
 
     public void Execute(PlayerCtrl player)
@@ -44,17 +47,22 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
+            Debug.Log("공격시작");
             player.NavMesh.ResetPath();
 
             //타겟방향으로 회전
             Vector3 dir = (_target.transform.position - player.transform.position).normalized;
+            dir.y = 0f;
             player.transform.rotation = Quaternion.LookRotation(dir);
 
-            Debug.Log("공격");
-            player.Anima.SetTrigger("Attack");
-            //히트박스콜라이더 온
-
-            //리턴시켜서 타겟으로 이동 안시키도록
+            //공격중이 아니라면
+            if (player.IsAttack == false)
+            {                
+                player.Anima.SetBool("Run", false);
+                player.Anima.SetBool("Attack", true);
+                player.Anima.SetInteger("Combo", player.ComboIndex);
+               
+            }
             return;
         }
 
@@ -71,7 +79,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
 
     public void Exit(PlayerCtrl player)
     {
-        player.NavMesh.ResetPath();
+        player.NavMesh.ResetPath();        
     }
 
     
