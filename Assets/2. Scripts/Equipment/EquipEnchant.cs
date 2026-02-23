@@ -91,7 +91,7 @@ public class EquipEnchant : MonoBehaviour
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         float cost = equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
-                * GetIntByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank);
+                * equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank);
         _costGold = cost - (int)cost < 0.5f? (int)cost : (int)cost + 1;
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
@@ -179,62 +179,5 @@ public class EquipEnchant : MonoBehaviour
         RefreshEnchantPanel(equip);
     }
 
-    /// <summary>
-    /// Rarity ID값읊 기반으로 배율을 받아옵니다. 
-    /// 데이터 테이블을 통해 이미 장비 정보를 받아왔다면 Rarity 열거형 버전을 사용해주십시오.
-    /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도 ID값을 갖도록 하는, 장비의 equipment_Rarity 부분.</param>
-    /// <returns>해당 등급 ID값을 기반으로 확인한 등급배율</returns>
-    public float GetIntByRarity(int Rarity)
-    {
-        switch(Rarity)
-        {
-            case 40001:
-                return 1;
-
-            case 40002:
-                return 1.5f;
-
-            case 40003:
-                return 3;
-
-            case 40004:
-                return 6;
-
-            case 40005:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
-
-    /// <summary>
-    /// Rarity 열겨형 기반으로 배율을 받아옵니다.
-    /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도를 나타내는 Rarity 열거형 값</param>
-    /// <returns>해당 배율과 일치하는 강화 배율값</returns>
-    public float GetIntByRarity(Rarity Rarity)
-    {
-        switch(Rarity)
-        {
-            case Rarity.Normal:
-                return 1;
-
-            case Rarity.Uncommon:
-                return 1.5f;
-
-            case Rarity.Rare:
-                return 3;
-
-            case Rarity.Legendary:
-                return 6;
-
-            case Rarity.Mythtic:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
+    
 }

@@ -55,7 +55,7 @@ public class TestWeaponGenerator : MonoBehaviour
                     break;
 
             }
-            Equipment testWeapon = new Equipment(_equipData, 40001, 1);
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, 40001, 1);
 
             if (_equipData != null)
             {
@@ -134,7 +134,7 @@ public class TestWeaponGenerator : MonoBehaviour
 
             }
             int Rarity = Random.Range(40001, 40006);
-            Equipment testWeapon = new Equipment(_equipData, Rarity, 1);
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, Rarity, 1);
 
             if (_equipData != null)
             {

@@ -48,7 +48,7 @@ public class InventoryPanel : MonoBehaviour
     {
         //인스펙터상의 실수 확인용
         if (_slots.Count != 16)
-            Debug.Log("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
+            Debug.LogWarning("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
         _equipButton.onClick.AddListener(() =>
         {
             AddToSlot(_selectedEquipment);
@@ -249,6 +249,21 @@ public class InventoryPanel : MonoBehaviour
         Refresh();
     }
 
+    public void SellEquip(Equipment equip)
+    {
+        if(equip.equip_Upgrade > 0)
+        {
+            var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
+            TestGoldAndScrapManager.Instance.testGold += (int)((equip.equip_price * equip.equip_level * GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)) +
+                (equip.equip_price * Mathf.Pow(equip.equip_Upgrade + 1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade + 1).Equip_Upgrade_Value)
+                * equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank) * 0.2f));
+        }
+        else
+        {
+            TestGoldAndScrapManager.Instance.testGold += (int)(equip.equip_price * equip.equip_level * GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
+        }
+    }
+
     /// <summary>
     /// 인벤토리 패널에서 선택했을 경우 그 장비 정보를 넘기기 위한 슬롯을 정의합니다.
     /// </summary>
@@ -270,7 +285,6 @@ public class InventoryPanel : MonoBehaviour
             //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
             if (_targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
             {
-                Debug.Log("장착 중인 장비를 합성 재료로 사용할 수 없습니다!");
                 return;
             }
 
@@ -296,8 +310,6 @@ public class InventoryPanel : MonoBehaviour
             //장비 슬롯이라면 장비를 장착합니다.
             if (_targetSlot.slotType == SlotType.EquipSlot)
             {
-                Debug.Log($"{_targetSlot.equipped.equip_name} 장착 완료!");
-                
                 equip.SetEquipped(_targetSlot.slotIndex);
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
@@ -320,6 +332,30 @@ public class InventoryPanel : MonoBehaviour
             _targetSlot.equipped = null;
             //스프라이트를 제거합니다.
             _targetSlot.iconImage.sprite = null;
+        }
+    }
+
+    /// <summary>
+    /// 등급에 따른 판매 시의 가중치를 구합니다.
+    /// </summary>
+    /// <param name="rarity">판매하려는 장비의 등급</param>
+    /// <returns></returns>
+    private float GetRarityWeight(Rarity rarity)
+    {
+        switch(rarity)
+        {
+            case Rarity.Normal:
+                return 1;
+            case Rarity.Uncommon:
+                return 1.5f;
+            case Rarity.Rare:
+                return 2.5f;
+            case Rarity.Legendary:
+                return 5;
+            case Rarity.Mythtic:
+                return 10;
+            default:
+                return 0.5f;
         }
     }
 
