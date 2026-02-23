@@ -11,6 +11,8 @@ public class EquipmentUI : MonoBehaviour
     [SerializeField] InventoryPanel _inventoryPanel;   // 인벤토리를 담당하는 패널
     [SerializeField] CanvasGroup _equipmentUIGroup;    // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
 
+    [SerializeField] EquipmentSlotManager _equipmentSlotManager;
+
     [SerializeField]private Equip_Type _currentSelectedPart;           // 현재 인벤토리를 열람할 장착 부위
     [SerializeField]private EquipSlot _currentSelectedSlot;            // 가장 최근에 누른 장착슬롯
 

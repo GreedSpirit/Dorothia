@@ -10,9 +10,12 @@ public class PlayerCtrl : MonoBehaviour
     public Animator Anima => _anima;
     public NavMeshAgent NavMesh => _navMesh;
     public bool IsAutoMode => _isAutoMode;
+    public bool IsAttack => _isAttack;
     public float EnemyFindRange => _enemyFindRange;
     public float AttackRange => _attackRange;
 
+    //콤보 체크용변수
+    public int ComboIndex { get; set; } = 0;
 
     [SerializeField] PlayerStats _playerStats;
 
@@ -27,11 +30,22 @@ public class PlayerCtrl : MonoBehaviour
     //공격실행범위
     [SerializeField] float _attackRange = 1f;
 
+    //히트박스
+    [SerializeField] BoxCollider _hitBox;
+    [SerializeField] BoxCollider _hitBox3;
+
     Animator _anima;
     NavMeshAgent _navMesh;
 
     //오토모드 체크용변수
     bool _isAutoMode = false;
+
+    //공격상태 체크용변수
+    bool _isAttack = false;
+
+    int _maxComboIndex = 3;
+
+
 
     //입력값 저장변수
     Vector2 _moveInput;
@@ -147,6 +161,43 @@ public class PlayerCtrl : MonoBehaviour
         {
             _moveInput = Vector2.zero;
         }
+    }
+
+    //애니메이션 이벤트 함수
+    public void ResetCombo() //콤보리셋
+    {
+        ComboIndex = 0;
+        _anima.SetInteger("Combo", 0);
+        _anima.SetBool("Attack", false);
+
+    }
+
+    public void StartCombo() //콤보시작
+    {
+        ComboIndex++;
+        if (ComboIndex >= _maxComboIndex)
+        {
+            ComboIndex = 0;
+        }
+    }
+    public void EnableAttackCollider()  //1,2히트박스활성화
+    {
+        _hitBox.enabled = true;
+    }
+
+    public void DisableAttackCollider() //1,2히트박스 비활성화
+    {
+        _hitBox.enabled = false;
+    }
+
+    public void EnableFinalAttackCollider()  //3히트박스활성화
+    {
+        _hitBox3.enabled = true;
+    }
+
+    public void DisableFinalAttackCollider() //3히트박스 비활성화
+    {
+        _hitBox3.enabled = false;
     }
 
     //에디터 체크용 기즈모

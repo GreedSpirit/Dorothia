@@ -10,8 +10,8 @@ public class MonsterStatsFromSO : IMonsterStats
     }
 
     public string MonsterID => _data.monsterID;
-    public MonsterRank Rank => _data.rank;
-    public MonsterArchetype Archetype => _data.archetype;
+    public Monster_Type Rank => _data.rank;
+    public Monster_Kind Archetype => _data.archetype;
 
     public int MaxHp => _data.maxHp;
     public float MoveSpeed => _data.moveSpeed;
