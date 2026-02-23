@@ -1,9 +1,6 @@
 ﻿[System.Serializable]
 public class EquipmentSaveData
 {
-    public Equip_Type equipType;            // 장비 타입
-    public int slotIndex;                   // 장비의 칸 위치
-
     public string instanceGUID;             // 해당 장비의 GUID
     public int equipID;                     // 해당 장비의 테이블상 ID
     public int equipLevel;                  // 해당 장비의 장착레벨

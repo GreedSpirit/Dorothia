@@ -89,8 +89,6 @@ public class EquipmentInventory : MonoBehaviour
                     //저장할 데이터에 아래 항목을 추가합니다.
                     saveData.EquipmentInventory.Add(new EquipmentSaveData
                     {
-                        equipType = type,
-                        slotIndex = i,
                         instanceGUID = list[i].InstanceGUID,
                         equipID = list[i].equip_id,
                         equipLevel = list[i].equip_level,
@@ -128,14 +126,7 @@ public class EquipmentInventory : MonoBehaviour
         //인벤토리 Dictionary 내에 있는 모든 데이터를 대상으로 아래 코드를 실행합니다.
         foreach (var pair in invDic)
         {
-            //Dictionary에 들어있는 각각의 장비 리스트를 받아옵니다.
-            List<Equipment> list = pair.Value;
-
-            //리스트 내의 내용물을 전부 비웁니다.
-            for (int i = 0; i < list.Count; i++)
-            {
-                list[i] = null;
-            }
+            pair.Value.Clear();
         }
 
         //이제 받아온 세이브데이터의 모든 데이터를 대상으로 아래 코드를 실행합니다.
@@ -149,9 +140,10 @@ public class EquipmentInventory : MonoBehaviour
             equipment.equip_Upgrade_Weight = data.enchantWeight;
             equipment.equip_Fuse_Weight = data.fuseWeight;
 
+            AddEquipment(equipment);
             //장비 Dictionary의 Key값을 저장 데이터의 Equip_Type으로, 그 Key값의 Value로 나오는 리스트의 칸 위치는 저장 데이터의 slotIndex로 하여
             //해당 위치에 방금 생성한 장비를 끼워넣습니다.
-            invDic[data.equipType][data.slotIndex] = equipment;
+            //invDic = equipment;
         }
     }
 
