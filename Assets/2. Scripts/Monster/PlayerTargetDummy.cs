@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerTargetDummy : MonoBehaviour, IMonsterTarget
+public class PlayerTargetDummy : MonoBehaviour, IMonsterTarget, IResettable
 {
+    public event System.Action OnDead;
+
     [SerializeField] private int _hp = 2097152;
     [SerializeField] private float _attackRange = 8f;
     [SerializeField] private int _damagePerSecond;
     [SerializeField] private LayerMask _monsterLayer;
+
+    private int _maxHp = 2097152;
 
     private readonly Collider[] _hitBuffer = new Collider[32];
 
@@ -56,7 +60,23 @@ public class PlayerTargetDummy : MonoBehaviour, IMonsterTarget
 
     public void ApplyDamage(int amount)
     {
+        if (!IsAlive)
+            return;
+
         _hp -= amount;
         Debug.Log($"Damaged: {amount}, HP: {_hp}");
+
+        if (_hp <= 0)
+        {
+            _hp = 0;
+            Debug.Log("Player Dead");
+
+            OnDead?.Invoke();
+        }
+    }
+
+    public void ResetState()
+    {
+        _hp = _maxHp;
     }
 }
