@@ -8,12 +8,17 @@
 public class DynamicSpawnPolicy : ISpawnPolicy
 {
     private readonly int _minCount;
-    private readonly int _softMaxCount;
+    private int _softMaxCount;
 
-    public DynamicSpawnPolicy(int minCount = 30, int softMaxCount = 100)
+    public DynamicSpawnPolicy(int minCount = 30)
     {
         _minCount = Mathf.Max(0, minCount);
-        _softMaxCount = Mathf.Max(_minCount, softMaxCount);
+    }
+
+    //스테이지 시작시 호출
+    public void SetSoftMax(int sameSpawnMax)
+    {
+        _softMaxCount = Mathf.Max(_minCount, sameSpawnMax);
     }
 
     public float GetSpawnInterval(SpawnMetrics metrics, int currentCount)

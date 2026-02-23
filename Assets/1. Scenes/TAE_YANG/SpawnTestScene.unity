@@ -764,6 +764,111 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 122
   m_CollisionDetection: 0
+--- !u!1 &951519015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 951519017}
+  - component: {fileID: 951519016}
+  m_Layer: 0
+  m_Name: StageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &951519016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951519015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 610b3ee020def774a9e1b88402486ec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageManager
+  _spawnManager: {fileID: 1612849593}
+  _startStageId: 110001
+  _defaultBossTimeLimit: 60
+  _playerBehaviour: {fileID: 918643909}
+--- !u!4 &951519017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951519015}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &980081699
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 980081701}
+  - component: {fileID: 980081700}
+  m_Layer: 0
+  m_Name: MonsterPrefabRegistry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &980081700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980081699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcf79858b920e75479cf38f4058c1f5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterPrefabRegistry
+  _entries:
+  - monsterId: 90001
+    prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}
+  - monsterId: 90002
+    prefab: {fileID: 181878253367983839, guid: 346004fc319c44d4fb5d9105459e9fe6, type: 3}
+  - monsterId: 95001
+    prefab: {fileID: 4143500432110682478, guid: 5152ca9063d10bb4cb7c02e6c41db436, type: 3}
+  - monsterId: 95002
+    prefab: {fileID: 181878253367983839, guid: b485cedf602301545988b3ba813f4001, type: 3}
+  - monsterId: 98001
+    prefab: {fileID: 4143500432110682478, guid: 217e3207d3644514ca870b8964115251, type: 3}
+  - monsterId: 98002
+    prefab: {fileID: 181878253367983839, guid: 1b53a0601caab654f94c277374f0d3e1, type: 3}
+--- !u!4 &980081701
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980081699}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1019266210
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,14 +1045,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawnManager
   _maxMonsterCount: 120
-  _spawnGroupSize: {x: 6, y: 7}
-  _spawnTable:
-  - monsterId: 90001
-    prefab: {fileID: 4143500432110682478, guid: d6298d2c0212d314e87d668846024061, type: 3}
-    weight: 1
-  - monsterId: 90002
-    prefab: {fileID: 181878253367983839, guid: 346004fc319c44d4fb5d9105459e9fe6, type: 3}
-    weight: 1
   _spawnAreaProvider: {fileID: 93869834}
   _targetProvider: {fileID: 918643909}
   _projectileDatabase: {fileID: 11400000, guid: d9d18fcdbfcb59e4887d9a61aee48378, type: 2}
@@ -1020,7 +1117,9 @@ SceneRoots:
   - {fileID: 97772133}
   - {fileID: 1019266214}
   - {fileID: 918643908}
+  - {fileID: 2027691167}
   - {fileID: 93869835}
   - {fileID: 1612849594}
   - {fileID: 570924140}
-  - {fileID: 2027691167}
+  - {fileID: 951519017}
+  - {fileID: 980081701}

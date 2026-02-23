@@ -11,7 +11,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class MonsterController : MonoBehaviour, IMonster
 {
-    public static event System.Action<float> OnMonsterKilledLifeTime;
+    public static event System.Action<float> OnMonsterKilledLifeTime;   // 동적 스폰 TTK 기록용
+    public static event System.Action<int, bool> OnMonsterKilled;       // 스테이지 진행용
     
     [Header("Projectile")]
     [SerializeField] private ProjectileDatabase _projectileDatabase;
@@ -36,6 +37,11 @@ public class MonsterController : MonoBehaviour, IMonster
 
     //어떤 프리펩풀로 반환할지 식별용 키
     private MonsterController _poolKeyPrefab;
+
+    //스테이지, 보스
+    private int _monsterId;
+    public int MonsterId => _monsterId;
+    private bool IsBoss => _stats != null && _stats.Rank == Monster_Type.Boss;
 
     public IMonsterStats Stats => _stats;
     public MonsterSpawnManager SpawnManager => _owner;
@@ -69,6 +75,8 @@ public class MonsterController : MonoBehaviour, IMonster
         _poolKeyPrefab = poolKeyPrefab;
         _projectileDatabase = projectileDb;
 
+        _monsterId = monsterId;
+
         if (DataManager.Instance == null)
         {
             Debug.LogError("[MonsterController] 씬에 DataManager 없음");
@@ -95,6 +103,9 @@ public class MonsterController : MonoBehaviour, IMonster
         _spawnTime = Time.time; // 생존시간 측정 시작
         _hp = _stats.MaxHp; // 체력 초기화
         _lastAttackTime = -999f; // 즉시 공격방지
+
+        if (_agent != null && !_agent.enabled)
+            _agent.enabled = true;
 
         ApplyNavMeshSettings();
 
@@ -258,6 +269,9 @@ public class MonsterController : MonoBehaviour, IMonster
         //동적 스폰용 생존시간 이벤트 발행
         float lifeTime = Mathf.Max(0.01f, Time.time - _spawnTime);
         OnMonsterKilledLifeTime?.Invoke(lifeTime);
+
+        //스테이지 매니저가 킬카운트/보스판정 받게
+        OnMonsterKilled?.Invoke(_monsterId, IsBoss);
 
         Invoke(nameof(ForceDespawn), 1f); // 1초후 풀 반환
     }
