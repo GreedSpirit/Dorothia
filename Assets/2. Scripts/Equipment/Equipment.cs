@@ -7,6 +7,7 @@ public class Equipment
 {
     //CSV 구조도 순서대로 작성합니다!
     //equip
+    public string InstanceGUID { get; private set; }
     public int equip_id;                                       // 장비의 ID값입니다.
     public string equip_name;                                  // 장비의 이름입니다.
     public Dictionary<Status, float> equip_status;    // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
@@ -19,6 +20,7 @@ public class Equipment
     //equip_rank
     //▼ 일반 : 1, 희귀 : 2, 레어 : 3, 전설 : 4, 신화 : 5
     public int equipment_Rarity;                      // 장비의 레어도입니다. 데이터에서 받아온 등급의 값의 가독성을 높이기 위해 열거형을 사용합니다.
+    public float equip_Fuse_Weight;                   // 합성 가중치입니다. 합성에 실패할 때마다 등급에 따른 가중치를 획득합니다.
 
     //equip_Upgrade
     public int equip_Upgrade_Value;
@@ -28,7 +30,7 @@ public class Equipment
     public int equip_level;
 
     public int equip_Upgrade;
-    public int equip_Upgrade_Count;
+    public float equip_Upgrade_Weight;
 
     public int EquippedSlotIndex = -1; // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
     public bool isEquipped = false;    // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
@@ -43,7 +45,6 @@ public class Equipment
     {
         if(isEquipped == true)
         {
-            Debug.Log("이미 장착한 장비입니다.");
             return;
         }
         //현재 장비를 장착하는 것이므로 장착 여부를 참으로 설정합니다.
@@ -78,8 +79,9 @@ public class Equipment
     /// </summary>
     /// <param name="equipData">id값을 통해 데이터 테이블로부터 빼온 장비 id값</param>
     /// <param name="rarity">해당 장비의 등급</param>
-    public Equipment(EquipData equipData, int rarity, int equipLevel)
+    public Equipment(string GUID, EquipData equipData, int rarity, int equipLevel)
     {
+        InstanceGUID = GUID;                          // 생성된 장비를 구분하기 위한 고유 GUID값
         equip_id = equipData.Equip_Id;                                            // 장비 id값
         equip_name = equipData.Equip_Name;                                        // 장비 이름
         equip_type = equipData.Equip_Type;                                        // 장착 부위
@@ -88,6 +90,7 @@ public class Equipment
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
 
         equipment_Rarity = rarity;                                                                                       // 장비 등급
+        equip_Fuse_Weight = 0;
 
         equip_status = new Dictionary<Status, float>();
         Debug.Log(equipData.Equip_Type);
@@ -99,7 +102,7 @@ public class Equipment
         equip_level = equipLevel;
 
         equip_Upgrade = 0;
-        equip_Upgrade_Count = 0;
+        equip_Upgrade_Weight = 0;
 
     }
 
@@ -180,7 +183,11 @@ public class Equipment
     /// <param name="rarity"></param>
     public void AddEquipStatusByType(EquipData data, Rarity rarity)
     {
-        Debug.Log(data.Equip_Type);
+        //규칙에 정의되지 않은 Equip_Type가 들어온 경우 반환합니다.
+        if (!EquipStatusStaticRule._rules.ContainsKey(data.Equip_Type))
+        {
+            return;
+        }
         //static으로 선언한 규칙에서 만드려는 장비의 Dictionary를 받아옵니다.
         var rule = EquipStatusStaticRule._rules[data.Equip_Type];
 
@@ -190,15 +197,26 @@ public class Equipment
             AddStatusFromData(main, data);
         }
 
+        if(!EquipStatusStaticRule.SubStatusCount.ContainsKey(rarity))
+        {
+            return;
+        }
         //장비의 등급에 따라, 스테이터스를 얼마나 만들지 확인합니다.
         int subCount = EquipStatusStaticRule.SubStatusCount[rarity];
 
         //장비의 장착 부위와 등급에 따라, 보조 스테이터스 리스트를 생성합니다.
         var selectedSubs = new List<Status>();
-        
+
+        //만에 하나 SubStatus에 아무 정보도 담겨있지 않다면 반환합니다.
+        if(rule.SubStatus.Count == 0)
+        {
+            return;
+        }
+
         //규칙으로 정한 보조 스테이터스의 수량까지 도달하거나(배열 칸 이탈 방지) 추가해야 하는 보조 스테이터스 수량이 될 때까지 아래 코드를 실행합니다.
         for(int i = 0; i< rule.SubStatus.Count && selectedSubs.Count < subCount; i++)
         {
+            if(rule.SubStatus != null)
             //보조 스테이터스 규칙에 따라, 앞에 있는 것부터 순차적으로 추가합니다.
             selectedSubs.Add(rule.SubStatus[i]);
         }
@@ -239,7 +257,6 @@ public class Equipment
         //그 수가 0이거나 그보다 작다면 추가할 사유가 없으므로 반환합니다.
         if (addCount <= 0)
         {
-            Debug.Log("해당 등급에서 추가할 보조 스테이터스가 존재하지 않습니다.");
             return;
         }
 
@@ -277,6 +294,65 @@ public class Equipment
             i++;
         }
         return stringBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Rarity ID값읊 기반으로 배율을 받아옵니다. 
+    /// 데이터 테이블을 통해 이미 장비 정보를 받아왔다면 Rarity 열거형 버전을 사용해주십시오.
+    /// </summary>
+    /// <param name="Rarity">해당 장비의 레어도 ID값을 갖도록 하는, 장비의 equipment_Rarity 부분.</param>
+    /// <returns>해당 등급 ID값을 기반으로 확인한 등급배율</returns>
+    public float GetEnchantWeightByRarity(int Rarity)
+    {
+        switch (Rarity)
+        {
+            case 40001:
+                return 1;
+
+            case 40002:
+                return 1.5f;
+
+            case 40003:
+                return 3;
+
+            case 40004:
+                return 6;
+
+            case 40005:
+                return 10;
+
+            default:
+                return 1;
+        }
+    }
+
+    /// <summary>
+    /// Rarity 열겨형 기반으로 배율을 받아옵니다.
+    /// </summary>
+    /// <param name="Rarity">해당 장비의 레어도를 나타내는 Rarity 열거형 값</param>
+    /// <returns>해당 배율과 일치하는 강화 배율값</returns>
+    public float GetEnchantWeightByRarity(Rarity Rarity)
+    {
+        switch (Rarity)
+        {
+            case Rarity.Normal:
+                return 1;
+
+            case Rarity.Uncommon:
+                return 1.5f;
+
+            case Rarity.Rare:
+                return 3;
+
+            case Rarity.Legendary:
+                return 6;
+
+            case Rarity.Mythtic:
+                return 10;
+
+            default:
+                return 1;
+        }
     }
 
     public float GetStatus(Status equipStatus)

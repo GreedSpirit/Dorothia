@@ -41,24 +41,26 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] Button _cancelButton;                   // 합성 전용 취소버튼
     [SerializeField] Button _equipButton;                    // 장비를 장착합니다.
 
-    public EquipSlot _targetSlot;                               // 장비를 받기 위한 대상 슬롯입니다.
+    public EquipSlot targetSlot;                               // 장비를 받기 위한 대상 슬롯입니다.
     private Equipment _selectedEquipment;                        // 인벤토리 칸에서 선택한 장비
 
     private void Awake()
     {
         //인스펙터상의 실수 확인용
         if (_slots.Count != 16)
-            Debug.Log("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
+            Debug.LogWarning("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
         _equipButton.onClick.AddListener(() =>
         {
             AddToSlot(_selectedEquipment);
         });
+        //분해 버튼 기능 추가 - 안내패널 활성화
         _salvageButton.onClick.AddListener(() =>
         {
             _noticePanel.alpha = 1;
             _noticePanel.interactable = true;
             _noticePanel.blocksRaycasts = true;
         });
+        //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
         _salvageAcceptButton.onClick.AddListener(() =>
         {
             Salvage(_selectedEquipment);
@@ -66,20 +68,24 @@ public class InventoryPanel : MonoBehaviour
             _noticePanel.interactable = false;
             _noticePanel.blocksRaycasts = false;
         });
+        //안내패널 내 N버튼 기능 추가 - 안내패널 비활성화
         _salvageRejectButton.onClick.AddListener(() =>
         {
             _noticePanel.alpha = 0;
             _noticePanel.interactable = false;
             _noticePanel.blocksRaycasts = false;
         });
+        //확인버튼 기능 추가 - 슬롯에 해당 장비 추가
         _confirmButton.onClick.AddListener(() =>
         {
             AddToSlot(_selectedEquipment);
         });
+        //취소버튼 기능 추가 - 해당 슬롯에서 장비 제거
         _cancelButton.onClick.AddListener(() =>
         {
             RemoveFromSlot();
         });
+        //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
     }
 
@@ -250,12 +256,71 @@ public class InventoryPanel : MonoBehaviour
     }
 
     /// <summary>
+    /// 장비 판매 시의 기능입니다.
+    /// </summary>
+    /// <param name="equip">판매할 장비</param>
+    public void SellEquip(Equipment equip)
+    {
+        //해당 장비의 강화 단계를 기준으로 데이터를 먼저 불러옵니다.
+        var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
+
+        //판매가격인 골드 지역변수를 선언합니다.
+        int equipGold = 0;
+
+        //강화 단계가 50(현재 최대치)이거나, 모종의 툴을 사용하여 그 이상이 나왔을 경우
+        //오류를 방지하기 위해 49단계 기준으로 진행합니다.
+        if(equip.equip_Upgrade >= 50)
+        {
+            //공식 : (기본 판매가격 * 장비 장착 레벨 * 장비 등급에 따른 가중치) + (강화 평균 소모 골드 * 0.2)
+            //강화 평균 소모 골드 : 해당 단계 기준 1회 강화 비용(장비 기본 판매가격 * (현재 강화단계 + 1)값의 (골드데이터 상의 배율)제곱 * 등급에 따른 가중치) / 성공 확률
+            int firstGold = Mathf.RoundToInt
+                (
+                    equip.equip_price * equip.equip_level * 
+                    GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                );
+            int secondGold = Mathf.RoundToInt
+                (
+                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(50, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(50).Equip_Upgrade_Value)) *
+                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                    / DataManager.Instance.GetData<Equip_UpgradeData>(50).Equip_Success_Prob * 0.2f
+                );
+
+            equipGold = firstGold + secondGold;
+        }
+        else
+        {
+            //공식 : (기본 판매가격 * 장비 장착 레벨 * 장비 등급에 따른 가중치) + (강화 평균 소모 골드 * 0.2)
+            //강화 평균 소모 골드 : 해당 단계 기준 1회 강화 비용(장비 기본 판매가격 * (현재 강화단계 + 1)값의 (골드데이터 상의 배율)제곱 * 등급에 따른 가중치) / 성공 확률
+            int firstGold = Mathf.RoundToInt
+                (
+                    equip.equip_price * equip.equip_level *
+                    GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                );
+            int secondGold = Mathf.RoundToInt
+                (
+                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade + 1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade + 1).Equip_Upgrade_Value)) *
+                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                    / DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Success_Prob * 0.2f
+                );
+
+            equipGold = firstGold + secondGold;
+        }
+
+        //계산된 만큼 골드를 획득합니다.
+        TestGoldAndScrapManager.Instance.testGold += equipGold;
+        //현재 장비를 인벤토리에서 제거합니다.
+        _equipmentInventory.RemoveEquipment(equip);
+        //인벤토리를 갱신합니다.
+        Refresh();
+    }
+
+    /// <summary>
     /// 인벤토리 패널에서 선택했을 경우 그 장비 정보를 넘기기 위한 슬롯을 정의합니다.
     /// </summary>
     /// <param name="slot">현재 장비를 받아와야 할 슬롯의 정보</param>
     public void SetTargetSlot(EquipSlot slot)
     {
-        _targetSlot = slot;
+        targetSlot = slot;
         Open(slot.part, slot.slotIndex);
     }
 
@@ -265,43 +330,40 @@ public class InventoryPanel : MonoBehaviour
     /// <param name="equip">합성 재료로 쓰기 위한 장비</param>
     private void AddToSlot(Equipment equip)
     {
-        if (_targetSlot != null)
+        if (targetSlot != null)
         {
             //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
-            if (_targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
+            if (targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
             {
-                Debug.Log("장착 중인 장비를 합성 재료로 사용할 수 없습니다!");
                 return;
             }
 
             //기존 슬롯에 이미 존재하던 장비는 제거합니다.
-            if (_targetSlot.equipped != null && _targetSlot.slotType == SlotType.EquipSlot)
+            if (targetSlot.equipped != null && targetSlot.slotType == SlotType.EquipSlot)
             {
-                _targetSlot.equipped.UnEquip();
+                targetSlot.equipped.UnEquip();
             }
-            else if(_targetSlot.equipped != null && _targetSlot.slotType == SlotType.FuseSlot)
+            else if(targetSlot.equipped != null && targetSlot.slotType == SlotType.FuseSlot)
             {
-                _targetSlot.equipped.CancelFuseMaterial();
+                targetSlot.equipped.CancelFuseMaterial();
             }
 
             //대상 슬롯의 장비에 해당 장비를 집어넣습니다.
-            _targetSlot.equipped = equip;
+            targetSlot.equipped = equip;
 
             //대상 슬롯의 이미지를 동일하게 만들고, 이미지를 활성화하며,
             //시각적으로 볼 수 있도록 레어도에 맞게 이미지 색을 변경합니다.
-            _targetSlot.iconImage.sprite = equip.icon;
-            _targetSlot.iconImage.enabled = true;
-            _targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
+            targetSlot.iconImage.sprite = equip.icon;
+            targetSlot.iconImage.enabled = true;
+            targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
 
             //장비 슬롯이라면 장비를 장착합니다.
-            if (_targetSlot.slotType == SlotType.EquipSlot)
+            if (targetSlot.slotType == SlotType.EquipSlot)
             {
-                Debug.Log($"{_targetSlot.equipped.equip_name} 장착 완료!");
-                
-                equip.SetEquipped(_targetSlot.slotIndex);
+                equip.SetEquipped(targetSlot.slotIndex);
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
-            else if(_targetSlot.slotType == SlotType.FuseSlot)
+            else if(targetSlot.slotType == SlotType.FuseSlot)
             {
                 equip.isFusing = true;
             }
@@ -314,15 +376,43 @@ public class InventoryPanel : MonoBehaviour
     private void RemoveFromSlot()
     {
         //타겟 슬롯이 null이 아니라면
-        if (_targetSlot != null)
+        if (targetSlot != null)
         {
             //슬롯에 장착된 장비를 null로 바꾸고
-            _targetSlot.equipped = null;
+            targetSlot.equipped = null;
             //스프라이트를 제거합니다.
-            _targetSlot.iconImage.sprite = null;
+            targetSlot.iconImage.sprite = null;
         }
     }
 
+    /// <summary>
+    /// 등급에 따른 판매 시의 가중치를 구합니다.
+    /// </summary>
+    /// <param name="rarity">판매하려는 장비의 등급</param>
+    /// <returns></returns>
+    private float GetRarityWeight(Rarity rarity)
+    {
+        switch(rarity)
+        {
+            case Rarity.Normal:
+                return 1;
+            case Rarity.Uncommon:
+                return 1.5f;
+            case Rarity.Rare:
+                return 2.5f;
+            case Rarity.Legendary:
+                return 5;
+            case Rarity.Mythtic:
+                return 10;
+            default:
+                return 0.5f;
+        }
+    }
+
+    /// <summary>
+    /// 장비 데이터를 전송합니다.
+    /// </summary>
+    /// <returns>현재 선택된 장비</returns>
     public Equipment GiveEquipmentData()
     {
         return _selectedEquipment;
