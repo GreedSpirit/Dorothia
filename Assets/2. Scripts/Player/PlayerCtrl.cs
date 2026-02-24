@@ -15,9 +15,8 @@ public class PlayerCtrl : MonoBehaviour
     public float AttackRange => _attackRange;
 
     //콤보 체크용변수
-    public int ComboIndex { get; set; } = 0;
+    public int ComboIndex { get; set; } = 0;    
 
-    [SerializeField] PlayerStats _playerStats;
 
     [SerializeField] LayerMask _enemyLayer;
 
@@ -34,6 +33,7 @@ public class PlayerCtrl : MonoBehaviour
     [SerializeField] BoxCollider _hitBox;
     [SerializeField] BoxCollider _hitBox3;
 
+    PlayerStats _playerStats;
     Animator _anima;
     NavMeshAgent _navMesh;
 
@@ -44,6 +44,8 @@ public class PlayerCtrl : MonoBehaviour
     bool _isAttack = false;
 
     int _maxComboIndex = 3;
+
+    bool _isDead = false;
 
 
 
@@ -57,25 +59,42 @@ public class PlayerCtrl : MonoBehaviour
     PlayerMoveState _moveState;
     PlayerIdleState _idleState;
     PlayerAutoState _autoState;
+    PlayerDeadState _deadState;
 
 
     private void Awake()
     {
+        _playerStats = GetComponent<PlayerStats>();
         _anima = GetComponent<Animator>();
         _navMesh = GetComponent<NavMeshAgent>();
-        
+               
+
 
         //상태들 캐싱
         _moveState = new PlayerMoveState();
         _idleState = new PlayerIdleState();
         _autoState = new PlayerAutoState();
+        _deadState = new PlayerDeadState();
 
         //상태 초기화
         _currentState = _idleState;
         _currentState.Enter(this);
     }
+
+    private void OnEnable()
+    {
+        _playerStats.OnDead += ChangeDead;
+    }
+
+    private void OnDisable()
+    {
+        _playerStats.OnDead -= ChangeDead;
+    }
     void Update()
     {
+        //죽은상태면 리턴
+        if (_isDead == true) return;
+
         //오토모드가 활성화되어있고 입력이 안들어오면
         if (_isAutoMode && _moveInput.sqrMagnitude < 0.001f)
         {
@@ -162,6 +181,14 @@ public class PlayerCtrl : MonoBehaviour
             _moveInput = Vector2.zero;
         }
     }
+
+    //이벤트 알림 구독함수
+    void ChangeDead()
+    {
+        _isDead = true;
+        ChangeState(_deadState);
+    }
+
 
     //애니메이션 이벤트 함수
     public void ResetCombo() //콤보리셋

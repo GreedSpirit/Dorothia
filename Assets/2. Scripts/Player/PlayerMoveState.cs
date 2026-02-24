@@ -53,8 +53,9 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
             player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRot, Time.deltaTime * 10f);
 
             //이동
-            float speed = player.PlayerStats.Speed;
-            player.transform.position += moveDir * speed * Time.deltaTime;
+            float speed = player.PlayerStats._agi;
+            //player.transform.position += moveDir * speed * Time.deltaTime;
+            player.NavMesh.Move(moveDir * speed * Time.deltaTime);
         }
 
 
