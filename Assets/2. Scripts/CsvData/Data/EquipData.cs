@@ -18,7 +18,6 @@ public class EquipData : ICSVLoad, ITableKey
     public float Equip_Hp_Regen { get; set; }
     public float Equip_Agi { get; set; }
     public int Equip_Price { get; set; }
-    public string Equip_Model { get; set; }
     public string Equip_Icon { get; set; }
 
     int ITableKey.Id => Equip_Id;
@@ -54,9 +53,7 @@ public class EquipData : ICSVLoad, ITableKey
         if (values.Length > 12 && float.TryParse(values[12], out float v12)) Equip_Agi = v12;
         // 13: Equip_price (int)
         if (values.Length > 13 && int.TryParse(values[13], out int v13)) Equip_Price = v13;
-        // 14: Equip_Model (string)
-        if (values.Length > 14) Equip_Model = values[14];
-        // 15: Equip_Icon (string)
-        if (values.Length > 15) Equip_Icon = values[15];
+        // 14: Equip_Icon (string)
+        if (values.Length > 14) Equip_Icon = values[14];
     }
 }

@@ -20,7 +20,7 @@ public class PlayerStats : MonoBehaviour
     public float _hp_regen;    //체력재생력
     public float _agi;         //이동속도
     public int _upgrade_scrap_n; //첫업그레이드 시 소비하는 스크랩
-    public float _level_exp_n;     //첫레벨업 시 필요한 경험치
+    public double _level_exp_n;     //첫레벨업 시 필요한 경험치
 
     public event Action<float> OnHpChanged;
     public event Action<float> OnExpChanged;
