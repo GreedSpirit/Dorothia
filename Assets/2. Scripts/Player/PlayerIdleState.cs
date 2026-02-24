@@ -2,7 +2,7 @@
 
 public class PlayerIdleState : IPlayerState<PlayerCtrl>
 {
-    TestEnemy _target;
+    IMonster _target;
     public void Enter(PlayerCtrl player)
     {
         Debug.Log("아이들상태진입");
@@ -26,13 +26,13 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
         }
 
         //타겟과 플레이어 거리
-        float targetDistance = Vector3.Distance(player.transform.position, _target.transform.position);
+        float targetDistance = Vector3.Distance(player.transform.position, _target.Transform.position);
 
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
             //타겟 방향으로 회전
-            Vector3 dir = (_target.transform.position - player.transform.position).normalized;
+            Vector3 dir = (_target.Transform.position - player.transform.position).normalized;
             dir.y = 0f;
             player.transform.rotation = Quaternion.LookRotation(dir);
 

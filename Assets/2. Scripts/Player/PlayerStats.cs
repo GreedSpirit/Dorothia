@@ -26,33 +26,49 @@ public class PlayerStats : MonoBehaviour
     public event Action<float> OnExpChanged;
     public event Action OnDead;
 
-
     PlayerCtrl _player;
+
+    public float Attack => _atk;
+
+    //테스트용
+    [SerializeField] private bool _useTestStats = true;
+    [SerializeField] private float _testMaxHp;
+    [SerializeField] private float _testAttack;
 
 
     //TODO 추후 datamanager를 타이틀씬에 배치해두고 Awake로 변경예정
     private void Start()
     {
-        //CSV 기본값 셋팅
-        _data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
+        if (_useTestStats)
+        {
+            _maxHp = _testMaxHp;
+            _atk = _testAttack;
 
-        _level = _data.Character_Level;
-        _maxHp = _data.Character_Hp;
-        _atk = _data.Character_Atk;
-        _atk_m = _data.Character_Atk_M;
-        _dps = _data.Character_Dps;
-        _crt_prob = _data.Character_Crt_Prob;
-        _crt_dmg = _data.Character_Crt_Dmg;
-        _def = _data.Character_Def;
-        _def_m = _data.Character_Def_M;
-        _hp_regen = _data.Character_Hp_Regen;
-        _agi = _data.Character_Agi;
-        _upgrade_scrap_n = _data.Character_Upgrade_Scrap_N;
-        _level_exp_n = _data.Character_Level_Exp_N;
+            Debug.Log("테스트모드");
+        }
+        else
+        {
+            //CSV 기본값 셋팅
+            _data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
 
+            _level = _data.Character_Level;
+            _maxHp = _data.Character_Hp;
+            _atk = _data.Character_Atk;
+            _atk_m = _data.Character_Atk_M;
+            _dps = _data.Character_Dps;
+            _crt_prob = _data.Character_Crt_Prob;
+            _crt_dmg = _data.Character_Crt_Dmg;
+            _def = _data.Character_Def;
+            _def_m = _data.Character_Def_M;
+            _hp_regen = _data.Character_Hp_Regen;
+            _agi = _data.Character_Agi;
+            _upgrade_scrap_n = _data.Character_Upgrade_Scrap_N;
+            _level_exp_n = _data.Character_Level_Exp_N;
+        }
 
-        _player = GetComponent<PlayerCtrl>();
+        _currentHp = _maxHp;
 
+        Debug.Log($"HP: {_currentHp}/{_maxHp}  ATK: {_atk}");
     }
 
     //TODO 추후 계산 공식 적용해야됨 현재는 테스트용 가데이터
@@ -72,6 +88,28 @@ public class PlayerStats : MonoBehaviour
     //경험치 변화 알림
     public void AddExp()
     {
-        
+
+    }
+
+    public void TakeDamage(int amount)
+    {
+        _currentHp -= amount;
+
+        Debug.Log($"Damaged: {amount}, HP: {_currentHp}");
+
+        OnHpChanged?.Invoke(_currentHp);
+
+        if (_currentHp <= 0)
+        {
+            _currentHp = 0;
+            Debug.Log("플레이어 사망");
+            OnDead?.Invoke();
+        }
+    }
+
+    public void ResetHPToMax()
+    {
+        _currentHp = _maxHp;
+        OnHpChanged?.Invoke(_currentHp);
     }
 }

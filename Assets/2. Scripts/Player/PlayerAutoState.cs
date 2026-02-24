@@ -2,7 +2,7 @@
 
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
-    TestEnemy _target;
+    IMonster _target;
     float _timer = 0f;
     float _resetTimer = 1f;
 
@@ -34,24 +34,25 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         }
 
         //타겟 없으면
-        if (_target == null)
+        if (_target == null || !_target.IsAlive)
         {
+            _target = null;
             //경로 초기화
             player.NavMesh.ResetPath();
             return;
         }
 
         //널체크 후 타겟과 플레이어 거리
-        float targetDistance = Vector3.Distance(player.transform.position, _target.transform.position);
+        float targetDistance = Vector3.Distance(player.transform.position, _target.Transform.position);
 
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
-            Debug.Log("공격시작");
+            //Debug.Log("공격시작");
             player.NavMesh.ResetPath();
 
             //타겟방향으로 회전
-            Vector3 dir = (_target.transform.position - player.transform.position).normalized;
+            Vector3 dir = (_target.Transform.position - player.transform.position).normalized;
             dir.y = 0f;
             player.transform.rotation = Quaternion.LookRotation(dir);
 
@@ -70,9 +71,9 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         else
         {
             //타겟으로 이동
-            player.NavMesh.SetDestination(_target.transform.position);
+            player.NavMesh.SetDestination(_target.Transform.position);
 
-            Debug.Log("달리기");
+            //Debug.Log("달리기");
             player.Anima.SetBool("Run", true);
         }
     }

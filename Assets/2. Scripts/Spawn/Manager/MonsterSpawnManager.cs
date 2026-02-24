@@ -371,8 +371,12 @@ public class MonsterSpawnManager : MonoBehaviour
     public void EndBossFight()
     {
         _isBossFight = false;
-        _isSpawning = true;
-        StartCoroutine(SpawnRoutine());
+
+        if (!_isSpawning)
+        {
+            _isSpawning = true;
+            StartCoroutine(SpawnRoutine());
+        }
     }
 
     /// <summary>
