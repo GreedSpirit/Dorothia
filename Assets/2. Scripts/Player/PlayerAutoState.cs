@@ -3,6 +3,7 @@
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
     IMonster _target;
+    float _chaseRange = 5f;
     float _timer = 0f;
     float _resetTimer = 1f;
 
@@ -44,6 +45,14 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
 
         //널체크 후 타겟과 플레이어 거리
         float targetDistance = Vector3.Distance(player.transform.position, _target.Transform.position);
+
+        //추적범위 벗어나면 타겟해제 하고 리턴
+        if (targetDistance > _chaseRange)
+        {
+            _target = null;
+            player.NavMesh.ResetPath();
+            return;
+        }
 
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
