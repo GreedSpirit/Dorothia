@@ -28,6 +28,7 @@ public class InventoryPanel : MonoBehaviour
     [Header("기타 버튼")]
     [SerializeField] Button _autoEquipButtons;                   // 자동장착 버튼입니다.
     [SerializeField] Button _lockButton;                         // 잠금 버튼입니다.
+    [SerializeField] TextMeshProUGUI _lockButtonText;            // 잠금 버튼의 텍스트입니다.
 
     [Header("장비 분해 / 판매 관련")]
     [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
@@ -131,6 +132,7 @@ public class InventoryPanel : MonoBehaviour
         });
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
+        onInventoryChanged += ResetInfo;
     }
 
     /// <summary>
@@ -168,6 +170,24 @@ public class InventoryPanel : MonoBehaviour
         _infoIcon.sprite = equip.icon;
         _infoName.text = equip.equip_Upgrade == 0 ? $"이름: {equip.equip_name}" : $"이름: {equip.equip_name}<color=orange> +{equip.equip_Upgrade}</color>";
         _infoName.color = RarityColor.GetColor((Rarity)equipRankData.Equip_Rank);
+        if(equip.isLocked == true)
+        {
+            _lockButtonText.text = "Unlock";
+            _lockButton.onClick.RemoveAllListeners();
+            _lockButton.onClick.AddListener(() =>
+            {
+                UnlockEquipment(_selectedEquipment);
+            });
+        }
+        else
+        {
+            _lockButtonText.text = "Lock";
+            _lockButton.onClick.RemoveAllListeners();
+            _lockButton.onClick.AddListener(() =>
+            {
+                LockEquipment(_selectedEquipment);
+            });
+        }
         _infoDescription.text = equip.GetEquipStatusString();
 
         //확인 버튼에 있던 기능을 지우고, 합성 슬롯에 집어넣기 기능을 추가합니다.
@@ -184,6 +204,50 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
+    }
+
+    /// <summary>
+    /// 장비를 잠금 상태로 변경합니다.
+    /// </summary>
+    /// <param name="equip">잠글 장비</param>
+    private void LockEquipment(Equipment equip)
+    {
+        //고른 장비가 없으면 반환합니다.
+        if (_selectedEquipment == null)
+        {
+            return;
+        }
+        //반환되지 않았다면 고른 장비가 존재한다는 것.
+        //잠겨있는 경우에는 잠금을 해제합니다.
+        if(_selectedEquipment.isLocked == false)
+        {
+            equip.isLocked = true;
+        }
+        Refresh();
+        ResetInfo();
+        OnClickItem(equip);
+    }
+
+    /// <summary>
+    /// 장비를 잠금 해제 상태로 변경합니다.
+    /// </summary>
+    /// <param name="equip">잠금 해제할 장비</param>
+    private void UnlockEquipment(Equipment equip)
+    {
+        //고른 장비가 없으면 반환합니다.
+        if (_selectedEquipment == null)
+        {
+            return;
+        }
+        //반환되지 않았다면 고른 장비가 존재한다는 것.
+        //잠겨있는 경우에는 잠금을 해제합니다.
+        if(_selectedEquipment.isLocked == true)
+        {
+            equip.isLocked = false;
+        }
+        Refresh();
+        ResetInfo();
+        OnClickItem(equip);
     }
 
     /// <summary>
@@ -283,7 +347,7 @@ public class InventoryPanel : MonoBehaviour
         int _currentSlotIndex = slotIndex;
 
         //인벤토리를 다시 불러옵니다.
-        Refresh();
+        onInventoryChanged.Invoke();
 
         SetPanelActiveValue(true);
     }
@@ -311,10 +375,6 @@ public class InventoryPanel : MonoBehaviour
                 ClearSlot(_slots[i]);
             }
         }
-
-        _infoIcon.sprite = _infoIconBaseSprite;
-        _infoName.text = "";
-        _infoDescription.text = "";
     }
 
     /// <summary>
@@ -442,7 +502,7 @@ public class InventoryPanel : MonoBehaviour
         _equipmentInventory.RemoveEquipment(equip);
 
         //인벤토리를 갱신합니다.
-        Refresh();
+        onInventoryChanged.Invoke();
     }
 
     /// <summary>
@@ -501,7 +561,7 @@ public class InventoryPanel : MonoBehaviour
         //현재 장비를 인벤토리에서 제거합니다.
         _equipmentInventory.RemoveEquipment(equip);
         //인벤토리를 갱신합니다.
-        Refresh();
+        onInventoryChanged.Invoke();
     }
 
     /// <summary>
@@ -573,6 +633,14 @@ public class InventoryPanel : MonoBehaviour
             //스프라이트를 제거합니다.
             targetSlot.iconImage.sprite = null;
         }
+    }
+
+    public void ResetInfo()
+    {
+        _selectedEquipment = null;
+        _infoIcon.sprite = _infoIconBaseSprite;
+        _infoName.text = "";
+        _infoDescription.text = "";
     }
 
     /// <summary>
