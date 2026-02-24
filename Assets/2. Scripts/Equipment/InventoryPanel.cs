@@ -8,6 +8,8 @@ public enum InventoryStatus
 {
     Equip, Fuse
 }
+[RequireComponent(typeof(InventoryEquipFunction))]
+[RequireComponent(typeof(EquipmentExchangeFunction))]
 public class InventoryPanel : MonoBehaviour
 {
     public InventoryStatus status = InventoryStatus.Equip;
@@ -25,32 +27,7 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] GameObject _equipButtons;                   // 장착 슬롯을 눌렀을 때의 버튼입니다.
     [SerializeField] GameObject _fuseButtons;                    // 합성 슬롯을 눌렀을 때의 버튼입니다.
 
-    [Header("기타 버튼")]
-    [SerializeField] Button _autoEquipButtons;                   // 자동장착 버튼입니다.
-    [SerializeField] Button _lockButton;                         // 잠금 버튼입니다.
-    [SerializeField] TextMeshProUGUI _lockButtonText;            // 잠금 버튼의 텍스트입니다.
-
-    [Header("장비 분해 / 판매 관련")]
-    [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
-    [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
-    [SerializeField] Button _salvageAtOnceButton;            // 일괄 분해 시도를 위한 인벤토리 내 버튼입니다.
-    [SerializeField] Button _sellAtOnceButton;               // 일괄 판매 시도를 위한 인벤토리 내 버튼입니다.
-
-    [Header("일반 판매/분해 전용 패널 관련")]
-    [SerializeField] CanvasGroup _noticePanel;               // 장비 분해를 시도할 때 나타나도록 할 안내용 창입니다.
-    [SerializeField] TextMeshProUGUI _noticeMessage;         // 안내용 창의 안내 메세지입니다.
-    [SerializeField] Button _AcceptButton;                   // 장비 분해/판매 결정의 경우를 위한 안내창 내 Y 버튼입니다.
-    [SerializeField] TextMeshProUGUI _buttonText;            // 분해/판매 선택에 따라 변경하기 위한 동의 버튼의 텍스트입니다.
-    [SerializeField] Button _RejectButton;                   // 장비 분해/판매 취소의 경우를 위한 안내창 내 N 버튼입니다.
-
-    [Header("일괄 판매/분해 전용 패널 관련")]
-    [SerializeField] CanvasGroup _multiSelectPanel;          // 일괄 판매나 분해를 눌렀을 시 조건을 분류하기 위한 패널입니다.
-    [SerializeField] Button _includeUpgradedButton;          // 강화 장비를 포함할지 여부를 결정지을 버튼입니다.
-    [SerializeField] Button NormalButton;                    // 일반 등급 버튼입니다. 일반 등급의 장비를 일괄 선택합니다.
-    [SerializeField] Button UncommonButton;                  // 희귀 등급 버튼입니다. 희귀 등급의 장비를 일괄 선택합니다.
-    [SerializeField] Button RareButton;                      // 레어 등급 버튼입니다. 레어 등급의 장비를 일괄 선택합니다.
-    [SerializeField] Button LegendaryButton;                 // 전설 등급 버튼입니다. 전설 등급의 장비를 일괄 선택합니다.
-    [SerializeField] Button MythticButton;                   // 신화 등급 버튼입니다. 신화 등급의 장비를 일괄 선택합니다.
+    
 
     [Header("장비 정보 출력용")]
     [SerializeField] GameObject _infoPanel;                  // 정보를 담을 패널
@@ -65,8 +42,8 @@ public class InventoryPanel : MonoBehaviour
 
     public EquipSlot targetSlot;                             // 장비를 받기 위한 대상 슬롯입니다.
     private Equipment _selectedEquipment;                    // 인벤토리 칸에서 선택한 장비
-    private bool isSalvage = false;                          // 패널 출현 시 분해 버튼을 통해 열린 경우에만 참이 되는 변수
-
+    
+    private InventoryEquipFunction _inventoryEquipFunction;
     private InventorySlot _currentSelectedSlot;
 
     private void Awake()
@@ -74,45 +51,13 @@ public class InventoryPanel : MonoBehaviour
         //인스펙터상의 실수 확인용
         if (_slots.Count != 16)
             Debug.LogWarning("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
+        _inventoryEquipFunction = GetComponent<InventoryEquipFunction>();
         _equipButton.onClick.AddListener(() =>
         {
             AddToSlot(_selectedEquipment);
         });
         //분해 버튼 기능 추가 - 분해 상태 O. 안내패널 활성화
-        _salvageButton.onClick.AddListener(() =>
-        {
-            isSalvage = true;
-            _noticeMessage.text = "정말 분해하시겠습니까?";
-            _buttonText.text = "분해";
-            _noticePanel.alpha = 1;
-            _noticePanel.interactable = true;
-            _noticePanel.blocksRaycasts = true;
-        });
-        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
-        _sellButton.onClick.AddListener(() =>
-        {
-            isSalvage = false;
-            _noticeMessage.text = "정말 판매하시겠습니까?";
-            _buttonText.text = "판매";
-            _noticePanel.alpha = 1;
-            _noticePanel.interactable = true;
-            _noticePanel.blocksRaycasts = true;
-        });
-        //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
-        _AcceptButton.onClick.AddListener(() =>
-        {
-            SalvageOrSellEquip(_selectedEquipment);
-            _noticePanel.alpha = 0;
-            _noticePanel.interactable = false;
-            _noticePanel.blocksRaycasts = false;
-        });
-        //안내패널 내 N버튼 기능 추가 - 안내패널 비활성화
-        _RejectButton.onClick.AddListener(() =>
-        {
-            _noticePanel.alpha = 0;
-            _noticePanel.interactable = false;
-            _noticePanel.blocksRaycasts = false;
-        });
+        
         //확인버튼 기능 추가 - 슬롯에 해당 장비 추가
         _confirmButton.onClick.AddListener(() =>
         {
@@ -123,18 +68,13 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
-        //자동장착 기능 추가 - 현재 인벤토리 기준 장비 장착
-        _autoEquipButtons.onClick.AddListener(() =>
-        {
-            AutoEquip(currentPart);
-            SetPanelActiveValue(false);
-            Refresh();
-        });
+        
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
         onInventoryChanged += ResetInfo;
     }
 
+    
     /// <summary>
     /// 슬롯을 선택했을 때의 동작입니다.
     /// </summary>
@@ -170,24 +110,9 @@ public class InventoryPanel : MonoBehaviour
         _infoIcon.sprite = equip.icon;
         _infoName.text = equip.equip_Upgrade == 0 ? $"이름: {equip.equip_name}" : $"이름: {equip.equip_name}<color=orange> +{equip.equip_Upgrade}</color>";
         _infoName.color = RarityColor.GetColor((Rarity)equipRankData.Equip_Rank);
-        if(equip.isLocked == true)
-        {
-            _lockButtonText.text = "Unlock";
-            _lockButton.onClick.RemoveAllListeners();
-            _lockButton.onClick.AddListener(() =>
-            {
-                UnlockEquipment(_selectedEquipment);
-            });
-        }
-        else
-        {
-            _lockButtonText.text = "Lock";
-            _lockButton.onClick.RemoveAllListeners();
-            _lockButton.onClick.AddListener(() =>
-            {
-                LockEquipment(_selectedEquipment);
-            });
-        }
+
+        _inventoryEquipFunction.ChangeLockButtonState(equip);
+        
         _infoDescription.text = equip.GetEquipStatusString();
 
         //확인 버튼에 있던 기능을 지우고, 합성 슬롯에 집어넣기 기능을 추가합니다.
@@ -206,134 +131,9 @@ public class InventoryPanel : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// 장비를 잠금 상태로 변경합니다.
-    /// </summary>
-    /// <param name="equip">잠글 장비</param>
-    private void LockEquipment(Equipment equip)
-    {
-        //고른 장비가 없으면 반환합니다.
-        if (_selectedEquipment == null)
-        {
-            return;
-        }
-        //반환되지 않았다면 고른 장비가 존재한다는 것.
-        //잠겨있는 경우에는 잠금을 해제합니다.
-        if(_selectedEquipment.isLocked == false)
-        {
-            equip.isLocked = true;
-        }
-        Refresh();
-        ResetInfo();
-        OnClickItem(equip);
-    }
+    
 
-    /// <summary>
-    /// 장비를 잠금 해제 상태로 변경합니다.
-    /// </summary>
-    /// <param name="equip">잠금 해제할 장비</param>
-    private void UnlockEquipment(Equipment equip)
-    {
-        //고른 장비가 없으면 반환합니다.
-        if (_selectedEquipment == null)
-        {
-            return;
-        }
-        //반환되지 않았다면 고른 장비가 존재한다는 것.
-        //잠겨있는 경우에는 잠금을 해제합니다.
-        if(_selectedEquipment.isLocked == true)
-        {
-            equip.isLocked = false;
-        }
-        Refresh();
-        ResetInfo();
-        OnClickItem(equip);
-    }
-
-    /// <summary>
-    /// 자동 장착 시의 동작입니다.
-    /// </summary>
-    /// <param name="part">장착 부위</param>
-    public void AutoEquip(Equip_Type part)
-    {
-        //인벤토리로부터 해당 장착 부위의 장비 리스트를 가져옵니다.
-        List<Equipment> list = _equipmentInventory.GetInventory(part);
-
-        //리스트 안에 들어있는 게 없다면?
-        if (list.Count == 0)
-        {
-            //아무것도 없다는 것이므로 그냥 반환시킵니다.
-            return;
-        }
-
-        //장착 중인 장비를 확인합니다.
-        int currentEquipWeight = targetSlot.equipped != null? targetSlot.equipped.GetEquipScore() : 0;
-        //장착할 장비를 선언하고, 장착 중인 장비가 있다면 해당 장비를 넣습니다. (없어도 null이 들어갈 것입니다.)
-        Equipment equipmentToEquip = targetSlot.equipped;
-
-        for(int i = 0; i < list.Count; i++)
-        {
-            //이미 장착 중인 장비라면, 해당 칸에 이미 장착되었거나, 반지의 경우 다른 칸에 이미 장착된 경우입니다.
-            //그러니 다음 단계로 넘어갑니다.
-            if (list[i].isEquipped == true)
-            {
-                continue;
-            }
-            //현재 칸의 장비 점수를 체크합니다.
-            int score = list[i].GetEquipScore();
-
-            //해당 장비 점수가 현재의 가중치보다 높을 경우
-            if(score > currentEquipWeight)
-            {
-                //가중치를 해당 점수로 두고
-                currentEquipWeight = score;
-                //해당 장비를 장착할 장비로 선언한 후
-                equipmentToEquip = list[i];
-                //다음 단계로 넘어갑니다.
-                continue;
-            }
-            //해당 장비 점수가 현재의 가중치보다 낮을 경우
-            else if(score < currentEquipWeight)
-            {
-                //바로 다음 단계로 넘어갑니다.
-                continue;
-            }
-
-            //여기 도착했다는 건 장비 점수가 같다는 이야기입니다.
-            //점수가 같은데 장비가 없다는 건 가중치 0, 점수 0의 장비라는 것.
-            if(equipmentToEquip == null)
-            {
-                //장비가 없다는 뜻이니 우선 장착할 장비로 둡니다.
-                equipmentToEquip = list[i];
-                //다음 단계로 넘어갑니다.
-                continue;
-            }
-            //장착할 장비가 존재한다면, 점수가 같을 때 처음 봐야 하는 것은 등급입니다.
-            //등급이 서로 다를 경우, 장착할 장비를 결정합니다.
-            if (equipmentToEquip.equipment_Rarity != list[i].equipment_Rarity)
-            {
-                //등급이 높은 쪽이 장착할 대상이 됩니다.
-                equipmentToEquip = equipmentToEquip.equipment_Rarity > list[i].equipment_Rarity ?
-                    equipmentToEquip : list[i];
-                //다음 단계로 넘어갑니다.
-                continue;
-            }
-            //장비가 존재하고, 등급도 같다면 다음에 봐야 하는 것은 강화도입니다.
-            if (equipmentToEquip.equip_Upgrade != list[i].equip_Upgrade)
-            {
-                //강화도가 높은 쪽이 장착할 대상이 됩니다.
-                equipmentToEquip = equipmentToEquip.equip_Upgrade > list[i].equip_Upgrade?
-                    equipmentToEquip : list[i];
-                //다음 단계로 넘어갑니다.
-                continue;
-            }
-            //장비가 존재하고, 등급도 같으며, 강화도마저 같으면 획득한 순서를 살펴봅니다.
-            //다만, GUID가 같으면 같은 장비인 것이고, GUID가 다르면 list[i]쪽이 더 나중에 획득한 장비입니다. ( 현재 배치순서 변경 불가 )
-            //따라서, 여기까지 왔으면 다음 단계로 넘어갑니다.
-        }
-        //전부 진행했다면, 해당 장비를 장착합니다.
-        AddToSlot(equipmentToEquip);
-    }
+    
 
     /// <summary>
     /// 인자값으로 받은 장착 부위에 맞는 인벤토리를 엽니다.
@@ -457,111 +257,11 @@ public class InventoryPanel : MonoBehaviour
         _inventoryPanelGroup.blocksRaycasts = value;
     }
 
-    /// <summary>
-    /// 판매 버튼 또는 분해 버튼으로 패널을 열었을 때, 해당 패널에서 동의(수락)버튼을 눌렀을 시의 동작입니다.
-    /// </summary>
-    /// <param name="equip">팔거나 분해할 장비</param>
-    public void SalvageOrSellEquip(Equipment equip)
+    
+
+    public void ClearCurrentSlot()
     {
-        //분해 버튼을 통해 해당 창을 열었으면 분해를 진행합니다.
-        if(isSalvage == true)
-        {
-            Salvage(equip);
-        }
-        //그것이 아니라면 판매를 진행합니다.
-        else
-        {
-            SellEquip(equip);
-        }
-    }
-
-    /// <summary>
-    /// 장비를 분해할 경우의 골드와 스크랩 정산을 위한 코드입니다.
-    /// </summary>
-    /// <param name="equip">분해를 진행할 장비</param>
-    public void Salvage(Equipment equip)
-    {
-        //등급에 따른 분해 데이터를 받아옵니다.
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
-
-        //강화 수치가 0이 아닐 경우, 테이블로부터 강화 수치 기준 데이터를 받아와 골드에 공식을 적용합니다.
-        if (equip.equip_Upgrade > 0)
-        {
-            var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
-            TestGoldAndScrapManager.Instance.testGold += (equip.equip_price + (int)(equip.equip_Upgrade * breakData.Equip_Break_Gold / upgradeData.Equip_Success_Prob));
-            TestGoldAndScrapManager.Instance.testScrap += ((equip.equip_level + breakData.Equip_Break_Gold_Scrap) / 10);
-        }
-        //강화 수치가 0인 경우, 골드는 기본값으로 적용하고 스크랩만 계산하여 지급합니다.
-        if (equip.equip_Upgrade == 0)
-        {
-            TestGoldAndScrapManager.Instance.testGold += equip.equip_price;
-            TestGoldAndScrapManager.Instance.testScrap += ((equip.equip_level + breakData.Equip_Break_Gold_Scrap) / 10);
-        }
-
-        //현재 장비를 인벤토리에서 제거합니다.
-        _equipmentInventory.RemoveEquipment(equip);
-
-        //인벤토리를 갱신합니다.
-        onInventoryChanged.Invoke();
-    }
-
-    /// <summary>
-    /// 장비 판매 시의 기능입니다.
-    /// </summary>
-    /// <param name="equip">판매할 장비</param>
-    public void SellEquip(Equipment equip)
-    {
-        //해당 장비의 강화 단계를 기준으로 데이터를 먼저 불러옵니다.
-        var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
-
-        //판매가격인 골드 지역변수를 선언합니다.
-        int equipGold = 0;
-
-        //강화 단계가 50(현재 최대치)이거나, 모종의 툴을 사용하여 그 이상이 나왔을 경우
-        //오류를 방지하기 위해 49단계 기준으로 진행합니다.
-        if(equip.equip_Upgrade >= 50)
-        {
-            //공식 : (기본 판매가격 * 장비 장착 레벨 * 장비 등급에 따른 가중치) + (강화 평균 소모 골드 * 0.2)
-            //강화 평균 소모 골드 : 해당 단계 기준 1회 강화 비용(장비 기본 판매가격 * (현재 강화단계 + 1)값의 (골드데이터 상의 배율)제곱 * 등급에 따른 가중치) / 성공 확률
-            int firstGold = Mathf.RoundToInt
-                (
-                    equip.equip_price * equip.equip_level * 
-                    GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
-                );
-            int secondGold = Mathf.RoundToInt
-                (
-                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(50, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(50).Equip_Upgrade_Value)) *
-                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
-                    / DataManager.Instance.GetData<Equip_UpgradeData>(50).Equip_Success_Prob * 0.2f
-                );
-
-            equipGold = firstGold + secondGold;
-        }
-        else
-        {
-            //공식 : (기본 판매가격 * 장비 장착 레벨 * 장비 등급에 따른 가중치) + (강화 평균 소모 골드 * 0.2)
-            //강화 평균 소모 골드 : 해당 단계 기준 1회 강화 비용(장비 기본 판매가격 * (현재 강화단계 + 1)값의 (골드데이터 상의 배율)제곱 * 등급에 따른 가중치) / 성공 확률
-            int firstGold = Mathf.RoundToInt
-                (
-                    equip.equip_price * equip.equip_level *
-                    GetRarityWeight((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
-                );
-            int secondGold = Mathf.RoundToInt
-                (
-                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade + 1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade + 1).Equip_Upgrade_Value)) *
-                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
-                    / DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Success_Prob * 0.2f
-                );
-
-            equipGold = firstGold + secondGold;
-        }
-
-        //계산된 만큼 골드를 획득합니다.
-        TestGoldAndScrapManager.Instance.testGold += equipGold;
-        //현재 장비를 인벤토리에서 제거합니다.
-        _equipmentInventory.RemoveEquipment(equip);
-        //인벤토리를 갱신합니다.
-        onInventoryChanged.Invoke();
+        _currentSelectedSlot = null;
     }
 
     /// <summary>
@@ -578,7 +278,7 @@ public class InventoryPanel : MonoBehaviour
     /// 슬롯에 해당 장비를 장착합니다.
     /// </summary>
     /// <param name="equip">장착 혹은 재료로 사용할 장비</param>
-    private void AddToSlot(Equipment equip)
+    public void AddToSlot(Equipment equip)
     {
         if (targetSlot != null)
         {
@@ -643,29 +343,7 @@ public class InventoryPanel : MonoBehaviour
         _infoDescription.text = "";
     }
 
-    /// <summary>
-    /// 등급에 따른 판매 시의 가중치를 구합니다.
-    /// </summary>
-    /// <param name="rarity">판매하려는 장비의 등급</param>
-    /// <returns></returns>
-    private float GetRarityWeight(Rarity rarity)
-    {
-        switch(rarity)
-        {
-            case Rarity.Normal:
-                return 1;
-            case Rarity.Uncommon:
-                return 1.5f;
-            case Rarity.Rare:
-                return 2.5f;
-            case Rarity.Legendary:
-                return 5;
-            case Rarity.Mythtic:
-                return 10;
-            default:
-                return 0.5f;
-        }
-    }
+    
 
     /// <summary>
     /// 장비 데이터를 전송합니다.
@@ -674,6 +352,16 @@ public class InventoryPanel : MonoBehaviour
     public Equipment GiveEquipmentData()
     {
         return _selectedEquipment;
+    }
+
+    public InventorySlot GiveCurrentSlotData()
+    {
+        return _currentSelectedSlot;
+    }
+
+    public InventorySlot GiveTargetSlotData(Equipment equip)
+    {
+        return _slots[_equipmentInventory.GetInventoryIndex(equip)];
     }
 
     public void OnStatusChange(bool isEquip)

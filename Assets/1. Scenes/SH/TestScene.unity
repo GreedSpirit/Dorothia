@@ -1568,6 +1568,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1699306374}
     m_Modifications:
+    - target: {fileID: 5411131497788428783, guid: 81c7a4f9808a3934c9992e2bdee94890, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6175659894906356840, guid: 81c7a4f9808a3934c9992e2bdee94890, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1902,18 +1906,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 1094377835792421498, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uC7A5\uAC11"
-      objectReference: {fileID: 0}
     - target: {fileID: 1633785182184661040, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 2380711135445886493, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uBB34\uAE30"
-      objectReference: {fileID: 0}
     - target: {fileID: 2388861833212202084, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -1922,14 +1918,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 3246972781398260609, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uD558\uC758"
-      objectReference: {fileID: 0}
-    - target: {fileID: 4087769888993852974, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uBC18\uC9C0"
-      objectReference: {fileID: 0}
     - target: {fileID: 4345273186547808941, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: m_Name
       value: '[Panel]Equip'
@@ -1938,26 +1926,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 6413591554059909605, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uC0C1\uC758"
-      objectReference: {fileID: 0}
     - target: {fileID: 6498394306552092225, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 7811087968499896207, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uBC18\uC9C0"
-      objectReference: {fileID: 0}
     - target: {fileID: 8083956520508711222, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: _inventoryPanel
       value: 
       objectReference: {fileID: 366508771}
-    - target: {fileID: 8374475155872188511, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
-      propertyPath: m_text
-      value: "\uC2E0\uBC1C"
-      objectReference: {fileID: 0}
     - target: {fileID: 8581420457008457723, guid: 98fd81f88e0feff4ca3a7a7f98f51220, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -2059,6 +2035,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 1486614513}
+    - target: {fileID: 4627511432945732015, guid: 43c4b597457a9d94195b538598087a7b, type: 3}
+      propertyPath: _equipmentInventory
+      value: 
+      objectReference: {fileID: 551951962}
     - target: {fileID: 5417743752782375050, guid: 43c4b597457a9d94195b538598087a7b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -2075,6 +2055,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[Panel]EquipPartMenu'
       objectReference: {fileID: 0}
+    - target: {fileID: 7069385003373366486, guid: 43c4b597457a9d94195b538598087a7b, type: 3}
+      propertyPath: _equipmentInventory
+      value: 
+      objectReference: {fileID: 551951962}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
