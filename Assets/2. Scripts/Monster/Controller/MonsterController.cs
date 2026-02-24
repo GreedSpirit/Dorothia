@@ -46,6 +46,9 @@ public class MonsterController : MonoBehaviour, IMonster
     public IMonsterStats Stats => _stats;
     public MonsterSpawnManager SpawnManager => _owner;
 
+    public Transform Transform => transform;
+    public bool IsAlive => _currentState != MonsterState.Dead;
+
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -292,7 +295,16 @@ public class MonsterController : MonoBehaviour, IMonster
 
     public void TakeDamage(int amount)
     {
+        if (_currentState == MonsterState.Dead)
+            return;
+
         _hp -= amount;
+
+        if (_hp <= 0)
+        {
+            _hp = 0;
+            ChangeState(MonsterState.Dead);
+        }
     }
     #endregion
 

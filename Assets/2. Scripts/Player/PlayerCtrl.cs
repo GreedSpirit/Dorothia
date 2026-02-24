@@ -3,14 +3,14 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
-public class PlayerCtrl : MonoBehaviour, IMonsterTarget
+public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
     //프로퍼티
     public Vector2 MoveInput => _moveInput;
     public PlayerStats PlayerStats => _playerStats;
     public Animator Anima => _anima;
     public NavMeshAgent NavMesh => _navMesh;
-    public TestEnemy CurrentTarget => _currentTarget;
+    public IMonster CurrentTarget => _currentTarget;
     public bool IsAutoMode => _isAutoMode;
     public bool IsAttack => _isAttack;
     public float EnemyFindRange => _enemyFindRange;
@@ -19,9 +19,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
     //콤보 체크용변수
     public int ComboIndex { get; set; } = 0;
 
-    public Transform Transform => throw new NotImplementedException();
+    public Transform Transform => transform;
 
-    public bool IsAlive => throw new NotImplementedException();
+    public bool IsAlive => !_isDead;
 
     [SerializeField] LayerMask _enemyLayer;
 
@@ -43,7 +43,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
     NavMeshAgent _navMesh;
 
     //외부에서쓸 타겟변수
-    TestEnemy _currentTarget;
+    IMonster _currentTarget;
 
     //오토모드 체크용변수
     bool _isAutoMode = false;
@@ -195,8 +195,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
     //이벤트 알림 구독함수
     void ChangeDead()
     {
+        if (_isDead) return;
+
         _isDead = true;
         ChangeState(_deadState);
+
+        OnDead?.Invoke();
     }
 
 
@@ -257,50 +261,88 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
 
     public void ApplyDamage(int amount)
     {
-        PlayerStats._currentHp -= amount;
+        if (_isDead) return;
 
-        if (PlayerStats._currentHp <= 0)
-        {
-            OnDead?.Invoke();
-        }
+        _playerStats.TakeDamage(amount);
     }
 
     //TestEnemy 임시클래스명
-    public TestEnemy FindEnemy()
+    public IMonster FindEnemy()
     {
         //탐지범위안에 있는 콜라이더 가져오기
-        Collider[] colliders = Physics.OverlapSphere(transform.position, EnemyFindRange);
+        Collider[] colliders =
+        Physics.OverlapSphere(
+            transform.position,
+            EnemyFindRange,
+            _enemyLayer);
 
         //초기값셋팅
-        TestEnemy nearest = null;
+        IMonster nearest = null;
         float minDistance = EnemyFindRange;
 
         //탐지된 콜라이더에서 enemy컴포넌트확인하고
         foreach (Collider col in colliders)
         {
-            TestEnemy enemy = col.GetComponent<TestEnemy>();
+            IMonster monster =
+                col.GetComponentInParent<IMonster>();
 
-            //적이 존재하고 살아있으면
-            if (enemy != null && !enemy.isdead)
+            if (monster == null) continue;
+
+            float distance =
+                Vector3.Distance(
+                    transform.position,
+                    monster.Transform.position);
+
+            if (distance < minDistance)
             {
-                //플레이어 적 사이 거리 계산
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-
-                //저장되있던 최소거리보다 가까우면
-                if (distance < minDistance)
-                {
-                    //최소거리 갱신하고
-                    minDistance = distance;
-                    //가까운적 갱신
-                    nearest = enemy;
-                }
+                minDistance = distance;
+                nearest = monster;
             }
         }
+        //foreach (Collider col in colliders)
+        //{
+        //    IMonster enemy = col.GetComponent<IMonster>();
+
+        //    //적이 존재하고 살아있으면
+        //    if (enemy != null && !enemy.isdead)
+        //    {
+        //        //플레이어 적 사이 거리 계산
+        //        float distance = Vector3.Distance(transform.position, enemy.transform.position);
+
+        //        //저장되있던 최소거리보다 가까우면
+        //        if (distance < minDistance)
+        //        {
+        //            //최소거리 갱신하고
+        //            minDistance = distance;
+        //            //가까운적 갱신
+        //            nearest = enemy;
+        //        }
+        //    }
+        //}
         //외부에서쓸 타겟변수갱신
         _currentTarget = nearest;
 
         //가까운적 리턴
         //없으면 널리턴
         return nearest;
+    }
+
+    public void ResetState()
+    {
+        _isDead = false;
+
+        //체력 복구
+        _playerStats.ResetHPToMax();
+
+        //상태 초기화
+        ChangeState(_idleState);
+
+        //애니메이션 초기화
+        _anima.SetBool("Attack", false);
+        _anima.SetBool("Run", false);
+        _anima.SetInteger("Combo", 0);
+
+        //이동 초기화
+        _navMesh.ResetPath();
     }
 }
