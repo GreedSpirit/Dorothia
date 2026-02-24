@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3586617c2783aa543b322ca6b15cce25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterController
-  _data: {fileID: 11400000, guid: 0cd54c66eca133b469bc27a6a7cf56e2, type: 2}
+  _projectileDatabase: {fileID: 0}
   _hitCollider: {fileID: 6806003256409885698}
 --- !u!114 &-6603040081694172690
 MonoBehaviour:
@@ -139,7 +139,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6, y: 0.6, z: 0.6}
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!195 &7615663520045526447
 NavMeshAgent:
