@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
-public class PlayerCtrl : MonoBehaviour
+public class PlayerCtrl : MonoBehaviour, IMonsterTarget
 {
     //프로퍼티
     public Vector2 MoveInput => _moveInput;
@@ -15,8 +16,11 @@ public class PlayerCtrl : MonoBehaviour
     public float AttackRange => _attackRange;
 
     //콤보 체크용변수
-    public int ComboIndex { get; set; } = 0;    
+    public int ComboIndex { get; set; } = 0;
 
+    public Transform Transform => throw new NotImplementedException();
+
+    public bool IsAlive => throw new NotImplementedException();
 
     [SerializeField] LayerMask _enemyLayer;
 
@@ -61,6 +65,7 @@ public class PlayerCtrl : MonoBehaviour
     PlayerAutoState _autoState;
     PlayerDeadState _deadState;
 
+    public event Action OnDead;
 
     private void Awake()
     {
@@ -243,5 +248,15 @@ public class PlayerCtrl : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawSphere(transform.position, _attackRange);
 
+    }
+
+    public void ApplyDamage(int amount)
+    {
+        PlayerStats._currentHp -= amount;
+
+        if (PlayerStats._currentHp <= 0)
+        {
+            OnDead?.Invoke();
+        }
     }
 }

@@ -69,17 +69,6 @@ public class PlayerStats : MonoBehaviour
         */
     }
 
-    //HP변화 알림
-    public void Takedamage(float damage)
-    {
-        _currentHp -= damage;
-
-        if (_currentHp <= 0)
-        {
-            OnDead?.Invoke();
-        }
-    }
-
     //경험치 변화 알림
     public void AddExp()
     {
