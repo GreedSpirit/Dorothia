@@ -28,8 +28,8 @@ public class HitBox : MonoBehaviour
             return;
 
         //이미 맞은 몬스터면 무시
-        if (_hitMonsters.Contains(monster))
-            return;
+        //if (_hitMonsters.Contains(monster))
+        //    return;
 
         _hitMonsters.Add(monster);
 

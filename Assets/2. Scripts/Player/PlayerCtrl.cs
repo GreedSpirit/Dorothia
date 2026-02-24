@@ -251,11 +251,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         //탐지범위
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(transform.position, _enemyFindRange);
+        Gizmos.DrawWireSphere(transform.position, _enemyFindRange);
 
         //공격범위
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(transform.position, _attackRange);
+        Gizmos.DrawWireSphere(transform.position, _attackRange);
 
     }
 
