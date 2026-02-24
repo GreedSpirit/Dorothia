@@ -10,6 +10,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
     public PlayerStats PlayerStats => _playerStats;
     public Animator Anima => _anima;
     public NavMeshAgent NavMesh => _navMesh;
+    public TestEnemy CurrentTarget => _currentTarget;
     public bool IsAutoMode => _isAutoMode;
     public bool IsAttack => _isAttack;
     public float EnemyFindRange => _enemyFindRange;
@@ -40,6 +41,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
     PlayerStats _playerStats;
     Animator _anima;
     NavMeshAgent _navMesh;
+
+    //외부에서쓸 타겟변수
+    TestEnemy _currentTarget;
 
     //오토모드 체크용변수
     bool _isAutoMode = false;
@@ -104,14 +108,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
         if (_isAutoMode && _moveInput.sqrMagnitude < 0.001f)
         {
             ChangeState(_autoState);
-            Debug.Log("오토스테이트");
         }
 
         //오토모드가 켜져있으면서 입력들어오면
         else if (_isAutoMode && _moveInput.sqrMagnitude > 0.001f)
         {
             ChangeState(_moveState);
-            Debug.Log("무브상태");
         }
 
         //수동모드
@@ -152,6 +154,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
 
     public void ChangeState(IPlayerState<PlayerCtrl> newState)
     {
+        //같은상태면 전환못하게
+        if (_currentState == newState) return;
+
         Debug.Log($"상태 변경: {_currentState.GetType().Name} → {newState.GetType().Name}");
         //상태아웃시키고 전환
         _currentState.Exit(this);
@@ -258,5 +263,44 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget
         {
             OnDead?.Invoke();
         }
+    }
+
+    //TestEnemy 임시클래스명
+    public TestEnemy FindEnemy()
+    {
+        //탐지범위안에 있는 콜라이더 가져오기
+        Collider[] colliders = Physics.OverlapSphere(transform.position, EnemyFindRange);
+
+        //초기값셋팅
+        TestEnemy nearest = null;
+        float minDistance = EnemyFindRange;
+
+        //탐지된 콜라이더에서 enemy컴포넌트확인하고
+        foreach (Collider col in colliders)
+        {
+            TestEnemy enemy = col.GetComponent<TestEnemy>();
+
+            //적이 존재하고 살아있으면
+            if (enemy != null && !enemy.isdead)
+            {
+                //플레이어 적 사이 거리 계산
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+
+                //저장되있던 최소거리보다 가까우면
+                if (distance < minDistance)
+                {
+                    //최소거리 갱신하고
+                    minDistance = distance;
+                    //가까운적 갱신
+                    nearest = enemy;
+                }
+            }
+        }
+        //외부에서쓸 타겟변수갱신
+        _currentTarget = nearest;
+
+        //가까운적 리턴
+        //없으면 널리턴
+        return nearest;
     }
 }
