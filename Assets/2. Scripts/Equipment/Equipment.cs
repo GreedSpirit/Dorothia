@@ -15,7 +15,6 @@ public class Equipment
     public Dictionary<Status, float> equip_status;    // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
     public Equip_Type equip_type;                              // 장비의 타입입니다. int값을 받으면 EquipType 열거형으로 자동 치환하여 가독성을 높입니다.
     public int equip_price;                                    // 장비의 판매가입니다.
-    public string equip_model;                                 // 장비의 모델입니다. 모델? 장착 시 외형 변화를 위한 것인가...
     public string equip_icon;                                  // 장비의 아이콘, 즉 인벤토리에 출력 시 사용될 스프라이트를 가져오기 위한 경로입니다.
     public Sprite icon;                                        // 장비의 실질적 아이콘입니다. equip_icon을 통해 가져온 스프라이트를 넣을 공간입니다.
 
@@ -89,7 +88,6 @@ public class Equipment
         equip_name = equipData.Equip_Name;                                        // 장비 이름
         equip_type = equipData.Equip_Type;                                        // 장착 부위
         equip_icon = equipData.Equip_Icon;                                        // 장비 아이콘
-        equip_model = equipData.Equip_Model;                                      // ?
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
 
         equipment_Rarity = rarity;                                                                                       // 장비 등급
