@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class Equipment
 {
@@ -32,9 +34,10 @@ public class Equipment
     public int equip_Upgrade;
     public float equip_Upgrade_Weight;
 
-    public int EquippedSlotIndex = -1; // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
-    public bool isEquipped = false;    // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
-    public bool isFusing = false;
+    public int EquippedSlotIndex = -1;               // 기본값은 -1, 장착 시 0, "반지 2 슬롯 한정" 1
+    public bool isEquipped = false;                  // 장착 시에만 true가 되는 장착 여부 확인용 bool형 매개변수
+    public bool isFusing = false;                    // 합성 재료 칸에 존재할 경우에 true가 되는 합성 여부 확인용 bool형 매개변수
+    public bool isLocked = false;                    // 잠금 상태가 되었을 때 true가 되는 bool형 매개변수
 
 
     /// <summary>
@@ -96,7 +99,7 @@ public class Equipment
         Debug.Log(equipData.Equip_Type);
         AddEquipStatusByType(equipData, (Rarity)DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity).Equip_Rank);
 
-
+        LoadIcon(equip_icon);
         equip_set_id = GetSetEffect(equip_name);
 
         equip_level = equipLevel;
@@ -373,5 +376,28 @@ public class Equipment
             }
         }
         return set_id;
+    }
+
+    public async void LoadIcon(string address)
+    {
+        var handle = Addressables.LoadAssetAsync<Sprite>(address);
+        await handle.Task;
+        icon = handle.Result;
+    }
+
+    public int GetEquipScore()
+    {
+        int score = 0;
+        score += (int)(GetStatus(Status.ATK) * 10);
+        score += (int)(GetStatus(Status.DEF) * 2);
+        score += (int)(GetStatus(Status.MagicDEF) * 2);
+        score += (int)(GetStatus(Status.HP) * 3);
+        score += (int)(GetStatus(Status.HPRegen) * 1);
+        score += (int)(GetStatus(Status.AttackSpeed) * 8);
+        score += (int)(GetStatus(Status.MoveSpeed) * 7);
+        score += (int)(GetStatus(Status.CriticalChance) * 9);
+        score += (int)(GetStatus(Status.CriticalDamage) * 9);
+
+        return score;
     }
 }

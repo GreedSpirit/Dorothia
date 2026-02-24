@@ -25,15 +25,36 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] GameObject _equipButtons;                   // 장착 슬롯을 눌렀을 때의 버튼입니다.
     [SerializeField] GameObject _fuseButtons;                    // 합성 슬롯을 눌렀을 때의 버튼입니다.
 
-    [Header("장비 분해 관련")]
-    [SerializeField] CanvasGroup _noticePanel;               // 장비 분해를 시도할 때 나타나도록 할 안내용 창입니다.
+    [Header("기타 버튼")]
+    [SerializeField] Button _autoEquipButtons;                   // 자동장착 버튼입니다.
+    [SerializeField] Button _lockButton;                         // 잠금 버튼입니다.
+
+    [Header("장비 분해 / 판매 관련")]
     [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
-    [SerializeField] Button _salvageAcceptButton;            // 장비 분해 결정의 경우를 위한 안내창 내 Y 버튼입니다.
-    [SerializeField] Button _salvageRejectButton;            // 장비 분해 취소의 경우를 위한 안내창 내 N 버튼입니다.
+    [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
+    [SerializeField] Button _salvageAtOnceButton;            // 일괄 분해 시도를 위한 인벤토리 내 버튼입니다.
+    [SerializeField] Button _sellAtOnceButton;               // 일괄 판매 시도를 위한 인벤토리 내 버튼입니다.
+
+    [Header("일반 판매/분해 전용 패널 관련")]
+    [SerializeField] CanvasGroup _noticePanel;               // 장비 분해를 시도할 때 나타나도록 할 안내용 창입니다.
+    [SerializeField] TextMeshProUGUI _noticeMessage;         // 안내용 창의 안내 메세지입니다.
+    [SerializeField] Button _AcceptButton;                   // 장비 분해/판매 결정의 경우를 위한 안내창 내 Y 버튼입니다.
+    [SerializeField] TextMeshProUGUI _buttonText;            // 분해/판매 선택에 따라 변경하기 위한 동의 버튼의 텍스트입니다.
+    [SerializeField] Button _RejectButton;                   // 장비 분해/판매 취소의 경우를 위한 안내창 내 N 버튼입니다.
+
+    [Header("일괄 판매/분해 전용 패널 관련")]
+    [SerializeField] CanvasGroup _multiSelectPanel;          // 일괄 판매나 분해를 눌렀을 시 조건을 분류하기 위한 패널입니다.
+    [SerializeField] Button _includeUpgradedButton;          // 강화 장비를 포함할지 여부를 결정지을 버튼입니다.
+    [SerializeField] Button NormalButton;                    // 일반 등급 버튼입니다. 일반 등급의 장비를 일괄 선택합니다.
+    [SerializeField] Button UncommonButton;                  // 희귀 등급 버튼입니다. 희귀 등급의 장비를 일괄 선택합니다.
+    [SerializeField] Button RareButton;                      // 레어 등급 버튼입니다. 레어 등급의 장비를 일괄 선택합니다.
+    [SerializeField] Button LegendaryButton;                 // 전설 등급 버튼입니다. 전설 등급의 장비를 일괄 선택합니다.
+    [SerializeField] Button MythticButton;                   // 신화 등급 버튼입니다. 신화 등급의 장비를 일괄 선택합니다.
 
     [Header("장비 정보 출력용")]
     [SerializeField] GameObject _infoPanel;                  // 정보를 담을 패널
     [SerializeField] Image _infoIcon;                        // 정보 패널에서의 장비 아이콘 출력용 이미지
+    [SerializeField] Sprite _infoIconBaseSprite;             // 정보 패널에서 장비 아이콘의 기본 상태용 스프라이트
     [SerializeField] TextMeshProUGUI _infoName;              // 정보 패널에서 장비의 이름를 나타낼 텍스트
     [SerializeField] TextMeshProUGUI _infoDescription;       // 정보 패널에서 장비의 정보를 나타낼 텍스트
 
@@ -41,8 +62,11 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] Button _cancelButton;                   // 합성 전용 취소버튼
     [SerializeField] Button _equipButton;                    // 장비를 장착합니다.
 
-    public EquipSlot targetSlot;                               // 장비를 받기 위한 대상 슬롯입니다.
-    private Equipment _selectedEquipment;                        // 인벤토리 칸에서 선택한 장비
+    public EquipSlot targetSlot;                             // 장비를 받기 위한 대상 슬롯입니다.
+    private Equipment _selectedEquipment;                    // 인벤토리 칸에서 선택한 장비
+    private bool isSalvage = false;                          // 패널 출현 시 분해 버튼을 통해 열린 경우에만 참이 되는 변수
+
+    private InventorySlot _currentSelectedSlot;
 
     private void Awake()
     {
@@ -53,23 +77,36 @@ public class InventoryPanel : MonoBehaviour
         {
             AddToSlot(_selectedEquipment);
         });
-        //분해 버튼 기능 추가 - 안내패널 활성화
+        //분해 버튼 기능 추가 - 분해 상태 O. 안내패널 활성화
         _salvageButton.onClick.AddListener(() =>
         {
+            isSalvage = true;
+            _noticeMessage.text = "정말 분해하시겠습니까?";
+            _buttonText.text = "분해";
+            _noticePanel.alpha = 1;
+            _noticePanel.interactable = true;
+            _noticePanel.blocksRaycasts = true;
+        });
+        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
+        _sellButton.onClick.AddListener(() =>
+        {
+            isSalvage = false;
+            _noticeMessage.text = "정말 판매하시겠습니까?";
+            _buttonText.text = "판매";
             _noticePanel.alpha = 1;
             _noticePanel.interactable = true;
             _noticePanel.blocksRaycasts = true;
         });
         //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
-        _salvageAcceptButton.onClick.AddListener(() =>
+        _AcceptButton.onClick.AddListener(() =>
         {
-            Salvage(_selectedEquipment);
+            SalvageOrSellEquip(_selectedEquipment);
             _noticePanel.alpha = 0;
             _noticePanel.interactable = false;
             _noticePanel.blocksRaycasts = false;
         });
         //안내패널 내 N버튼 기능 추가 - 안내패널 비활성화
-        _salvageRejectButton.onClick.AddListener(() =>
+        _RejectButton.onClick.AddListener(() =>
         {
             _noticePanel.alpha = 0;
             _noticePanel.interactable = false;
@@ -85,8 +122,34 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
+        //자동장착 기능 추가 - 현재 인벤토리 기준 장비 장착
+        _autoEquipButtons.onClick.AddListener(() =>
+        {
+            AutoEquip(currentPart);
+            SetPanelActiveValue(false);
+            Refresh();
+        });
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
+    }
+
+    /// <summary>
+    /// 슬롯을 선택했을 때의 동작입니다.
+    /// </summary>
+    /// <param name="slot">현재 선택중인 슬롯</param>
+    public void OnSelectSlot(InventorySlot slot)
+    {
+        //기존에 선택하고 있던 슬롯이 있었을 경우 아래 코드를 실행합니다.
+        if(_currentSelectedSlot != null)
+        {
+            //해당 슬롯의 선택 표시를 비활성화합니다.
+            _currentSelectedSlot.selectMark.SetActive(false);
+        }
+
+        //현재 선택한 슬롯을 기억합니다.
+        _currentSelectedSlot = slot;
+        //그 슬롯의 선택 표시를 활성화합니다.
+        _currentSelectedSlot.selectMark.SetActive(true);
     }
 
     /// <summary>
@@ -121,6 +184,91 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
+    }
+
+    /// <summary>
+    /// 자동 장착 시의 동작입니다.
+    /// </summary>
+    /// <param name="part">장착 부위</param>
+    public void AutoEquip(Equip_Type part)
+    {
+        //인벤토리로부터 해당 장착 부위의 장비 리스트를 가져옵니다.
+        List<Equipment> list = _equipmentInventory.GetInventory(part);
+
+        //리스트 안에 들어있는 게 없다면?
+        if (list.Count == 0)
+        {
+            //아무것도 없다는 것이므로 그냥 반환시킵니다.
+            return;
+        }
+
+        //장착 중인 장비를 확인합니다.
+        int currentEquipWeight = targetSlot.equipped != null? targetSlot.equipped.GetEquipScore() : 0;
+        //장착할 장비를 선언하고, 장착 중인 장비가 있다면 해당 장비를 넣습니다. (없어도 null이 들어갈 것입니다.)
+        Equipment equipmentToEquip = targetSlot.equipped;
+
+        for(int i = 0; i < list.Count; i++)
+        {
+            //이미 장착 중인 장비라면, 해당 칸에 이미 장착되었거나, 반지의 경우 다른 칸에 이미 장착된 경우입니다.
+            //그러니 다음 단계로 넘어갑니다.
+            if (list[i].isEquipped == true)
+            {
+                continue;
+            }
+            //현재 칸의 장비 점수를 체크합니다.
+            int score = list[i].GetEquipScore();
+
+            //해당 장비 점수가 현재의 가중치보다 높을 경우
+            if(score > currentEquipWeight)
+            {
+                //가중치를 해당 점수로 두고
+                currentEquipWeight = score;
+                //해당 장비를 장착할 장비로 선언한 후
+                equipmentToEquip = list[i];
+                //다음 단계로 넘어갑니다.
+                continue;
+            }
+            //해당 장비 점수가 현재의 가중치보다 낮을 경우
+            else if(score < currentEquipWeight)
+            {
+                //바로 다음 단계로 넘어갑니다.
+                continue;
+            }
+
+            //여기 도착했다는 건 장비 점수가 같다는 이야기입니다.
+            //점수가 같은데 장비가 없다는 건 가중치 0, 점수 0의 장비라는 것.
+            if(equipmentToEquip == null)
+            {
+                //장비가 없다는 뜻이니 우선 장착할 장비로 둡니다.
+                equipmentToEquip = list[i];
+                //다음 단계로 넘어갑니다.
+                continue;
+            }
+            //장착할 장비가 존재한다면, 점수가 같을 때 처음 봐야 하는 것은 등급입니다.
+            //등급이 서로 다를 경우, 장착할 장비를 결정합니다.
+            if (equipmentToEquip.equipment_Rarity != list[i].equipment_Rarity)
+            {
+                //등급이 높은 쪽이 장착할 대상이 됩니다.
+                equipmentToEquip = equipmentToEquip.equipment_Rarity > list[i].equipment_Rarity ?
+                    equipmentToEquip : list[i];
+                //다음 단계로 넘어갑니다.
+                continue;
+            }
+            //장비가 존재하고, 등급도 같다면 다음에 봐야 하는 것은 강화도입니다.
+            if (equipmentToEquip.equip_Upgrade != list[i].equip_Upgrade)
+            {
+                //강화도가 높은 쪽이 장착할 대상이 됩니다.
+                equipmentToEquip = equipmentToEquip.equip_Upgrade > list[i].equip_Upgrade?
+                    equipmentToEquip : list[i];
+                //다음 단계로 넘어갑니다.
+                continue;
+            }
+            //장비가 존재하고, 등급도 같으며, 강화도마저 같으면 획득한 순서를 살펴봅니다.
+            //다만, GUID가 같으면 같은 장비인 것이고, GUID가 다르면 list[i]쪽이 더 나중에 획득한 장비입니다. ( 현재 배치순서 변경 불가 )
+            //따라서, 여기까지 왔으면 다음 단계로 넘어갑니다.
+        }
+        //전부 진행했다면, 해당 장비를 장착합니다.
+        AddToSlot(equipmentToEquip);
     }
 
     /// <summary>
@@ -163,6 +311,10 @@ public class InventoryPanel : MonoBehaviour
                 ClearSlot(_slots[i]);
             }
         }
+
+        _infoIcon.sprite = _infoIconBaseSprite;
+        _infoName.text = "";
+        _infoDescription.text = "";
     }
 
     /// <summary>
@@ -180,12 +332,23 @@ public class InventoryPanel : MonoBehaviour
         slot.equipMark.SetActive(equip.isEquipped);
 
         //합성 슬롯에 등록했다는 것을 볼 수 있도록 합성 재료 표기를 활성화합니다.
-        slot.FuseMark.SetActive(equip.isFusing);
+        slot.fuseMark.SetActive(equip.isFusing);
+
+        //잠겨있는 장비인 경우, 잠금 상태인 것을 확인할 수 있도록 자물쇠 모양 표기를 활성화합니다.
+        slot.lockedMark.SetActive(equip.isLocked);
+
+        //해당 슬롯이 지금 내가 선택하고 있는 슬롯이 맞다면, 해당 슬롯을 활성화합니다.
+        slot.selectMark.SetActive(_currentSelectedSlot == slot);
+
+        //해당 슬롯에 존재하는 장비의 강화도를 표기해줍니다.
+        slot.UpgradeValue.text = $"+{equip.equip_Upgrade}";
 
         //해당 슬롯 버튼을 눌렀을 때의 동작을 전부 지우고 새로 추가합니다.
         slot.button.onClick.RemoveAllListeners();
         slot.button.onClick.AddListener(() =>
         {
+            //해당 슬롯을 눌렀다는 것을 확인할 수 있도록 합니다.
+            OnSelectSlot(slot);
             //기존 장비가 있다면 해제하여, 현재 장비를 장착합니다.
             OnClickItem(equip);
         });
@@ -205,7 +368,16 @@ public class InventoryPanel : MonoBehaviour
         slot.equipMark.SetActive(false);
 
         //합성할 수 있는 상태가 아니므로 합성 재료 표기를 비활성화합니다.
-        slot.FuseMark.SetActive(false);
+        slot.fuseMark.SetActive(false);
+
+        //비어있는 장비를 잠글 수는 없으므로 잠금 표기도 비활성화합니다.
+        slot.lockedMark.SetActive(false);
+
+        //빈 공간을 선택할 수는 없으므로 선택 표기도 비활성화합니다.
+        slot.selectMark.SetActive(false);
+
+        //장비가 존재하지 않으면 강화 또한 불가능하므로 강화 단계 표기 텍스트를 비워줍니다.
+        slot.UpgradeValue.text = "";
 
         //해당 슬롯 버튼을 눌렀을 때 동작을 전부 지웁니다. 이 버튼을 눌렀을 때는 어떤 동작도 일어나면 안 됩니다.
         slot.button.onClick.RemoveAllListeners();
@@ -226,13 +398,31 @@ public class InventoryPanel : MonoBehaviour
     }
 
     /// <summary>
+    /// 판매 버튼 또는 분해 버튼으로 패널을 열었을 때, 해당 패널에서 동의(수락)버튼을 눌렀을 시의 동작입니다.
+    /// </summary>
+    /// <param name="equip">팔거나 분해할 장비</param>
+    public void SalvageOrSellEquip(Equipment equip)
+    {
+        //분해 버튼을 통해 해당 창을 열었으면 분해를 진행합니다.
+        if(isSalvage == true)
+        {
+            Salvage(equip);
+        }
+        //그것이 아니라면 판매를 진행합니다.
+        else
+        {
+            SellEquip(equip);
+        }
+    }
+
+    /// <summary>
     /// 장비를 분해할 경우의 골드와 스크랩 정산을 위한 코드입니다.
     /// </summary>
     /// <param name="equip">분해를 진행할 장비</param>
     public void Salvage(Equipment equip)
     {
-        //(현재 테이블이 업데이트되지 않아 업데이트 이전 테이블에 맞추기 위한 값 40000 제거) 등급에 따른 분해 데이터를 받아옵니다.
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity - 40000);
+        //등급에 따른 분해 데이터를 받아옵니다.
+        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
 
         //강화 수치가 0이 아닐 경우, 테이블로부터 강화 수치 기준 데이터를 받아와 골드에 공식을 적용합니다.
         if (equip.equip_Upgrade > 0)
@@ -325,9 +515,9 @@ public class InventoryPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// 합성 슬롯에 해당 장비를 장착합니다.
+    /// 슬롯에 해당 장비를 장착합니다.
     /// </summary>
-    /// <param name="equip">합성 재료로 쓰기 위한 장비</param>
+    /// <param name="equip">장착 혹은 재료로 사용할 장비</param>
     private void AddToSlot(Equipment equip)
     {
         if (targetSlot != null)

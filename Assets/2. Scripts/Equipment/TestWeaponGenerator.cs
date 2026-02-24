@@ -145,8 +145,6 @@ public class TestWeaponGenerator : MonoBehaviour
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
 
-            testWeapon.icon = weaponSprite;
-
             //해당 장비를 인벤토리에 넣습니다.
             equipmentInventory.AddEquipment(testWeapon);
             Debug.Log("장비 획득 성공!");

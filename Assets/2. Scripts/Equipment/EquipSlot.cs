@@ -62,6 +62,6 @@ public class EquipSlot : MonoBehaviour
     {
         equipped = null;
         iconImage.sprite = iconSprite;
-        iconImage.color = Color.white;
+        iconImage.color = slotType == SlotType.EquipSlot? new Color32(21, 21, 21, 255) : Color.white;
     }
 }

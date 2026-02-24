@@ -67,7 +67,7 @@ public class FusePanel : MonoBehaviour
             return;
         }
 
-        //세 장비의 등급이 일치하지 않으면 합성이 불가능합니다.
+        //신화 등급의 장비를 합성에 사용하려고 시도할 경우 불가능하다는 안내를 띄웁니다.
         if(mainEquipment.equipment_Rarity == 40005 ||
             subEquipmentOne.equipment_Rarity == 40005 ||
             subEquipmentTwo.equipment_Rarity == 40005)
@@ -97,14 +97,14 @@ public class FusePanel : MonoBehaviour
         int randomNumber = Random.Range(1, 101);
 
         //성공을 결정할 숫자는, 장비 등급에 따라 결정됩니다.
-        float successNumber = CheckFuseSuccessRate(mainEquipment);
+        float successNumber = (int)(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity).Equip_Success_Prob * 100);
 
         if(_isUsingWeight == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
             if (successNumber + mainEquipment.equip_Fuse_Weight <= 100)
             {
-                successNumber += mainEquipment.equip_Fuse_Weight * 100;
+                successNumber += (int)(mainEquipment.equip_Fuse_Weight * 100);
             }
             //초과하는 경우라면, 100을 달성할 값까지만 사용합니다.
             else
