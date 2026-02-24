@@ -30,6 +30,9 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private MonsterState _currentState;
 
+    private PlayerCombatSlots _slotSystem;          // 슬롯시스템
+    private Transform _mySlot;
+
     private int _hp;
     private float _lastAttackTime;
 
@@ -128,7 +131,12 @@ public class MonsterController : MonoBehaviour, IMonster
         _agent.radius = _stats.AgentRadius;
         
         //RVO 충돌 우선순위 랜덤화 -> 군집 이동할때 자연스러움 증가
-        _agent.avoidancePriority = Random.Range(_stats.AvoidancePriorityMin, _stats.AvoidancePriorityMax + 1);
+        _agent.avoidancePriority = 
+            Random.Range(_stats.AvoidancePriorityMin, _stats.AvoidancePriorityMax + 1);
+
+        //빠른 근접 몬스터가 몰릴 때 플레이어 밀림/겹침을 줄이기 위한
+        _agent.obstacleAvoidanceType = 
+            ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
         _agent.isStopped = false;
         _agent.ResetPath();
@@ -207,31 +215,70 @@ public class MonsterController : MonoBehaviour, IMonster
 
     /// <summary>
     /// 추격 상태
-    /// NavMeshAgent로 최단 경로로
-    /// 원거리는 PreferredRange 유지
+    /// 근접 몬스터
+    /// 플레이어 중심이 아닌 '전투 슬롯 위치'를 목표로 이동
+    /// 슬롯 시스템을 통해 겹침 및 밀림 현상 방지
+    /// 
+    /// 원거리 몬스터
+    /// 플레이어와의 거리(PreferredRange)를 유지
+    /// 사거리보다 멀면 접근, 가까우면 정지 후 공격
+    /// 
+    /// 공통
+    /// 항상 플레이어 방향으로 회전
+    /// 실제 공격 사거리(AttackRange)에 진입하면 Attack 상태로 전환
     /// </summary>
     private void UpdateChase()
     {
-        float distance = DistanceXZ(transform.position, _target.Transform.position);
-
-        //최단경로 및 원거리공격 유지
-        if (_stats.Archetype == Monster_Kind.Ranged)
+        //슬롯 시스템 가져오기
+        if (_slotSystem == null)
         {
-            //원거리: 일정 거리 이상일 때만 접근
-            if (distance > _stats.PreferredRange)
-                _agent.SetDestination(_target.Transform.position);
-            else
-                _agent.ResetPath();
+            _slotSystem =
+                (_target as MonoBehaviour)
+                ?.GetComponent<PlayerCombatSlots>();
+        }
+
+        //근접 몬스터일 경우 슬롯 요청
+        if (_mySlot == null && _slotSystem != null)
+        {
+            _mySlot = _slotSystem.RequestSlof(this);
+        }
+
+        Vector3 destination;
+
+        if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
+        {
+            //근접 몬스터 -> 슬롯 위치 이동
+            destination = _mySlot.position;
         }
         else
         {
-            //근접: 무조건 접근
-            _agent.SetDestination(_target.Transform.position);
+            //원거리 몬스터 -> 플레이어 거리 유지
+            float distance =
+                DistanceXZ(transform.position, _target.Transform.position);
+
+            if (distance > _stats.PreferredRange)
+            {
+                //사거리 보다 멀면 접근
+                destination = _target.Transform.position;
+            }
+            else
+            {
+                //적정 거리 유지 -> 이동 정지 후 공격
+                _agent.ResetPath();
+                RotateToTarget(_target.Transform.position);
+                return;
+            }
         }
 
-        RotateToTarget(_target.Transform.position);
+        _agent.SetDestination(destination); // NavMesh 설정
 
-        if (distance <= _stats.AttackRange)
+        RotateToTarget(_target.Transform.position); // 항상 플레이어 방향 보게
+
+        //공격 가능 여부 판단
+        float attackDistance =
+            DistanceXZ(transform.position, _target.Transform.position);
+
+        if (attackDistance <= _stats.AttackRange) // 공격
             ChangeState(MonsterState.Attack);
     }
 
@@ -265,6 +312,12 @@ public class MonsterController : MonoBehaviour, IMonster
     {
         _agent.isStopped = true;
         _agent.ResetPath();
+
+        if (_slotSystem != null && _mySlot != null)
+        {
+            _slotSystem.ReleaseSlot(this); // 슬롯 반환
+            _mySlot = null;
+        }
 
         if (_hitCollider != null)
             _hitCollider.enabled = false;
