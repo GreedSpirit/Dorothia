@@ -6495,7 +6495,7 @@ MonoBehaviour:
   _mapHalfSize: 30
   _safeZoneRadius: 6
   _playerCamera: {fileID: 6883391311551316759}
-  _player: {fileID: 6883391311551316758}
+  _player: {fileID: 6883391311551316762}
 --- !u!4 &2083373619
 Transform:
   m_ObjectHideFlags: 0
@@ -6655,6 +6655,10 @@ PrefabInstance:
       propertyPath: _enemyLayer.m_Bits
       value: 128
       objectReference: {fileID: 0}
+    - target: {fileID: 3028053722376861038, guid: a7d5a1291db775049a25180b03402308, type: 3}
+      propertyPath: m_Constraints
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5418599706268974583, guid: a7d5a1291db775049a25180b03402308, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.38
@@ -6712,6 +6716,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6669346866790367979, guid: a7d5a1291db775049a25180b03402308, type: 3}
+      propertyPath: _agi
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6669346866790367979, guid: a7d5a1291db775049a25180b03402308, type: 3}
       propertyPath: _testMaxHp
       value: 999999
       objectReference: {fileID: 0}
@@ -6724,14 +6732,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1484422475366113726, guid: a7d5a1291db775049a25180b03402308, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 6883391311551316771}
+    - targetCorrespondingSourceObject: {fileID: 1484422475366113726, guid: a7d5a1291db775049a25180b03402308, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6883391311551316761}
   m_SourcePrefab: {fileID: 100100000, guid: a7d5a1291db775049a25180b03402308, type: 3}
---- !u!4 &6883391311551316758 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5548866240929260716, guid: a7d5a1291db775049a25180b03402308, type: 3}
-  m_PrefabInstance: {fileID: 6883391311551316757}
-  m_PrefabAsset: {fileID: 0}
 --- !u!20 &6883391311551316759 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 1785608903871479534, guid: a7d5a1291db775049a25180b03402308, type: 3}
@@ -6765,6 +6771,25 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!4 &6883391311551316762 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5757106919654936331, guid: a7d5a1291db775049a25180b03402308, type: 3}
+  m_PrefabInstance: {fileID: 6883391311551316757}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6883391311551316771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6883391311551316760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17de09f1dc12a5345a545e975803f025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSlots
+  _slotCount: 12
+  radius: 1.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

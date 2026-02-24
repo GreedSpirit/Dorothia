@@ -251,11 +251,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         //탐지범위
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(transform.position, _enemyFindRange);
+        Gizmos.DrawWireSphere(transform.position, _enemyFindRange);
 
         //공격범위
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(transform.position, _attackRange);
+        Gizmos.DrawWireSphere(transform.position, _attackRange);
 
     }
 
@@ -269,7 +269,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     //TestEnemy 임시클래스명
     public IMonster FindEnemy()
     {
-        //탐지범위안에 있는 콜라이더 가져오기
+        //EnemyFindRange 탐지범위안에 있는 콜라이더 가져오기
         Collider[] colliders =
         Physics.OverlapSphere(
             transform.position,
@@ -278,47 +278,30 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         //초기값셋팅
         IMonster nearest = null;
-        float minDistance = EnemyFindRange;
+        float minSqrDistance = EnemyFindRange * EnemyFindRange; // 비교 기준 거리
 
-        //탐지된 콜라이더에서 enemy컴포넌트확인하고
         foreach (Collider col in colliders)
         {
+            if (!col.gameObject.activeInHierarchy) continue; // 비활성화 몬스터면 무시
+
             IMonster monster =
-                col.GetComponentInParent<IMonster>();
+                col.GetComponentInParent<IMonster>(); // IMonster 확인
 
-            if (monster == null) continue;
+            if (monster == null) continue; // IMonster가 아니면 무시
+            if (!monster.IsAlive) continue; // 이미 죽은 몬스터면 무시
 
-            float distance =
-                Vector3.Distance(
-                    transform.position,
-                    monster.Transform.position);
+            //플레이어와 몬스터 사이의 제곱거리 계산(루트 연산 피하기 위해서 성능 최적화)
+            float sqrDist =
+                (monster.Transform.position - transform.position).sqrMagnitude;
 
-            if (distance < minDistance)
+            //저장되있던 최소거리보다 가까우면
+            if (sqrDist < minSqrDistance)
             {
-                minDistance = distance;
-                nearest = monster;
+                minSqrDistance = sqrDist; // 최소거리 갱신
+                nearest = monster; // 가까운적 갱신
             }
         }
-        //foreach (Collider col in colliders)
-        //{
-        //    IMonster enemy = col.GetComponent<IMonster>();
-
-        //    //적이 존재하고 살아있으면
-        //    if (enemy != null && !enemy.isdead)
-        //    {
-        //        //플레이어 적 사이 거리 계산
-        //        float distance = Vector3.Distance(transform.position, enemy.transform.position);
-
-        //        //저장되있던 최소거리보다 가까우면
-        //        if (distance < minDistance)
-        //        {
-        //            //최소거리 갱신하고
-        //            minDistance = distance;
-        //            //가까운적 갱신
-        //            nearest = enemy;
-        //        }
-        //    }
-        //}
+        
         //외부에서쓸 타겟변수갱신
         _currentTarget = nearest;
 

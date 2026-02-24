@@ -3,7 +3,7 @@
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
     IMonster _target;
-    float _chaseRange = 5f;
+    float _chaseRange;
     float _timer = 0f;
     float _resetTimer = 1f;
 
@@ -13,6 +13,9 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //설정 초기화
         _timer = 0f;
         _resetTimer = 1f;
+
+        //추적초기화 범위는 탐지범위보다 항상 크도록
+        _chaseRange = player.EnemyFindRange + 5f;
         _target = null;
         player.NavMesh.ResetPath();
         player.Anima.SetBool("Run", false);
@@ -79,6 +82,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //위상황들 다 통과하면 타겟으로 이동
         else
         {
+            Debug.LogError("타겟으로 이동");
             //타겟으로 이동
             player.NavMesh.SetDestination(_target.Transform.position);
 
