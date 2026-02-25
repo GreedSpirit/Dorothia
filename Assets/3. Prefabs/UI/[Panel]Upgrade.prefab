@@ -1519,6 +1519,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[Item]Stat'
       objectReference: {fileID: 0}
+    - target: {fileID: 2081819097981336279, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+      propertyPath: m_Padding.m_Top
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 2081819097981336279, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+      propertyPath: m_Padding.m_Bottom
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 5119669761901300944, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1746,8 +1754,52 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1138173054560441474, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4726313552313585187}
+    - targetCorrespondingSourceObject: {fileID: 5460524415616081851, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1888978189301914164}
   m_SourcePrefab: {fileID: 100100000, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+--- !u!1 &1665301470618999275 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1138173054560441474, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+  m_PrefabInstance: {fileID: 1790124234174975337}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4726313552313585187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665301470618999275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
+--- !u!1 &5985392240123810514 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5460524415616081851, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}
+  m_PrefabInstance: {fileID: 1790124234174975337}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1888978189301914164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5985392240123810514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!224 &7493575294208770761 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9162937958664523680, guid: 976977d1841180f46a3a7de3bac3ef8e, type: 3}

@@ -24,10 +24,10 @@ public abstract class BaseUI: MonoBehaviour
     // 모든 UI가 닫힐 때 공통적으로 실행할 로직
     public virtual void Close()
     {
+        OnClose();
+
         gameObject.SetActive(false);
         IsOpen = false;
-
-        OnClose();
     }
 
     protected abstract void OnOpen();

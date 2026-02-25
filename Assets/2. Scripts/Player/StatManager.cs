@@ -17,6 +17,11 @@ public class FinalStat
         this.weight = weight;
         ResetModifiers();
     }
+    // 캐싱된 최종 값
+    private float cachedValue;
+
+    // 외부에서는 이 프로퍼티만 읽어감 (추가 연산 없음)
+    public float FinalValue => cachedValue;
 
     //{(캐릭터 스테이터스 * 레벨업 스테이터스 가중치 * 승급}+ 장비스탯} * (1 + 장비세트 효과 * 패시브)
 
@@ -30,18 +35,15 @@ public class FinalStat
     /// <param name="promotionMulti"></param>
     /// <param name="equipAdd"></param>
     /// <returns></returns>
-    public float GetFinalValue(int level, float promotionMulti, float equipAdd)
+    public void UpdateFinalValue(int level = 1, float promotionMulti = 1, float equipAdd = 0)
     {
-        // 순수 캐릭터 성장치 계산 (승급 포함)
         float characterGrowth = baseStat * Mathf.Pow(weight, level - 1);
 
-        // 장비 고정 스탯 합산
         float totalBeforePercent = (characterGrowth * promotionMulti) + equipAdd;
 
-        // 최종 퍼센트 효과 적용 (1 + 장비세트 + 패시브 등등의 합산 결과가 multiStat)
-        return totalBeforePercent * multiStat;
+        cachedValue = totalBeforePercent * multiStat;
     }
-
+   
     public void AddGrowModifier(float add)
     {
         growAdditiveStat += add;
@@ -94,19 +96,24 @@ public class StatManager : MonoBehaviour
     // 모든 스탯 영향을 한 번에 계산
     public void RefreshStats()
     {
-        // 모든 수치 초기화
-        foreach (var stat in stats.Values) stat.ResetModifiers();
-
-        // 패시브 스킬 적용
+        foreach (var stat in stats.Values)
+        {
+            stat.ResetModifiers();
+        }
         ApplyPassiveEffects();
-
-        // 장비 효과 적용
         ApplyEquipmentStats();
 
-        Debug.Log("모든 스탯 수치가 최신화되었습니다.");
+        //int currentLevel = PlayerManager.Instance.Level;
+        //float promotion = PlayerManager.Instance.Promotion;
+
+        foreach (var stat in stats.Values)
+        {
+            //stat.UpdateFinalValue(currentLevel, promotion, 0);
+            stat.UpdateFinalValue();
+        }
     }
 
-    public void ApplyPassiveEffects()
+    private void ApplyPassiveEffects()
     {
         // 패시브 스킬 적용
         if (SkillManager.Instance != null)
@@ -120,22 +127,16 @@ public class StatManager : MonoBehaviour
         }
     }
 
-    public void ApplyEquipmentStats()
+    private void ApplyEquipmentStats()
     {
         // 장비의 고정 수치는 add에, 세트효과는 multi에 더함
         // stats[type].AddModifier(equip.power, equip.powerPercent);
     }
 
-    public float GetFinalStatValue(Status type)
+   
+
+    public float GetStat(Status type)
     {
-        if (!stats.ContainsKey(type)) return 0f;
-
-        // 현재 플레이어 데이터 매니저 등에서 값 가져오기
-        //int level = Player.Level;
-        //float promotion = Player.PromotionMultiplier;
-
-        //return stats[type].GetFinalValue(level, promotion, equipAdd);
-
-        return 0f;
+        return stats[type].FinalValue; 
     }
 }
