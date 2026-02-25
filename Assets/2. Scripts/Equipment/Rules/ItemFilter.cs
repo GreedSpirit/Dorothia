@@ -9,6 +9,11 @@ public static class ItemFilter
         List<Equipment> target = new List<Equipment>();
         foreach (Equipment equip in inventory)
         {
+            if(equip.isEquipped == true)
+            {
+                Debug.Log("장착된 장비는 적용 안됨!");
+                continue;
+            }
             if (Upgraded == false && equip.equip_Upgrade != 0)
             {
                 Debug.Log("업그레이드된 장비는 불가능!");
