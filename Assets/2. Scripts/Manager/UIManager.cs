@@ -28,10 +28,12 @@ public class UIManager : MonoBehaviour
 
         baseUI.Open();
         uiStack.Push(baseUI);
+        Debug.Log(uiStack.Count);
     }
 
     public void CloseTopPanel()
     {
+        Debug.Log(uiStack.Count);
         if (uiStack.Count > 0)
         {
             var top = uiStack.Pop();
