@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -131,6 +131,17 @@ public class StatManager : MonoBehaviour
     {
         // 장비의 고정 수치는 add에, 세트효과는 multi에 더함
         // stats[type].AddModifier(equip.power, equip.powerPercent);
+        if (EquipmentSlotManager.Instance != null)
+        {
+            foreach (var stat in EquipmentSlotManager.Instance.EquipmentStatus.Keys)
+            {
+                stats[stat].AddEquipModifier(EquipmentSlotManager.Instance.SetStatus[stat]);
+            }
+            foreach (var stat in EquipmentSlotManager.Instance.SetStatus.Keys)
+            {
+                stats[stat].AddMultiModifier(EquipmentSlotManager.Instance.EquipmentStatus[stat]);
+            }
+        }
     }
 
    

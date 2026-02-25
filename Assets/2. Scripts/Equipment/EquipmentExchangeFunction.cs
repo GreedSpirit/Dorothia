@@ -193,9 +193,18 @@ public class EquipmentExchangeFunction : MonoBehaviour
         {
             _multiModifyTitleText.text = "일괄 분해 필터 설정";
             _multiModifyAcceptText.text = "일괄 분해";
+            //일괄 기능의 동작 버튼의 기능을 모두 없애고, 다중 분해/판매 기능과 패널의 비활성화 기능을 추가합니다.
+            _multiAcceptButton.onClick.RemoveAllListeners();
             _multiAcceptButton.onClick.AddListener(() =>
             {
                 MultiSalvageOrSell(_inventoryPanel.currentPart);
+                SetPanelActiveValue(false);
+            });
+            //일괄 기능의 취소 버튼의 기능을 모두 없애고, 패널 비활성화 기능을 추가합니다.
+            _multiRejectButton.onClick.RemoveAllListeners();
+            _multiRejectButton.onClick.AddListener(() =>
+            {
+                SetPanelActiveValue(false);
             });
         }
         else

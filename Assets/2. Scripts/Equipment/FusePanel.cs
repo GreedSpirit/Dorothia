@@ -97,7 +97,7 @@ public class FusePanel : MonoBehaviour
         int randomNumber = Random.Range(1, 101);
 
         //성공을 결정할 숫자는, 장비 등급에 따라 결정됩니다.
-        float successNumber = (int)(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity).Equip_Success_Prob * 100);
+        float successNumber = (int)(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Success_Prob * 100);
 
         if(_isUsingWeight == true)
         {

@@ -115,4 +115,31 @@ public static class ItemCalculator
                 return 1;
         }
     }
+
+    public static int RarityCalculator()
+    {
+        int value = Random.Range(1, 10001);
+        int rarity = 40001;
+        if(value <= 9400)
+        {
+            rarity = 40001;
+        }
+        else if(value > 9400 && value <= 9900)
+        {
+            rarity = 40002;
+        }
+        else if(value > 9900 && value <= 9990)
+        {
+            rarity = 40003;
+        }
+        else if(value > 9990 && value <= 9999)
+        {
+            rarity = 40004;
+        }
+        else if(value == 10000)
+        {
+            rarity = 40005;
+        }
+        return rarity;
+    }
 }

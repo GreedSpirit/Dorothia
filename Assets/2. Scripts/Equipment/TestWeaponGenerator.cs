@@ -4,9 +4,21 @@ using UnityEngine;
 
 public class TestWeaponGenerator : MonoBehaviour
 {
+    public static TestWeaponGenerator Instance;
+
     [SerializeField] private EquipmentInventory equipmentInventory;           // 현재 사용할 인벤토리.
     [SerializeField] Sprite weaponSprite;                                     // 획득 무기에 적용할 스프라이트.
     [SerializeField] InventoryPanel inventoryPanel;                           // 갱신해야 할 인벤토리.
+
+    private void Awake()
+    {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+
+        Instance = this;
+    }
 
     public void Test()
     {
@@ -20,42 +32,44 @@ public class TestWeaponGenerator : MonoBehaviour
         int rng = Random.Range(1, 401);
 
         //90% 확률에 맞게 10%만큼의 범위 내에 들어왔을 때 생성하도록 합니다.
-        if(rng < 41)
+        if (rng < 41)
         {
             //10% 범위 내에서 8개로 나눠, 1.25%의 드랍율을 맞추겠습니다.
             int result = (rng - 1) / 5;
+            int variation = Random.Range(0, 2);
             EquipData _equipData = new EquipData();
 
             switch (result)
             {
                 //1을 더했을 때 각각의 장착 부위가 되도록 생성합니다. 8번은 열거형 값에 존재하지 않으므로 7번을 중복 사용했습니다.
                 case 0:
-                    _equipData = DataManager.Instance.GetData<EquipData>(50001);
+                    _equipData = DataManager.Instance.GetData<EquipData>(50001 + variation);
                     break;
                 case 1:
-                    _equipData = DataManager.Instance.GetData<EquipData>(51000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(51000 + variation);
                     break;
                 case 2:
-                    _equipData = DataManager.Instance.GetData<EquipData>(52000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(52000 + variation);
                     break;
                 case 3:
-                    _equipData = DataManager.Instance.GetData<EquipData>(53000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(53000 + variation);
                     break;
                 case 4:
-                    _equipData = DataManager.Instance.GetData<EquipData>(54000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(54000 + variation);
                     break;
                 case 5:
-                    _equipData = DataManager.Instance.GetData<EquipData>(55000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(55000 + variation);
                     break;
                 case 6:
-                    _equipData = DataManager.Instance.GetData<EquipData>(56000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(56000 + variation);
                     break;
                 case 7:
-                    _equipData = DataManager.Instance.GetData<EquipData>(56000);
+                    _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
                     break;
 
             }
-            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, 40001, 1);
+            int Rarity = Random.Range(40001, 40006);
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, Rarity, 1);
 
             if (_equipData != null)
             {
@@ -66,15 +80,13 @@ public class TestWeaponGenerator : MonoBehaviour
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
 
-            testWeapon.icon = weaponSprite;
-
             //해당 장비를 인벤토리에 넣습니다.
             equipmentInventory.AddEquipment(testWeapon);
             Debug.Log("장비 획득 성공!");
 
-            if(inventoryPanel.currentPart != 0)
+            if (inventoryPanel.currentPart != 0)
             {
-                inventoryPanel.onInventoryChanged.Invoke();
+                inventoryPanel.Refresh();
             }
         }
 
@@ -133,7 +145,7 @@ public class TestWeaponGenerator : MonoBehaviour
                     break;
 
             }
-            int Rarity = Random.Range(40001, 40006);
+            int Rarity = ItemCalculator.RarityCalculator();
             Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, Rarity, 1);
 
             if (_equipData != null)
@@ -151,7 +163,7 @@ public class TestWeaponGenerator : MonoBehaviour
 
             if (inventoryPanel.currentPart != 0)
             {
-                inventoryPanel.onInventoryChanged.Invoke();
+                inventoryPanel.Refresh();
             }
         }
 
