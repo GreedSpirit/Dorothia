@@ -1,9 +1,8 @@
-using NUnit.Framework.Internal.Execution;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OptionPopup : BasePopup
+public class OptionPopup : BaseUI
 {
     [SerializeField] private Button saveBtn;
     [SerializeField] private TMP_Dropdown languageDropdown;
@@ -56,5 +55,11 @@ public class OptionPopup : BasePopup
         }
     }
 
+    protected override void OnOpen()
+    {
+    }
 
+    protected override void OnClose()
+    {
+    }
 }

@@ -1,5 +1,3 @@
-using Unity.VectorGraphics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -24,7 +22,7 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private OptionPopup optionPopup;
     public void OnClickOptionPopup()
     {
-        optionPopup.OpenPopup();
+        optionPopup.Open();
     }
 
     public void GameStart()

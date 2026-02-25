@@ -19,6 +19,17 @@ public class FinalStat
     }
 
     //{(캐릭터 스테이터스 * 레벨업 스테이터스 가중치 * 승급}+ 장비스탯} * (1 + 장비세트 효과 * 패시브)
+
+    //todo : 계산식 고치기
+    /// <summary>
+    /// Level : 플레이어 레벨
+    /// promotion : 플레이어 승급 단계
+    /// equipAdd : 장비 수치?(지워야할듯)
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="promotionMulti"></param>
+    /// <param name="equipAdd"></param>
+    /// <returns></returns>
     public float GetFinalValue(int level, float promotionMulti, float equipAdd)
     {
         // 순수 캐릭터 성장치 계산 (승급 포함)
