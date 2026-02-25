@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class UIOpener : MonoBehaviour
 {
-    [SerializeField] private BasePanel targetPanel;
+    [SerializeField] private BaseUI targetPanel;
 
     void Awake()
     {

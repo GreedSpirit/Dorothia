@@ -18,23 +18,23 @@ public class UIManager : MonoBehaviour
         instance = this;
     }
 
-    private Stack<BasePanel> popupStack = new Stack<BasePanel>();
+    private Stack<BaseUI> uiStack = new Stack<BaseUI>();
 
-    public void OpenPanel(BasePanel panel)
+    public void OpenPanel(BaseUI baseUI)
     {
-        if (panel == null) return;
+        if (baseUI == null) return;
 
-        if (panel.IsOpen) return;
+        if (baseUI.IsOpen) return;
 
-        panel.Open();
-        popupStack.Push(panel);
+        baseUI.Open();
+        uiStack.Push(baseUI);
     }
 
     public void CloseTopPanel()
     {
-        if (popupStack.Count > 0)
+        if (uiStack.Count > 0)
         {
-            var top = popupStack.Pop();
+            var top = uiStack.Pop();
             top.Close();
         }
     }
