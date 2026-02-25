@@ -65,6 +65,4 @@ public class GremlinManager : MonoBehaviour
             Destroy(newGremlinObj);
         }
     }
-
-
 }

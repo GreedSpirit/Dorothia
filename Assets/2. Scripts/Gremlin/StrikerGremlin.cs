@@ -6,14 +6,13 @@ public class StrikerGremlin : GremlinBase
     [SerializeField] private float _attackRange = 10f;
     [SerializeField] private LayerMask _enemyLayer;
     private float _timer;
-    //TODO 나중에 Player 클래스로 바꾸기
-    private Transform _player;
+    private PlayerCtrl _player;
 
     public override void Init(string id, string name, Rarity tier, int level, float baseValue, Transform player)
     {
         base.Init(id, name, tier, level, baseValue, player);
 
-        // if(player != null) _player = player.GetComponent<Player>();
+        if(player != null) _player = player.GetComponent<PlayerCtrl>();
     }
     protected override void PerformAction()
     {
@@ -32,11 +31,12 @@ public class StrikerGremlin : GremlinBase
 
     private Transform FindTarget()
     {
-        // 플레이어가 타겟중인 적
-        if(_player != null) // 플레이어가 현재 타겟하는 적이 있는지까지 같이 확인
+        if(_player != null && _player.CurrentTarget != null)
         {
-            //플레이어의 타겟이 사거리 내에 있는지 확인 후 
-            return _player; //_player.currenttarget
+            if(Vector3.Distance(transform.position, _player.CurrentTarget.Transform.position) <= _attackRange)
+            {
+                return _player.CurrentTarget.Transform; 
+            }
         }
 
         // 플레이어와 가장 가까운 적

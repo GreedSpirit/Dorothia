@@ -3,14 +3,13 @@ using UnityEngine;
 public class BufferGremlin : GremlinBase
 {
     private float _timer;  
-    //TODO 나중에 플레이어로 바꿔야 함
-    private Transform _player;
+    private PlayerCtrl _player;
 
     public override void Init(string id, string name, Rarity tier, int level, float baseValue, Transform player)
     {
         base.Init(id, name, tier, level, baseValue, player);
 
-        // if(player != null) _player = player.GetComponent<Player>();
+        if(player != null) _player = player.GetComponent<PlayerCtrl>();
 
         //TODO 초기화 되고 소환되면 바로 버프를 쓰도록 해두긴 했는데 악용할 수도 있으므로 추후 기획팀과 얘기
         _timer = currentActionCycle;
