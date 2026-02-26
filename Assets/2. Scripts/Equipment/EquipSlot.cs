@@ -21,7 +21,26 @@ public class EquipSlot : MonoBehaviour
 
     public Equipment equipped;                     // 현재 장착되어있는 장비입니다.
 
-    [SerializeField] EquipmentUI equipmentUI;      // 장착 장비 UI입니다. 해당 슬롯의 장착 부위에 맞는 인벤토리 칸을 열기 위해 필요합니다.
+    [SerializeField] EquipmentUI _equipmentUI;      // 장착 장비 UI입니다. 해당 슬롯의 장착 부위에 맞는 인벤토리 칸을 열기 위해 필요합니다.
+    [SerializeField] InventoryPanel _inventoryPanel;
+
+    private void Awake()
+    {
+        if(slotType == SlotType.EquipSlot)
+        {
+            button.onClick.AddListener(() =>
+            {
+                _inventoryPanel.OnStatusChange(true);
+            });
+        }
+        else if(slotType == SlotType.FuseSlot)
+        {
+            button.onClick.AddListener(() =>
+            {
+                _inventoryPanel.OnStatusChange(false);
+            });
+        }
+    }
 
     /// <summary>
     /// 해당 슬롯을 눌렀을 때 사용할 메서드입니다.

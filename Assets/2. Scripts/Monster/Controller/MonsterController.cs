@@ -9,6 +9,7 @@ using UnityEngine.AI;
 /// 공격 로직은 MonsterAttackBase에서 
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
 public class MonsterController : MonoBehaviour, IMonster
 {
     public static event System.Action<float> OnMonsterKilledLifeTime;   // 동적 스폰 TTK 기록용
@@ -20,6 +21,9 @@ public class MonsterController : MonoBehaviour, IMonster
     [Header("HitCollider")]
     [SerializeField] private Collider _hitCollider; // 피격 판정용 콜라이더
 
+    [Header("Attack Animation")]
+    [SerializeField] private AnimationClip _attackClip; // 공격 애니클립
+
     private IMonsterStats _stats;                   // 인터페이스 기반 스탯
 
     private MonsterSpawnManager _owner;             // 스폰매니저
@@ -28,13 +32,18 @@ public class MonsterController : MonoBehaviour, IMonster
     private NavMeshAgent _agent;                    // 이동담당
     private MonsterAttackBase _attack;              // 공격타입(근접/원거리)
 
+    private Animator _animator;
+
     private MonsterState _currentState;
 
     private PlayerCombatSlots _slotSystem;          // 슬롯시스템
     private Transform _mySlot;
 
-    private int _hp;
-    private float _lastAttackTime;
+    private int _hp;                                // 체력
+
+    private bool _isAttacking;                      // 실제 공격 여부
+    private float _attackTimer;                     // 공격 타이머
+    private float _currentAttackDuration;           // 계산된 공격 지속시간
 
     private float _spawnTime;                       // 생존시간 계산
 
@@ -48,13 +57,13 @@ public class MonsterController : MonoBehaviour, IMonster
 
     public IMonsterStats Stats => _stats;
     public MonsterSpawnManager SpawnManager => _owner;
-
     public Transform Transform => transform;
     public bool IsAlive => _currentState != MonsterState.Dead;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponent<Animator>();
 
         if (_hitCollider == null)
             _hitCollider = GetComponent<Collider>();
@@ -108,7 +117,9 @@ public class MonsterController : MonoBehaviour, IMonster
 
         _spawnTime = Time.time; // 생존시간 측정 시작
         _hp = _stats.MaxHp; // 체력 초기화
-        _lastAttackTime = -999f; // 즉시 공격방지
+
+        _isAttacking = false; // 공격
+        _attackTimer = 0f;
 
         if (_agent != null && !_agent.enabled)
             _agent.enabled = true;
@@ -194,11 +205,14 @@ public class MonsterController : MonoBehaviour, IMonster
 
             case MonsterState.Chase:
                 _agent.isStopped = false;
+                _animator.SetBool("IsMoving", true);    // 애니
                 break;
 
             case MonsterState.Attack:
                 _agent.isStopped = true;
                 _agent.ResetPath();
+                _animator.SetBool("IsMoving", false);
+                StartAttack(); // 공격시작
                 break;
 
             case MonsterState.Dead:
@@ -301,10 +315,16 @@ public class MonsterController : MonoBehaviour, IMonster
         }
 
         //사거리 안이면 계속 공격
-        if (Time.time - _lastAttackTime >= _stats.AttackCooldown)
+        if (!_isAttacking)
+            return;
+
+        _attackTimer += Time.deltaTime;
+
+        if (_attackTimer >= _currentAttackDuration)
         {
-            DoAttack();
-            _lastAttackTime = Time.time;
+            _isAttacking = false;
+            _animator.speed = 1f; // 속도 복구
+            ChangeState(MonsterState.Chase);
         }
     }
 
@@ -312,6 +332,8 @@ public class MonsterController : MonoBehaviour, IMonster
     {
         _agent.isStopped = true;
         _agent.ResetPath();
+
+        _animator.SetTrigger("Dead");
 
         if (_slotSystem != null && _mySlot != null)
         {
@@ -329,11 +351,44 @@ public class MonsterController : MonoBehaviour, IMonster
         //스테이지 매니저가 킬카운트/보스판정 받게
         OnMonsterKilled?.Invoke(_monsterId, IsBoss);
 
-        Invoke(nameof(ForceDespawn), 1f); // 1초후 풀 반환
+        //Invoke(nameof(ForceDespawn), 1f); // 1초후 풀 반환
+    }
+
+    //애니메이션 이벤트용
+    public void OnDeathAnimationEnd()
+    {
+        ForceDespawn();
     }
     #endregion
 
     #region 공격
+    /// <summary>
+    /// 애니 기반 공격
+    /// </summary>
+    private void StartAttack()
+    {
+        if (_isAttacking)
+            return;
+
+        _isAttacking = true;
+
+        float baseLength = _attackClip.length; // 애니 길이 기준
+        _currentAttackDuration = baseLength * _stats.AttackCooldown; // 속도 배율
+
+        _animator.speed = 1f / _stats.AttackCooldown; // 애니 속도 조절
+        _animator.SetTrigger("Attack");
+        _attackTimer = 0f;
+    }
+
+    //애니메이션 이벤트용
+    public void OnAttackHit()
+    {
+        if (!_isAttacking)
+            return;
+
+        DoAttack();
+    }
+
     /// <summary>
     /// 실제 공격 실행
     /// 공격 방식은 MonsterAttackBase에서

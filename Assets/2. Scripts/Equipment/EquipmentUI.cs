@@ -10,6 +10,7 @@ public class EquipmentUI : MonoBehaviour
     [SerializeField] EquipSlot _secondRingSlot;
     [SerializeField] InventoryPanel _inventoryPanel;   // 인벤토리를 담당하는 패널
     [SerializeField] CanvasGroup _equipmentUIGroup;    // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
+    [SerializeField] Button _equipButton;              // 장비 관련 기능을 열기 위한 버튼
 
     [SerializeField] EquipmentSlotManager _equipmentSlotManager;
 
@@ -27,6 +28,14 @@ public class EquipmentUI : MonoBehaviour
             Debug.LogWarning("EquipmentUI - 파트별 버튼이 모자랍니다!");
         if (_inventoryPanel == null)
             Debug.LogError("EquipmentUI - 장비를 담은 인벤토리 확인용 창이 등록되지 않았습니다!");
+
+        if(_equipButton != null)
+        {
+            _equipButton.onClick.AddListener(() =>
+            {
+                SetPanelActiveValue(true);
+            });
+        }
     }
 
     private void Start()
