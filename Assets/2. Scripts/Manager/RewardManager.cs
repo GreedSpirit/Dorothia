@@ -27,10 +27,13 @@ public class RewardManager : MonoBehaviour
 
     private void GetEquipment(int monsterId, bool isBoss)
     {
-        int equipLevel = CurrentSectionLevel();
+        //현재 섹션 번호(1, 2, --- 50, 51)
+        int currentSection = _stageManager.CurrentSection;
 
-        ////Section이 끝날 시점에 id값이 바뀌므로 id값 기준으로 적용
-        //int id = DataManager.Instance.GetData<Stage_SectionData>(여기에 Section ID값 투입);
+        //현재 Stage_Section_Id(120001, 120002)
+        int currentStageSectionId = _stageManager.CurrentStageSectionId;
+
+        Debug.Log($"드랍 섹션 확인 Section:{currentSection}, SectionId:{currentStageSectionId}");
 
         ////드랍율이 테이블에 있으며, float값으로 적용중이고 소수점 단위를 쓰므로 해당 값 적용
         //int dropChance = Random.Range(0, 100);
@@ -40,10 +43,5 @@ public class RewardManager : MonoBehaviour
         //{
         //    //TestWeaponGenerator.Instance.Test(id.Equip_Drop_Level);
         //}
-    }
-
-    private int CurrentSectionLevel()
-    {
-        return _stageManager.CurrentSection; // 현재 스테이지 섹션 정보
     }
 }

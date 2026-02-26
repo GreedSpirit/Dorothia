@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public enum StageState
 {
@@ -52,7 +53,11 @@ public class StageManager : MonoBehaviour
     private float _bossStartTime;
     private bool _bossTimerRunning;
 
-    public int CurrentSection => _currentSection;   // 장비드랍 현재 스테이지 섹션용
+    //RewardManager용
+    public int CurrentSection => _currentSection;                   // 현재 섹션
+    public int CurrentStageSectionId => 
+        _sectionData != null ? _sectionData.Stage_Section_Id : 0;   // 현재 스테이지섹션 ID
+    public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
 
     private void Awake()
     {
@@ -103,6 +108,12 @@ public class StageManager : MonoBehaviour
     /// <param name="stageId"></param>
     public void StartStage(int stageId)
     {
+        if (DataManager.Instance == null)
+        {
+            Debug.LogError("[StageManager] DataManager.Instance NULL");
+            return;
+        }
+
         _stage = DataManager.Instance.GetData<StageData>(stageId);
         if (_stage == null)
         {
@@ -124,7 +135,7 @@ public class StageManager : MonoBehaviour
             return;
         }
 
-        _currentSection = _sectionData.Section_Start; // 현재 섹션 초기화
+        _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
 
         _killCount = 0;
         _bossKillTarget = _stage.Boss_Summon_Dead_Namber;
@@ -139,6 +150,94 @@ public class StageManager : MonoBehaviour
 
         ChangeState(StageState.Enter);
     }
+
+    #region 섹션 관리 로직
+    /// <summary>
+    /// 현재 섹션 번호가 현재 구간 범위를 넘어가면 다음 Stage_Section_Id로 이동
+    /// </summary>
+    /// <returns></returns>
+    private bool TryAdvanceSectionDataIfNeeded()
+    {
+        if (_sectionData == null)
+        {
+            Debug.LogError("[StageManager] _sectionData NULL");
+            return false;
+        }
+
+        //아직 현재 구간 범위 안이면
+        if (_currentSection >= _sectionData.Section_Start &&
+            _currentSection <= _sectionData.Section_End)
+        {
+            return true;
+        }
+
+        //범위를 벗어난 경우 -> 다음 구간 로드 시도
+        //50->51 넘어갈 때 120001 -> 120002 같은 식으로 연결
+        int nextSectionId = _sectionData.Stage_Section_Id + 1;
+
+        var next = DataManager.Instance.GetData<Stage_SectionData>(nextSectionId);
+        if (next == null)
+        {
+            Debug.LogError($"[StageManager] 다음 SectionData 없음 nextId={nextSectionId}");
+            return false;
+        }
+
+        _sectionData = next;
+
+        //새 구간 로드 후에도 현재 섹션이 범위에 들어오는지 검증
+        bool valid = (_currentSection >= _sectionData.Section_Start &&
+                      _currentSection <= _sectionData.Section_End);
+
+        if (!valid)
+        {
+            Debug.LogError($"[StageManager] 섹션/구간 불일치 section={_currentSection}, range={_sectionData.Section_Start}~{_sectionData.Section_End}, id={_sectionData.Stage_Section_Id}");
+        }
+
+        return valid;
+    }
+
+    /// <summary>
+    /// 감소 시 이전 구간으로 이동
+    /// </summary>
+    /// <returns></returns>
+    private bool TryRetreatSectionDataIfNeeded()
+    {
+        if (_sectionData == null)
+        {
+            Debug.LogError("[StageManager] _sectionData NULL (Retreat)");
+            return false;
+        }
+
+        // 아직 현재 구간 범위 안이면 문제 없음
+        if (_currentSection >= _sectionData.Section_Start &&
+            _currentSection <= _sectionData.Section_End)
+        {
+            return true;
+        }
+
+        // 이전 구간으로 이동 시도
+        int prevSectionId = _sectionData.Stage_Section_Id - 1;
+
+        var prev = DataManager.Instance.GetData<Stage_SectionData>(prevSectionId);
+        if (prev == null)
+        {
+            Debug.LogError($"[StageManager] 이전 SectionData 없음 prevId={prevSectionId}");
+            return false;
+        }
+
+        _sectionData = prev;
+
+        bool valid = (_currentSection >= _sectionData.Section_Start &&
+                      _currentSection <= _sectionData.Section_End);
+
+        if (!valid)
+        {
+            Debug.LogError($"[StageManager] 감소 후 섹션/구간 불일치 section={_currentSection}, range={_sectionData.Section_Start}~{_sectionData.Section_End}, id={_sectionData.Stage_Section_Id}");
+        }
+
+        return valid;
+    }
+    #endregion
 
     /// <summary>
     /// 스테이지 FSM 전환
@@ -199,9 +298,16 @@ public class StageManager : MonoBehaviour
 
             _currentSection++;
 
-            Debug.Log($"Section Clear → {_currentSection}");
+            //증가 직후 현재 구간 범위 체크 -> 필요시 다음 Stage_Section_Id로 이동
+            if (!TryAdvanceSectionDataIfNeeded())
+            {
+                Debug.LogError("[StageManager] 섹션 구간 갱신 실패");
+                return;
+            }
 
-            // 현재 Stage의 Section 끝에 도달했는가?
+            Debug.Log($"섹션 확인 {_currentSection} (SectionId:{CurrentStageSectionId})");
+
+            //현재 Stage의 Section 끝에 도달했는가?
             if (_currentSection > _sectionData.Section_End)
             {
                 int nextStageId = _stage.Stage_Id + 1;
@@ -210,7 +316,7 @@ public class StageManager : MonoBehaviour
 
                 if (nextStage != null)
                 {
-                    Debug.Log($"Stage Transition → {nextStageId}");
+                    Debug.Log($"Stage 구간 바뀜 -> {nextStageId}");
                     StartStage(nextStageId);
                 }
                 else
@@ -318,7 +424,7 @@ public class StageManager : MonoBehaviour
 
     private void ResetSectionAndRespawn()
     {
-        Debug.Log($"[Stage] 실패 → 이전 섹션 이동 전: {_currentSection}");
+        Debug.Log($"[Stage] 실패 -> 이전 섹션 이동 전: {_currentSection}");
 
         _spawnManager.StopNormalSpawn();
         _spawnManager.ForceClearAll();
@@ -328,7 +434,13 @@ public class StageManager : MonoBehaviour
         else
             _currentSection = _sectionData.Section_Start;
 
-        Debug.Log($"[Stage] 실패 → 현재 섹션: {_currentSection}");
+        if (!TryRetreatSectionDataIfNeeded())
+        {
+            Debug.LogError("[StageManager] 이전 구간 이동 실패");
+            return;
+        }
+
+        Debug.Log($"[Stage] 실패 -> 현재 섹션: {_currentSection}");
 
         _killCount = 0;
 
