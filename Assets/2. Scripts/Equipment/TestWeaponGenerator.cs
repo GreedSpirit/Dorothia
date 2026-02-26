@@ -20,7 +20,7 @@ public class TestWeaponGenerator : MonoBehaviour
         Instance = this;
     }
 
-    public void Test()
+    public void Test(int equipLevel)
     {
         if (equipmentInventory == null)
         {
@@ -34,9 +34,9 @@ public class TestWeaponGenerator : MonoBehaviour
         //90% 확률에 맞게 10%만큼의 범위 내에 들어왔을 때 생성하도록 합니다.
         if (rng < 41)
         {
-            //10% 범위 내에서 8개로 나눠, 1.25%의 드랍율을 맞추겠습니다.
-            int result = (rng - 1) / 5;
             int variation = Random.Range(0, 2);
+            //60% 확률로 드랍하는 메인 그룹의 장비와 40% 확률로 드랍하는 서브 그룹의 장비입니다.
+            int result = rng <= 24? (rng - 1) / 6 : (rng - 1)/4;
             EquipData _equipData = new EquipData();
 
             switch (result)
@@ -54,28 +54,27 @@ public class TestWeaponGenerator : MonoBehaviour
                 case 3:
                     _equipData = DataManager.Instance.GetData<EquipData>(53000 + variation);
                     break;
-                case 4:
+                case 6:
                     _equipData = DataManager.Instance.GetData<EquipData>(54000 + variation);
                     break;
-                case 5:
+                case 7:
                     _equipData = DataManager.Instance.GetData<EquipData>(55000 + variation);
                     break;
-                case 6:
+                case 8:
                     _equipData = DataManager.Instance.GetData<EquipData>(56000 + variation);
                     break;
-                case 7:
+                case 9:
                     _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
                     break;
-
             }
             int Rarity = Random.Range(40001, 40006);
-            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, Rarity, 1);
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, Rarity, equipLevel);
 
             if (_equipData != null)
             {
                 Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
                 Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 착용레벨 : {testWeapon.equip_level}");
-                Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}");
+                Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}, 레벨 : {testWeapon.equip_level}");
             }
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
@@ -97,7 +96,7 @@ public class TestWeaponGenerator : MonoBehaviour
     /// <summary>
     /// 테이블 변경사항(종류 추가) 반영 및 확정 지급을 통한 빠른 테스트 지원용 메서드입니다.
     /// </summary>
-    public void Test2()
+    public void Test2(int equipLevel)
     {
         if (equipmentInventory == null)
         {
@@ -111,9 +110,9 @@ public class TestWeaponGenerator : MonoBehaviour
         //90% 확률에 맞게 10%만큼의 범위 내에 들어왔을 때 생성하도록 합니다.
         if (rng < 41)
         {
-            //10% 범위 내에서 8개로 나눠, 1.25%의 드랍율을 맞추겠습니다.
-            int result = (rng - 1) / 5;
             int variation = Random.Range(0, 2);
+            //60% 확률로 드랍하는 메인 그룹의 장비와 40% 확률로 드랍하는 서브 그룹의 장비로 나뉩니다.
+            int result = rng <= 24 ? (rng - 1) / 6 : (rng - 1) / 4;
             EquipData _equipData = new EquipData();
 
             switch (result)
@@ -131,28 +130,27 @@ public class TestWeaponGenerator : MonoBehaviour
                 case 3:
                     _equipData = DataManager.Instance.GetData<EquipData>(53000 + variation);
                     break;
-                case 4:
+                case 6:
                     _equipData = DataManager.Instance.GetData<EquipData>(54000 + variation);
                     break;
-                case 5:
+                case 7:
                     _equipData = DataManager.Instance.GetData<EquipData>(55000 + variation);
                     break;
-                case 6:
+                case 8:
                     _equipData = DataManager.Instance.GetData<EquipData>(56000 + variation);
                     break;
-                case 7:
+                case 9:
                     _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
                     break;
-
             }
             int Rarity = ItemCalculator.RarityCalculator();
-            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, Rarity, 1);
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(),_equipData, Rarity, equipLevel);
 
             if (_equipData != null)
             {
                 Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
                 Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 착용레벨 : {testWeapon.equip_level}");
-                Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}");
+                Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}, 레벨 : {testWeapon.equip_level}");
             }
             testWeapon.equip_type = _equipData.Equip_Type;
             testWeapon.equip_name = _equipData.Equip_Name;
