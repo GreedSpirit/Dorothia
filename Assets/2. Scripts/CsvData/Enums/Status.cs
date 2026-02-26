@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum Status
 {
@@ -11,5 +11,6 @@ public enum Status
     DEF = 7,
     MagicDEF = 8,
     HPRegen = 9,
-    MoveSpeed = 10
+    MoveSpeed = 10,
+    Level_Exp_N = 11
 }

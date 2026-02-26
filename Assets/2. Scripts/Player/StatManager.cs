@@ -5,23 +5,23 @@ using UnityEngine;
 [Serializable]
 public class FinalStat
 {
-    public float baseStat;       // 최초 스탯 (Lv.1)
+    public double baseStat;       // 최초 스탯 (Lv.1)
     public float growAdditiveStat;
     public float equipAdditiveStat;
     public float multiStat;      // 추가 곱셈 비율 (기본 1.0 = 100%)
     public float weight = 1.025f; // 레벨업 가중치
 
-    public FinalStat(float baseStat, float weight = 1.025f)
+    public FinalStat(double baseStat, float weight = 1.025f)
     {
         this.baseStat = baseStat;
         this.weight = weight;
         ResetModifiers();
     }
     // 캐싱된 최종 값
-    private float cachedValue;
+    private double cachedValue;
 
     // 외부에서는 이 프로퍼티만 읽어감 (추가 연산 없음)
-    public float FinalValue => cachedValue;
+    public double FinalValue => cachedValue;
 
     //{(캐릭터 스테이터스 * 레벨업 스테이터스 가중치 * 승급}+ 장비스탯} * (1 + 장비세트 효과 * 패시브)
 
@@ -35,15 +35,16 @@ public class FinalStat
     /// <param name="promotionMulti"></param>
     /// <param name="equipAdd"></param>
     /// <returns></returns>
-    public void UpdateFinalValue(int level = 1, float promotionMulti = 1, float equipAdd = 0)
+    public void UpdateFinalValue(int level, float promotionMulti = 1)
     {
-        float characterGrowth = baseStat * Mathf.Pow(weight, level - 1);
 
-        float totalBeforePercent = (characterGrowth * promotionMulti) + equipAdd;
+        double characterGrowth = (baseStat + growAdditiveStat) * Mathf.Pow(weight, level - 1);
+
+        double totalBeforePercent = (characterGrowth * promotionMulti) + equipAdditiveStat;
 
         cachedValue = totalBeforePercent * multiStat;
     }
-   
+
     public void AddGrowModifier(float add)
     {
         growAdditiveStat += add;
@@ -69,7 +70,7 @@ public class FinalStat
 public class StatManager : MonoBehaviour
 {
     private static StatManager instance;
-    public static StatManager Instance;
+    public static StatManager Instance => instance;
 
     public Dictionary<Status, FinalStat> stats = new Dictionary<Status, FinalStat>();
 
@@ -81,26 +82,52 @@ public class StatManager : MonoBehaviour
             return;
         }
         instance = this;
-        InitStats();
+        //InitStats();
     }
 
-    private void InitStats()
+    //private void InitStats()
+    //{
+    //    foreach (Status type in Enum.GetValues(typeof(Status)))
+    //    {
+    //        // todo : 실제 데이터에서 기본값을 가져와 생성하도록 수정 필요
+    //        stats[type] = new FinalStat(10f);
+    //    }
+    //}
+
+
+    public void InitStats(Character_StatsData data)
     {
-        foreach (Status type in Enum.GetValues(typeof(Status)))
-        {
-            // todo : 실제 데이터에서 기본값을 가져와 생성하도록 수정 필요
-            stats[type] = new FinalStat(10f);
-        }
+        stats[Status.HP] = new FinalStat(data.Character_Hp);
+        stats[Status.ATK] = new FinalStat(data.Character_Atk);
+        stats[Status.MagicATK] = new FinalStat(data.Character_Atk_M);
+        stats[Status.AttackSpeed] = new FinalStat(data.Character_Dps);
+        stats[Status.CriticalChance] = new FinalStat(data.Character_Crt_Prob);
+        stats[Status.CriticalDamage] = new FinalStat(data.Character_Crt_Dmg);
+        stats[Status.DEF] = new FinalStat(data.Character_Def);
+        stats[Status.MagicDEF] = new FinalStat(data.Character_Def_M);
+        stats[Status.HPRegen] = new FinalStat(data.Character_Hp_Regen);
+        stats[Status.MoveSpeed] = new FinalStat(data.Character_Agi);
+        stats[Status.Level_Exp_N] = new FinalStat(data.Character_Level_Exp_N);
+
     }
 
-    // 모든 스탯 영향을 한 번에 계산
-    public void RefreshStats()
+    // 스탯에 변화가 있을 때 무조건 호출
+    // 장비탈착, 스킬탈착, 스탯 업그레이드, 레벨업, 승급
+    public void RefreshStats(int level)
     {
+        // 모든 스탯을 초기화
         foreach (var stat in stats.Values)
         {
             stat.ResetModifiers();
         }
+
+        //스탯 업그레이드 내역 적용
+        //ApplyGrowStat();
+
+        // 패시브 효과 적용
         ApplyPassiveEffects();
+
+        // 장비 효과 적용
         ApplyEquipmentStats();
 
         //int currentLevel = PlayerManager.Instance.Level;
@@ -109,8 +136,13 @@ public class StatManager : MonoBehaviour
         foreach (var stat in stats.Values)
         {
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
-            stat.UpdateFinalValue();
+            stat.UpdateFinalValue(level);
         }
+    }
+
+    private void ApplyGrowStats()
+    {
+
     }
 
     private void ApplyPassiveEffects()
@@ -129,14 +161,26 @@ public class StatManager : MonoBehaviour
 
     private void ApplyEquipmentStats()
     {
-        // 장비의 고정 수치는 add에, 세트효과는 multi에 더함
-        // stats[type].AddModifier(equip.power, equip.powerPercent);
+        if (EquipmentSlotManager.Instance != null)
+        {
+            // 장비 장착 효과
+            foreach (var stat in EquipmentSlotManager.Instance.EquipmentStatus.Keys)
+            {
+                stats[stat].AddEquipModifier(EquipmentSlotManager.Instance.EquipmentStatus[stat]);
+            }
+
+            // 장비 세트 효과
+            foreach (var stat in EquipmentSlotManager.Instance.SetStatus.Keys)
+            {
+                stats[stat].AddMultiModifier(EquipmentSlotManager.Instance.SetStatus[stat]);
+            }
+        }
     }
 
-   
 
-    public float GetStat(Status type)
+
+    public double GetStat(Status type)
     {
-        return stats[type].FinalValue; 
+        return stats[type].FinalValue;
     }
 }

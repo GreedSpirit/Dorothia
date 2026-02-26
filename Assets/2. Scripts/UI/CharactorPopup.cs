@@ -28,16 +28,16 @@ public class CharactorPopup : BaseUI
         //exp.text = 
         //totalPower = 
 
-        hp.text = StatManager.Instance.GetStat(Status.HP).ToString();
-        atk.text = StatManager.Instance.GetStat(Status.ATK).ToString();
-        def.text = StatManager.Instance.GetStat(Status.DEF).ToString();
-        mAtk.text = StatManager.Instance.GetStat(Status.MagicATK).ToString();
-        mDef.text = StatManager.Instance.GetStat(Status.MagicDEF).ToString();
-        cri.text = StatManager.Instance.GetStat(Status.CriticalChance).ToString();
-        criDmg.text = StatManager.Instance.GetStat(Status.CriticalDamage).ToString();
-        mSpd.text = StatManager.Instance.GetStat(Status.MoveSpeed).ToString();
-        aSpd.text = StatManager.Instance.GetStat(Status.AttackSpeed).ToString();
-        regen.text = StatManager.Instance.GetStat(Status.HPRegen).ToString();
+        //hp.text = StatManager.Instance.GetStat(Status.HP).ToString();
+        //atk.text = StatManager.Instance.GetStat(Status.ATK).ToString();
+        //def.text = StatManager.Instance.GetStat(Status.DEF).ToString();
+        //mAtk.text = StatManager.Instance.GetStat(Status.MagicATK).ToString();
+        //mDef.text = StatManager.Instance.GetStat(Status.MagicDEF).ToString();
+        //cri.text = StatManager.Instance.GetStat(Status.CriticalChance).ToString();
+        //criDmg.text = StatManager.Instance.GetStat(Status.CriticalDamage).ToString();
+        //mSpd.text = StatManager.Instance.GetStat(Status.MoveSpeed).ToString();
+        //aSpd.text = StatManager.Instance.GetStat(Status.AttackSpeed).ToString();
+        //regen.text = StatManager.Instance.GetStat(Status.HPRegen).ToString();
     }
 
     protected override void OnClose()

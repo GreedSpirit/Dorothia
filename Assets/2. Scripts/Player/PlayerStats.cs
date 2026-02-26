@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
 {
@@ -22,8 +23,8 @@ public class PlayerStats : MonoBehaviour
     public int _upgrade_scrap_n; //첫업그레이드 시 소비하는 스크랩
     public double _level_exp_n;     //첫레벨업 시 필요한 경험치
 
-    public event Action<float> OnHpChanged;
-    public event Action<float> OnExpChanged;
+    public event Action<float,float> OnHpChanged;
+    public event Action<float,double> OnExpChanged;
     public event Action OnDead;
 
     PlayerCtrl _player;
@@ -31,44 +32,51 @@ public class PlayerStats : MonoBehaviour
     public float Attack => _atk;
 
     //테스트용
-    [SerializeField] private bool _useTestStats = true;
-    [SerializeField] private float _testMaxHp;
-    [SerializeField] private float _testAttack;
+    //[SerializeField] private bool _useTestStats = true;
+    //[SerializeField] private float _testMaxHp;
+    //[SerializeField] private float _testAttack;
 
 
     //TODO 추후 datamanager를 타이틀씬에 배치해두고 Awake로 변경예정
     private void Start()
     {
-        if (_useTestStats)
-        {
-            _maxHp = _testMaxHp;
-            _atk = _testAttack;
+        //CSV 기본값 셋팅
+        _data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
+        
+        //스탯매니저셋팅
+        StatManager.Instance.InitStats(_data);
 
-            Debug.Log("테스트모드");
-        }
-        else
-        {
-            //CSV 기본값 셋팅
-            _data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
+        //TODO : 불러오기 함수 호출
 
-            _level = _data.Character_Level;
-            _maxHp = _data.Character_Hp;
-            _atk = _data.Character_Atk;
-            _atk_m = _data.Character_Atk_M;
-            _dps = _data.Character_Dps;
-            _crt_prob = _data.Character_Crt_Prob;
-            _crt_dmg = _data.Character_Crt_Dmg;
-            _def = _data.Character_Def;
-            _def_m = _data.Character_Def_M;
-            _hp_regen = _data.Character_Hp_Regen;
-            _agi = _data.Character_Agi;
-            _upgrade_scrap_n = _data.Character_Upgrade_Scrap_N;
-            _level_exp_n = _data.Character_Level_Exp_N;
-        }
+
+        //스탯매니저계산값 적용
+        StatManager.Instance.RefreshStats(_level);
+
+
+        //스탯 적용
+        _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
+        _atk = (float)StatManager.Instance.GetStat(Status.ATK);
+        _atk_m = (float)StatManager.Instance.GetStat(Status.MagicATK);
+        _dps = (float)StatManager.Instance.GetStat(Status.AttackSpeed);
+        _crt_prob = (float)StatManager.Instance.GetStat(Status.CriticalChance);
+        _crt_dmg = (float)StatManager.Instance.GetStat(Status.CriticalDamage);
+        _def = (float)StatManager.Instance.GetStat(Status.DEF);
+        _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
+        _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
+        _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);
+        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
 
         _currentHp = _maxHp;
+    }
 
-        Debug.Log($"HP: {_currentHp}/{_maxHp}  ATK: {_atk}");
+    private void OnEnable()
+    {
+        MonsterController.OnMonsterKilled += AddExp;
+    }
+
+    private void OnDisable()
+    {
+        MonsterController.OnMonsterKilled -= AddExp;
     }
 
     //TODO 추후 계산 공식 적용해야됨 현재는 테스트용 가데이터
@@ -86,9 +94,46 @@ public class PlayerStats : MonoBehaviour
     }
 
     //경험치 변화 알림
-    public void AddExp()
+    public void AddExp(int mosterId, bool isBoss)
     {
+        _currentExp += 500f;
 
+        if (_currentExp >= _level_exp_n)
+        {
+            LevelUp();
+        }
+
+        OnExpChanged?.Invoke(_currentExp, _level_exp_n);
+    }
+
+    public void LevelUp()
+    {
+        if (_level >= 200) return;
+
+        //요구했던 경험치량 저장
+        double save_Level_Exp_N = _level_exp_n;
+
+        //레벨업
+        _level++;
+
+        //업된 레벨기준 재계산
+        StatManager.Instance.RefreshStats(_level);
+
+        //스탯 적용
+        _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
+        _atk = (float)StatManager.Instance.GetStat(Status.ATK);
+        _atk_m = (float)StatManager.Instance.GetStat(Status.MagicATK);
+        _dps = (float)StatManager.Instance.GetStat(Status.AttackSpeed);
+        _crt_prob = (float)StatManager.Instance.GetStat(Status.CriticalChance);
+        _crt_dmg = (float)StatManager.Instance.GetStat(Status.CriticalDamage);
+        _def = (float)StatManager.Instance.GetStat(Status.DEF);
+        _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
+        _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
+        _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);        
+        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
+
+        _currentHp = _maxHp;
+        _currentExp -= (float)save_Level_Exp_N;
     }
 
     public void TakeDamage(int amount)
@@ -97,7 +142,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"Damaged: {amount}, HP: {_currentHp}");
 
-        OnHpChanged?.Invoke(_currentHp);
+        OnHpChanged?.Invoke(_currentHp, _maxHp);
 
         if (_currentHp <= 0)
         {
@@ -110,6 +155,6 @@ public class PlayerStats : MonoBehaviour
     public void ResetHPToMax()
     {
         _currentHp = _maxHp;
-        OnHpChanged?.Invoke(_currentHp);
+        OnHpChanged?.Invoke(_currentHp, _maxHp);
     }
 }
