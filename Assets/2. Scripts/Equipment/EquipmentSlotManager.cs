@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EquipmentSlotManager : MonoBehaviour
@@ -10,6 +11,9 @@ public class EquipmentSlotManager : MonoBehaviour
 
     public Dictionary<Status, float> EquipmentStatus = new Dictionary<Status, float>();
     public Dictionary<Status, float> SetStatus = new Dictionary<Status, float>();
+
+    //플레이어스탯에게 알림용 이벤트
+    public event Action OnEquipChanged;
 
     private void Awake()
     {
@@ -105,7 +109,10 @@ public class EquipmentSlotManager : MonoBehaviour
         {
             Debug.Log($"{status} = {EquipmentStatus[status]}");
         }
-        //StatManager.Instance.RefreshStats();
+        //스탯계산 후 적용
+        StatManager.Instance.RefreshStats();
+        //플레이어스탯에게 알림
+        OnEquipChanged?.Invoke();
     }
 
     /// <summary>
