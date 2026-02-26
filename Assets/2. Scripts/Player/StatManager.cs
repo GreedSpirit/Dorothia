@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,15 +35,16 @@ public class FinalStat
     /// <param name="promotionMulti"></param>
     /// <param name="equipAdd"></param>
     /// <returns></returns>
-    public void UpdateFinalValue(int level, float promotionMulti = 1, float equipAdd = 0)
+    public void UpdateFinalValue(int level, float promotionMulti = 1)
     {
-        double characterGrowth = baseStat * Mathf.Pow(weight, level - 1);
 
-        double totalBeforePercent = (characterGrowth * promotionMulti) + equipAdd;
+        double characterGrowth = (baseStat + growAdditiveStat) * Mathf.Pow(weight, level - 1);
+
+        double totalBeforePercent = (characterGrowth * promotionMulti) + equipAdditiveStat;
 
         cachedValue = totalBeforePercent * multiStat;
     }
-   
+
     public void AddGrowModifier(float add)
     {
         growAdditiveStat += add;
@@ -110,14 +111,23 @@ public class StatManager : MonoBehaviour
 
     }
 
-    // 모든 스탯 영향을 한 번에 계산
+    // 스탯에 변화가 있을 때 무조건 호출
+    // 장비탈착, 스킬탈착, 스탯 업그레이드, 레벨업, 승급
     public void RefreshStats(int level)
     {
+        // 모든 스탯을 초기화
         foreach (var stat in stats.Values)
         {
             stat.ResetModifiers();
         }
+
+        //스탯 업그레이드 내역 적용
+        //ApplyGrowStat();
+
+        // 패시브 효과 적용
         ApplyPassiveEffects();
+
+        // 장비 효과 적용
         ApplyEquipmentStats();
 
         //int currentLevel = PlayerManager.Instance.Level;
@@ -128,6 +138,11 @@ public class StatManager : MonoBehaviour
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
             stat.UpdateFinalValue(level);
         }
+    }
+
+    private void ApplyGrowStats()
+    {
+
     }
 
     private void ApplyPassiveEffects()
@@ -146,25 +161,26 @@ public class StatManager : MonoBehaviour
 
     private void ApplyEquipmentStats()
     {
-        // 장비의 고정 수치는 add에, 세트효과는 multi에 더함
-        // stats[type].AddModifier(equip.power, equip.powerPercent);
         if (EquipmentSlotManager.Instance != null)
         {
+            // 장비 장착 효과
             foreach (var stat in EquipmentSlotManager.Instance.EquipmentStatus.Keys)
             {
-                stats[stat].AddEquipModifier(EquipmentSlotManager.Instance.SetStatus[stat]);
+                stats[stat].AddEquipModifier(EquipmentSlotManager.Instance.EquipmentStatus[stat]);
             }
+
+            // 장비 세트 효과
             foreach (var stat in EquipmentSlotManager.Instance.SetStatus.Keys)
             {
-                stats[stat].AddMultiModifier(EquipmentSlotManager.Instance.EquipmentStatus[stat]);
+                stats[stat].AddMultiModifier(EquipmentSlotManager.Instance.SetStatus[stat]);
             }
         }
     }
 
-   
+
 
     public double GetStat(Status type)
     {
-        return stats[type].FinalValue; 
+        return stats[type].FinalValue;
     }
 }
