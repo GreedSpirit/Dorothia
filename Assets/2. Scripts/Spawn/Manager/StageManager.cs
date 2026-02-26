@@ -52,6 +52,8 @@ public class StageManager : MonoBehaviour
     private float _bossStartTime;
     private bool _bossTimerRunning;
 
+    public int CurrentSection => _currentSection;   // 장비드랍 현재 스테이지 섹션용
+
     private void Awake()
     {
         _player = _playerBehaviour as IMonsterTarget;
