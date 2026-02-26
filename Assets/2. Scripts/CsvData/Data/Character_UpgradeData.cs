@@ -16,6 +16,7 @@ public class Character_UpgradeData : ICSVLoad, ITableKey
     public float Character_Upgrade_Hp_Regen { get; set; }
     public float Character_Upgrade_Agi { get; set; }
     public int Character_Upgrade_Scrap { get; set; }
+    public int Character_Upgrade_Max { get; set; }
 
     int ITableKey.Id => Character_Id;
     string ITableKey.Key => Character_Id.ToString();
@@ -46,5 +47,7 @@ public class Character_UpgradeData : ICSVLoad, ITableKey
         if (values.Length > 10 && float.TryParse(values[10], out float v10)) Character_Upgrade_Agi = v10;
         // 11: Character_Upgrade_Scrap (int)
         if (values.Length > 11 && int.TryParse(values[11], out int v11)) Character_Upgrade_Scrap = v11;
+        // 12: Character_Upgrade_Max (int)
+        if (values.Length > 12 && int.TryParse(values[12], out int v12)) Character_Upgrade_Max = v12;
     }
 }
