@@ -51,7 +51,7 @@ public static class ItemCalculator
             int secondGold = Mathf.RoundToInt
                 (
                     Mathf.RoundToInt(equip.equip_price * Mathf.Pow(50, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(50).Equip_Upgrade_Value)) *
-                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                    ItemCalculator.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
                     / DataManager.Instance.GetData<Equip_UpgradeData>(50).Equip_Success_Prob * 0.2f
                 );
 
@@ -81,7 +81,7 @@ public static class ItemCalculator
             int secondGold = Mathf.RoundToInt
                 (
                     Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade).Equip_Upgrade_Value)) *
-                    equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
+                    ItemCalculator.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)
                     / DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Success_Prob * 0.2f
                 );
 
@@ -141,5 +141,97 @@ public static class ItemCalculator
             rarity = 40005;
         }
         return rarity;
+    }
+
+    /// <summary>
+    /// 장비 등급에 맞는 배율을 반환합니다.
+    /// </summary>
+    /// <param name="rarity">장비 등급</param>
+    /// <returns></returns>
+    public static float RarityMultiplyerCalculation(int rarity)
+    {
+        float RarityMultiply = 1f;
+        switch(rarity)
+        {
+            case 40002:
+                RarityMultiply = 1.1f;
+                break;
+            case 40003:
+                RarityMultiply = 1.2f;
+                break;
+            case 40004:
+                RarityMultiply = 1.4f;
+                break;
+            case 40005:
+                RarityMultiply = 1.7f;
+                break;
+            default:
+                RarityMultiply = 1;
+                break;
+        }
+        return RarityMultiply;
+    }
+
+    /// <summary>
+    /// 장비가 가진 스탯의 정보를 기반으로 점수를 책정합니다.
+    /// </summary>
+    /// <param name="equip">점수를 책정할 장비</param>
+    /// <returns></returns>
+    public static int GetEquipScore(Equipment equip)
+    {
+        int score = 0;
+        score += (int)(GetStatus(equip, Status.ATK) * 10);
+        score += (int)(GetStatus(equip, Status.DEF) * 2);
+        score += (int)(GetStatus(equip, Status.MagicDEF) * 2);
+        score += (int)(GetStatus(equip, Status.HP) * 3);
+        score += (int)(GetStatus(equip, Status.HPRegen) * 1);
+        score += (int)(GetStatus(equip, Status.AttackSpeed) * 8);
+        score += (int)(GetStatus(equip, Status.MoveSpeed) * 7);
+        score += (int)(GetStatus(equip, Status.CriticalChance) * 9);
+        score += (int)(GetStatus(equip, Status.CriticalDamage) * 9);
+
+        return score;
+    }
+    public static float GetStatus(Equipment equip, Status equipStatus)
+    {
+        float multiply = 1;
+        if (equip.equip_Upgrade != 0)
+        {
+            multiply += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_id).Equip_Value;
+        }
+
+        //레벨에 따른 상승량 값이 존재함에도 굳이 레벨*비율을 사용하는 이유는 혹시 모를 예외 상황에 대비하기 위함.
+        return equip.equip_status.TryGetValue(equipStatus, out float value) ?
+            value * multiply * ItemCalculator.RarityMultiplyerCalculation(equip.equipment_Rarity)+ equip.equip_level * 1.5f
+            : 0f;
+    }
+
+    /// <summary>
+    /// Rarity 열겨형 기반으로 배율을 받아옵니다.
+    /// </summary>
+    /// <param name="Rarity">해당 장비의 레어도를 나타내는 Rarity 열거형 값</param>
+    /// <returns>해당 배율과 일치하는 강화 배율값</returns>
+    public static float GetEnchantWeightByRarity(Rarity Rarity)
+    {
+        switch (Rarity)
+        {
+            case Rarity.Normal:
+                return 1;
+
+            case Rarity.Uncommon:
+                return 1.5f;
+
+            case Rarity.Rare:
+                return 3;
+
+            case Rarity.Legendary:
+                return 6;
+
+            case Rarity.Mythtic:
+                return 10;
+
+            default:
+                return 1;
+        }
     }
 }

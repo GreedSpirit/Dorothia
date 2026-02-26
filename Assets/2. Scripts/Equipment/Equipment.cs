@@ -283,84 +283,39 @@ public class Equipment
         }
     }
 
+    /// <summary>
+    /// 현재 장비가 가진 모든 스탯의 정보를 출력합니다.
+    /// 인벤토리 정보 패널에서 선택된 장비의 스탯을 출력하기 위함입니다.
+    /// </summary>
+    /// <returns></returns>
     public string GetEquipStatusString()
     {
         StringBuilder stringBuilder = new StringBuilder();
+        //몇 개의 정보를 연달아 적었는지 나타냅니다.
         int i = 0;
         foreach(var stat in equip_status)
         {
+            //(스탯 값) 형태로 출력되도록 합니다. ex) HP 5
             stringBuilder.Append($"{stat.Key} + {stat.Value} ");
+
+            //i가 1이면 두 가지 정보를 출력한 것이므로 일단 내립니다.
+            //최대 4개의 스탯을 가질 수 있으므로 1에서 내리고 난 뒤 추가 작업은 진행하지 않습니다.
             if (i == 1)
+            {
                 stringBuilder.Append("\n");
+            }
+
+            //i값 상승.
             i++;
         }
         return stringBuilder.ToString();
     }
 
     /// <summary>
-    /// Rarity ID값읊 기반으로 배율을 받아옵니다. 
-    /// 데이터 테이블을 통해 이미 장비 정보를 받아왔다면 Rarity 열거형 버전을 사용해주십시오.
+    /// 이름에 해당하는 세트효과가 있는지 확인하고 그 세트효과의 ID값을 가져옵니다.
     /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도 ID값을 갖도록 하는, 장비의 equipment_Rarity 부분.</param>
-    /// <returns>해당 등급 ID값을 기반으로 확인한 등급배율</returns>
-    public float GetEnchantWeightByRarity(int Rarity)
-    {
-        switch (Rarity)
-        {
-            case 40001:
-                return 1;
-
-            case 40002:
-                return 1.5f;
-
-            case 40003:
-                return 3;
-
-            case 40004:
-                return 6;
-
-            case 40005:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
-
-    /// <summary>
-    /// Rarity 열겨형 기반으로 배율을 받아옵니다.
-    /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도를 나타내는 Rarity 열거형 값</param>
-    /// <returns>해당 배율과 일치하는 강화 배율값</returns>
-    public float GetEnchantWeightByRarity(Rarity Rarity)
-    {
-        switch (Rarity)
-        {
-            case Rarity.Normal:
-                return 1;
-
-            case Rarity.Uncommon:
-                return 1.5f;
-
-            case Rarity.Rare:
-                return 3;
-
-            case Rarity.Legendary:
-                return 6;
-
-            case Rarity.Mythtic:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
-
-    public float GetStatus(Status equipStatus)
-    {
-        return equip_status.TryGetValue(equipStatus, out float value) ? value : 0f ;
-    }
-
+    /// <param name="equipName">현 장비의 이름.</param>
+    /// <returns></returns>
     private int GetSetEffect(string equipName)
     {
         Dictionary<int, List<Equip_SetData>> allSets = DataManager.Instance.GetListDict<Equip_SetData>();
@@ -383,19 +338,5 @@ public class Equipment
         icon = handle.Result;
     }
 
-    public int GetEquipScore()
-    {
-        int score = 0;
-        score += (int)(GetStatus(Status.ATK) * 10);
-        score += (int)(GetStatus(Status.DEF) * 2);
-        score += (int)(GetStatus(Status.MagicDEF) * 2);
-        score += (int)(GetStatus(Status.HP) * 3);
-        score += (int)(GetStatus(Status.HPRegen) * 1);
-        score += (int)(GetStatus(Status.AttackSpeed) * 8);
-        score += (int)(GetStatus(Status.MoveSpeed) * 7);
-        score += (int)(GetStatus(Status.CriticalChance) * 9);
-        score += (int)(GetStatus(Status.CriticalDamage) * 9);
-
-        return score;
-    }
+    
 }

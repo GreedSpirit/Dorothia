@@ -82,9 +82,9 @@ public class EquipmentSlotManager : MonoBehaviour
         }
 
         //세트효과를 통해 얻는 스텟을 확인합니다. (세트효과는 여기서 끝)
-        foreach(var a in SetStatus.Keys)
+        foreach(var status in SetStatus.Keys)
         {
-            Debug.Log($"{a} = {SetStatus[a]}");
+            Debug.Log($"{status} = {SetStatus[status]}");
         }
         EquipmentStatus = new Dictionary<Status, float>
         {
@@ -101,9 +101,9 @@ public class EquipmentSlotManager : MonoBehaviour
         };
         //세트효과 적용 후, 현재 장비의 효과를 처리합니다.
         GetAllStatusFromEquipment();
-        foreach(var a in EquipmentStatus.Keys)
+        foreach(var status in EquipmentStatus.Keys)
         {
-            Debug.Log($"{a} = {EquipmentStatus[a]}");
+            Debug.Log($"{status} = {EquipmentStatus[status]}");
         }
         //StatManager.Instance.RefreshStats();
     }
@@ -131,9 +131,9 @@ public class EquipmentSlotManager : MonoBehaviour
             //해당 슬롯에 장착 중인 장비가 존재한다면 아래 코드를 실행합니다.
             if(slot.equipped != null)
             {
-                foreach(var a in slot.equipped.equip_status.Keys)
+                foreach(var status in slot.equipped.equip_status.Keys)
                 {
-                    EquipmentStatus[a] += slot.equipped.GetStatus(a);
+                    EquipmentStatus[status] += ItemCalculator.GetStatus(slot.equipped, status);
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿using Unity.VisualScripting;
+﻿using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,8 @@ public class FusePanel : MonoBehaviour
     [SerializeField] EquipmentInventory inventory;      // 실질적인 인벤토리입니다.
     [SerializeField] CanvasGroup _fusePanelGroup;       // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
     [SerializeField] InventoryPanel _inventoryPanel;    // 인벤토리를 열고 닫기 위한 패널입니다.
+    [SerializeField] Toggle _useWeightToggle;           // 가중치를 사용할지 결정하기 위한 토글입니다.
+    [SerializeField] TextMeshProUGUI _toggleText;
 
     private bool _isUsingWeight;
 
@@ -33,8 +36,14 @@ public class FusePanel : MonoBehaviour
         {
             subSlot2.OnClickSlot();
         });
+        _useWeightToggle.onValueChanged.AddListener(UseWeight);
     }
 
+    private void UseWeight(bool value)
+    {
+        _isUsingWeight = value;
+        _toggleText.text = value == true ? "On" : "Off";
+    }
     private void OnClickFuse()
     {
         //합성 슬롯에 3개의 장비가 전부 채워지지 않으면 합성을 진행하지 않습니다.
