@@ -118,7 +118,7 @@ public class InventoryPanel : MonoBehaviour
 
         _inventoryEquipFunction.ChangeLockButtonState(equip);
         
-        _infoDescription.text = equip.GetEquipStatusString();
+        _infoDescription.text = EquipmentSlotManager.Instance.GetEquipStatusString(equip);
 
         //확인 버튼에 있던 기능을 지우고, 합성 슬롯에 집어넣기 기능을 추가합니다.
         //현재는 장착 기능을 구현하지 않았으므로 예외 처리 없이 바로 넣습니다.

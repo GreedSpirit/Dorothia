@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class EquipmentSlotManager : MonoBehaviour
@@ -144,5 +145,33 @@ public class EquipmentSlotManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 현재 장비가 가진 모든 스탯의 정보를 출력합니다.
+    /// 인벤토리 정보 패널에서 선택된 장비의 스탯을 출력하기 위함입니다.
+    /// </summary>
+    /// <returns></returns>
+    public string GetEquipStatusString(Equipment equip)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        //몇 개의 정보를 연달아 적었는지 나타냅니다.
+        int i = 0;
+        foreach (var stat in equip.equip_status)
+        {
+            //(스탯 값) 형태로 출력되도록 합니다. ex) HP 5
+            stringBuilder.Append($"{stat.Key} + {stat.Value} ");
+
+            //i가 1이면 두 가지 정보를 출력한 것이므로 일단 내립니다.
+            //최대 4개의 스탯을 가질 수 있으므로 1에서 내리고 난 뒤 추가 작업은 진행하지 않습니다.
+            if (i == 1)
+            {
+                stringBuilder.Append("\n");
+            }
+
+            //i값 상승.
+            i++;
+        }
+        return stringBuilder.ToString();
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public static class ItemCalculator
 {
@@ -233,5 +234,161 @@ public static class ItemCalculator
             default:
                 return 1;
         }
+    }
+
+    /// <summary>
+    /// 장비 데이터로부터, 해당 장비에서 유효한 스텟만 가져오는 메서드입니다.
+    /// </summary>
+    /// <param name="equip">스텟을 가져올 장비</param>
+    /// <param name="equipStatus">장비의 스텟</param>
+    /// <param name="equipStatusValue">해당 장비 스텟의 값</param>
+    public static void AddEquipStatus(Equipment equip, Status equipStatus, float equipStatusValue)
+    {
+        //이미 해당 스테이터스가 Dictionary에 존재한다면, 해당 값을 추가합니다.
+        if (equip.equip_status.ContainsKey(equipStatus))
+        {
+            equip.equip_status[equipStatus] += equipStatusValue;
+        }
+        //Dictionary에 존재하지 않을 경우, 값이 0이 아닌 경우에만 포함시킵니다.
+        else if (equipStatusValue != 0)
+        {
+            equip.equip_status.Add(equipStatus, equipStatusValue);
+        }
+    }
+
+    /// <summary>
+    /// 규칙으로부터 확인한 스테이터스에 따라, 데이터로부터 해당 스테이터스의 정보를 받아옵니다.
+    /// </summary>
+    /// <param name="equip">정보를 확인할 장비</param>
+    /// <param name="status">정보를 확인해야 하는 스테이터스</param>
+    /// <param name="data">그 스테이터스를 확인하기 위한 테이블상의 장비데이터</param>
+    public static void AddStatusFromData(Equipment equip, Status status, EquipData data)
+    {
+        switch (status)
+        {
+            case Status.HP:
+                AddEquipStatus(equip, status, data.Equip_Hp);
+                break;
+
+            case Status.ATK:
+                AddEquipStatus(equip, status, data.Equip_Atk);
+                break;
+
+            case Status.MagicATK:
+                AddEquipStatus(equip, status, data.Equip_Atk_M);
+                break;
+
+            case Status.AttackSpeed:
+                AddEquipStatus(equip, status, data.Equip_Dps);
+                break;
+
+            case Status.CriticalChance:
+                AddEquipStatus(equip, status, data.Equip_Crt_Prob);
+                break;
+
+            case Status.CriticalDamage:
+                AddEquipStatus(equip, status, data.Equip_Crt_Dmg);
+                break;
+
+            case Status.DEF:
+                AddEquipStatus(equip, status, data.Equip_Def);
+                break;
+
+            case Status.MagicDEF:
+                AddEquipStatus(equip, status, data.Equip_Def_M);
+                break;
+
+            case Status.HPRegen:
+                AddEquipStatus(equip, status, data.Equip_Hp_Regen);
+                break;
+
+            case Status.MoveSpeed:
+                AddEquipStatus(equip, status, data.Equip_Agi);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 장착 부위별로 지정된 주요 스테이터스와 보조 스테이터스의 규칙대로 스테이터스를 형성합니다.
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="rarity"></param>
+    public static void AddEquipStatusByType(Equipment equip, EquipData data, Rarity rarity)
+    {
+        //규칙에 정의되지 않은 Equip_Type가 들어온 경우 반환합니다.
+        if (!EquipStatusStaticRule._rules.ContainsKey(data.Equip_Type))
+        {
+            return;
+        }
+        //static으로 선언한 규칙에서 만드려는 장비의 Dictionary를 받아옵니다.
+        var rule = EquipStatusStaticRule._rules[data.Equip_Type];
+
+        //해당 장비의 타입을 기반으로, 데이터를 확인하여 메인 스테이터스를 생성합니다.
+        foreach (var main in rule.MainStatus)
+        {
+            AddStatusFromData(equip, main, data);
+        }
+
+        if (!EquipStatusStaticRule.SubStatusCount.ContainsKey(rarity))
+        {
+            return;
+        }
+        //장비의 등급에 따라, 스테이터스를 얼마나 만들지 확인합니다.
+        int subCount = EquipStatusStaticRule.SubStatusCount[rarity];
+
+        //장비의 장착 부위와 등급에 따라, 보조 스테이터스 리스트를 생성합니다.
+        var selectedSubs = new List<Status>();
+
+        //만에 하나 SubStatus에 아무 정보도 담겨있지 않다면 반환합니다.
+        if (rule.SubStatus.Count == 0)
+        {
+            return;
+        }
+
+        //규칙으로 정한 보조 스테이터스의 수량까지 도달하거나(배열 칸 이탈 방지) 추가해야 하는 보조 스테이터스 수량이 될 때까지 아래 코드를 실행합니다.
+        for (int i = 0; i < rule.SubStatus.Count && selectedSubs.Count < subCount; i++)
+        {
+            if (rule.SubStatus != null)
+                //보조 스테이터스 규칙에 따라, 앞에 있는 것부터 순차적으로 추가합니다.
+                selectedSubs.Add(rule.SubStatus[i]);
+        }
+
+        //그럼에도 여전히 스텟을 추가해야 하는 경우라면, 위 코드를 반복합니다.
+        while (selectedSubs.Count < subCount)
+        {
+            //왼쪽 조건문이 초기화되었어도, 오른쪽 조건문은 그대로일 테니 필요하면 멈출 것입니다.
+            for (int i = 0; i < rule.SubStatus.Count && selectedSubs.Count < subCount; i++)
+            {
+                //보조 스테이터스 규칙에 따라, 앞에 있는 것부터 순차적으로 추가합니다.
+                selectedSubs.Add(rule.SubStatus[i]);
+            }
+        }
+
+        //채워넣은 보조 스테이터스 리스트의 각 보조 스테이터스마다 데이터를 확인하여 스테이터스를 생성합니다.
+        foreach (var sub in selectedSubs)
+        {
+            AddStatusFromData(equip, sub, data);
+        }
+    }
+
+    /// <summary>
+    /// 이름에 해당하는 세트효과가 있는지 확인하고 그 세트효과의 ID값을 가져옵니다.
+    /// </summary>
+    /// <param name="equipName">현 장비의 이름.</param>
+    /// <returns></returns>
+    public static int GetSetEffect(string equipName)
+    {
+        //세트효과를 찾습니다.
+        Dictionary<int, List<Equip_SetData>> allSets = DataManager.Instance.GetListDict<Equip_SetData>();
+        int set_id = 0;
+        foreach (var Set in allSets.Values)
+        {
+            foreach (var item in Set)
+            {
+                if (equipName.Contains(item.Equip_Set_Need_Name))
+                    set_id = item.Equip_Set_Id;
+            }
+        }
+        return set_id;
     }
 }
