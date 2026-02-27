@@ -82,7 +82,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //위상황들 다 통과하면 타겟으로 이동
         else
         {
-            Debug.LogError("타겟으로 이동");
+            
             //타겟으로 이동
             player.NavMesh.SetDestination(_target.Transform.position);
 

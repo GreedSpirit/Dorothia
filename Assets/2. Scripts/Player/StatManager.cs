@@ -154,7 +154,7 @@ public class StatManager : MonoBehaviour
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
             stat.UpdateFinalValue(level);
         }
-        Debug.LogError("스탯적용");
+        
     }
 
     private void ApplyGrowStats()

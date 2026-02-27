@@ -70,15 +70,15 @@ public class CharactorPopup : BaseUI
     void UpdateStats()
     {
         level.text = ($"Level. {playerStats._level}");
-        hp.text = StatManager.Instance.GetStat(Status.HP).ToString("F0");
-        atk.text = StatManager.Instance.GetStat(Status.ATK).ToString("F0");
-        def.text = StatManager.Instance.GetStat(Status.DEF).ToString("F0");
-        mAtk.text = StatManager.Instance.GetStat(Status.MagicATK).ToString("F0");
-        mDef.text = StatManager.Instance.GetStat(Status.MagicDEF).ToString("F0");
-        cri.text = StatManager.Instance.GetStat(Status.CriticalChance).ToString("F0");
-        criDmg.text = StatManager.Instance.GetStat(Status.CriticalDamage).ToString("F0");
-        mSpd.text = StatManager.Instance.GetStat(Status.MoveSpeed).ToString("F0");
-        aSpd.text = StatManager.Instance.GetStat(Status.AttackSpeed).ToString("F0");
-        regen.text = StatManager.Instance.GetStat(Status.HPRegen).ToString("F0");
+        hp.text = StatManager.Instance.GetStat(Status.HP).ToString();
+        atk.text = StatManager.Instance.GetStat(Status.ATK).ToString();
+        def.text = StatManager.Instance.GetStat(Status.DEF).ToString();
+        mAtk.text = StatManager.Instance.GetStat(Status.MagicATK).ToString();
+        mDef.text = StatManager.Instance.GetStat(Status.MagicDEF).ToString();
+        cri.text = StatManager.Instance.GetStat(Status.CriticalChance).ToString();
+        criDmg.text = StatManager.Instance.GetStat(Status.CriticalDamage).ToString();
+        mSpd.text = StatManager.Instance.GetStat(Status.MoveSpeed).ToString();
+        aSpd.text = StatManager.Instance.GetStat(Status.AttackSpeed).ToString();
+        regen.text = StatManager.Instance.GetStat(Status.HPRegen).ToString();
     }
 }

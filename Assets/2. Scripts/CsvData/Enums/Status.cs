@@ -2,16 +2,16 @@
 
 public enum Status
 {
-    Level = 1,
-    HP = 2,
-    ATK = 3,
-    MagicATK = 4,
-    AttackSpeed = 5,
-    CriticalChance  = 6,
-    CriticalDamage = 7,
-    DEF = 8,
-    MagicDEF = 9,
-    HPRegen = 10,
-    MoveSpeed = 11,
-    Level_Exp_N = 12
+    HP = 1,
+    ATK = 2,
+    MagicATK = 3,
+    AttackSpeed = 4,
+    CriticalChance  = 5,
+    CriticalDamage = 6,
+    DEF = 7,
+    MagicDEF = 8,
+    HPRegen = 9,
+    MoveSpeed = 10,
+    Level_Exp_N = 11,
+    Level = 12
 }

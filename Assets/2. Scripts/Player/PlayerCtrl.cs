@@ -38,6 +38,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [SerializeField] BoxCollider _hitBox;
     [SerializeField] BoxCollider _hitBox3;
 
+    //이펙트
+    [SerializeField] ParticleSystem _attackEffect1;
+    [SerializeField] ParticleSystem _attackEffect2;
+    [SerializeField] ParticleSystem _attackEffect3;
+    [SerializeField] ParticleSystem _attackHitEffect;
+
     PlayerStats _playerStats;
     Animator _anima;
     NavMeshAgent _navMesh;
@@ -240,6 +246,38 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         _hitBox3.enabled = false;
     }
+
+    public void EnableAttackEffect1()
+    {
+        
+    }
+
+    public void DisableAttackEffect1()
+    {
+        
+    }
+
+    public void EnableAttackEffect2()
+    {
+
+    }
+
+    public void DisableAttackEffect2()
+    {
+
+    }
+
+    public void EnableAttackEffect3()
+    {
+
+    }
+
+    public void DisableAttackEffect3()
+    {
+
+    }
+
+    //public void Disable
 
     //에디터 체크용 기즈모
     void OnDrawGizmos()
