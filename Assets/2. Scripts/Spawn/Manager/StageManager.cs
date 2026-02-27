@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum StageState
@@ -59,6 +60,10 @@ public class StageManager : MonoBehaviour
         _sectionData != null ? _sectionData.Stage_Section_Id : 0;   // 현재 스테이지섹션 ID
     public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
 
+    //UI용
+    public int CurrentStageId => _stage.Stage_Id;
+    public int CurrentProgressSection => _currentSection;
+
     private void Awake()
     {
         _player = _playerBehaviour as IMonsterTarget;
@@ -100,6 +105,7 @@ public class StageManager : MonoBehaviour
         }
     }
 
+    #region 스테이지 진입점
     /// <summary>
     /// 스테이지 시작/재시작 진입점
     /// StageData 로드 -> Monster_SpawnData 로드
@@ -108,34 +114,75 @@ public class StageManager : MonoBehaviour
     /// <param name="stageId"></param>
     public void StartStage(int stageId)
     {
+        InternalStartStage(stageId, -1);
+    }
+
+    public void StartStageFromSection(int stageId, int sectionNumber)
+    {
+        InternalStartStage(stageId, sectionNumber);
+    }
+
+    private void InternalStartStage(int stageId, int startSection)
+    {
         if (DataManager.Instance == null)
         {
-            Debug.LogError("[StageManager] DataManager.Instance NULL");
+            Debug.LogError("[StageManager] DataManager NULL");
             return;
         }
 
         _stage = DataManager.Instance.GetData<StageData>(stageId);
         if (_stage == null)
         {
-            Debug.LogError($"[StageManager] StageData 없음 {stageId}");
+            Debug.LogError("StageData 없음");
             return;
         }
 
         _spawnData = DataManager.Instance.GetData<Monster_SpawnData>(_stage.Monster_Spawn_Id);
         if (_spawnData == null)
         {
-            Debug.LogError($"[StageManager] Monster_SpawnData 없음 {_stage.Monster_Spawn_Id}");
+            Debug.LogError("SpawnData 없음");
             return;
         }
 
-        _sectionData = DataManager.Instance.GetData<Stage_SectionData>(_stage.Stage_Section_Id);
-        if (_sectionData == null)
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+        if (dict == null)
         {
-            Debug.LogError($"[StageManager] SectionData 없음 {_stage.Stage_Section_Id}");
+            Debug.LogError("SectionData Dict NULL");
             return;
         }
 
-        _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
+        var sections = dict.Values
+            .Where(x => x.Stage_Id == stageId)
+            .OrderBy(x => x.Section_Start)
+            .ToList();
+
+        if (sections.Count == 0)
+        {
+            Debug.LogError("해당 Stage에 Section 없음");
+            return;
+        }
+
+        if (startSection <= 0)
+        {
+            _sectionData = sections.First();
+            _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
+        }
+        else
+        {
+            //선택한 섹션이 포함된 구간 찾기
+            var matched = sections.FirstOrDefault(x =>
+                startSection >= x.Section_Start &&
+                startSection <= x.Section_End);
+
+            if (matched == null)
+            {
+                Debug.LogError("선택 섹션에 맞는 구간 없음");
+                return;
+            }
+
+            _sectionData = matched;
+            _currentSection = startSection;
+        }
 
         _killCount = 0;
         _bossKillTarget = _stage.Boss_Summon_Dead_Namber;
@@ -146,10 +193,13 @@ public class StageManager : MonoBehaviour
         OnStageIdChanged?.Invoke(_stage.Stage_Id);
 
         //스폰매니저 초기화 (보스 ID도 같이 넘김)
-        _spawnManager.InitializeStageSpawn(_spawnData, _stage.Same_Spawn_Max, _bossMonsterId);
+        _spawnManager.InitializeStageSpawn(
+            _spawnData, _stage.Same_Spawn_Max, _bossMonsterId
+        );
 
         ChangeState(StageState.Enter);
     }
+    #endregion
 
     #region 섹션 관리 로직
     /// <summary>
