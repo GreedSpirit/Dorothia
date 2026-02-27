@@ -19,15 +19,9 @@ public class TitleManager : MonoBehaviour
 
     }
 
-    [SerializeField] private OptionPopup optionPopup;
-    public void OnClickOptionPopup()
-    {
-        optionPopup.Open();
-    }
-
     public void GameStart()
     {
-        SceneManager.LoadScene("TInGameScene");
+        SceneManager.LoadScene("InGameScene");
     }
 
 }
