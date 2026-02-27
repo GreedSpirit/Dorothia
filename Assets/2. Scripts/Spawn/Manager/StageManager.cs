@@ -345,6 +345,7 @@ public class StageManager : MonoBehaviour
         if (isBoss)
         {
             _bossAlive = false;
+            _bossTimerRunning = false;
 
             _currentSection++;
 
