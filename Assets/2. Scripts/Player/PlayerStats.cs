@@ -29,6 +29,7 @@ public class PlayerStats : MonoBehaviour
     public event Action<float,float> OnHpChanged;
     public event Action<float,double> OnExpChanged;
     public event Action<int> OnLevelChanged;
+    public event Action LevelChanged;
     public event Action OnDead;
 
     PlayerCtrl _player;
@@ -145,6 +146,7 @@ public class PlayerStats : MonoBehaviour
         _currentExp -= (float)save_Level_Exp_N;
 
         OnLevelChanged?.Invoke(_level);
+        LevelChanged?.Invoke();
     }
 
     //장비장착시 호출 함수
