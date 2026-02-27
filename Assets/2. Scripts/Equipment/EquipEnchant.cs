@@ -175,7 +175,7 @@ public class EquipEnchant : MonoBehaviour
             }
 
             //강화 성공 시 강화 구간이 변경되는 경우에만, 강화 보정치를 초기화합니다.
-            if(upgradeData.Equip_Upgrade_Section != DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Upgrade_Section)
+            if(equip.equip_Upgrade > 1 && upgradeData.Equip_Upgrade_Section != DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade -1).Equip_Upgrade_Section)
             {
                 Debug.Log("강화 보정치 초기화");
                 equip.equip_Upgrade_Weight = 0;

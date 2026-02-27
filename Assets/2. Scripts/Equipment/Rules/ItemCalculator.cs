@@ -197,7 +197,7 @@ public static class ItemCalculator
         float multiply = 1;
         if (equip.equip_Upgrade != 0)
         {
-            multiply += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_id).Equip_Value;
+            multiply += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Value;
         }
 
         //레벨에 따른 상승량 값이 존재함에도 굳이 레벨*비율을 사용하는 이유는 혹시 모를 예외 상황에 대비하기 위함.

@@ -78,9 +78,9 @@ public class EquipmentSlotManager : MonoBehaviour
                 //현재 장착 중인 해당 세트의 장비 수가 세트효과를 받기 위해 요구하는 장비 수보다 많을 경우 아래 코드를 실행합니다.
                 if(set.Value >= SetEffect.Equip_Set_Need_Number)
                 {
-                    Debug.Log($"세트 효과 {SetEffect.Equip_Set_Need_Number}셋 적용, {SetEffect.Affection_Equip_Set} {SetEffect.Affection_Equip_Set_Value} 증가");
+                    Debug.Log($"세트 효과 {SetEffect.Equip_Set_Need_Number}셋 적용, {SetEffect.Affection_Equip_Set+1} {SetEffect.Affection_Equip_Set_Value} 증가");
                     //세트 효과로 인해 받는 스텟 증가를 적용합니다.
-                    ApplySetStats(SetEffect.Affection_Equip_Set, SetEffect.Affection_Equip_Set_Value);
+                    ApplySetStats(SetEffect.Affection_Equip_Set+1, SetEffect.Affection_Equip_Set_Value);
                 }
             }
         }

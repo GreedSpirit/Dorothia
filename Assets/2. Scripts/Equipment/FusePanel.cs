@@ -106,14 +106,14 @@ public class FusePanel : MonoBehaviour
         int randomNumber = Random.Range(1, 101);
 
         //성공을 결정할 숫자는, 장비 등급에 따라 결정됩니다.
-        float successNumber = (int)(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Success_Prob * 100);
+        float successNumber = Mathf.RoundToInt(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Success_Prob * 100);
 
         if(_isUsingWeight == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
             if (successNumber + mainEquipment.equip_Fuse_Weight <= 100)
             {
-                successNumber += (int)(mainEquipment.equip_Fuse_Weight * 100);
+                successNumber += Mathf.RoundToInt(mainEquipment.equip_Fuse_Weight * 100);
             }
             //초과하는 경우라면, 100을 달성할 값까지만 사용합니다.
             else

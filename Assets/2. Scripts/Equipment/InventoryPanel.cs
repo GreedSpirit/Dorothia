@@ -74,7 +74,12 @@ public class InventoryPanel : MonoBehaviour
         onInventoryChanged += ResetInfo;
     }
 
-    
+    private void OnDestroy()
+    {
+        onInventoryChanged -= Refresh;
+        onInventoryChanged -= ResetInfo;
+    }
+
     /// <summary>
     /// 슬롯을 선택했을 때의 동작입니다.
     /// </summary>
