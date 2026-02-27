@@ -215,6 +215,11 @@ public class EquipmentExchangeFunction : MonoBehaviour
             {
                 MultiSalvageOrSell(_inventoryPanel.currentPart);
             });
+            _multiRejectButton.onClick.RemoveAllListeners();
+            _multiRejectButton.onClick.AddListener(() =>
+            {
+                SetPanelActiveValue(false);
+            });
         }
     }
 

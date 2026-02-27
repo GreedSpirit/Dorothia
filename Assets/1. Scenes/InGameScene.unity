@@ -225,7 +225,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: GetItem
+  m_text: GoldCheat
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2169,7 +2169,6 @@ GameObject:
   - component: {fileID: 1269436005}
   - component: {fileID: 1269436004}
   - component: {fileID: 1269436003}
-  - component: {fileID: 1269436002}
   m_Layer: 5
   m_Name: GoldCheat
   m_TagString: Untagged
@@ -2194,24 +2193,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 430, y: 500}
+  m_AnchoredPosition: {x: 430, y: 200}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1269436002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1269436000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db3d49877f194b7419c63fec219fe40e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TestWeaponGenerator
-  equipmentInventory: {fileID: 1941664641}
-  weaponSprite: {fileID: 21300000, guid: 9313eb11e1564334db3cec1ecac1fc2d, type: 3}
-  inventoryPanel: {fileID: 324391188}
 --- !u!114 &1269436003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7954,10 +7938,10 @@ PrefabInstance:
       addedObject: {fileID: 347356079}
     - targetCorrespondingSourceObject: {fileID: 3075521370656818259, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 197201448}
+      addedObject: {fileID: 1269436001}
     - targetCorrespondingSourceObject: {fileID: 3075521370656818259, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1269436001}
+      addedObject: {fileID: 197201448}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4195740917564039002, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       insertIndex: 1
