@@ -51,22 +51,28 @@ public class EquipmentExchangeFunction : MonoBehaviour
     {
         _salvageButton.onClick.AddListener(() =>
         {
-            _isSalvage = true;
-            _noticeMessage.text = "정말 분해하시겠습니까?";
-            _buttonText.text = "분해";
-            _noticePanel.alpha = 1;
-            _noticePanel.interactable = true;
-            _noticePanel.blocksRaycasts = true;
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                _isSalvage = true;
+                _noticeMessage.text = "정말 분해하시겠습니까?";
+                _buttonText.text = "분해";
+                _noticePanel.alpha = 1;
+                _noticePanel.interactable = true;
+                _noticePanel.blocksRaycasts = true;
+            }
         });
         //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
         _sellButton.onClick.AddListener(() =>
         {
-            _isSalvage = false;
-            _noticeMessage.text = "정말 판매하시겠습니까?";
-            _buttonText.text = "판매";
-            _noticePanel.alpha = 1;
-            _noticePanel.interactable = true;
-            _noticePanel.blocksRaycasts = true;
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                _isSalvage = false;
+                _noticeMessage.text = "정말 판매하시겠습니까?";
+                _buttonText.text = "판매";
+                _noticePanel.alpha = 1;
+                _noticePanel.interactable = true;
+                _noticePanel.blocksRaycasts = true;
+            }
         });
         //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
         _AcceptButton.onClick.AddListener(() =>
@@ -101,6 +107,45 @@ public class EquipmentExchangeFunction : MonoBehaviour
         _rareButton.onValueChanged.AddListener(IncludeRare);
         _legendaryButton.onValueChanged.AddListener(IncludeLegendary);
         _mythticButton.onValueChanged.AddListener(IncludeMythtic);
+
+        _inventoryPanel.onInventoryChanged += DisableInteractable;
+        _inventoryPanel.onInventoryClosed += DisableInteractable;
+        _inventoryPanel.onInventoryClosed += OnCloseInventory;
+        _inventoryPanel.onClickEquipment += EnableInteractable;
+    }
+
+    private void OnDisable()
+    {
+        _inventoryPanel.onInventoryChanged -= DisableInteractable;
+        _inventoryPanel.onInventoryClosed -= DisableInteractable;
+        _inventoryPanel.onInventoryClosed -= OnCloseInventory;
+        _inventoryPanel.onClickEquipment -= EnableInteractable;
+    }
+
+    public void OnCloseInventory()
+    {
+        if(_multiSelectPanel.alpha > 0)
+        {
+            SetPanelActiveValue(false);
+        }
+        if(_noticePanel.alpha > 0)
+        {
+            _noticePanel.alpha = 0;
+            _noticePanel.interactable = false;
+            _noticePanel.blocksRaycasts = false;
+        }
+    }
+
+    public void EnableInteractable()
+    {
+        _sellButton.interactable = true;
+        _salvageButton.interactable = true;
+    }
+
+    public void DisableInteractable()
+    {
+        _sellButton.interactable = false;
+        _salvageButton.interactable = false;
     }
 
     /// <summary>

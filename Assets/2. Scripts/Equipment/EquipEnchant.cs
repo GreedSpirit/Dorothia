@@ -40,9 +40,12 @@ public class EquipEnchant : MonoBehaviour
         // - 강화 창 갱신하기
         _enchantButton.onClick.AddListener(() =>
         {
-            GetEquipment(_inventoryPanel.GiveEquipmentData());
-            SetPanelActiveValue(true);
-            RefreshEnchantPanel(_equipment);
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                GetEquipment(_inventoryPanel.GiveEquipmentData());
+                SetPanelActiveValue(true);
+                RefreshEnchantPanel(_equipment);
+            }
         });
 
         //강화 진행 버튼에 다음 기능을 추가합니다.
@@ -52,6 +55,28 @@ public class EquipEnchant : MonoBehaviour
             Enchant(_equipment);
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
+
+        _inventoryPanel.onInventoryChanged += DisableInteractable;
+        _inventoryPanel.onInventoryClosed += DisableInteractable;
+        _inventoryPanel.onClickEquipment += EnableInteractable;
+    }
+
+    private void OnDisable()
+    {
+        _inventoryPanel.onInventoryChanged -= DisableInteractable;
+        _inventoryPanel.onInventoryClosed -= DisableInteractable;
+        _inventoryPanel.onClickEquipment -= EnableInteractable;
+    }
+
+
+    public void EnableInteractable()
+    {
+        _enchantButton.interactable = true;
+    }
+
+    public void DisableInteractable()
+    {
+        _enchantButton.interactable = false;
     }
 
     private void UseWeight(bool value)
