@@ -287,6 +287,18 @@ public class InventoryPanel : MonoBehaviour
     {
         if (targetSlot != null)
         {
+            //해당 슬롯에 아무것도 장착되지 않은 상태에서, 이미 다른 슬롯에 장착된 장비를 착용하려 할 경우 반환합니다.
+            if(targetSlot.equipped == null && equip.isEquipped == true)
+            {
+                return;
+            }
+
+            //해당 슬롯에 무언가 장착되어있다면, 장착한 슬롯의 장비와 장착을 시도하는 "장착 중인" 장비의 GUID를 비교하고, 다를 경우 반환합니다.
+            if (targetSlot.equipped != null && equip.isEquipped == true & targetSlot.equipped.InstanceGUID != equip.InstanceGUID)
+            {
+                return;
+            }
+
             //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
             if (targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
             {
