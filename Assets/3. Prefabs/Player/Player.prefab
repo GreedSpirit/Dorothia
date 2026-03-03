@@ -449,9 +449,11 @@ GameObject:
   - component: {fileID: 8532678823205123340}
   - component: {fileID: 1905652078350580133}
   - component: {fileID: 6669346866790367979}
+  - component: {fileID: 6987612538377370365}
   - component: {fileID: 3854378439147051231}
   - component: {fileID: 8166486048015584209}
   - component: {fileID: 3028053722376861038}
+  - component: {fileID: 7455989657034157212}
   m_Layer: 0
   m_Name: Dorothia_Ver02
   m_TagString: Untagged
@@ -514,12 +516,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCtrl
   _enemyLayer:
     serializedVersion: 2
-    m_Bits: 16
+    m_Bits: 128
   _dragDistance: 100
   _enemyFindRange: 20
   _attackRange: 2.5
   _hitBox: {fileID: 5164043311048528979}
   _hitBox3: {fileID: 1984986942889966787}
+  _attackEffect1: {fileID: 0}
+  _attackEffect2: {fileID: 0}
+  _attackEffect3: {fileID: 0}
+  _attackHitEffect: {fileID: 0}
 --- !u!114 &6669346866790367979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -547,6 +553,20 @@ MonoBehaviour:
   _agi: 0
   _upgrade_scrap_n: 0
   _level_exp_n: 0
+--- !u!114 &6987612538377370365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484422475366113726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17de09f1dc12a5345a545e975803f025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSlots
+  _slotCount: 12
+  radius: 1.5
 --- !u!114 &3854378439147051231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -699,7 +719,7 @@ NavMeshAgent:
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8
-  avoidancePriority: 50
+  avoidancePriority: 0
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
@@ -734,8 +754,31 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 10
   m_CollisionDetection: 0
+--- !u!136 &7455989657034157212
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484422475366113726}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.3
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &1529339510848038358
 GameObject:
   m_ObjectHideFlags: 0
@@ -1472,7 +1515,7 @@ Transform:
   m_GameObject: {fileID: 4468215990453395589}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.38, y: 0, z: 0.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
