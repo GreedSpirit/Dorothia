@@ -53,6 +53,10 @@ public class EquipmentExchangeFunction : MonoBehaviour
         {
             if (_inventoryPanel.CheckEquipmentSelected() == true)
             {
+                if(_inventoryPanel.CheckLocked() == true)
+                {
+                    return;
+                }
                 _isSalvage = true;
                 _noticeMessage.text = "정말 분해하시겠습니까?";
                 _buttonText.text = "분해";
@@ -66,6 +70,10 @@ public class EquipmentExchangeFunction : MonoBehaviour
         {
             if (_inventoryPanel.CheckEquipmentSelected() == true)
             {
+                if(_inventoryPanel.CheckLocked() == true)
+                {
+                    return;
+                }
                 _isSalvage = false;
                 _noticeMessage.text = "정말 판매하시겠습니까?";
                 _buttonText.text = "판매";
