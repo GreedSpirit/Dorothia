@@ -29,6 +29,7 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int, int> OnKillCountChanged;
     public static event System.Action<int> OnBossSpawned;
     public static event System.Action<int> OnStageCleared;
+    public static event System.Action<int> OnSectionChanged;
 
     [SerializeField] private MonsterSpawnManager _spawnManager;
     [SerializeField] private int _startStageId = 110001;
@@ -166,6 +167,7 @@ public class StageManager : MonoBehaviour
         {
             _sectionData = sections.First();
             _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
+            OnSectionChanged?.Invoke(_currentSection);
         }
         else
         {
@@ -182,6 +184,7 @@ public class StageManager : MonoBehaviour
 
             _sectionData = matched;
             _currentSection = startSection;
+            OnSectionChanged?.Invoke(_currentSection);
         }
 
         _killCount = 0;
@@ -356,6 +359,8 @@ public class StageManager : MonoBehaviour
                 return;
             }
 
+            OnSectionChanged?.Invoke(_currentSection);
+
             Debug.Log($"섹션 확인 {_currentSection} (SectionId:{CurrentStageSectionId})");
 
             //현재 Stage의 Section 끝에 도달했는가?
@@ -490,6 +495,8 @@ public class StageManager : MonoBehaviour
             Debug.LogError("[StageManager] 이전 구간 이동 실패");
             return;
         }
+
+        OnSectionChanged?.Invoke(_currentSection);
 
         Debug.Log($"[Stage] 실패 -> 현재 섹션: {_currentSection}");
 
