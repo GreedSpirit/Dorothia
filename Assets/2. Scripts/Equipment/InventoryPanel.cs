@@ -373,6 +373,7 @@ public class InventoryPanel : MonoBehaviour
             {
                 equip.SetEquipped(targetSlot.slotIndex);
                 EquipmentSlotManager.Instance.ApplyEquipmentSet();
+                onInventoryChanged?.Invoke();
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(targetSlot.slotType == SlotType.FuseSlot)
