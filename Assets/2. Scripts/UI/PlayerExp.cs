@@ -5,11 +5,11 @@ using UnityEngine.UI;
 public class PlayerExp : MonoBehaviour
 {
     [SerializeField] PlayerStats _playerStats;
-    Image _image;
+    Slider _slider;
 
     private void Awake()
     {
-        _image = GetComponent<Image>();
+        _slider = GetComponent<Slider>();
     }
     private void Start()
     {
@@ -30,11 +30,11 @@ public class PlayerExp : MonoBehaviour
     IEnumerator UpdateDelay()
     {
         yield return null;
-        _image.fillAmount = 0f;
+        _slider.value = 0f;
     }
 
     void ChangeExpBar(float currentExp, double maxExp)
     {
-        _image.fillAmount = (float)(currentExp / maxExp);
+        _slider.value = (float)(currentExp / maxExp);
     }
 }
