@@ -336,13 +336,16 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         {
             case 1: _attackEffect1.Play();
                     _attackHitEffect.Play();
+                Debug.LogWarning("이펙트1");
                 break;
             case 2: _attackEffect2.Play(); 
                     _attackHitEffect.Play();
+                Debug.LogWarning("이펙트2");
                 break;
             case 3: _attackEffect3.Play();
                     _attackHitEffect2.Play();
                     _attackHitEffect3.Play();
+                Debug.LogWarning("이펙트3");
                 break;
         }
     }

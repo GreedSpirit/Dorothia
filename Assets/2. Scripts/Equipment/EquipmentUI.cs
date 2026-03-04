@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EquipmentUI : MonoBehaviour
+public class EquipmentUI : BaseUI
 {
     [Header("버튼의 리스트")]
     [SerializeField] List<EquipSlot> _partSlots;        // 반지 슬롯을 제외한 나머지 버튼을 등록하기 위한 버튼의 리스트입니다.
@@ -131,5 +131,15 @@ public class EquipmentUI : MonoBehaviour
         //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
         _equipmentUIGroup.interactable = value;
         _equipmentUIGroup.blocksRaycasts = value;
+    }
+
+    protected override void OnOpen()
+    {
+        
+    }
+
+    protected override void OnClose()
+    {
+        
     }
 }
