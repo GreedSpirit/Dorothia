@@ -20,12 +20,14 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public NavMeshAgent NavMesh => _navMesh;
     public IMonster CurrentTarget => _currentTarget;
     public bool IsAutoMode => _isAutoMode;
-    public bool IsAttack => _isAttack;
     public float EnemyFindRange => _enemyFindRange;
     public float AttackRange => _attackRange;
 
     //콤보 체크용변수
     public int ComboIndex { get; set; } = 0;
+
+    //공격상태 체크용변수
+    public bool IsAttack { get; set; } = false;
 
     public Transform Transform => transform;
 
@@ -64,9 +66,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     //오토모드 체크용변수
     bool _isAutoMode = false;
 
-    //공격상태 체크용변수
-    bool _isAttack = false;
-
     int _maxComboIndex = 3;
 
     bool _isDead = false;
@@ -95,8 +94,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _playerStats = GetComponent<PlayerStats>();
         _anima = GetComponent<Animator>();
         _navMesh = GetComponent<NavMeshAgent>();
-               
 
+        //네비매쉬로 회전못하게
+        _navMesh.updateRotation = false;
+        
 
         //상태들 캐싱
         _moveState = new PlayerMoveState();
@@ -299,6 +300,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         ComboIndex = 0;
         _anima.SetInteger("Combo", 0);
         _anima.SetBool("Attack", false);
+        Debug.LogWarning("콤보리셋");
 
     }
 

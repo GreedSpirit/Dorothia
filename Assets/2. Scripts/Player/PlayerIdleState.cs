@@ -47,7 +47,7 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
 
     public void Exit(PlayerCtrl player)
     {
-        player.ComboIndex = 0;
+        
     }
     
 }

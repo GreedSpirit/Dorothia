@@ -43,6 +43,9 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
             _target = null;
             //경로 초기화
             player.NavMesh.ResetPath();
+            player.ComboIndex = 0;
+    player.Anima.SetBool("Attack", false);
+    player.Anima.SetInteger("Combo", 0);
             return;
         }
 
@@ -54,13 +57,16 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         {
             _target = null;
             player.NavMesh.ResetPath();
+            player.ComboIndex = 0;
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
             return;
         }
 
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
-            //Debug.Log("공격시작");
+            
             player.NavMesh.ResetPath();
 
             //타겟방향으로 회전
@@ -70,11 +76,13 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
 
             //공격중이 아니라면
             if (player.IsAttack == false)
-            {                
+            {
+                
                 player.Anima.SetBool("Run", false);
                 player.Anima.SetBool("Attack", true);
                 player.Anima.SetInteger("Combo", player.ComboIndex);
-               
+                Debug.LogWarning($"공격시작 + {player.ComboIndex}");
+
             }
             return;
         }
@@ -82,7 +90,18 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //위상황들 다 통과하면 타겟으로 이동
         else
         {
-            
+            player.ComboIndex = 0;
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
+
+            Vector3 dir = (_target.Transform.position - player.transform.position).normalized;
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0f)
+            {
+                //즉시 방향 전환
+                player.transform.rotation = Quaternion.LookRotation(dir);
+            }            
+
             //타겟으로 이동
             player.NavMesh.SetDestination(_target.Transform.position);
 
