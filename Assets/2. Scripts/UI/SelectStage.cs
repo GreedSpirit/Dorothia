@@ -139,11 +139,15 @@ public class SelectStage : BaseUI
 
     private StageStateType GetStageState(int sectionNumber, int currentSection)
     {
-        if (sectionNumber < currentSection)
-            return StageStateType.Cleared;
+        int maxCleared = _stageManager.MaxClearedSection;
 
-        if (sectionNumber == currentSection)
-            return StageStateType.Current;
+        if (sectionNumber <= maxCleared)
+        {
+            if (sectionNumber == currentSection)
+                return StageStateType.Current;
+
+            return StageStateType.Cleared;
+        }
 
         return StageStateType.Locked;
     }
@@ -263,7 +267,7 @@ public class SelectStage : BaseUI
         //선택한 섹션이 있으면 그걸 기준으로 표시
         int referenceSection = (_selectedSection > 0)
             ? _selectedSection
-            : _stageManager.CurrentSection;
+            : _stageManager.MaxClearedSection;
 
         //현재 진행 중인 챕터가 아닌 경우
         if (stageId != _stageManager.CurrentStageId)
