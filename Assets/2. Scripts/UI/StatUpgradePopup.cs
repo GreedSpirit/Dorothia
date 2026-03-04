@@ -1,4 +1,5 @@
 using System.Linq;
+using TMPro;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +8,8 @@ public class StatUpgradePopup : BaseUI
 {
     public enum Type { Upgrade, Promotion };
     private Type type = Type.Upgrade;
+
+    [SerializeField] private TextMeshProUGUI title;
 
     [SerializeField] private ToggleGroup toggles;
     [SerializeField] private Toggle upgradeToggle;
@@ -40,6 +43,8 @@ public class StatUpgradePopup : BaseUI
             promotionPanel.SetActive(!isUpgrade);
 
             type = isUpgrade ? Type.Upgrade : Type.Promotion;
+
+            title.text = isUpgrade ? "캐릭터 업그레이드" : "캐릭터 승급";
         }
     }
 
