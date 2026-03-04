@@ -44,6 +44,7 @@ public class StageManager : MonoBehaviour
     private Stage_SectionData _sectionData; // CSV
 
     private int _currentSection;
+    private int _maxClearedSection;
 
     private StageState _state;
     private int _killCount;
@@ -64,6 +65,7 @@ public class StageManager : MonoBehaviour
     //UI용
     public int CurrentStageId => _stage.Stage_Id;
     public int CurrentProgressSection => _currentSection;
+    public int MaxClearedSection => _maxClearedSection;
 
     private void Awake()
     {
@@ -167,7 +169,6 @@ public class StageManager : MonoBehaviour
         {
             _sectionData = sections.First();
             _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
-            OnSectionChanged?.Invoke(_currentSection);
         }
         else
         {
@@ -184,8 +185,12 @@ public class StageManager : MonoBehaviour
 
             _sectionData = matched;
             _currentSection = startSection;
-            OnSectionChanged?.Invoke(_currentSection);
         }
+
+        if (_maxClearedSection < _currentSection)
+            _maxClearedSection = _currentSection;
+
+        OnSectionChanged?.Invoke(_currentSection);
 
         _killCount = 0;
         _bossKillTarget = _stage.Boss_Summon_Dead_Namber;
@@ -358,6 +363,9 @@ public class StageManager : MonoBehaviour
                 Debug.LogError("[StageManager] 섹션 구간 갱신 실패");
                 return;
             }
+
+            if (_currentSection > _maxClearedSection)
+                _maxClearedSection = _currentSection;
 
             OnSectionChanged?.Invoke(_currentSection);
 

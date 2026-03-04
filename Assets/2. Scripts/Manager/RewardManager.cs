@@ -22,7 +22,7 @@ public class RewardManager : MonoBehaviour
         //골드
 
         //장비
-        //GetEquipment(monsterId, isBoss);
+        GetEquipment(monsterId, isBoss);
     }
 
     private void GetEquipment(int monsterId, bool isBoss)
