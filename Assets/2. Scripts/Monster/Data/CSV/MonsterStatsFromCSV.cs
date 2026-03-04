@@ -33,7 +33,7 @@ public class MonsterStatsFromCSV : IMonsterStats
     public float PreferredRange => _data.Monster_Atk_Range - 0.2f;
 
     public float AgentRadius => 0.5f;
-    public int AvoidancePriorityMin => 20;
+    public int AvoidancePriorityMin => 60;
     public int AvoidancePriorityMax => 60;
 
     //투사체는 SO로 관리
