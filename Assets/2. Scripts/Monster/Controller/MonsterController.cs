@@ -8,8 +8,9 @@ using UnityEngine.AI;
 /// 스폰/회수는 MonsterSpawnManager에서
 /// 공격 로직은 MonsterAttackBase에서 
 /// </summary>
-[RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(CapsuleCollider))]
 public class MonsterController : MonoBehaviour, IMonster
 {
     public static event System.Action<float> OnMonsterKilledLifeTime;   // 동적 스폰 TTK 기록용
@@ -60,13 +61,42 @@ public class MonsterController : MonoBehaviour, IMonster
     public Transform Transform => transform;
     public bool IsAlive => _currentState != MonsterState.Dead;
 
+    private void Reset()
+    {
+        _hitCollider = GetComponent<CapsuleCollider>();
+
+        int layer = LayerMask.NameToLayer("Monster");
+
+        if (layer == -1)
+        {
+            Debug.LogWarning("레이어 'Monster' 없음");
+            return;
+        }
+
+        SetLayerRecursively(gameObject, layer);
+    }
+
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
 
         if (_hitCollider == null)
-            _hitCollider = GetComponent<Collider>();
+            _hitCollider = GetComponent<CapsuleCollider>();
+
+        int layer = LayerMask.NameToLayer("Monster");
+        if (layer != -1)
+            gameObject.layer = layer;
 
         _attack = GetComponent<MonsterAttackBase>();
     }
