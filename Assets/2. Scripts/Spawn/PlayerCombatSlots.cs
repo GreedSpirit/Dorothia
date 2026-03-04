@@ -5,20 +5,23 @@ using System.Collections.Generic;
 /// 플레이어 주변에 근접 몬스터가 
 /// 접근할 위치 슬롯을 생성 및 관리하는 시스템
 /// 
-/// 플레이어 주변에 원형으로 N개의 슬롯 생성
-/// 몬스터는 슬롯을 요청
-/// 비어있는 슬롯만 점유 가능
-/// 몬스터가 죽거나 사라지면 슬롯 반환
+/// 업그레이드 Combat Slot 시스템
+/// - 각도 기반 슬롯
+/// - 랜덤 오프셋
+/// - 자연스러운 포지션 분산
 /// </summary>
 public class PlayerCombatSlots : MonoBehaviour
 {
     [SerializeField] private int _slotCount = 12; // 플레이어 주변 슬롯 수
     [SerializeField] private float radius = 1.5f; // 플레이어 중심에서 슬롯까지 거리
+    [SerializeField] private float randomOffset = 0.35f; // 슬롯 퍼짐 정도
 
     private Transform[] _slots; // 생성된 슬롯 위치 배열
 
     //현재 어떤 몬스터가 어떤 슬롯을 갖고 있는지 관리
     private Dictionary<IMonster, int> _occupied = new();
+
+    private HashSet<int> _usedSlots = new();
 
     private void Awake()
     {
@@ -50,35 +53,88 @@ public class PlayerCombatSlots : MonoBehaviour
     /// </summary>
     /// <param name="monster"></param>
     /// <returns></returns>
-    public Transform RequestSlof(IMonster monster)
+    public Transform RequestSlot(IMonster monster)
     {
-        //점유한 슬롯이 있다면 재사용
-        if (_occupied.ContainsKey(monster))
-            return _slots[_occupied[monster]];
+        //이미 슬롯이 있다면 재사용
+        if (_occupied.TryGetValue(monster, out int slotIndex))
+        {
+            return _slots[slotIndex];
+        }
+
+        int bestIndex = -1;
+        float bestDist = float.MaxValue;
 
         //빈 슬롯 찾기
         for (int i = 0; i < _slots.Length; i++)
         {
-            //아무도 안쓰고 있다면
-            if (!_occupied.ContainsValue(i))
+            if (_usedSlots.Contains(i))
+                continue;
+
+            float dist =
+                (monster.Transform.position - _slots[i].position).sqrMagnitude;
+
+            if (dist < bestDist)
             {
-                //몬스터에게 슬롯 할당
-                _occupied.Add(monster, i);
-                return _slots[i];
+                bestDist = dist;
+                bestIndex = i;
             }
         }
 
-        //빈 슬롯이 없으면 null 반환
-        return null;
+        if (bestIndex != -1)
+        {
+            _occupied.Add(monster, bestIndex);
+            _usedSlots.Add(bestIndex);
+
+            ApplyRandomOffset(bestIndex);
+
+            return _slots[bestIndex];
+        }
+
+        return null; // 빈슬롯 없으면 널반환
     }
 
     /// <summary>
-    /// 몬스터가 사망하거나 전투에서 이탈할 때 호출
+    /// 슬롯 위치 랜덤 분산
     /// </summary>
-    /// <param name="monster"></param>
+    /// <param name="index"></param>
+    private void ApplyRandomOffset(int index)
+    {
+        Vector3 random =
+            new Vector3(
+                Random.Range(-randomOffset, randomOffset),
+                0,
+                Random.Range(-randomOffset, randomOffset));
+
+        _slots[index].localPosition += random;
+    }
+
     public void ReleaseSlot(IMonster monster)
     {
-        if (_occupied.ContainsKey(monster))
+        if (_occupied.TryGetValue(monster, out int index))
+        {
             _occupied.Remove(monster);
+
+            _usedSlots.Remove(index);
+
+            //슬롯 위치 원래대로 복구
+            ResetSlot(index);
+        }
+    }
+
+    /// <summary>
+    /// 슬롯 위치 초기화
+    /// </summary>
+    /// <param name="monster"></param>
+    private void ResetSlot(int index)
+    {
+        float angle = (360f / _slotCount) * index;
+
+        Vector3 dir =
+            new Vector3(
+                Mathf.Cos(angle * Mathf.Deg2Rad),
+                0,
+                Mathf.Sin(angle * Mathf.Deg2Rad));
+
+        _slots[index].localPosition = dir * radius;
     }
 }

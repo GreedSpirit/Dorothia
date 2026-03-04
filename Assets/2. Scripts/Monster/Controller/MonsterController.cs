@@ -274,25 +274,30 @@ public class MonsterController : MonoBehaviour, IMonster
     private void UpdateChase()
     {
         //슬롯 시스템 가져오기
-        if (_slotSystem == null)
+        if (_slotSystem == null && _target is MonoBehaviour mono)
         {
-            _slotSystem =
-                (_target as MonoBehaviour)
-                ?.GetComponent<PlayerCombatSlots>();
+            _slotSystem = mono.GetComponent<PlayerCombatSlots>();
         }
 
         //근접 몬스터일 경우 슬롯 요청
         if (_mySlot == null && _slotSystem != null)
         {
-            _mySlot = _slotSystem.RequestSlof(this);
+            _mySlot = _slotSystem.RequestSlot(this);
         }
 
         Vector3 destination;
 
-        if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
+        if (_stats.Archetype == Monster_Kind.Melee)
         {
-            //근접 몬스터 -> 슬롯 위치 이동
-            destination = _mySlot.position;
+            if (_mySlot == null && _slotSystem != null)
+            {
+                _mySlot = _slotSystem.RequestSlot(this);
+            }
+
+            if (_mySlot != null)
+                destination = _mySlot.position;
+            else
+                destination = _target.Transform.position; // 슬롯 없으면 플레이어
         }
         else
         {
@@ -314,16 +319,40 @@ public class MonsterController : MonoBehaviour, IMonster
             }
         }
 
-        _agent.SetDestination(destination); // NavMesh 설정
+        if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 0.1f)
+        {
+            _agent.SetDestination(destination);
+        }
 
         RotateToTarget(_target.Transform.position); // 항상 플레이어 방향 보게
 
         //공격 가능 여부 판단
-        float attackDistance =
-            DistanceXZ(transform.position, _target.Transform.position);
+        //
+        //근접 몬스터는 슬롯 도착 여부로 공격 판단
+        if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
+        {
+            float slotDistance =
+                DistanceXZ(transform.position, _mySlot.position);
 
-        if (attackDistance <= _stats.AttackRange) // 공격
-            ChangeState(MonsterState.Attack);
+            if (slotDistance < 0.4f) // 슬롯 거의 도착
+            {
+                ChangeState(MonsterState.Attack);
+                return;
+            }
+        }
+        else
+        {
+            //원거리 몬스터는 기존 거리 판단 유지
+            float attackDistance =
+                DistanceXZ(transform.position, _target.Transform.position);
+
+            if (attackDistance <= _stats.AttackRange)
+            {
+                _agent.ResetPath();
+                ChangeState(MonsterState.Attack);
+                return;
+            }
+        }
     }
 
     /// <summary>
@@ -467,6 +496,12 @@ public class MonsterController : MonoBehaviour, IMonster
 
     public void ForceDespawn()
     {
+        if (_slotSystem != null && _mySlot != null)
+        {
+            _slotSystem.ReleaseSlot(this);
+            _mySlot = null;
+        }
+
         CancelInvoke();
         _owner.ReleaseMonster(this, _poolKeyPrefab);
     }
