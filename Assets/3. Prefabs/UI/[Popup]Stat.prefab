@@ -6412,6 +6412,10 @@ PrefabInstance:
       propertyPath: m_fontSizeBase
       value: 36
       objectReference: {fileID: 0}
+    - target: {fileID: 4992946268822818335, guid: e34847ee03f10e9408743e0530b824c0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 3973775601567988671}
     - target: {fileID: 5063759056931510080, guid: e34847ee03f10e9408743e0530b824c0, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -7110,12 +7114,17 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4627371088583777666, guid: e34847ee03f10e9408743e0530b824c0, type: 3}
   m_PrefabInstance: {fileID: 7708438672580959819}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 3973775601567988671}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56425587b387e0c4091ca071d2965abd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatUpgradePopup
+--- !u!1 &3973775601567988671 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6763368678659499508, guid: e34847ee03f10e9408743e0530b824c0, type: 3}
+  m_PrefabInstance: {fileID: 7708438672580959819}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &6960660962196285272 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 747839867206056211, guid: e34847ee03f10e9408743e0530b824c0, type: 3}
