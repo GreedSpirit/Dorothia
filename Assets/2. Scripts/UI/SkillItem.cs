@@ -1,30 +1,48 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SkillItem : MonoBehaviour
 {
-    int scrollId;
+    private SkillKey key;
 
     //이벤트 기반으로 변경하기
     [SerializeField] private TextMeshProUGUI skillNameText;
     [SerializeField] private TextMeshProUGUI skillCountText;
 
-    public void Setup(SkillData data)
+    [SerializeField] private SkillInfoPopup SkillInfo;
+
+    private SkillPanel skillPanel;
+    private Button button;
+
+    private void Awake()
     {
-        scrollId = data.Job_Skill_Id;
+        skillPanel = GetComponentInParent<SkillPanel>();
+
+        button = GetComponent<Button>();
+        button.onClick.AddListener(Click_SkillInfo);
+    }
+
+    public void Setup(SkillKey key)
+    {
+        this.key = key;
+
+        var data = DataManager.Instance.GetData<SkillData>(key.sid);
+
         skillNameText.text = data.Skill_Name;
         skillCountText.text = 0.ToString();
 
         if (SkillManager.Instance != null)
-            SkillManager.Instance.OnAddScroll += UpdateUI;
+            SkillManager.Instance.OnItemCountChanged += UpdateUI;
     }
 
-    private void UpdateUI(int sid)
+    private void UpdateUI(SkillKey key, int count)
     {
-        if (SkillManager.Instance.scrolls.ContainsKey(sid))
-        {
-            skillCountText.text = SkillManager.Instance.scrolls[sid].ToString();
-        }
+        skillCountText.text = $"{count} / 3";
     }
 
+    private void Click_SkillInfo()
+    {
+        skillPanel.Click_SkillInfo(key);
+    }
 }
