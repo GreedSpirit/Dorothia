@@ -124220,13 +124220,10 @@ GameObject:
   - component: {fileID: 5836150658412791258}
   - component: {fileID: 3173110701553596654}
   - component: {fileID: 2749688272120000096}
-  - component: {fileID: 6562805927953155708}
-  - component: {fileID: 100978269956290385}
   - component: {fileID: 6032601063345712281}
   - component: {fileID: 5221601638537756902}
   - component: {fileID: 8420283370444179642}
   - component: {fileID: 2135851063452930395}
-  - component: {fileID: 8710158716219954442}
   m_Layer: 0
   m_Name: Dorothia_Ver02
   m_TagString: Untagged
@@ -124338,36 +124335,6 @@ MonoBehaviour:
   _agi: 5
   _upgrade_scrap_n: 0
   _level_exp_n: 0
---- !u!114 &6562805927953155708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7507282556335131659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17de09f1dc12a5345a545e975803f025, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSlots
-  _slotCount: 12
-  radius: 1.5
-  randomOffset: 0.35
---- !u!114 &100978269956290385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7507282556335131659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17de09f1dc12a5345a545e975803f025, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSlots
-  _slotCount: 12
-  radius: 1.5
-  randomOffset: 0.35
 --- !u!114 &6032601063345712281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124570,29 +124537,6 @@ Rigidbody:
   m_Constraints: 10
   m_CollisionDetection: 0
 --- !u!136 &2135851063452930395
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7507282556335131659}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.3
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.5, z: 0}
---- !u!136 &8710158716219954442
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
