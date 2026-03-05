@@ -23,7 +23,6 @@ public class InventoryEquipFunction : MonoBehaviour
         _autoEquipButtons.onClick.AddListener(() =>
         {
             AutoEquip(_inventoryPanel.currentPart);
-            _inventoryPanel.SetPanelActiveValue(false);
             _inventoryPanel.onInventoryChanged?.Invoke();
         });
     }
