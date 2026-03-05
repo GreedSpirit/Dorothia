@@ -21,7 +21,9 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
         if (_target == null)
         {
             //공격중일수도있으니깐 꺼주기
+            player.ComboIndex = 0;
             player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
             return;
         }
 

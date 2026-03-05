@@ -44,8 +44,8 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
             //경로 초기화
             player.NavMesh.ResetPath();
             player.ComboIndex = 0;
-    player.Anima.SetBool("Attack", false);
-    player.Anima.SetInteger("Combo", 0);
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
             return;
         }
 
