@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 public class MonsterStatsFromCSV : IMonsterStats
 {
@@ -6,7 +7,10 @@ public class MonsterStatsFromCSV : IMonsterStats
     private readonly Monster_ValueData _value;
     private readonly ProjectileData _projectile;
 
-    public MonsterStatsFromCSV(Monster_Data data, Monster_ValueData value, ProjectileDatabase projectileDb)
+    private float _agentRadius = 0.2f;
+
+    public MonsterStatsFromCSV(Monster_Data data, Monster_ValueData value, 
+        ProjectileDatabase projectileDb, MonsterController prefab)
     {
         _data = data;
         _value = value;
@@ -14,6 +18,13 @@ public class MonsterStatsFromCSV : IMonsterStats
         if (_data.Projectile_Id > 0 && projectileDb != null)
         {
             _projectile = projectileDb.Get(_data.Projectile_Id);
+        }
+
+        if (prefab != null)
+        {
+            var agent = prefab.GetComponent<NavMeshAgent>();
+            if (agent != null)
+                _agentRadius = agent.radius;
         }
     }
 
@@ -32,7 +43,7 @@ public class MonsterStatsFromCSV : IMonsterStats
     public float AttackCooldown => 1f;
     public float PreferredRange => _data.Monster_Atk_Range - 0.2f;
 
-    public float AgentRadius => 0.5f;
+    public float AgentRadius => _agentRadius;
     public int AvoidancePriorityMin => 60;
     public int AvoidancePriorityMax => 60;
 
