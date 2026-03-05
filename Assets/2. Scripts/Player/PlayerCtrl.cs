@@ -179,6 +179,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (_currentState == newState) return;
 
         Debug.Log($"상태 변경: {_currentState.GetType().Name} → {newState.GetType().Name}");
+
+        //_hitBox.enabled = false;
+        //_hitBox3.enabled = false;
         //상태아웃시키고 전환
         _currentState.Exit(this);
         _currentState = newState;

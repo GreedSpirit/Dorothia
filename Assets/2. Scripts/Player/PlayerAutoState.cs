@@ -52,6 +52,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //널체크 후 타겟과 플레이어 거리
         float targetDistance = Vector3.Distance(player.transform.position, _target.Transform.position);
 
+        //TODO : 타겟과 플레이어 거리가 추적범위(탐지거리의 +5f) 보다 멀면 해제인데 공격범위보다 공격범위기준으로 초기화해야되지 않나? 추후 체크해야됨
         //추적범위 벗어나면 타겟해제 하고 리턴
         if (targetDistance > _chaseRange)
         {
