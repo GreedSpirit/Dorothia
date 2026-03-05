@@ -9,6 +9,7 @@ public class Stage_SectionData : ICSVLoad, ITableKey
     public int Section_End { get; set; }
     public int Equip_Drop_Level { get; set; }
     public float Equip_Drop_Prob { get; set; }
+    public int Stage_Id { get; set; }
 
     int ITableKey.Id => Stage_Section_Id;
     string ITableKey.Key => Stage_Section_Id.ToString();
@@ -25,5 +26,7 @@ public class Stage_SectionData : ICSVLoad, ITableKey
         if (values.Length > 3 && int.TryParse(values[3], out int v3)) Equip_Drop_Level = v3;
         // 4: Equip_Drop_Prob (float)
         if (values.Length > 4 && float.TryParse(values[4], out float v4)) Equip_Drop_Prob = v4;
+        // 5: Stage_Id (int)
+        if (values.Length > 5 && int.TryParse(values[5], out int v5)) Stage_Id = v5;
     }
 }

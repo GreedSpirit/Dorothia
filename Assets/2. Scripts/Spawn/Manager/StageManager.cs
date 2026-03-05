@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public enum StageState
 {
@@ -27,6 +29,7 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int, int> OnKillCountChanged;
     public static event System.Action<int> OnBossSpawned;
     public static event System.Action<int> OnStageCleared;
+    public static event System.Action<int> OnSectionChanged;
 
     [SerializeField] private MonsterSpawnManager _spawnManager;
     [SerializeField] private int _startStageId = 110001;
@@ -41,6 +44,7 @@ public class StageManager : MonoBehaviour
     private Stage_SectionData _sectionData; // CSV
 
     private int _currentSection;
+    private int _maxClearedSection;
 
     private StageState _state;
     private int _killCount;
@@ -52,7 +56,16 @@ public class StageManager : MonoBehaviour
     private float _bossStartTime;
     private bool _bossTimerRunning;
 
-    public int CurrentSection => _currentSection;   // 장비드랍 현재 스테이지 섹션용
+    //RewardManager용
+    public int CurrentSection => _currentSection;                   // 현재 섹션
+    public int CurrentStageSectionId => 
+        _sectionData != null ? _sectionData.Stage_Section_Id : 0;   // 현재 스테이지섹션 ID
+    public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
+
+    //UI용
+    public int CurrentStageId => _stage.Stage_Id;
+    public int CurrentProgressSection => _currentSection;
+    public int MaxClearedSection => _maxClearedSection;
 
     private void Awake()
     {
@@ -95,6 +108,7 @@ public class StageManager : MonoBehaviour
         }
     }
 
+    #region 스테이지 진입점
     /// <summary>
     /// 스테이지 시작/재시작 진입점
     /// StageData 로드 -> Monster_SpawnData 로드
@@ -103,28 +117,80 @@ public class StageManager : MonoBehaviour
     /// <param name="stageId"></param>
     public void StartStage(int stageId)
     {
+        InternalStartStage(stageId, -1);
+    }
+
+    public void StartStageFromSection(int stageId, int sectionNumber)
+    {
+        InternalStartStage(stageId, sectionNumber);
+    }
+
+    private void InternalStartStage(int stageId, int startSection)
+    {
+        if (DataManager.Instance == null)
+        {
+            Debug.LogError("[StageManager] DataManager NULL");
+            return;
+        }
+
         _stage = DataManager.Instance.GetData<StageData>(stageId);
         if (_stage == null)
         {
-            Debug.LogError($"[StageManager] StageData 없음 {stageId}");
+            Debug.LogError("StageData 없음");
             return;
         }
 
         _spawnData = DataManager.Instance.GetData<Monster_SpawnData>(_stage.Monster_Spawn_Id);
         if (_spawnData == null)
         {
-            Debug.LogError($"[StageManager] Monster_SpawnData 없음 {_stage.Monster_Spawn_Id}");
+            Debug.LogError("SpawnData 없음");
             return;
         }
 
-        _sectionData = DataManager.Instance.GetData<Stage_SectionData>(_stage.Stage_Section_Id);
-        if (_sectionData == null)
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+        if (dict == null)
         {
-            Debug.LogError($"[StageManager] SectionData 없음 {_stage.Stage_Section_Id}");
+            Debug.LogError("SectionData Dict NULL");
             return;
         }
 
-        _currentSection = _sectionData.Section_Start; // 현재 섹션 초기화
+        var sections = dict.Values
+            .Where(x => x.Stage_Id == stageId)
+            .OrderBy(x => x.Section_Start)
+            .ToList();
+
+        if (sections.Count == 0)
+        {
+            Debug.LogError("해당 Stage에 Section 없음");
+            return;
+        }
+
+        if (startSection <= 0)
+        {
+            _sectionData = sections.First();
+            _currentSection = _sectionData.Section_Start; // 현재 섹션은 현재 구간의 start로 확정
+        }
+        else
+        {
+            //선택한 섹션이 포함된 구간 찾기
+            var matched = sections.FirstOrDefault(x =>
+                startSection >= x.Section_Start &&
+                startSection <= x.Section_End);
+
+            if (matched == null)
+            {
+                Debug.LogError("선택 섹션에 맞는 구간 없음");
+                return;
+            }
+
+            _sectionData = matched;
+            _currentSection = startSection;
+        }
+
+        if (_maxClearedSection < _currentSection)
+            _maxClearedSection = _currentSection;
+
+        OnSectionChanged?.Invoke(_currentSection);
 
         _killCount = 0;
         _bossKillTarget = _stage.Boss_Summon_Dead_Namber;
@@ -135,10 +201,101 @@ public class StageManager : MonoBehaviour
         OnStageIdChanged?.Invoke(_stage.Stage_Id);
 
         //스폰매니저 초기화 (보스 ID도 같이 넘김)
-        _spawnManager.InitializeStageSpawn(_spawnData, _stage.Same_Spawn_Max, _bossMonsterId);
+        _spawnManager.InitializeStageSpawn(
+            _spawnData, _stage.Same_Spawn_Max, _bossMonsterId
+        );
 
         ChangeState(StageState.Enter);
     }
+    #endregion
+
+    #region 섹션 관리 로직
+    /// <summary>
+    /// 현재 섹션 번호가 현재 구간 범위를 넘어가면 다음 Stage_Section_Id로 이동
+    /// </summary>
+    /// <returns></returns>
+    private bool TryAdvanceSectionDataIfNeeded()
+    {
+        if (_sectionData == null)
+        {
+            Debug.LogError("[StageManager] _sectionData NULL");
+            return false;
+        }
+
+        //아직 현재 구간 범위 안이면
+        if (_currentSection >= _sectionData.Section_Start &&
+            _currentSection <= _sectionData.Section_End)
+        {
+            return true;
+        }
+
+        //범위를 벗어난 경우 -> 다음 구간 로드 시도
+        //50->51 넘어갈 때 120001 -> 120002 같은 식으로 연결
+        int nextSectionId = _sectionData.Stage_Section_Id + 1;
+
+        var next = DataManager.Instance.GetData<Stage_SectionData>(nextSectionId);
+        if (next == null)
+        {
+            Debug.LogError($"[StageManager] 다음 SectionData 없음 nextId={nextSectionId}");
+            return false;
+        }
+
+        _sectionData = next;
+
+        //새 구간 로드 후에도 현재 섹션이 범위에 들어오는지 검증
+        bool valid = (_currentSection >= _sectionData.Section_Start &&
+                      _currentSection <= _sectionData.Section_End);
+
+        if (!valid)
+        {
+            Debug.LogError($"[StageManager] 섹션/구간 불일치 section={_currentSection}, range={_sectionData.Section_Start}~{_sectionData.Section_End}, id={_sectionData.Stage_Section_Id}");
+        }
+
+        return valid;
+    }
+
+    /// <summary>
+    /// 감소 시 이전 구간으로 이동
+    /// </summary>
+    /// <returns></returns>
+    private bool TryRetreatSectionDataIfNeeded()
+    {
+        if (_sectionData == null)
+        {
+            Debug.LogError("[StageManager] _sectionData NULL (Retreat)");
+            return false;
+        }
+
+        // 아직 현재 구간 범위 안이면 문제 없음
+        if (_currentSection >= _sectionData.Section_Start &&
+            _currentSection <= _sectionData.Section_End)
+        {
+            return true;
+        }
+
+        // 이전 구간으로 이동 시도
+        int prevSectionId = _sectionData.Stage_Section_Id - 1;
+
+        var prev = DataManager.Instance.GetData<Stage_SectionData>(prevSectionId);
+        if (prev == null)
+        {
+            Debug.LogError($"[StageManager] 이전 SectionData 없음 prevId={prevSectionId}");
+            return false;
+        }
+
+        _sectionData = prev;
+
+        bool valid = (_currentSection >= _sectionData.Section_Start &&
+                      _currentSection <= _sectionData.Section_End);
+
+        if (!valid)
+        {
+            Debug.LogError($"[StageManager] 감소 후 섹션/구간 불일치 section={_currentSection}, range={_sectionData.Section_Start}~{_sectionData.Section_End}, id={_sectionData.Stage_Section_Id}");
+        }
+
+        return valid;
+    }
+    #endregion
 
     /// <summary>
     /// 스테이지 FSM 전환
@@ -196,12 +353,25 @@ public class StageManager : MonoBehaviour
         if (isBoss)
         {
             _bossAlive = false;
+            _bossTimerRunning = false;
 
             _currentSection++;
 
-            Debug.Log($"Section Clear → {_currentSection}");
+            //증가 직후 현재 구간 범위 체크 -> 필요시 다음 Stage_Section_Id로 이동
+            if (!TryAdvanceSectionDataIfNeeded())
+            {
+                Debug.LogError("[StageManager] 섹션 구간 갱신 실패");
+                return;
+            }
 
-            // 현재 Stage의 Section 끝에 도달했는가?
+            if (_currentSection > _maxClearedSection)
+                _maxClearedSection = _currentSection;
+
+            OnSectionChanged?.Invoke(_currentSection);
+
+            Debug.Log($"섹션 확인 {_currentSection} (SectionId:{CurrentStageSectionId})");
+
+            //현재 Stage의 Section 끝에 도달했는가?
             if (_currentSection > _sectionData.Section_End)
             {
                 int nextStageId = _stage.Stage_Id + 1;
@@ -210,7 +380,7 @@ public class StageManager : MonoBehaviour
 
                 if (nextStage != null)
                 {
-                    Debug.Log($"Stage Transition → {nextStageId}");
+                    Debug.Log($"Stage 구간 바뀜 -> {nextStageId}");
                     StartStage(nextStageId);
                 }
                 else
@@ -318,7 +488,7 @@ public class StageManager : MonoBehaviour
 
     private void ResetSectionAndRespawn()
     {
-        Debug.Log($"[Stage] 실패 → 이전 섹션 이동 전: {_currentSection}");
+        Debug.Log($"[Stage] 실패 -> 이전 섹션 이동 전: {_currentSection}");
 
         _spawnManager.StopNormalSpawn();
         _spawnManager.ForceClearAll();
@@ -328,7 +498,15 @@ public class StageManager : MonoBehaviour
         else
             _currentSection = _sectionData.Section_Start;
 
-        Debug.Log($"[Stage] 실패 → 현재 섹션: {_currentSection}");
+        if (!TryRetreatSectionDataIfNeeded())
+        {
+            Debug.LogError("[StageManager] 이전 구간 이동 실패");
+            return;
+        }
+
+        OnSectionChanged?.Invoke(_currentSection);
+
+        Debug.Log($"[Stage] 실패 -> 현재 섹션: {_currentSection}");
 
         _killCount = 0;
 

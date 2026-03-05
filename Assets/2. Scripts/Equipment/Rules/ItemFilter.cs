@@ -14,6 +14,11 @@ public static class ItemFilter
                 Debug.Log("장착된 장비는 적용 안됨!");
                 continue;
             }
+            if(equip.isLocked == true)
+            {
+                Debug.Log("잠금 상태의 장비는 적용 안됨!");
+                continue;
+            }
             if (Upgraded == false && equip.equip_Upgrade != 0)
             {
                 Debug.Log("업그레이드된 장비는 불가능!");

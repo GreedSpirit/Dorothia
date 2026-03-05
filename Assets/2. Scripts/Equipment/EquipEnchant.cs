@@ -14,6 +14,9 @@ public class EquipEnchant : MonoBehaviour
     [Header("강화 창 내의 강화 버튼")]
     [SerializeField] Button _proceedEnchantButton;                    // 실제 장비 강화를 진행하기 위한 버튼. 강화 창에서의 장비 강화 진행용 버튼을 연결해 주십시오.
 
+    [SerializeField] Toggle _useWeightToggle;                         // 가중치 사용 여부를 결정할 토글입니다.
+    [SerializeField] TextMeshProUGUI _toggleText;                     // 토글 클릭 시 유저가 확인할 수 있도록 하는, 토글의 체크 표시를 대체할텍스트입니다.
+
     [Header("강화 대상 장비 이미지 표현용")]
     [SerializeField] Image _beforeEnchantEquipment;                   // 장비 강화가 성공하기 전, 인벤토리 내의 해당 장비 이미지입니다.
     [SerializeField] Image _afterEnchantEquipment;                    // 장비 강화가 성공하고 난 후, 해당 장비를 보여주기 위한 이미지입니다.
@@ -37,9 +40,12 @@ public class EquipEnchant : MonoBehaviour
         // - 강화 창 갱신하기
         _enchantButton.onClick.AddListener(() =>
         {
-            GetEquipment(_inventoryPanel.GiveEquipmentData());
-            SetPanelActiveValue(true);
-            RefreshEnchantPanel(_equipment);
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                GetEquipment(_inventoryPanel.GiveEquipmentData());
+                SetPanelActiveValue(true);
+                RefreshEnchantPanel(_equipment);
+            }
         });
 
         //강화 진행 버튼에 다음 기능을 추가합니다.
@@ -48,6 +54,35 @@ public class EquipEnchant : MonoBehaviour
         {
             Enchant(_equipment);
         });
+        _useWeightToggle.onValueChanged.AddListener(UseWeight);
+
+        _inventoryPanel.onInventoryChanged += DisableInteractable;
+        _inventoryPanel.onInventoryClosed += DisableInteractable;
+        _inventoryPanel.onClickEquipment += EnableInteractable;
+    }
+
+    private void OnDisable()
+    {
+        _inventoryPanel.onInventoryChanged -= DisableInteractable;
+        _inventoryPanel.onInventoryClosed -= DisableInteractable;
+        _inventoryPanel.onClickEquipment -= EnableInteractable;
+    }
+
+
+    public void EnableInteractable()
+    {
+        _enchantButton.interactable = true;
+    }
+
+    public void DisableInteractable()
+    {
+        _enchantButton.interactable = false;
+    }
+
+    private void UseWeight(bool value)
+    {
+        _isUsingFailureCount = value;
+        _toggleText.text = value == true ? "On" : "Off";
     }
 
     /// <summary>
@@ -91,7 +126,7 @@ public class EquipEnchant : MonoBehaviour
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         _costGold = Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
-                * equip.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
+                * ItemCalculator.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         _costGoldText.text = $"{_costGold}<color=orange>G</color>";
@@ -158,9 +193,16 @@ public class EquipEnchant : MonoBehaviour
             //강화 수치를 높입니다.
             equip.equip_Upgrade++;
 
-            //강화 성공 시 강화 구간이 변경되는 경우에만, 강화 보정치를 초기화합니다.
-            if(equip.equip_Upgrade % 10 == 1)
+            //강화 보정치를 사용해서 강화했다면 0으로 초기화시킵니다.
+            if(_isUsingFailureCount == true)
             {
+                equip.equip_Upgrade_Weight = 0;
+            }
+
+            //강화 성공 시 강화 구간이 변경되는 경우에만, 강화 보정치를 초기화합니다.
+            if(equip.equip_Upgrade > 1 && upgradeData.Equip_Upgrade_Section != DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade -1).Equip_Upgrade_Section)
+            {
+                Debug.Log("강화 보정치 초기화");
                 equip.equip_Upgrade_Weight = 0;
             }
         }
@@ -174,12 +216,12 @@ public class EquipEnchant : MonoBehaviour
                 equip.equip_Upgrade_Weight = 0;
             }
 
-            Debug.Log("강화에 실패하였습니다. 보정값을 1 획득합니다.");
-
             //강화 보정값을 상승시킵니다. 현재 보정값이 비어있는 데이터가 존재하므로, 0인 경우 0.1f라는 임시 값을 넣어주겠습니다.
             equip.equip_Upgrade_Weight += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Upgrade_Failure != 0?
                 DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade + 1).Equip_Upgrade_Failure:
                 0.1f;
+
+            Debug.Log($"강화에 실패하였습니다. 보정값을 획득합니다. 현재 보정값 : {equip.equip_Upgrade_Weight}");
         }
 
         RefreshEnchantPanel(equip);

@@ -43,24 +43,31 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
             _target = null;
             //경로 초기화
             player.NavMesh.ResetPath();
+            player.ComboIndex = 0;
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
             return;
         }
 
         //널체크 후 타겟과 플레이어 거리
         float targetDistance = Vector3.Distance(player.transform.position, _target.Transform.position);
 
+        //TODO : 타겟과 플레이어 거리가 추적범위(탐지거리의 +5f) 보다 멀면 해제인데 공격범위보다 공격범위기준으로 초기화해야되지 않나? 추후 체크해야됨
         //추적범위 벗어나면 타겟해제 하고 리턴
         if (targetDistance > _chaseRange)
         {
             _target = null;
             player.NavMesh.ResetPath();
+            player.ComboIndex = 0;
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
             return;
         }
 
         //공격범위안에 있으면 공격
         if (targetDistance <= player.AttackRange)
         {
-            //Debug.Log("공격시작");
+            
             player.NavMesh.ResetPath();
 
             //타겟방향으로 회전
@@ -70,11 +77,13 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
 
             //공격중이 아니라면
             if (player.IsAttack == false)
-            {                
+            {
+                
                 player.Anima.SetBool("Run", false);
                 player.Anima.SetBool("Attack", true);
                 player.Anima.SetInteger("Combo", player.ComboIndex);
-               
+                Debug.LogWarning($"공격시작 + {player.ComboIndex}");
+
             }
             return;
         }
@@ -82,7 +91,18 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //위상황들 다 통과하면 타겟으로 이동
         else
         {
-            Debug.LogError("타겟으로 이동");
+            player.ComboIndex = 0;
+            player.Anima.SetBool("Attack", false);
+            player.Anima.SetInteger("Combo", 0);
+
+            Vector3 dir = (_target.Transform.position - player.transform.position).normalized;
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0f)
+            {
+                //즉시 방향 전환
+                player.transform.rotation = Quaternion.LookRotation(dir);
+            }            
+
             //타겟으로 이동
             player.NavMesh.SetDestination(_target.Transform.position);
 

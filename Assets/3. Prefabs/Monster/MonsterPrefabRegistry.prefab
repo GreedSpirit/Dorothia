@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6803297988269231235
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6904390405178131423}
+  - component: {fileID: 2088776518925261541}
+  m_Layer: 0
+  m_Name: MonsterPrefabRegistry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6904390405178131423
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6803297988269231235}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2088776518925261541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6803297988269231235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcf79858b920e75479cf38f4058c1f5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterPrefabRegistry
+  _entries:
+  - monsterId: 90001
+    prefab: {fileID: 7820093925955608226, guid: 7fb4a952218b14143b370168fb81053f, type: 3}
+  - monsterId: 90006
+    prefab: {fileID: 7661879616201072358, guid: 2713630a60a6fb2478d0f18c5ac6d1d4, type: 3}
+  - monsterId: 98001
+    prefab: {fileID: 7820093925955608226, guid: b2cdb82e93c8c9b4d9d919165f341f93, type: 3}
+  - monsterId: 90008
+    prefab: {fileID: 7296882472164526265, guid: 7bb357f8cc334604080b2def4f1ea62d, type: 3}
+  - monsterId: 90021
+    prefab: {fileID: 2323174272607186706, guid: ee262ffc43669ea47bc1b3c32bb4253b, type: 3}
+  - monsterId: 98007
+    prefab: {fileID: 1886595885121192177, guid: 6fd6682c1e2da7e44bafeb2e8fd5e771, type: 3}
+  - monsterId: 90019
+    prefab: {fileID: 3276923423034006468, guid: 78ad335520246b944a8388622328c7bf, type: 3}
+  - monsterId: 90016
+    prefab: {fileID: 406526628511023084, guid: 334882c0e7dff2344813904bf02103ed, type: 3}
+  - monsterId: 98011
+    prefab: {fileID: 1756636796478155009, guid: 154c223f8c6b5534ab7dbdd7777cfab5, type: 3}

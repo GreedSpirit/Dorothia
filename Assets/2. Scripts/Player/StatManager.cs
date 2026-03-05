@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +10,7 @@ public class FinalStat
     public float equipAdditiveStat;
     public float multiStat;      // 추가 곱셈 비율 (기본 1.0 = 100%)
     public float weight = 1.025f; // 레벨업 가중치
+    
 
     public FinalStat(double baseStat, float weight = 1.025f)
     {
@@ -69,6 +70,9 @@ public class FinalStat
 
 public class StatManager : MonoBehaviour
 {
+    //캐싱시킬 레벨변수
+    int _currentLevel;
+
     private static StatManager instance;
     public static StatManager Instance => instance;
 
@@ -97,6 +101,10 @@ public class StatManager : MonoBehaviour
 
     public void InitStats(Character_StatsData data)
     {
+        //초기화할때 레벨 캐싱
+        _currentLevel = data.Character_Level;
+
+        stats[Status.Level] = new FinalStat(data.Character_Level);
         stats[Status.HP] = new FinalStat(data.Character_Hp);
         stats[Status.ATK] = new FinalStat(data.Character_Atk);
         stats[Status.MagicATK] = new FinalStat(data.Character_Atk_M);
@@ -111,10 +119,18 @@ public class StatManager : MonoBehaviour
 
     }
 
+    //슬롯매니저에서 매개변수 없이 캐싱된 레벨을 호출하기위해 오버로딩
+    public void RefreshStats()
+    {
+        RefreshStats(_currentLevel);        
+    }
+
     // 스탯에 변화가 있을 때 무조건 호출
     // 장비탈착, 스킬탈착, 스탯 업그레이드, 레벨업, 승급
     public void RefreshStats(int level)
     {
+        _currentLevel = level;
+
         // 모든 스탯을 초기화
         foreach (var stat in stats.Values)
         {
@@ -138,6 +154,7 @@ public class StatManager : MonoBehaviour
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
             stat.UpdateFinalValue(level);
         }
+        
     }
 
     private void ApplyGrowStats()

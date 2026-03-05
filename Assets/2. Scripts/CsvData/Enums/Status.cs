@@ -12,5 +12,6 @@ public enum Status
     MagicDEF = 8,
     HPRegen = 9,
     MoveSpeed = 10,
-    Level_Exp_N = 11
+    Level_Exp_N = 11,
+    Level = 12
 }

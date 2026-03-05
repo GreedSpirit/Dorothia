@@ -16,7 +16,6 @@ public class Character_StatsData : ICSVLoad, ITableKey
     public float Character_Def_M { get; set; }
     public float Character_Hp_Regen { get; set; }
     public float Character_Agi { get; set; }
-    public int Character_Upgrade_Scrap_N { get; set; }
     public double Character_Level_Exp_N { get; set; }
 
     int ITableKey.Id => Character_Id;
@@ -48,9 +47,7 @@ public class Character_StatsData : ICSVLoad, ITableKey
         if (values.Length > 10 && float.TryParse(values[10], out float v10)) Character_Hp_Regen = v10;
         // 11: Character_Agi (float)
         if (values.Length > 11 && float.TryParse(values[11], out float v11)) Character_Agi = v11;
-        // 12: Character_Upgrade_Scrap_N (int)
-        if (values.Length > 12 && int.TryParse(values[12], out int v12)) Character_Upgrade_Scrap_N = v12;
-        // 13: Character_Level_Exp_N (double)
-        if (values.Length > 13 && double.TryParse(values[13], out double v13)) Character_Level_Exp_N = v13;
+        // 12: Character_Level_Exp_N (float)
+        if (values.Length > 12 && double.TryParse(values[12], out double v12)) Character_Level_Exp_N = v12;
     }
 }

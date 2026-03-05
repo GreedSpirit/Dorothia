@@ -15,6 +15,8 @@ public class InventoryPanel : MonoBehaviour
     public InventoryStatus status = InventoryStatus.Equip;
     public Equip_Type currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
     public Action onInventoryChanged;
+    public Action onInventoryClosed;
+    public Action onClickEquipment;
 
     [SerializeField] EquipmentUI _equipmentUI;                   // 장착 중인 장비를 보여주는 UI
 
@@ -27,8 +29,6 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] GameObject _equipButtons;                   // 장착 슬롯을 눌렀을 때의 버튼입니다.
     [SerializeField] GameObject _fuseButtons;                    // 합성 슬롯을 눌렀을 때의 버튼입니다.
 
-    
-
     [Header("장비 정보 출력용")]
     [SerializeField] GameObject _infoPanel;                  // 정보를 담을 패널
     [SerializeField] Image _infoIcon;                        // 정보 패널에서의 장비 아이콘 출력용 이미지
@@ -39,6 +39,7 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] Button _confirmButton;                  // 합성 전용 확인버튼
     [SerializeField] Button _cancelButton;                   // 합성 전용 취소버튼
     [SerializeField] Button _equipButton;                    // 장비를 장착합니다.
+    [SerializeField] Button _closeButton;
 
     public EquipSlot targetSlot;                             // 장비를 받기 위한 대상 슬롯입니다.
     private Equipment _selectedEquipment;                    // 인벤토리 칸에서 선택한 장비
@@ -61,7 +62,10 @@ public class InventoryPanel : MonoBehaviour
         //확인버튼 기능 추가 - 슬롯에 해당 장비 추가
         _confirmButton.onClick.AddListener(() =>
         {
-            AddToSlot(_selectedEquipment);
+            if(_selectedEquipment.isLocked == false)
+            {
+                AddToSlot(_selectedEquipment);
+            }
         });
         //취소버튼 기능 추가 - 해당 슬롯에서 장비 제거
         _cancelButton.onClick.AddListener(() =>
@@ -72,9 +76,26 @@ public class InventoryPanel : MonoBehaviour
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
         onInventoryChanged += ResetInfo;
+
+        onInventoryClosed += Refresh;
+        onInventoryClosed += ResetInfo;
+
+        _closeButton.onClick.AddListener(() =>
+        {
+            onInventoryClosed?.Invoke();
+            SetPanelActiveValue(false);
+        });
     }
 
-    
+    private void OnDestroy()
+    {
+        onInventoryChanged -= Refresh;
+        onInventoryChanged -= ResetInfo;
+
+        onInventoryClosed += Refresh;
+        onInventoryClosed += ResetInfo;
+    }
+
     /// <summary>
     /// 슬롯을 선택했을 때의 동작입니다.
     /// </summary>
@@ -92,6 +113,11 @@ public class InventoryPanel : MonoBehaviour
         _currentSelectedSlot = slot;
         //그 슬롯의 선택 표시를 활성화합니다.
         _currentSelectedSlot.selectMark.SetActive(true);
+    }
+
+    public bool CheckLocked()
+    {
+        return _selectedEquipment.isLocked;
     }
 
     /// <summary>
@@ -113,7 +139,7 @@ public class InventoryPanel : MonoBehaviour
 
         _inventoryEquipFunction.ChangeLockButtonState(equip);
         
-        _infoDescription.text = equip.GetEquipStatusString();
+        _infoDescription.text = EquipmentSlotManager.Instance.GetEquipStatusString(equip);
 
         //확인 버튼에 있던 기능을 지우고, 합성 슬롯에 집어넣기 기능을 추가합니다.
         //현재는 장착 기능을 구현하지 않았으므로 예외 처리 없이 바로 넣습니다.
@@ -129,10 +155,23 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
+        onClickEquipment?.Invoke();
     }
 
-    
-
+    /// <summary>
+    /// 인벤토리 내에서 선택된 장비가 있는지 여부를 확인합니다.
+    /// </summary>
+    /// <returns>_selectedEquipment 값 존재 여부</returns>
+    public bool CheckEquipmentSelected()
+    {
+        //선택된 장비가 존재할 경우 참을 반환합니다.
+        if(_selectedEquipment != null)
+        {
+            return true;
+        }
+        //없을 시 거짓을 반환합니다.
+        return false;
+    }
     
 
     /// <summary>
@@ -141,6 +180,9 @@ public class InventoryPanel : MonoBehaviour
     /// <param name="part">인벤토리를 확인하고자 하는 장착 부위</param>
     public void Open(Equip_Type part, int slotIndex)
     {
+        //선택 중인 슬롯을 초기화합니다.
+        ClearCurrentSlot();
+
         //현재 장착 부위를 인자값으로 받아온 값과 일치시킵니다.
         if(part != 0)
         currentPart = part;
@@ -150,6 +192,8 @@ public class InventoryPanel : MonoBehaviour
         onInventoryChanged.Invoke();
 
         SetPanelActiveValue(true);
+
+
     }
 
     /// <summary>
@@ -282,8 +326,25 @@ public class InventoryPanel : MonoBehaviour
     {
         if (targetSlot != null)
         {
+            //해당 슬롯에 아무것도 장착되지 않은 상태에서, 이미 다른 슬롯에 장착된 장비를 착용하려 할 경우 반환합니다.
+            if(targetSlot.equipped == null && equip.isEquipped == true)
+            {
+                return;
+            }
+
+            //해당 슬롯에 무언가 장착되어있다면, 장착한 슬롯의 장비와 장착을 시도하는 "장착 중인" 장비의 GUID를 비교하고, 다를 경우 반환합니다.
+            if (targetSlot.equipped != null && equip.isEquipped == true & targetSlot.equipped.InstanceGUID != equip.InstanceGUID)
+            {
+                return;
+            }
+
             //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
             if (targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
+            {
+                return;
+            }
+
+            if(targetSlot.slotType == SlotType.FuseSlot && equip.isLocked == true)
             {
                 return;
             }
@@ -312,11 +373,13 @@ public class InventoryPanel : MonoBehaviour
             {
                 equip.SetEquipped(targetSlot.slotIndex);
                 EquipmentSlotManager.Instance.ApplyEquipmentSet();
+                onInventoryChanged?.Invoke();
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(targetSlot.slotType == SlotType.FuseSlot)
             {
                 equip.isFusing = true;
+                SetPanelActiveValue(false);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
@@ -23,18 +24,17 @@ public class PlayerStats : MonoBehaviour
     public int _upgrade_scrap_n; //첫업그레이드 시 소비하는 스크랩
     public double _level_exp_n;     //첫레벨업 시 필요한 경험치
 
+    //TODO : 오버드라이브게이지에 반영할 변수값, 이벤트 추가예정
+
     public event Action<float,float> OnHpChanged;
     public event Action<float,double> OnExpChanged;
+    public event Action<int> OnLevelChanged;
+    public event Action LevelChanged;
     public event Action OnDead;
 
     PlayerCtrl _player;
 
     public float Attack => _atk;
-
-    //테스트용
-    //[SerializeField] private bool _useTestStats = true;
-    //[SerializeField] private float _testMaxHp;
-    //[SerializeField] private float _testAttack;
 
 
     //TODO 추후 datamanager를 타이틀씬에 배치해두고 Awake로 변경예정
@@ -42,6 +42,9 @@ public class PlayerStats : MonoBehaviour
     {
         //CSV 기본값 셋팅
         _data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
+
+        //가져온 CSV값으로 레벨 셋팅
+        _level = _data.Character_Level;
         
         //스탯매니저셋팅
         StatManager.Instance.InitStats(_data);
@@ -54,6 +57,7 @@ public class PlayerStats : MonoBehaviour
 
 
         //스탯 적용
+        _level = (int)StatManager.Instance.GetStat(Status.Level);
         _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
         _atk = (float)StatManager.Instance.GetStat(Status.ATK);
         _atk_m = (float)StatManager.Instance.GetStat(Status.MagicATK);
@@ -67,16 +71,20 @@ public class PlayerStats : MonoBehaviour
         _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
 
         _currentHp = _maxHp;
+
+        EquipmentSlotManager.Instance.OnEquipChanged += ChangeEquip;
     }
 
     private void OnEnable()
     {
         MonsterController.OnMonsterKilled += AddExp;
+        
     }
 
     private void OnDisable()
     {
         MonsterController.OnMonsterKilled -= AddExp;
+        EquipmentSlotManager.Instance.OnEquipChanged -= ChangeEquip;
     }
 
     //TODO 추후 계산 공식 적용해야됨 현재는 테스트용 가데이터
@@ -96,9 +104,11 @@ public class PlayerStats : MonoBehaviour
     //경험치 변화 알림
     public void AddExp(int mosterId, bool isBoss)
     {
+        //경험치 증가
         _currentExp += 500f;
 
-        if (_currentExp >= _level_exp_n)
+        //현재경험치가 경험치통보다 많으면서 현재 레벨이 200 아니면 반복
+        while (_currentExp >= _level_exp_n && _level < 200)
         {
             LevelUp();
         }
@@ -134,7 +144,29 @@ public class PlayerStats : MonoBehaviour
 
         _currentHp = _maxHp;
         _currentExp -= (float)save_Level_Exp_N;
+
+        OnLevelChanged?.Invoke(_level);
+        LevelChanged?.Invoke();
     }
+
+    //장비장착시 호출 함수
+    public void ChangeEquip()
+    {
+        //스탯 적용
+        _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
+        _atk = (float)StatManager.Instance.GetStat(Status.ATK);
+        _atk_m = (float)StatManager.Instance.GetStat(Status.MagicATK);
+        _dps = (float)StatManager.Instance.GetStat(Status.AttackSpeed);
+        _crt_prob = (float)StatManager.Instance.GetStat(Status.CriticalChance);
+        _crt_dmg = (float)StatManager.Instance.GetStat(Status.CriticalDamage);
+        _def = (float)StatManager.Instance.GetStat(Status.DEF);
+        _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
+        _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
+        _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);
+        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
+    }
+
+    
 
     public void TakeDamage(int amount)
     {

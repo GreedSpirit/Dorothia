@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,7 +10,7 @@ public class Equipment
     public string InstanceGUID { get; private set; }
     public int equip_id;                                       // 장비의 ID값입니다.
     public string equip_name;                                  // 장비의 이름입니다.
-    public Dictionary<Status, float> equip_status;    // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
+    public Dictionary<Status, float> equip_status;             // 장비의 주요 스텟 전반을 담고 있을 Dictionary입니다.
     public Equip_Type equip_type;                              // 장비의 타입입니다. int값을 받으면 EquipType 열거형으로 자동 치환하여 가독성을 높입니다.
     public int equip_price;                                    // 장비의 판매가입니다.
     public string equip_icon;                                  // 장비의 아이콘, 즉 인벤토리에 출력 시 사용될 스프라이트를 가져오기 위한 경로입니다.
@@ -95,10 +93,10 @@ public class Equipment
 
         equip_status = new Dictionary<Status, float>();
         Debug.Log(equipData.Equip_Type);
-        AddEquipStatusByType(equipData, (Rarity)DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity).Equip_Rank);
+        ItemCalculator.AddEquipStatusByType(this, equipData, (Rarity)DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity).Equip_Rank);
 
         LoadIcon(equip_icon);
-        equip_set_id = GetSetEffect(equip_name);
+        equip_set_id = ItemCalculator.GetSetEffect(equip_name);
 
         equip_level = equipLevel;
 
@@ -107,138 +105,11 @@ public class Equipment
 
     }
 
-    /// <summary>
-    /// 장비 데이터로부터, 해당 장비에서 유효한 스텟만 가져오는 메서드입니다.
-    /// </summary>
-    /// <param name="equipStatus">장비의 스텟</param>
-    /// <param name="equipStatusValue">해당 장비 스텟의 값</param>
-    public void AddEquipStatus(Status equipStatus,float equipStatusValue)
-    {
-        //이미 해당 스테이터스가 Dictionary에 존재한다면, 해당 값을 추가합니다.
-        if(equip_status.ContainsKey(equipStatus))
-        {
-            equip_status[equipStatus] += equipStatusValue;
-        }
-        //Dictionary에 존재하지 않을 경우, 값이 0이 아닌 경우에만 포함시킵니다.
-        else if(equipStatusValue != 0)
-        {
-            equip_status.Add(equipStatus, equipStatusValue);
-        }
-    }
+    
 
-    /// <summary>
-    /// 규칙으로부터 확인한 스테이터스에 따라, 데이터로부터 해당 스테이터스의 정보를 받아옵니다.
-    /// </summary>
-    /// <param name="status">정보를 확인해야 하는 스테이터스</param>
-    /// <param name="data">그 스테이터스를 확인하기 위한 테이블상의 장비데이터</param>
-    public void AddStatusFromData(Status status, EquipData data)
-    {
-        switch (status)
-        {
-            case Status.HP:
-                AddEquipStatus(status, data.Equip_Hp);
-                break;
+    
 
-            case Status.ATK:
-                AddEquipStatus(status, data.Equip_Atk);
-                break;
-
-            case Status.MagicATK:
-                AddEquipStatus(status, data.Equip_Atk_M);
-                break;
-
-            case Status.AttackSpeed:
-                AddEquipStatus(status, data.Equip_Dps);
-                break;
-
-            case Status.CriticalChance:
-                AddEquipStatus(status, data.Equip_Crt_Prob);
-                break;
-
-            case Status.CriticalDamage:
-                AddEquipStatus(status, data.Equip_Crt_Dmg);
-                break;
-
-            case Status.DEF:
-                AddEquipStatus(status, data.Equip_Def);
-                break;
-
-            case Status.MagicDEF:
-                AddEquipStatus(status, data.Equip_Def_M);
-                break;
-
-            case Status.HPRegen:
-                AddEquipStatus(status, data.Equip_Hp_Regen);
-                break;
-
-            case Status.MoveSpeed:
-                AddEquipStatus(status, data.Equip_Agi);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// 장착 부위별로 지정된 주요 스테이터스와 보조 스테이터스의 규칙대로 스테이터스를 형성합니다.
-    /// </summary>
-    /// <param name="data"></param>
-    /// <param name="rarity"></param>
-    public void AddEquipStatusByType(EquipData data, Rarity rarity)
-    {
-        //규칙에 정의되지 않은 Equip_Type가 들어온 경우 반환합니다.
-        if (!EquipStatusStaticRule._rules.ContainsKey(data.Equip_Type))
-        {
-            return;
-        }
-        //static으로 선언한 규칙에서 만드려는 장비의 Dictionary를 받아옵니다.
-        var rule = EquipStatusStaticRule._rules[data.Equip_Type];
-
-        //해당 장비의 타입을 기반으로, 데이터를 확인하여 메인 스테이터스를 생성합니다.
-        foreach(var main in rule.MainStatus)
-        {
-            AddStatusFromData(main, data);
-        }
-
-        if(!EquipStatusStaticRule.SubStatusCount.ContainsKey(rarity))
-        {
-            return;
-        }
-        //장비의 등급에 따라, 스테이터스를 얼마나 만들지 확인합니다.
-        int subCount = EquipStatusStaticRule.SubStatusCount[rarity];
-
-        //장비의 장착 부위와 등급에 따라, 보조 스테이터스 리스트를 생성합니다.
-        var selectedSubs = new List<Status>();
-
-        //만에 하나 SubStatus에 아무 정보도 담겨있지 않다면 반환합니다.
-        if(rule.SubStatus.Count == 0)
-        {
-            return;
-        }
-
-        //규칙으로 정한 보조 스테이터스의 수량까지 도달하거나(배열 칸 이탈 방지) 추가해야 하는 보조 스테이터스 수량이 될 때까지 아래 코드를 실행합니다.
-        for(int i = 0; i< rule.SubStatus.Count && selectedSubs.Count < subCount; i++)
-        {
-            if(rule.SubStatus != null)
-            //보조 스테이터스 규칙에 따라, 앞에 있는 것부터 순차적으로 추가합니다.
-            selectedSubs.Add(rule.SubStatus[i]);
-        }
-
-        //그럼에도 여전히 스텟을 추가해야 하는 경우라면, 위 코드를 반복합니다.
-        while(selectedSubs.Count < subCount)
-        {
-            //왼쪽 조건문이 초기화되었어도, 오른쪽 조건문은 그대로일 테니 필요하면 멈출 것입니다.
-            for (int i = 0; i < rule.SubStatus.Count && selectedSubs.Count < subCount; i++)
-            {
-                //보조 스테이터스 규칙에 따라, 앞에 있는 것부터 순차적으로 추가합니다.
-                selectedSubs.Add(rule.SubStatus[i]);
-            }
-        }
-
-        //채워넣은 보조 스테이터스 리스트의 각 보조 스테이터스마다 데이터를 확인하여 스테이터스를 생성합니다.
-        foreach(var sub in selectedSubs)
-        {
-            AddStatusFromData(sub, data);
-        }
-    }
+    
 
     /// <summary>
     /// 장비 등급이 상승하게 되면, 그에 맞도록 보조 스테이터스를 추가합니다.
@@ -267,7 +138,7 @@ public class Equipment
             //현재 등급이 올라감으로서 추가되는 보조 스테이터스의 수는 1이므로 단일로 작성합니다.
             var sub = EquipStatusStaticRule._rules[data.Equip_Type].SubStatus[oldCount];
 
-            AddStatusFromData(sub, data);
+            ItemCalculator.AddStatusFromData(this, sub, data);
         }
 
         //기존 등급의 보조 스테이터스 수가 스테이터스 리스트 길이와 같거나 그보다 크면 아래 코드를 실행합니다.
@@ -279,123 +150,27 @@ public class Equipment
             var sub = EquipStatusStaticRule._rules[data.Equip_Type].SubStatus[oldCount
                 % EquipStatusStaticRule._rules[data.Equip_Type].SubStatus.Count];
 
-            AddStatusFromData(sub, data);
+            ItemCalculator.AddStatusFromData(this, sub, data);
         }
     }
 
-    public string GetEquipStatusString()
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        int i = 0;
-        foreach(var stat in equip_status)
-        {
-            stringBuilder.Append($"{stat.Key} + {stat.Value} ");
-            if (i == 1)
-                stringBuilder.Append("\n");
-            i++;
-        }
-        return stringBuilder.ToString();
-    }
+    
+
+    
 
     /// <summary>
-    /// Rarity ID값읊 기반으로 배율을 받아옵니다. 
-    /// 데이터 테이블을 통해 이미 장비 정보를 받아왔다면 Rarity 열거형 버전을 사용해주십시오.
+    /// Addressables를 활용하여 장비의 아이콘을 불러옵니다.
     /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도 ID값을 갖도록 하는, 장비의 equipment_Rarity 부분.</param>
-    /// <returns>해당 등급 ID값을 기반으로 확인한 등급배율</returns>
-    public float GetEnchantWeightByRarity(int Rarity)
-    {
-        switch (Rarity)
-        {
-            case 40001:
-                return 1;
-
-            case 40002:
-                return 1.5f;
-
-            case 40003:
-                return 3;
-
-            case 40004:
-                return 6;
-
-            case 40005:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
-
-    /// <summary>
-    /// Rarity 열겨형 기반으로 배율을 받아옵니다.
-    /// </summary>
-    /// <param name="Rarity">해당 장비의 레어도를 나타내는 Rarity 열거형 값</param>
-    /// <returns>해당 배율과 일치하는 강화 배율값</returns>
-    public float GetEnchantWeightByRarity(Rarity Rarity)
-    {
-        switch (Rarity)
-        {
-            case Rarity.Normal:
-                return 1;
-
-            case Rarity.Uncommon:
-                return 1.5f;
-
-            case Rarity.Rare:
-                return 3;
-
-            case Rarity.Legendary:
-                return 6;
-
-            case Rarity.Mythtic:
-                return 10;
-
-            default:
-                return 1;
-        }
-    }
-
-    public float GetStatus(Status equipStatus)
-    {
-        return equip_status.TryGetValue(equipStatus, out float value) ? value : 0f ;
-    }
-
-    private int GetSetEffect(string equipName)
-    {
-        Dictionary<int, List<Equip_SetData>> allSets = DataManager.Instance.GetListDict<Equip_SetData>();
-        int set_id = 0;
-        foreach(var Set in allSets.Values)
-        {
-            foreach(var item in Set)
-            {
-                if (equipName.Contains(item.Equip_Set_Need_Name))
-                    set_id = item.Equip_Set_Id;
-            }
-        }
-        return set_id;
-    }
-
+    /// <param name="address"></param>
     public async void LoadIcon(string address)
     {
+        //주소에 적힌 Sprite를 받아올 때까지 기다립니다.
         var handle = Addressables.LoadAssetAsync<Sprite>(address);
         await handle.Task;
+
+        //결과물을 아이콘에 넣습니다.
         icon = handle.Result;
     }
 
-    public int GetEquipScore()
-    {
-        int score = 0;
-        score += (int)(GetStatus(Status.ATK) * 10);
-        score += (int)(GetStatus(Status.DEF) * 2);
-        score += (int)(GetStatus(Status.MagicDEF) * 2);
-        score += (int)(GetStatus(Status.HP) * 3);
-        score += (int)(GetStatus(Status.HPRegen) * 1);
-        score += (int)(GetStatus(Status.AttackSpeed) * 8);
-        score += (int)(GetStatus(Status.MoveSpeed) * 7);
-        score += (int)(GetStatus(Status.CriticalChance) * 9);
-        score += (int)(GetStatus(Status.CriticalDamage) * 9);
-
-        return score;
-    }
+    
 }

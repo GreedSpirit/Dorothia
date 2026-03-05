@@ -236,6 +236,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1082271958561512970, guid: 1bde9bae1dc834e4ca5f10bcf2509b45, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 1330755669629619180, guid: 1bde9bae1dc834e4ca5f10bcf2509b45, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 7.2227554
@@ -396,6 +400,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -170.7332
       objectReference: {fileID: 0}
+    - target: {fileID: 8861691378318290060, guid: 1bde9bae1dc834e4ca5f10bcf2509b45, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -433,6 +441,10 @@ MonoBehaviour:
   _projectileDatabase: {fileID: 0}
   _hitCollider: {fileID: 6106446363378739998}
   _attackClip: {fileID: -203655887218126122, guid: 1eeb8dbd20258ed41ae7d2d49d5a301f, type: 3}
+  _slotRefreshInterval: 0.45
+  _slotRepathThreshold: 0.25
+  _stuckSpeedThreshold: 0.15
+  _stuckTimeToRefresh: 0.55
 --- !u!114 &3699123634424155841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -454,7 +466,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 1072894185942561419}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.15
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50

@@ -23,7 +23,6 @@ public class InventoryEquipFunction : MonoBehaviour
         _autoEquipButtons.onClick.AddListener(() =>
         {
             AutoEquip(_inventoryPanel.currentPart);
-            _inventoryPanel.SetPanelActiveValue(false);
             _inventoryPanel.onInventoryChanged?.Invoke();
         });
     }
@@ -45,7 +44,7 @@ public class InventoryEquipFunction : MonoBehaviour
         }
 
         //장착 중인 장비를 확인합니다.
-        int currentEquipWeight = _inventoryPanel.targetSlot.equipped != null ? _inventoryPanel.targetSlot.equipped.GetEquipScore() : 0;
+        int currentEquipWeight = _inventoryPanel.targetSlot.equipped != null ? ItemCalculator.GetEquipScore(_inventoryPanel.targetSlot.equipped) : 0;
         //장착할 장비를 선언하고, 장착 중인 장비가 있다면 해당 장비를 넣습니다. (없어도 null이 들어갈 것입니다.)
         Equipment equipmentToEquip = _inventoryPanel.targetSlot.equipped;
 
@@ -58,7 +57,7 @@ public class InventoryEquipFunction : MonoBehaviour
                 continue;
             }
             //현재 칸의 장비 점수를 체크합니다.
-            int score = list[i].GetEquipScore();
+            int score = ItemCalculator.GetEquipScore(list[i]);
 
             //해당 장비 점수가 현재의 가중치보다 높을 경우
             if (score > currentEquipWeight)
