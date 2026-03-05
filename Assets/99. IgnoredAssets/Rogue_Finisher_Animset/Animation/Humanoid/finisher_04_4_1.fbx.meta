@@ -58,19 +58,19 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0
-        functionName: StartCombo
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
       - time: 0.30521643
         functionName: EnableFinalAttackCollider
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
         floatParameter: 0
         intParameter: 0
+        messageOptions: 0
+      - time: 0.3067873
+        functionName: EnableAttackEffect
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
+        floatParameter: 0
+        intParameter: 3
         messageOptions: 0
       - time: 0.4517203
         functionName: DisableFinalAttackCollider
@@ -79,7 +79,7 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 1
+      - time: 0.90602416
         functionName: ResetCombo
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}

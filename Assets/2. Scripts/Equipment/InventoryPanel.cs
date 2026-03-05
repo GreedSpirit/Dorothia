@@ -62,7 +62,10 @@ public class InventoryPanel : MonoBehaviour
         //확인버튼 기능 추가 - 슬롯에 해당 장비 추가
         _confirmButton.onClick.AddListener(() =>
         {
-            AddToSlot(_selectedEquipment);
+            if(_selectedEquipment.isLocked == false)
+            {
+                AddToSlot(_selectedEquipment);
+            }
         });
         //취소버튼 기능 추가 - 해당 슬롯에서 장비 제거
         _cancelButton.onClick.AddListener(() =>
@@ -110,6 +113,11 @@ public class InventoryPanel : MonoBehaviour
         _currentSelectedSlot = slot;
         //그 슬롯의 선택 표시를 활성화합니다.
         _currentSelectedSlot.selectMark.SetActive(true);
+    }
+
+    public bool CheckLocked()
+    {
+        return _selectedEquipment.isLocked;
     }
 
     /// <summary>
@@ -336,6 +344,11 @@ public class InventoryPanel : MonoBehaviour
                 return;
             }
 
+            if(targetSlot.slotType == SlotType.FuseSlot && equip.isLocked == true)
+            {
+                return;
+            }
+
             //기존 슬롯에 이미 존재하던 장비는 제거합니다.
             if (targetSlot.equipped != null && targetSlot.slotType == SlotType.EquipSlot)
             {
@@ -360,11 +373,13 @@ public class InventoryPanel : MonoBehaviour
             {
                 equip.SetEquipped(targetSlot.slotIndex);
                 EquipmentSlotManager.Instance.ApplyEquipmentSet();
+                onInventoryChanged?.Invoke();
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(targetSlot.slotType == SlotType.FuseSlot)
             {
                 equip.isFusing = true;
+                SetPanelActiveValue(false);
             }
         }
     }

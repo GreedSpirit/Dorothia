@@ -65,7 +65,6 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
     public void Exit(PlayerCtrl player)
     {
         player.NavMesh.ResetPath();
-        player.ComboIndex = 0;
     }
 
 

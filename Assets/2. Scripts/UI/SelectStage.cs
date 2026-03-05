@@ -12,11 +12,54 @@ public class SelectStage : BaseUI
     [SerializeField] private StageButtonItem _stageButtonPrefab;    // 스테이지 버튼 프리팹
     [SerializeField] private Button _goToButton;                    // 바로가기 버튼
     [SerializeField] private TMP_Text _chapterTitleText;            // 챕터 제목
+    [SerializeField] private TMP_Text _progressText;                // 진행도
 
     private readonly List<StageButtonItem> _spawnedButtons = new();
 
     private int _selectedSection = -1;  // 현재 선택된 섹션 저장용
     private int _previewStageId;    // UI용 현재 선택 챕터
+
+    private void OnEnable()
+    {
+        StageManager.OnStageIdChanged += HandleStageChanged;
+        StageManager.OnStageCleared += HandleStageCleared;
+        StageManager.OnSectionChanged += HandleSectionChanged;
+    }
+
+    private void OnDisable()
+    {
+        StageManager.OnStageIdChanged -= HandleStageChanged;
+        StageManager.OnStageCleared -= HandleStageCleared;
+        StageManager.OnSectionChanged -= HandleSectionChanged;
+    }
+
+    private void HandleStageChanged(int newStageId)
+    {
+        _previewStageId = newStageId;
+        _selectedSection = -1;
+
+        GenerateStageButtons();
+        UpdateProgressText();
+    }
+
+    private void HandleStageCleared(int clearedStageId)
+    {
+        //현재 보고 있는 챕터면 갱신
+        if (clearedStageId == _previewStageId)
+        {
+            UpdateProgressText();
+            GenerateStageButtons();
+        }
+    }
+
+    private void HandleSectionChanged(int newSection)
+    {
+        if (_previewStageId == _stageManager.CurrentStageId)
+        {
+            UpdateProgressText();
+            GenerateStageButtons();
+        }
+    }
 
     protected override void OnOpen()
     {
@@ -28,6 +71,8 @@ public class SelectStage : BaseUI
         SyncChapterHeaderWithCurrentStage();
 
         GenerateStageButtons();
+
+        UpdateProgressText();
 
         if (_goToButton != null)
         {
@@ -94,11 +139,15 @@ public class SelectStage : BaseUI
 
     private StageStateType GetStageState(int sectionNumber, int currentSection)
     {
-        if (sectionNumber < currentSection)
-            return StageStateType.Cleared;
+        int maxCleared = _stageManager.MaxClearedSection;
 
-        if (sectionNumber == currentSection)
-            return StageStateType.Current;
+        if (sectionNumber <= maxCleared)
+        {
+            if (sectionNumber == currentSection)
+                return StageStateType.Current;
+
+            return StageStateType.Cleared;
+        }
 
         return StageStateType.Locked;
     }
@@ -122,6 +171,8 @@ public class SelectStage : BaseUI
 
         if (_goToButton != null)
             _goToButton.interactable = true;
+
+        UpdateProgressText();
     }
 
     //실제 이동은 여기서
@@ -150,6 +201,7 @@ public class SelectStage : BaseUI
         UpdateChapterHeader($"{chapterNumber} : {chapterName}");
 
         GenerateStageButtons();
+        UpdateProgressText();
     }
 
     //상단 텍스트 갱신
@@ -185,7 +237,53 @@ public class SelectStage : BaseUI
         //못 찾으면 그냥 비워둠
         UpdateChapterHeader(null);
     }
-#endregion
+    #endregion
+
+    private void UpdateProgressText()
+    {
+        if (_progressText == null || _stageManager == null)
+            return;
+
+        int stageId = _previewStageId;
+
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+        if (dict == null)
+            return;
+
+        var sections = dict.Values
+            .Where(x => x.Stage_Id == stageId)
+            .ToList();
+
+        if (sections.Count == 0)
+        {
+            _progressText.text = "";
+            return;
+        }
+
+        int totalStart = sections.Min(x => x.Section_Start);
+        int totalEnd = sections.Max(x => x.Section_End);
+        int totalCount = totalEnd - totalStart + 1;
+
+        //선택한 섹션이 있으면 그걸 기준으로 표시
+        int referenceSection = (_selectedSection > 0)
+            ? _selectedSection
+            : _stageManager.MaxClearedSection;
+
+        //현재 진행 중인 챕터가 아닌 경우
+        if (stageId != _stageManager.CurrentStageId)
+        {
+            _progressText.text = $"현재진행도: 0 / {totalCount}";
+            return;
+        }
+
+        int currentIndex = Mathf.Clamp(
+            referenceSection - totalStart + 1,
+            1,
+            totalCount
+        );
+
+        _progressText.text = $"현재진행도: {currentIndex} / {totalCount}";
+    }
 
     private void ClearButtons()
     {

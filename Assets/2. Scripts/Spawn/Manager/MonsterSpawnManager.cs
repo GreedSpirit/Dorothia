@@ -148,41 +148,82 @@ public class MonsterSpawnManager : MonoBehaviour
             if (!_spawnAreaProvider.TryGetSpawnPosition(out Vector3 centerPos))
                 continue;
 
-            SpawnClusterFromSpawnData(centerPos, metrics);
+            SpawnClusterWave(metrics);
         }
     }
     #endregion
 
     #region 스폰 로직 (SpawnData 기반)
     /// <summary>
-    /// SpawnData에서 몬스터 후보(candidates)를 만들고, 하나를 랜덤 선택해서 군집 스폰
-    /// candidates에는 보스가 절대로 들어가지 않도록 필터링
-    /// 군집 크기 = baseCount * multiplier (TTK 기반 배율)
+    /// multiplier기반으로 군집 개수 증가
     /// </summary>
-    /// <param name="centerPos"></param>
     /// <param name="metrics"></param>
-    private void SpawnClusterFromSpawnData(Vector3 centerPos, SpawnMetrics metrics)
+    private void SpawnClusterWave(SpawnMetrics metrics)
     {
         if (_currentSpawnData == null)
             return;
 
-        List<(int id, int count)> candidates = new();
+        List<(int id, int count)> candidates = BuildSpawnCandidates();
+
+        if (candidates.Count == 0)
+            return;
+
+        //TTK 기반 배율
+        float multiplier = _policy.GetSpawnMultiplier(metrics, _currentMonsterCount);
+
+        //multiplier를 "군집 개수"로 변환
+        int clusterCount = Mathf.FloorToInt(multiplier);
+
+        if (Random.value < (multiplier - clusterCount))
+            clusterCount++;
+
+        clusterCount = Mathf.Max(1, clusterCount);
+
+        for (int i = 0; i < clusterCount; i++)
+        {
+            if (_currentMonsterCount >= _stageSoftMaxCount)
+                break;
+
+            //군집마다 새 중심점 생성
+            if (!_spawnAreaProvider.TryGetSpawnPosition(out Vector3 clusterCenter))
+                continue;
+
+            var selected = candidates[Random.Range(0, candidates.Count)];
+
+            SpawnSingleCluster(
+                selected.id,
+                selected.count, // Monster_Number는 그대로 사용
+                clusterCenter
+            );
+        }
+    }
+
+    /// <summary>
+    /// 스폰후보 생성 분리
+    /// </summary>
+    /// <returns></returns>
+    private List<(int id, int count)> BuildSpawnCandidates()
+    {
+        List<(int id, int count)> list = new();
 
         void Add(int id, int count)
         {
-            if (id <= 0 || count <= 0) return;
+            if (id <= 0 || count <= 0)
+                return;
 
             //이번 스테이지 보스 ID는 무조건 제외
-            if (id == _currentBossMonsterId) return;
+            if (id == _currentBossMonsterId)
+                return;
 
             //Monster_Data 기반으로 Boss 타입이면 무조건 제외 (CSV가 어디에 넣든 안전)
             var md = DataManager.Instance.GetData<Monster_Data>(id);
-            if (md != null && md.Monster_Type == Monster_Type.Boss) return;
+            if (md != null && md.Monster_Type == Monster_Type.Boss)
+                return;
 
-            candidates.Add((id, count));
+            list.Add((id, count));
         }
 
-        //우선은 일반/앨리트 풀 1~7까지 사용
+        //우선은 일반,앨리트 풀 1~7까지 사용
         Add(_currentSpawnData.Monster_Id_1, _currentSpawnData.Monster_Number_1);
         Add(_currentSpawnData.Monster_Id_2, _currentSpawnData.Monster_Number_2);
         Add(_currentSpawnData.Monster_Id_3, _currentSpawnData.Monster_Number_3);
@@ -191,24 +232,17 @@ public class MonsterSpawnManager : MonoBehaviour
         Add(_currentSpawnData.Monster_Id_6, _currentSpawnData.Monster_Number_6);
         Add(_currentSpawnData.Monster_Id_7, _currentSpawnData.Monster_Number_7);
 
-        if (candidates.Count == 0)
-            return;
+        return list;
+    }
 
-        var selected = candidates[Random.Range(0, candidates.Count)];
-
-        int monsterId = selected.id;
-        int baseClusterSize = selected.count;
-
-        //TTK 기반 배율
-        float multiplier =
-            _policy.GetSpawnMultiplier(metrics, _currentMonsterCount);
-
-        int finalClusterSize = Mathf.Clamp(
-            Mathf.RoundToInt(baseClusterSize * multiplier),
-            1,
-            _stageSoftMaxCount - _currentMonsterCount);
-
-        //군집 스폰(중심점 기준으로 주변 분산)
+    /// <summary>
+    /// 군집 1개 생성 (개체수 고정)
+    /// </summary>
+    /// <param name="monsterId"></param>
+    /// <param name="clusterSize"></param>
+    /// <param name="centerPos"></param>
+    private void SpawnSingleCluster(int monsterId, int clusterSize, Vector3 centerPos)
+    {
         float maxRadius = 2.8f;
         float minDistance = 1.2f;
         int maxAttemptsPerMonster = 12;
@@ -216,21 +250,19 @@ public class MonsterSpawnManager : MonoBehaviour
         float mapHalfSize = _spawnAreaProvider.MapHalfSize;
         List<Vector3> usedPositions = new();
 
-        for (int i = 0; i < finalClusterSize; i++)
+        for (int i = 0; i < clusterSize; i++)
         {
             if (_currentMonsterCount >= _stageSoftMaxCount)
                 break;
 
-            if (_isBossFight) break;
-
             if (!TryGetClusterPosition(
-                    centerPos,
-                    mapHalfSize,
-                    maxRadius,
-                    minDistance,
-                    maxAttemptsPerMonster,
-                    usedPositions,
-                    out Vector3 spawnPos))
+                centerPos,
+                mapHalfSize,
+                maxRadius,
+                minDistance,
+                maxAttemptsPerMonster,
+                usedPositions,
+                out Vector3 spawnPos))
             {
                 continue;
             }

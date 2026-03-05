@@ -5,11 +5,11 @@ using UnityEngine.UI;
 public class PlayerHp : MonoBehaviour
 {
     [SerializeField] PlayerStats _playerStats;
-    Image _image;
+    Slider _slider;
 
     private void Awake()
     {
-        _image = GetComponent<Image>();
+        _slider = GetComponent<Slider>();
     }
 
     private void Start()
@@ -31,11 +31,11 @@ public class PlayerHp : MonoBehaviour
     IEnumerator UpdateDelay()
     {
         yield return null;
-        _image.fillAmount = _playerStats._currentHp;
+        _slider.value = _playerStats._currentHp;
     }
 
     void ChangeHpBar(float currentHp, float maxHp)
     {
-        _image.fillAmount = (currentHp / maxHp);
+        _slider.value = (currentHp / maxHp);
     }
 }
