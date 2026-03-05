@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0bc89087db979f54bb9c6c8ea071bd1f, type: 3}
       propertyPath: m_Name
-      value: 95002
+      value: 90007
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0bc89087db979f54bb9c6c8ea071bd1f, type: 3}
       propertyPath: m_Layer
@@ -97,6 +97,10 @@ MonoBehaviour:
   _projectileDatabase: {fileID: 0}
   _hitCollider: {fileID: 795372224295805900}
   _attackClip: {fileID: -203655887218126122, guid: 2f5ca7953dec65440b88989488c1d4cd, type: 3}
+  _slotRefreshInterval: 0.45
+  _slotRepathThreshold: 0.25
+  _stuckSpeedThreshold: 0.15
+  _stuckTimeToRefresh: 0.55
 --- !u!114 &8329900799990029810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,7 +122,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 6339653612815602664}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.3
+  m_Radius: 0.15
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50

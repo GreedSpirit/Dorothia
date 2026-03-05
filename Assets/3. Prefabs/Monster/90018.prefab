@@ -673,6 +673,10 @@ MonoBehaviour:
   _projectileDatabase: {fileID: 0}
   _hitCollider: {fileID: 4329198293286461486}
   _attackClip: {fileID: -203655887218126122, guid: d3d23751c3bda3a43a37b91d35322ee8, type: 3}
+  _slotRefreshInterval: 0.45
+  _slotRepathThreshold: 0.25
+  _stuckSpeedThreshold: 0.15
+  _stuckTimeToRefresh: 0.55
 --- !u!114 &1036128846516834751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -694,7 +698,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 938549638817397847}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.32
+  m_Radius: 0.16
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
