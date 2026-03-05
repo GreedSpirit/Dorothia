@@ -157,7 +157,7 @@ public class MonsterController : MonoBehaviour, IMonster
             Debug.LogError("ProjectileDatabase NULL");
         }
         
-        _stats = new MonsterStatsFromCSV(monsterData, valueData, _projectileDatabase);
+        _stats = new MonsterStatsFromCSV(monsterData, valueData, _projectileDatabase, poolKeyPrefab);
 
         _spawnTime = Time.time; // 생존시간 측정 시작
         _hp = _stats.MaxHp; // 체력 초기화
