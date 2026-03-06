@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
@@ -56,6 +57,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [SerializeField] ParticleSystem _attackHitEffect3;
 
     PlayerStats _playerStats;
+    OverDriveMode _odm;
     Animator _anima;
     NavMeshAgent _navMesh;
 
@@ -93,10 +95,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _playerStats = GetComponent<PlayerStats>();
         _anima = GetComponent<Animator>();
         _navMesh = GetComponent<NavMeshAgent>();
+        _odm = GetComponent<OverDriveMode>();
 
         //네비매쉬로 회전못하게
         _navMesh.updateRotation = false;
-        
+
 
         //상태들 캐싱
         _moveState = new PlayerMoveState();
@@ -159,11 +162,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 ChangeState(_idleState);
             }
         }
-            _currentState.Execute(this);
+        _currentState.Execute(this);
     }
 
 
-    
+
 
     //오토/수동모드 전환용 토글
     public void ChangeAutoMode()
@@ -188,7 +191,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _currentState.Enter(this);
     }
 
-    
+
     public void OnClick(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -218,7 +221,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 joystickBase.gameObject.SetActive(true);
                 //핸들은 가운데로
                 joystickHandle.anchoredPosition = Vector2.zero;
-            }            
+            }
         }
         //터치가 끝났을때 초기화
         if (ctx.canceled)
@@ -231,7 +234,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
     public void OnMove(InputAction.CallbackContext ctx)
     {
-        
+
         if (ctx.performed)
         {
             //UI위에서 터치했으면 isDrag가 false니깐 리턴
@@ -337,21 +340,59 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void EnableAttackEffect(int index)   //공격이펙트
     {
-        switch (index)
+        ParticleSystem[] effects = { _attackEffect3, _attackHitEffect2, _attackHitEffect3 };
+
+        if (_odm.IsModeOn)
         {
-            case 1: _attackEffect1.Play();
+            float rotX = index switch
+            {
+                1 => 35f,
+                2 => -215f,
+                _ => 0f
+            };
+
+            ResetCombo3RotationX(rotX, effects);
+            foreach (var effect in effects)
+            {
+                effect.Play();
+            }
+        }
+        else
+        {
+            switch (index)
+            {
+                case 1:
+                    _attackEffect1.Play();
                     _attackHitEffect.Play();
-                Debug.LogWarning("이펙트1");
-                break;
-            case 2: _attackEffect2.Play(); 
+                    Debug.LogWarning("이펙트1");
+                    break;
+                case 2:
+                    _attackEffect2.Play();
                     _attackHitEffect.Play();
-                Debug.LogWarning("이펙트2");
-                break;
-            case 3: _attackEffect3.Play();
+                    Debug.LogWarning("이펙트2");
+                    break;
+                case 3:
+                    ResetCombo3RotationX(0,effects);
+                    _attackEffect3.Play();
                     _attackHitEffect2.Play();
                     _attackHitEffect3.Play();
-                Debug.LogWarning("이펙트3");
-                break;
+                    Debug.LogWarning("이펙트3");
+                    break;
+            }
+        }
+    }
+
+    private void ResetCombo3RotationX(float rot, ParticleSystem[] effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (effect == null) continue;
+
+            Vector3 currentEuler = effect.transform.localEulerAngles;
+
+            currentEuler.x = rot;
+
+            effect.transform.localEulerAngles = currentEuler;
         }
     }
 
@@ -415,7 +456,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 nearest = monster; // 가까운적 갱신
             }
         }
-        
+
         //외부에서쓸 타겟변수갱신
         _currentTarget = nearest;
 

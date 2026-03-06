@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -570,6 +570,7 @@ public class MonsterSpawnManager : MonoBehaviour
             return;
 
         orb.transform.position = pos;
+        orb.Setup(_target);
     }
 
     public void ReleaseOrb(OverdriveOrb orb)
