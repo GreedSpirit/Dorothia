@@ -433,6 +433,11 @@ public class MonsterController : MonoBehaviour, IMonster
         if (_hitCollider != null)
             _hitCollider.enabled = false;
 
+        if (_stats.Rank == Monster_Type.Normal && _owner != null) // 일반 몬스터만 드랍
+        {
+            _owner.SpawnOverdriveOrb(transform.position);
+        }
+
         //동적 스폰용 생존시간 이벤트 발행
         float lifeTime = Mathf.Max(0.01f, Time.time - _spawnTime);
         OnMonsterKilledLifeTime?.Invoke(lifeTime);
