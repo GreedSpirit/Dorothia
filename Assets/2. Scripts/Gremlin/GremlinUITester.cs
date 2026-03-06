@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GremlinUITester : MonoBehaviour
@@ -13,8 +13,10 @@ public class GremlinUITester : MonoBehaviour
 
     private void Start()
     {
+        //더미데이터 생성
         GenerateDummyData();
         
+        //그렘린 UI 패널이 존재할 경우
         if (_gremlinUIPanel != null)
         {
             // UI 패널 열기 및 더미 데이터 전달
@@ -26,20 +28,22 @@ public class GremlinUITester : MonoBehaviour
         }
     }
 
+    //더미데이터 생성
     private void GenerateDummyData()
     {
+        //그렘린아이템데이터의 집합체
         _dummyGremlins = new List<GremlinItemData>();
 
         // 장착 중인 그렘린 (빨간 테두리 테스트용)
         _dummyGremlins.Add(new GremlinItemData
         {
-            id = 1,
-            gremlinName = "녹슨 톱니바퀴",
-            currentLevel = 5,
-            currentStat = 12.5f,
-            tier = Rarity.Normal,
-            iconSprite = dummyIconNormal,
-            isEquipped = true 
+            id = 1,                               // 아이디값
+            gremlinName = "녹슨 톱니바퀴",         // 이름
+            currentLevel = 5,                     // 현재레벨
+            currentStat = 12.5f,                  // 현재스텟
+            tier = Rarity.Normal,                 // 현재등급
+            iconSprite = dummyIconNormal,         // 아이콘스프라이트
+            isEquipped = true                     // 장착여부
         });
 
         _dummyGremlins.Add(new GremlinItemData

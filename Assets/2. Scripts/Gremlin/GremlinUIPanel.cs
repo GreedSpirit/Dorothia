@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
@@ -6,24 +6,24 @@ using System.Collections.Generic;
 public class GremlinUIPanel : MonoBehaviour
 {
     [Header("Top Panel (Info)")]
-    [SerializeField] private Image _imgPortrait;
-    [SerializeField] private TextMeshProUGUI _txtName;
-    [SerializeField] private TextMeshProUGUI _txtLevel;
-    [SerializeField] private TextMeshProUGUI _txtStat;
+    [SerializeField] private Image _imgPortrait;       // 이미지
+    [SerializeField] private TextMeshProUGUI _txtName; // 그렘린 이름
+    [SerializeField] private TextMeshProUGUI _txtLevel;// 그렘린 레벨
+    [SerializeField] private TextMeshProUGUI _txtStat; // 그렘린 스텟
 
     [Header("Middle Panel (Scroll View)")]
-    [SerializeField] private Transform _scrollContent;
-    [SerializeField] private GameObject _gremlinItemPrefab;
+    [SerializeField] private Transform _scrollContent; // 스크롤 컨턴츠
+    [SerializeField] private GameObject _gremlinItemPrefab; // 그렘린 프리팹
 
     [Header("Bottom Panel (Buttons)")]
-    [SerializeField] private Button _btnEquip;
-    [SerializeField] private Button _btnGoEnhance;
-    [SerializeField] private Button _btnGoMerge;
+    [SerializeField] private Button _btnEquip;          // 장착버튼
+    [SerializeField] private Button _btnGoEnhance;      // 강화버튼
+    [SerializeField] private Button _btnGoMerge;        // 합성버튼
 
-    private GremlinItemData _selectedGremlinData;
-    private GremlinUIItem _selectedUIItem;
-    private GremlinUIItem _equippedUIItem;
-    private List<GremlinUIItem> _createdItems = new List<GremlinUIItem>();
+    private GremlinItemData _selectedGremlinData;       // 선택한 그렘린의 데이터
+    private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
+    private GremlinUIItem _equippedUIItem;              // 장착 오브젝트 보여줄 UI
+    private List<GremlinUIItem> _createdItems = new List<GremlinUIItem>(); // 생성된 아이템 리스트
 
     private void Awake()
     {
@@ -35,21 +35,28 @@ public class GremlinUIPanel : MonoBehaviour
     //TODO 패널이 열릴 때 호출할 함수 (보유한 그렘린 리스트를 넘겨받아야 함)
     public void OpenPanel(List<GremlinItemData> ownedGremlins)
     {
-        gameObject.SetActive(true);
-        ClearScrollContent();
+        gameObject.SetActive(true);                // 일단 패널 오픈
+        ClearScrollContent();                      // 스크롤 초기화
 
+        //보유 그렘린들 속 데이터들 대상으로
         foreach (var data in ownedGremlins)
         {
+            //게임 오브젝트 생성
             GameObject itemObj = Instantiate(_gremlinItemPrefab, _scrollContent);
+            //생성된 오브젝트의 GremlinUIItem 클래스 저장
             GremlinUIItem uiItem = itemObj.GetComponent<GremlinUIItem>();
             
+            //그 클래스가 존재하면
             if (uiItem != null)
             {
+                //초기화 함수 실행 후 생성된 아이템 리스트에 담기
                 uiItem.Init(data, this);
                 _createdItems.Add(uiItem);
 
+                //데이터상에서 장착 중이라고 되어있으면
                 if (data.isEquipped)
                 {
+                    //장착 UI에 넣기
                     _equippedUIItem = uiItem;
                 }
             }
@@ -58,6 +65,7 @@ public class GremlinUIPanel : MonoBehaviour
         // TODO 첫 번째 아이템을 기본으로 선택 처리, 추후 기획팀과 대화해볼 내용
         if (_createdItems.Count > 0)
         {
+            //첫 번째 아이템을 기본 선택 상태로 처리.
             _createdItems[0]._btnItem.onClick.Invoke();
         }
     }
@@ -65,22 +73,30 @@ public class GremlinUIPanel : MonoBehaviour
     // 개별 슬롯을 터치했을 때 호출됨
     public void OnGremlinSelected(GremlinUIItem item, GremlinItemData data)
     {
+        //이미 선택한 UI아이템이 존재하는 경우
         if (_selectedUIItem != null)
         {
+            //선택 상태 false처리.
             _selectedUIItem.UpdateSelectState(false);
         }
 
+        //선택 UI Item 교체, 선택한 그렘린 데이터 추가
         _selectedUIItem = item;
         _selectedGremlinData = data;
+        //교체한 item의 선택상태 true 처리
         _selectedUIItem.UpdateSelectState(true);
 
+        //최상단 패널 업데이트
         UpdateTopPanel(data);
     }
 
     private void UpdateTopPanel(GremlinItemData data)
     {
+        //이미지 초상화 존재할 경우, 그 초상화 스프라이트는 데이터에서 지정한 스프라이트로.
         if (_imgPortrait != null) _imgPortrait.sprite = data.iconSprite;
+        //이름이 존재하는 경우, 데이터에서 그렘린 이름을 찾아 지정.
         if (_txtName != null) _txtName.text = data.gremlinName;
+        //레벨이 존재하는 경우, 레벨 텍스트는 아래 형식.
         if (_txtLevel != null) _txtLevel.text = $"Lv. {data.currentLevel}";
         
         // TODO 공격력인지 버프 수치인지 표시 포맷은 추후 수정 가능
@@ -89,17 +105,22 @@ public class GremlinUIPanel : MonoBehaviour
 
     private void OnClickEquip()
     {
+        //선택한 아이템이나 선택한 오브젝트의 그렘린 데이터가 null이면 반환
         if (_selectedUIItem == null || _selectedGremlinData == null) return;
 
         // 이미 장착된 녀석이라면 무시
         if (_selectedUIItem == _equippedUIItem) return;
 
+        //장비한 UIItem이 존재하는 경우
         if (_equippedUIItem != null)
         {
+            //장착한 아이템의 장착상태 false
             _equippedUIItem.UpdateEquipState(false);
         }
 
+        //장착 아이템은 현재 선택한 아이템
         _equippedUIItem = _selectedUIItem;
+        //장비 상태 업데이트 true
         _equippedUIItem.UpdateEquipState(true);
 
         // TODO: 여기서 GremlinManager.EquipGremlin() 호출
@@ -120,11 +141,15 @@ public class GremlinUIPanel : MonoBehaviour
 
     private void ClearScrollContent()
     {
+        //생성된 아이템들 기준
         foreach (var item in _createdItems)
         {
+            //내용물이 있으면 파괴
             if (item != null) Destroy(item.gameObject);
         }
+        //생성된 아이템들 리스트 초기화
         _createdItems.Clear();
+        //선택된 아이템 null, 장착된 아이템 null
         _selectedUIItem = null;
         _equippedUIItem = null;
     }

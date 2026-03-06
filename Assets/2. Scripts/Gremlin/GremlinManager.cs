@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GremlinManager : MonoBehaviour
 {
@@ -28,13 +28,17 @@ public class GremlinManager : MonoBehaviour
 
     public void DespawnCurrentGremlin()
     {
+        //현재 그렘린이 존재하는 경우
         if(currentGremlinInstance != null)
         {
+            //교체 시의 이펙트가 존재할 경우
             if(despawnEffectPrefab != null)
             {
+                //존재하는 그렘린 위치에 이펙트 생성
                 Instantiate(despawnEffectPrefab, currentGremlinInstance.transform.position, Quaternion.identity);
             }
 
+            //현재 장착 중인 그렘린 오브젝트 파괴
             Destroy(currentGremlinInstance.gameObject);
             currentGremlinInstance = null;
 
@@ -44,23 +48,31 @@ public class GremlinManager : MonoBehaviour
 
     private void SpawnGremlin(GameObject prefab, string id, string name, Rarity tier, int level, float csvBaseValue)
     {
+        //소환 위치는 플레이어의 위치.
         Vector3 spawnPosition = playerTransform.position;
 
+        //새 그렘린 오브젝트를 소환 위치에 생성. 해당 그렘린으로부터 그렘린베이스 클래스를 가져와 인스턴스에 장착
         GameObject newGremlinObj = Instantiate(prefab, spawnPosition, Quaternion.identity);
         currentGremlinInstance = newGremlinObj.GetComponent<GremlinBase>();
 
+        //인스턴스가 존재하는 경우
         if(currentGremlinInstance != null)
         {
+            //그렘린 스텟 가져옴
             currentGremlinInstance.Init(id, name, tier, level, csvBaseValue, playerTransform);
 
+            //소환 이펙트가 존재할 경우
             if (spawnEffectPrefab != null)
             {
+                //해당 그렘린 위치에 소환 이펙트 생성
                 Instantiate(spawnEffectPrefab, newGremlinObj.transform.position, Quaternion.identity);
             }
             Debug.Log($"[GremlinManager] {name} (Tier : {tier}, Lv: {level}) 소환 성공");
         }
+        //인스턴스가 존재하지 않을 경우
         else
         {
+            //그렘린이 아니라고 판단, 삭제
             Debug.LogError("그렘린 프리팹에 GremlinBase 컴포넌트가 있는지 확인해 볼 것!");
             Destroy(newGremlinObj);
         }
