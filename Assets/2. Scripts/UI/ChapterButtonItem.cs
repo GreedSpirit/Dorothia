@@ -21,7 +21,8 @@ public class ChapterButtonItem : MonoBehaviour
     private void Awake()
     {
         //SelectStage 자동 탐색
-        _selectStage = GetComponentInParent<SelectStage>();
+        if (_selectStage == null)
+            _selectStage = GetComponentInParent<SelectStage>();
 
         if (_button != null)
         {

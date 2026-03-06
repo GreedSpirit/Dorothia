@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.UI;
 using TMPro;
 
@@ -18,6 +17,13 @@ public class SelectStage : BaseUI
 
     private int _selectedSection = -1;  // 현재 선택된 섹션 저장용
     private int _previewStageId;    // UI용 현재 선택 챕터
+
+    //캐시용
+    private readonly Dictionary<int, List<Stage_SectionData>> _sectionCache = new();
+    private ChapterButtonItem[] _chapterButtons;
+
+    //캐시 빌드 여부 플래그
+    private bool _isCacheBuilt = false;
 
     private void OnEnable()
     {
@@ -63,6 +69,21 @@ public class SelectStage : BaseUI
 
     protected override void OnOpen()
     {
+        if (_stageManager == null)
+        {
+            Debug.LogError("[SelectStage] StageManager NULL");
+            return;
+        }
+
+        if (_chapterButtons == null)
+        {
+            _chapterButtons = GetComponentsInChildren<ChapterButtonItem>(true);
+        }
+
+        //캐시는 최초 1회만 빌드
+        if (!_isCacheBuilt)
+            BuildSectionCache();
+
         Debug.Log($"현재 섹션: {_stageManager.CurrentSection}");
 
         _previewStageId = _stageManager.CurrentStageId; // 현재 진행 챕터 기준
@@ -86,10 +107,70 @@ public class SelectStage : BaseUI
     {
     }
 
+    #region 캐시
+    /// <summary>
+    /// Stage_SectionData를 Stage_Id 기준으로 캐싱
+    /// LINQ Where / OrderBy / ToList 사용을 제거하기 위한 사전 작업
+    /// </summary>
+    private void BuildSectionCache()
+    {
+        _sectionCache.Clear();
+
+        if (DataManager.Instance == null)
+        {
+            Debug.LogError("[SelectStage] DataManager 없음");
+            return;
+        }
+
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+        if (dict == null)
+        {
+            Debug.LogError("[SelectStage] Stage_SectionData Dict 없음");
+            return;
+        }
+
+        foreach (var pair in dict)
+        {
+            Stage_SectionData data = pair.Value;
+            if (data == null)
+                continue;
+
+            if (!_sectionCache.TryGetValue(data.Stage_Id, out var list))
+            {
+                list = new List<Stage_SectionData>();
+                _sectionCache.Add(data.Stage_Id, list);
+            }
+
+            list.Add(data);
+        }
+
+        //Stage_Id별 Section_Start 오름차순 정렬
+        foreach (var pair in _sectionCache)
+        {
+            pair.Value.Sort((a, b) => a.Section_Start.CompareTo(b.Section_Start));
+        }
+
+        _isCacheBuilt = true;
+    }
+
+    /// <summary>
+    /// 캐시된 섹션 리스트 반환
+    /// </summary>
+    /// <param name="stageId"></param>
+    /// <param name="sections"></param>
+    /// <returns></returns>
+    private bool TryGetSections(int stageId, out List<Stage_SectionData> sections)
+    {
+        return _sectionCache.TryGetValue(stageId, out sections) &&
+               sections != null &&
+               sections.Count > 0;
+    }
+    #endregion
+
     #region 스테이지
     private void GenerateStageButtons()
     {
-        ClearButtons();
+        DeactivateAllButtons(); // 재사용
 
         if (_stageManager == null)
             return;
@@ -97,43 +178,54 @@ public class SelectStage : BaseUI
         int stageId = _previewStageId; // 우선은 preview로 사용 (추후 _stageManager.CurrentStageId로 바뀔수도)
         int currentSection = _stageManager.CurrentSection;
 
-        //Stage_Id 기준으로 정확히 필터링
-        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
-
-        if (dict == null)
+        //캐시 사용
+        if (!TryGetSections(stageId, out var sections))
         {
-            Debug.LogError("Stage_SectionData Dict NULL");
+            Debug.LogWarning($"[SelectStage] Stage_Id={stageId} 에 해당하는 Section 데이터 없음");
             return;
         }
 
-        List<Stage_SectionData> sections = dict
-            .Values
-            .Where(x => x.Stage_Id == stageId)
-            .OrderBy(x => x.Section_Start)
-            .ToList();
-
-        if (sections.Count == 0)
-            return;
-
         //전체 범위 계산
-        int totalStart = sections.Min(x => x.Section_Start);
-        int totalEnd = sections.Max(x => x.Section_End);
+        int totalStart = sections[0].Section_Start;
+        int totalEnd = sections[0].Section_End;
 
-        //버튼 생성
+        //LINQ Min / Max 제거
+        for (int i = 1; i < sections.Count; i++)
+        {
+            if (sections[i].Section_Start < totalStart)
+                totalStart = sections[i].Section_Start;
+
+            if (sections[i].Section_End > totalEnd)
+                totalEnd = sections[i].Section_End;
+        }
+
+        //버튼 재사용 인덱스
+        int buttonIndex = 0;
+
         for (int realSection = totalStart; realSection <= totalEnd; realSection++)
         {
-            var btn = Instantiate(_stageButtonPrefab, _stageGridRoot);
+            StageButtonItem btn;
+
+            //기존 버튼 재사용
+            if (buttonIndex < _spawnedButtons.Count)
+            {
+                btn = _spawnedButtons[buttonIndex];
+            }
+            else
+            {
+                //부족한 경우에만 새로 생성
+                btn = Instantiate(_stageButtonPrefab, _stageGridRoot);
+                _spawnedButtons.Add(btn);
+            }
+
+            btn.gameObject.SetActive(true);
 
             StageStateType stateType = GetStageState(realSection, currentSection);
+            int displayNumber = realSection - totalStart + 1; // UI 표시용 번호 계산
 
-            int displayNumber = realSection - totalStart + 1; // UI표시용 번호 계산
-
-            //표시번호 + 실제번호 둘 다 전달
             btn.Initialize(displayNumber, realSection, stateType, OnClickStageButton);
 
-            _spawnedButtons.Add(btn);
-
-            //Debug.Log($"Create display={displayNumber} real={realSection} state={stateType} current={currentSection}");
+            buttonIndex++;
         }
     }
 
@@ -157,14 +249,28 @@ public class SelectStage : BaseUI
         _selectedSection = realSectionNumber;
 
         //모든 버튼 선택 해제
-        foreach (var btn in _spawnedButtons)
+        for (int i = 0; i < _spawnedButtons.Count; i++)
         {
-            btn.SetSelected(false);
+            if (_spawnedButtons[i].gameObject.activeSelf)
+                _spawnedButtons[i].SetSelected(false);
         }
 
-        //선택된 버튼만 강조
-        var selectedBtn = _spawnedButtons
-            .FirstOrDefault(b => b.RealSectionNumber == realSectionNumber);
+        //FirstOrDefault 제거 -> for문으로 직접 탐색
+        StageButtonItem selectedBtn = null;
+
+        for (int i = 0; i < _spawnedButtons.Count; i++)
+        {
+            StageButtonItem btn = _spawnedButtons[i];
+
+            if (!btn.gameObject.activeSelf)
+                continue;
+
+            if (btn.RealSectionNumber == realSectionNumber)
+            {
+                selectedBtn = btn;
+                break;
+            }
+        }
 
         if (selectedBtn != null)
             selectedBtn.SetSelected(true);
@@ -190,7 +296,7 @@ public class SelectStage : BaseUI
 
         Close();
     }
-#endregion
+    #endregion
 
     #region 챕터
     //ChapterButtonItem에서 호출
@@ -221,10 +327,13 @@ public class SelectStage : BaseUI
 
     private void SyncChapterHeaderWithCurrentStage()
     {
-        var chapterButtons = GetComponentsInChildren<ChapterButtonItem>(true);
+        if (_chapterButtons == null)
+            return;
 
-        foreach (var chapter in chapterButtons)
+        for (int i = 0; i < _chapterButtons.Length; i++)
         {
+            var chapter = _chapterButtons[i];
+
             if (chapter.StageId == _previewStageId)
             {
                 UpdateChapterHeader(
@@ -234,8 +343,7 @@ public class SelectStage : BaseUI
             }
         }
 
-        //못 찾으면 그냥 비워둠
-        UpdateChapterHeader(null);
+        UpdateChapterHeader(null); // 못 찾으면 비워둠
     }
     #endregion
 
@@ -246,22 +354,25 @@ public class SelectStage : BaseUI
 
         int stageId = _previewStageId;
 
-        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
-        if (dict == null)
-            return;
-
-        var sections = dict.Values
-            .Where(x => x.Stage_Id == stageId)
-            .ToList();
-
-        if (sections.Count == 0)
+        //캐시 사용
+        if (!TryGetSections(stageId, out var sections))
         {
             _progressText.text = "";
             return;
         }
 
-        int totalStart = sections.Min(x => x.Section_Start);
-        int totalEnd = sections.Max(x => x.Section_End);
+        int totalStart = sections[0].Section_Start;
+        int totalEnd = sections[0].Section_End;
+
+        for (int i = 1; i < sections.Count; i++)
+        {
+            if (sections[i].Section_Start < totalStart)
+                totalStart = sections[i].Section_Start;
+
+            if (sections[i].Section_End > totalEnd)
+                totalEnd = sections[i].Section_End;
+        }
+
         int totalCount = totalEnd - totalStart + 1;
 
         //선택한 섹션이 있으면 그걸 기준으로 표시
@@ -285,14 +396,19 @@ public class SelectStage : BaseUI
         _progressText.text = $"현재진행도: {currentIndex} / {totalCount}";
     }
 
-    private void ClearButtons()
+    /// <summary>
+    /// 버튼 재사용
+    /// 다음 GenerateStageButtons에서 필요한 만큼 재활성화해서 재사용
+    /// </summary>
+    private void DeactivateAllButtons()
     {
-        foreach (var btn in _spawnedButtons)
+        for (int i = 0; i < _spawnedButtons.Count; i++)
         {
-            if (btn != null)
-                Destroy(btn.gameObject);
+            if (_spawnedButtons[i] != null)
+            {
+                _spawnedButtons[i].SetSelected(false);
+                _spawnedButtons[i].gameObject.SetActive(false);
+            }
         }
-
-        _spawnedButtons.Clear();
     }
 }
