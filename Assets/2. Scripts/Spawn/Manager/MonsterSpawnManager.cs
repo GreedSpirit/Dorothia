@@ -53,6 +53,11 @@ public class MonsterSpawnManager : MonoBehaviour
     private SpawnMetricsCollector _metrics;
     private DynamicSpawnPolicy _policy;
 
+    public void SetSpawnAreaProvider(SpawnAreaProvider provider)
+    {
+        _spawnAreaProvider = provider;
+    }
+
     private void Awake()
     {
         _target = _targetProvider as IMonsterTarget;
