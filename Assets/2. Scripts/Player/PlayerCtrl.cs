@@ -144,7 +144,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasReleasedThisFrame)
         {
             //초기화후 상태전환
-            _navMesh.ResetPath();
+            if (_navMesh.isOnNavMesh)
+                _navMesh.ResetPath();
             _moveInput = Vector2.zero;
             //_touchStart = Vector2.zero;
 
@@ -439,6 +440,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _anima.SetInteger("Combo", 0);
 
         //이동 초기화
-        _navMesh.ResetPath();
+        if (_navMesh.isOnNavMesh)
+            _navMesh.ResetPath();
     }
 }

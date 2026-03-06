@@ -6,7 +6,12 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
     public void Enter(PlayerCtrl player)
     {
         Debug.Log("아이들상태진입");
-        player.NavMesh.ResetPath();
+        if (player.NavMesh != null &&
+            player.NavMesh.isActiveAndEnabled &&
+            player.NavMesh.isOnNavMesh)
+        {
+            player.NavMesh.ResetPath();
+        }
         player.Anima.SetBool("Run", false);
         player.Anima.SetBool("Attack", false);
         player.ComboIndex = 0;
