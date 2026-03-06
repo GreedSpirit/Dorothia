@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HitBox : MonoBehaviour
 {
     private PlayerCtrl _player;
+    private OverDriveMode odm;
     private readonly HashSet<IMonster> _hitMonsters = new();
 
     private void Awake()
     {
         _player = GetComponentInParent<PlayerCtrl>();
+        odm = _player.GetComponent<OverDriveMode>();
     }
 
     private void OnEnable()
@@ -34,6 +36,7 @@ public class HitBox : MonoBehaviour
         _hitMonsters.Add(monster);
 
         int damage = Mathf.RoundToInt(_player.PlayerStats.Attack); // 플레이어스탯 공격력
+        if (odm.IsModeOn) damage *= 2;
 
         monster.TakeDamage(damage);
     }

@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerOverDriveGauge : MonoBehaviour
 {
-    [SerializeField] PlayerStats _playerStats;
-    Slider _slider;
+    [SerializeField] private OverDriveMode odm;
+    private Slider _slider;
 
     private void Awake()
     {
@@ -19,12 +19,12 @@ public class PlayerOverDriveGauge : MonoBehaviour
 
     private void OnEnable()
     {
-        //_playerStats.OnOverDriveGaugeChanged += ChangeOverDriveBar;
+        odm.OnOverdriveGaugeChanged += ChangeOverDriveBar;
     }
 
     private void OnDisable()
     {
-        //_playerStats.OnOverDriveGaugeChanged -= ChangeOverDriveBar;
+        odm.OnOverdriveGaugeChanged -= ChangeOverDriveBar;
     }
 
     void ChangeOverDriveBar(float currentGauge, float maxGauge)
