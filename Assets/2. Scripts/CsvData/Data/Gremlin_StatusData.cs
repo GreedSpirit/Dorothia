@@ -8,7 +8,7 @@ public class Gremlin_StatusData : ICSVLoad, ITableKey
     public float Gremlin_Atk { get; set; }
     public float Gremlin_Atk_M { get; set; }
     public float Gremlin_Dps { get; set; }
-    public Rarity Gremlin_Buff { get; set; }
+    public Status Gremlin_Buff { get; set; }
     public float Gremlin_Cooltime { get; set; }
 
     int ITableKey.Id => Gremlin_Id;
@@ -25,7 +25,7 @@ public class Gremlin_StatusData : ICSVLoad, ITableKey
         // 3: Gramlin_Dps (float)
         if (values.Length > 3 && float.TryParse(values[3], out float v3)) Gremlin_Dps = v3;
         // 4: Gramlin_Buff (Rarity)
-        if (values.Length > 4 && Enum.TryParse(values[4], out Rarity v4)) Gremlin_Buff = v4;
+        if (values.Length > 4 && Enum.TryParse(values[4], out Status v4)) Gremlin_Buff = v4;
         // 5: Gramlin_Cooltime (float)
         if (values.Length > 5 && float.TryParse(values[5], out float v5)) Gremlin_Cooltime = v5;
     }

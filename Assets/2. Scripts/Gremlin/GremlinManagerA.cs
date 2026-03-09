@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class GremlinManager : MonoBehaviour
+public class GremlinManagerA : MonoBehaviour
 {
     [SerializeField] private Transform playerTransform;
 
@@ -19,7 +19,7 @@ public class GremlinManager : MonoBehaviour
     /// CSV에서 로드한 스탯(공속, 공격력 또는 버프수치)
     /// </summary>
     
-    public void EquipGremlin(GameObject gremlinPrefab, string id, string gremlinName, Rarity tier, int level, float csvBaseValue)
+    public void EquipGremlin(GameObject gremlinPrefab, int id, string gremlinName, Rarity tier, int level, float csvBaseValue)
     {
         DespawnCurrentGremlin();
 
@@ -46,7 +46,7 @@ public class GremlinManager : MonoBehaviour
         }
     }
 
-    private void SpawnGremlin(GameObject prefab, string id, string name, Rarity tier, int level, float csvBaseValue)
+    private void SpawnGremlin(GameObject prefab, int id, string name, Rarity tier, int level, float csvBaseValue)
     {
         //소환 위치는 플레이어의 위치.
         Vector3 spawnPosition = playerTransform.position;
@@ -59,7 +59,7 @@ public class GremlinManager : MonoBehaviour
         if(currentGremlinInstance != null)
         {
             //그렘린 스텟 가져옴
-            currentGremlinInstance.Init(id, name, tier, level, csvBaseValue, playerTransform);
+            currentGremlinInstance.Init(id, tier, level, csvBaseValue, playerTransform);
 
             //소환 이펙트가 존재할 경우
             if (spawnEffectPrefab != null)

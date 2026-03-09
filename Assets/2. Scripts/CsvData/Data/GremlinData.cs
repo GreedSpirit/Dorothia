@@ -4,26 +4,26 @@ using System;
 [Serializable]
 public class GremlinData : ICSVLoad, ITableKey
 {
-    public int Gramlin_Id { get; set; }
-    public string Gramlin_Name { get; set; }
-    public Rarity Gremlin_Tier { get; set; }
-    public string Gramlin_Model { get; set; }
-    public string Gramlin_Icon { get; set; }
+    public int Gremlin_Id { get; set; }
+    public string Gremlin_Name { get; set; }
+    public Gremlin_Type Gremlin_Type { get; set; }
+    public string Gremlin_Model { get; set; }
+    public string Gremlin_Icon { get; set; }
 
-    int ITableKey.Id => Gramlin_Id;
-    string ITableKey.Key => Gramlin_Id.ToString();
+    int ITableKey.Id => Gremlin_Id;
+    string ITableKey.Key => Gremlin_Id.ToString();
 
     public void LoadFromCsv(string[] values)
     {
         // 0: Gremlin_Id (int)
-        if (values.Length > 0 && int.TryParse(values[0], out int v0)) Gramlin_Id = v0;
+        if (values.Length > 0 && int.TryParse(values[0], out int v0)) Gremlin_Id = v0;
         // 1: Gremlin_Name (string)
-        if (values.Length > 1) Gramlin_Name = values[1];
+        if (values.Length > 1) Gremlin_Name = values[1];
         // 2: Gremlin_Type (Rarity)
-        if (values.Length > 2 && Enum.TryParse(values[2], out Rarity v2)) Gremlin_Tier = v2;
+        if (values.Length > 2 && Enum.TryParse(values[2], out Gremlin_Type v2)) Gremlin_Type = v2;
         // 3: Gremlin_Model (string)
-        if (values.Length > 3) Gramlin_Model = values[3];
+        if (values.Length > 3) Gremlin_Model = values[3];
         // 4: Gremlin_Icon (string)
-        if (values.Length > 4) Gramlin_Icon = values[4];
+        if (values.Length > 4) Gremlin_Icon = values[4];
     }
 }

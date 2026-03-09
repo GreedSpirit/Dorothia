@@ -3,22 +3,24 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 
-public class GremlinUIPanel : MonoBehaviour
+public class GremlinUIPanel : BaseUI
 {
-    [Header("Top Panel (Info)")]
+    [Header("정보 출력용 상단 패널")]
     [SerializeField] private Image _imgPortrait;       // 이미지
     [SerializeField] private TextMeshProUGUI _txtName; // 그렘린 이름
     [SerializeField] private TextMeshProUGUI _txtLevel;// 그렘린 레벨
     [SerializeField] private TextMeshProUGUI _txtStat; // 그렘린 스텟
 
-    [Header("Middle Panel (Scroll View)")]
+    [Header("스크롤뷰(중간 패널, 아이템 표기용)")]
     [SerializeField] private Transform _scrollContent; // 스크롤 컨턴츠
     [SerializeField] private GameObject _gremlinItemPrefab; // 그렘린 프리팹
 
-    [Header("Bottom Panel (Buttons)")]
+    [Header("버튼")]
     [SerializeField] private Button _btnEquip;          // 장착버튼
     [SerializeField] private Button _btnGoEnhance;      // 강화버튼
     [SerializeField] private Button _btnGoMerge;        // 합성버튼
+
+    [SerializeField] private GremlinInventory _gremlinList;
 
     private GremlinItemData _selectedGremlinData;       // 선택한 그렘린의 데이터
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
@@ -60,6 +62,8 @@ public class GremlinUIPanel : MonoBehaviour
                     _equippedUIItem = uiItem;
                 }
             }
+
+            Debug.Log($"{data.id}생성 완료.");
         }
 
         // TODO 첫 번째 아이템을 기본으로 선택 처리, 추후 기획팀과 대화해볼 내용
@@ -152,5 +156,15 @@ public class GremlinUIPanel : MonoBehaviour
         //선택된 아이템 null, 장착된 아이템 null
         _selectedUIItem = null;
         _equippedUIItem = null;
+    }
+
+    protected override void OnOpen()
+    {
+        //OpenPanel(_gremlinList._gremlinInventory);
+    }
+
+    protected override void OnClose()
+    {
+        Close();
     }
 }
