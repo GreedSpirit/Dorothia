@@ -2,6 +2,8 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using System.Threading.Tasks;
 
 public class GremlinUIPanel : BaseUI
 {
@@ -22,7 +24,7 @@ public class GremlinUIPanel : BaseUI
 
     [SerializeField] private GremlinInventory _gremlinList;
 
-    private GremlinItemData _selectedGremlinData;       // 선택한 그렘린의 데이터
+    private Gremlin _selectedGremlinData;               // 선택한 그렘린의 데이터
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
     private GremlinUIItem _equippedUIItem;              // 장착 오브젝트 보여줄 UI
     private List<GremlinUIItem> _createdItems = new List<GremlinUIItem>(); // 생성된 아이템 리스트
@@ -35,7 +37,7 @@ public class GremlinUIPanel : BaseUI
     }
 
     //TODO 패널이 열릴 때 호출할 함수 (보유한 그렘린 리스트를 넘겨받아야 함)
-    public void OpenPanel(List<GremlinItemData> ownedGremlins)
+    public void OpenPanel(List<Gremlin> ownedGremlins)
     {
         gameObject.SetActive(true);                // 일단 패널 오픈
         ClearScrollContent();                      // 스크롤 초기화
@@ -56,14 +58,14 @@ public class GremlinUIPanel : BaseUI
                 _createdItems.Add(uiItem);
 
                 //데이터상에서 장착 중이라고 되어있으면
-                if (data.isEquipped)
+                if (data._isEquipped)
                 {
                     //장착 UI에 넣기
                     _equippedUIItem = uiItem;
                 }
             }
 
-            Debug.Log($"{data.id}생성 완료.");
+            Debug.Log($"{data._gremlinData.PetID}생성 완료.");
         }
 
         // TODO 첫 번째 아이템을 기본으로 선택 처리, 추후 기획팀과 대화해볼 내용
@@ -75,7 +77,7 @@ public class GremlinUIPanel : BaseUI
     }
 
     // 개별 슬롯을 터치했을 때 호출됨
-    public void OnGremlinSelected(GremlinUIItem item, GremlinItemData data)
+    public void OnGremlinSelected(GremlinUIItem item, Gremlin data)
     {
         //이미 선택한 UI아이템이 존재하는 경우
         if (_selectedUIItem != null)
@@ -91,20 +93,29 @@ public class GremlinUIPanel : BaseUI
         _selectedUIItem.UpdateSelectState(true);
 
         //최상단 패널 업데이트
-        UpdateTopPanel(data);
+        UpdateTopPanelAsync(data);
     }
 
-    private void UpdateTopPanel(GremlinItemData data)
+    private void UpdateTopPanelAsync(Gremlin data)
     {
         //이미지 초상화 존재할 경우, 그 초상화 스프라이트는 데이터에서 지정한 스프라이트로.
-        if (_imgPortrait != null) _imgPortrait.sprite = data.iconSprite;
+        if (_imgPortrait != null)
+        {
+            var icon = data._gremlinData.sprite;
+            _imgPortrait.sprite = icon;
+        };
         //이름이 존재하는 경우, 데이터에서 그렘린 이름을 찾아 지정.
-        if (_txtName != null) _txtName.text = data.gremlinName;
+        if (_txtName != null)
+        {
+            Debug.Log(data._gremlinData.PetID);
+            Debug.Log(DataManager.Instance.GetData<GremlinData>(140001).Gremlin_Id);
+            _txtName.text = DataManager.Instance.GetData<GremlinData>(data._gremlinData.PetID).Gremlin_Name;
+        }
         //레벨이 존재하는 경우, 레벨 텍스트는 아래 형식.
-        if (_txtLevel != null) _txtLevel.text = $"Lv. {data.currentLevel}";
+        if (_txtLevel != null) _txtLevel.text = $"Lv. {data._currentLevel}";
         
         // TODO 공격력인지 버프 수치인지 표시 포맷은 추후 수정 가능
-        if (_txtStat != null) _txtStat.text = $"능력치: {data.currentStat}"; 
+        //if (_txtStat != null) _txtStat.text = $"능력치: {data.currentStat}"; 
     }
 
     private void OnClickEquip()
@@ -128,19 +139,19 @@ public class GremlinUIPanel : BaseUI
         _equippedUIItem.UpdateEquipState(true);
 
         // TODO: 여기서 GremlinManager.EquipGremlin() 호출
-        Debug.Log($"[{_selectedGremlinData.gremlinName}] 장착 완료!");
+        Debug.Log($"[{DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name}] 장착 완료!");
     }
 
     private void OnClickGoEnhance()
     {
         if (_selectedGremlinData == null) return;
-        Debug.Log("강화 패널 열기 요청 - 선택된 그렘린: " + _selectedGremlinData.gremlinName);
+        Debug.Log("강화 패널 열기 요청 - 선택된 그렘린: " + DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name);
     }
 
     private void OnClickGoMerge()
     {
         if (_selectedGremlinData == null) return;
-        Debug.Log("합성 패널 열기 요청 - 선택된 그렘린: " + _selectedGremlinData.gremlinName);
+        Debug.Log("합성 패널 열기 요청 - 선택된 그렘린: " + DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name);
     }
 
     private void ClearScrollContent()
@@ -160,11 +171,11 @@ public class GremlinUIPanel : BaseUI
 
     protected override void OnOpen()
     {
-        //OpenPanel(_gremlinList._gremlinInventory);
+        OpenPanel(_gremlinList._gremlinInventory);
     }
 
     protected override void OnClose()
     {
-        Close();
+        
     }
 }

@@ -1,16 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
-
-public class GremlinItemData //TODO 아직 테이블이 없어서 만든 임시 데이터 클래스(추후 테이블에 맞게 변경)
-{
-    public int id;             // 아이디값
-    public string gremlinName; // 그렘린의 이름
-    public int currentLevel;   // 현재 그렘린의 레벨
-    public float currentStat;  // 공격력, 공속, 쿨타임 등
-    public Rarity tier;        // 그렘린의 등급
-    public Sprite iconSprite;  // 그렘린의 스프라이트
-    public bool isEquipped;    // 그렘린 장착 여부
-}
 
 public class GremlinUIItem : MonoBehaviour
 {
@@ -19,25 +10,26 @@ public class GremlinUIItem : MonoBehaviour
     [SerializeField] private Image _imgEquipBorder;    // 장착했는지 보여주기 위한 보더
     [SerializeField] public Button _btnItem;           // 아이템 버튼
 
-    private GremlinItemData _itemData;
+    private Gremlin _itemData;
     private GremlinUIPanel _parentPanel;
 
-    public void Init(GremlinItemData itemData, GremlinUIPanel parentPanel)
+    public void Init(Gremlin itemData, GremlinUIPanel parentPanel)
     {
         //그렘린 아이템데이터, 부모 패널 연결
         _itemData = itemData;
         _parentPanel = parentPanel;
 
         //이미지 아이콘이 존재하며 아이템데이터에 아이콘스프라이트가 존재하는 경우
-        if(_imgIcon != null && itemData.iconSprite != null)
+        if(_imgIcon != null && itemData._gremlinData.sprite != null)
         {
             //이미지 아이콘의 스프라이트를 아이템데이터에서 가져옴.
-            _imgIcon.sprite = itemData.iconSprite;
+            var icon = itemData._gremlinData.sprite;
+            _imgIcon.sprite = icon;
         }
 
         // 초기 테두리 상태 설정
         UpdateSelectState(false);
-        UpdateEquipState(itemData.isEquipped);
+        UpdateEquipState(itemData._isEquipped);
 
         // 버튼 이벤트 등록
         _btnItem.onClick.RemoveAllListeners();
@@ -63,7 +55,7 @@ public class GremlinUIItem : MonoBehaviour
             _imgEquipBorder.gameObject.SetActive(isEquipped);
         }
         //isEquipped값에 따라 아이템데이터에 장착 여부 변경
-        _itemData.isEquipped = isEquipped;
+        _itemData._isEquipped = isEquipped;
     }
 
     private void OnClickItem()
