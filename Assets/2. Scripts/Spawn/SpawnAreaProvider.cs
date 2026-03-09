@@ -19,6 +19,15 @@ public class SpawnAreaProvider : MonoBehaviour
 
     public float MapHalfSize => _mapHalfSize;
 
+    private void Awake()
+    {
+        if (_player == null)
+            _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        if (_playerCamera == null)
+            _playerCamera = Camera.main;
+    }
+
     /// <summary>
     /// 스폰 가능한 위치 계산
     /// </summary>

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HitBox : MonoBehaviour
 {
     private PlayerCtrl _player;
+    private OverDriveMode odm;
     private readonly HashSet<IMonster> _hitMonsters = new();
 
     private void Awake()
     {
         _player = GetComponentInParent<PlayerCtrl>();
+        odm = _player.GetComponent<OverDriveMode>();
     }
 
     private void OnEnable()

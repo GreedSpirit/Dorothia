@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -55,7 +55,13 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [SerializeField] ParticleSystem _attackHitEffect2;
     [SerializeField] ParticleSystem _attackHitEffect3;
 
+    private Vector3 _originPos3;
+    private Quaternion _originRot3;
+    private Vector3 _originHitPos3;
+    private Quaternion _originHitRot3;
+
     PlayerStats _playerStats;
+    OverDriveMode _odm;
     Animator _anima;
     NavMeshAgent _navMesh;
 
@@ -93,10 +99,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _playerStats = GetComponent<PlayerStats>();
         _anima = GetComponent<Animator>();
         _navMesh = GetComponent<NavMeshAgent>();
+        _odm = GetComponent<OverDriveMode>();
 
         //네비매쉬로 회전못하게
         _navMesh.updateRotation = false;
-        
+
 
         //상태들 캐싱
         _moveState = new PlayerMoveState();
@@ -107,6 +114,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         //상태 초기화
         _currentState = _idleState;
         _currentState.Enter(this);
+
+        _originPos3 = _attackEffect3.transform.localPosition;
+        _originRot3 = _attackEffect3.transform.localRotation;
+
+        _originHitPos3 = _attackHitEffect3.transform.localPosition;
+        _originHitRot3 = _attackHitEffect3.transform.localRotation;
     }
 
     private void OnEnable()
@@ -144,7 +157,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasReleasedThisFrame)
         {
             //초기화후 상태전환
-            _navMesh.ResetPath();
+            if (_navMesh.isOnNavMesh)
+                _navMesh.ResetPath();
             _moveInput = Vector2.zero;
             //_touchStart = Vector2.zero;
 
@@ -158,11 +172,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 ChangeState(_idleState);
             }
         }
-            _currentState.Execute(this);
+        _currentState.Execute(this);
     }
 
 
-    
+
 
     //오토/수동모드 전환용 토글
     public void ChangeAutoMode()
@@ -187,7 +201,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _currentState.Enter(this);
     }
 
-    
+
     public void OnClick(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -217,7 +231,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 joystickBase.gameObject.SetActive(true);
                 //핸들은 가운데로
                 joystickHandle.anchoredPosition = Vector2.zero;
-            }            
+            }
         }
         //터치가 끝났을때 초기화
         if (ctx.canceled)
@@ -230,7 +244,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
     public void OnMove(InputAction.CallbackContext ctx)
     {
-        
+
         if (ctx.performed)
         {
             //UI위에서 터치했으면 isDrag가 false니깐 리턴
@@ -334,24 +348,50 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _hitBox3.enabled = false;
     }
 
-    public void EnableAttackEffect(int index)   //공격이펙트
+    public void EnableAttackEffect(int index)
     {
-        switch (index)
+        Transform[] effectTransforms = { _attackEffect1.transform, _attackEffect2.transform, _attackEffect3.transform };
+        Transform[] hitEffectTransforms = { _attackHitEffect.transform, _attackHitEffect2.transform, _attackHitEffect3.transform };
+
+        if (index < 1 || index > 3) return;
+        int arrayIdx = index - 1;
+
+        ResetEffect3Transform();
+
+        if (_odm.IsModeOn)
         {
-            case 1: _attackEffect1.Play();
-                    _attackHitEffect.Play();
-                Debug.LogWarning("이펙트1");
-                break;
-            case 2: _attackEffect2.Play(); 
-                    _attackHitEffect.Play();
-                Debug.LogWarning("이펙트2");
-                break;
-            case 3: _attackEffect3.Play();
-                    _attackHitEffect2.Play();
-                    _attackHitEffect3.Play();
-                Debug.LogWarning("이펙트3");
-                break;
+            _attackEffect3.transform.SetPositionAndRotation(
+                effectTransforms[arrayIdx].position,
+                effectTransforms[arrayIdx].rotation
+            );
+            _attackHitEffect3.transform.SetPositionAndRotation(
+                hitEffectTransforms[arrayIdx].position,
+                hitEffectTransforms[arrayIdx].rotation
+            );
+
+            _attackEffect3.Play();
+            _attackHitEffect3.Play();
         }
+        else
+        {
+            // 일반 모드: 각 인덱스에 맞는 이펙트 재생
+            switch (index)
+            {
+                case 1: _attackEffect1.Play(); _attackHitEffect.Play(); break;
+                case 2: _attackEffect2.Play(); _attackHitEffect2.Play(); break;
+                case 3: _attackEffect3.Play(); _attackHitEffect.Play(); _attackHitEffect2.Play(); break;
+            }
+        }
+    }
+
+    // 이펙트 3번을 원래 태어났던(?) 자리로 되돌리는 함수
+    private void ResetEffect3Transform()
+    {
+        _attackEffect3.transform.localPosition = _originPos3;
+        _attackEffect3.transform.localRotation = _originRot3;
+
+        _attackHitEffect3.transform.localPosition = _originHitPos3;
+        _attackHitEffect3.transform.localRotation = _originHitRot3;
     }
 
     //에디터 체크용 기즈모
@@ -414,7 +454,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 nearest = monster; // 가까운적 갱신
             }
         }
-        
+
         //외부에서쓸 타겟변수갱신
         _currentTarget = nearest;
 
@@ -439,6 +479,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _anima.SetInteger("Combo", 0);
 
         //이동 초기화
-        _navMesh.ResetPath();
+        if (_navMesh.isOnNavMesh)
+            _navMesh.ResetPath();
     }
 }

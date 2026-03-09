@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,25 +24,25 @@ public class FinalStat
     // 외부에서는 이 프로퍼티만 읽어감 (추가 연산 없음)
     public double FinalValue => cachedValue;
 
-    //{(캐릭터 스테이터스 * 레벨업 스테이터스 가중치 * 승급}+ 장비스탯} * (1 + 장비세트 효과 * 패시브)
+    private double? overrideValue = null; // 고정값 사용 여부
 
-    //todo : 계산식 고치기
-    /// <summary>
-    /// Level : 플레이어 레벨
-    /// promotion : 플레이어 승급 단계
-    /// equipAdd : 장비 수치?(지워야할듯)
-    /// </summary>
-    /// <param name="level"></param>
-    /// <param name="promotionMulti"></param>
-    /// <param name="equipAdd"></param>
-    /// <returns></returns>
+    // 외부에서 고정값을 지정할 때 사용
+    public void SetOverrideValue(double? value)
+    {
+        overrideValue = value;
+    }
+
     public void UpdateFinalValue(int level, float promotionMulti = 1)
     {
+        // 고정값이 설정되어 있다면 계산을 무시하고 해당 값 사용
+        if (overrideValue.HasValue)
+        {
+            cachedValue = overrideValue.Value;
+            return;
+        }
 
         double characterGrowth = (baseStat + growAdditiveStat) * Mathf.Pow(weight, level - 1);
-
         double totalBeforePercent = (characterGrowth * promotionMulti) + equipAdditiveStat;
-
         cachedValue = totalBeforePercent * multiStat;
     }
 
@@ -58,13 +58,12 @@ public class FinalStat
     {
         multiStat += add;
     }
-
-
     public void ResetModifiers()
     {
         growAdditiveStat = 0;
         equipAdditiveStat = 0;
-        multiStat = 1f; // 기본 배율은 100%
+        multiStat = 1f;
+        overrideValue = null; // 리셋 시 고정값 해제
     }
 }
 
@@ -88,6 +87,8 @@ public class StatManager : MonoBehaviour
         instance = this;
         //InitStats();
     }
+
+    [SerializeField] private OverDriveMode _odm;
 
     //private void InitStats()
     //{
@@ -146,6 +147,8 @@ public class StatManager : MonoBehaviour
         // 장비 효과 적용
         ApplyEquipmentStats();
 
+        ApplyODMModifiers();
+
         //int currentLevel = PlayerManager.Instance.Level;
         //float promotion = PlayerManager.Instance.Promotion;
 
@@ -194,7 +197,23 @@ public class StatManager : MonoBehaviour
         }
     }
 
+    private void ApplyODMModifiers()
+    {
+        if (_odm != null && _odm.IsModeOn)
+        {
+            // 공격력 1.3배 (증가량 0.3을 더함)
+            if (stats.ContainsKey(Status.ATK))
+                stats[Status.ATK].AddMultiModifier(0.3f);
 
+            // 공격 속도 1.5배 (증가량 0.5를 더함)
+            if (stats.ContainsKey(Status.AttackSpeed))
+                stats[Status.AttackSpeed].AddMultiModifier(0.5f);
+
+            // 이동 속도 3으로 고정
+            if (stats.ContainsKey(Status.MoveSpeed))
+                stats[Status.MoveSpeed].SetOverrideValue(3.0);
+        }
+    }
 
     public double GetStat(Status type)
     {

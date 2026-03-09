@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
@@ -91,6 +91,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
         //위상황들 다 통과하면 타겟으로 이동
         else
         {
+            player.NavMesh.speed = (float)StatManager.Instance.stats[Status.MoveSpeed].FinalValue;
             player.ComboIndex = 0;
             player.Anima.SetBool("Attack", false);
             player.Anima.SetInteger("Combo", 0);

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -26,6 +26,11 @@ public class MonsterSpawnManager : MonoBehaviour
     [Header("Projectile Database")]
     [SerializeField] private ProjectileDatabase _projectileDatabase;
 
+    [Header("Overdrive Orb")]
+    [SerializeField] private OverdriveOrb _overdriveOrbPrefab;
+
+    private ObjectPool<OverdriveOrb> _orbPool;
+
     private IMonsterTarget _target;
 
     //몬스터풀, 프리팹 키단위로 풀을 분리해서 서론 다른 몬스터 프리팹을 섞어 써도 안전
@@ -48,6 +53,11 @@ public class MonsterSpawnManager : MonoBehaviour
     private SpawnMetricsCollector _metrics;
     private DynamicSpawnPolicy _policy;
 
+    public void SetSpawnAreaProvider(SpawnAreaProvider provider)
+    {
+        _spawnAreaProvider = provider;
+    }
+
     private void Awake()
     {
         _target = _targetProvider as IMonsterTarget;
@@ -57,6 +67,15 @@ public class MonsterSpawnManager : MonoBehaviour
 
         if (_projectileDatabase == null)
             Debug.LogError("[MonsterSpawnManager] ProjectileDatabase 설정 안됨");
+
+        _orbPool = new ObjectPool<OverdriveOrb>(
+            () => CreateOrb(),
+            orb => orb.gameObject.SetActive(true),
+            orb => orb.gameObject.SetActive(false),
+            orb => Destroy(orb.gameObject),
+            false,
+            32,
+            160);
 
         _metrics = new SpawnMetricsCollector(20);
         _policy = new DynamicSpawnPolicy(30);
@@ -519,6 +538,45 @@ public class MonsterSpawnManager : MonoBehaviour
             pool.Release(proj);
         else
             Destroy(proj.gameObject);
+    }
+    #endregion
+
+    #region 오버드라이브 오브
+    private OverdriveOrb CreateOrb()
+    {
+        if (_overdriveOrbPrefab == null)
+        {
+            Debug.LogError("OverdriveOrbPrefab 없음");
+            return null;
+        }
+
+        OverdriveOrb orb =
+            Instantiate(_overdriveOrbPrefab, RuntimeRootManager.Orbs);
+
+        orb.gameObject.SetActive(false);
+        orb.SetOwner(this);
+
+        return orb;
+    }
+
+    public void SpawnOverdriveOrb(Vector3 pos)
+    {
+        if (_orbPool == null)
+            return;
+
+        OverdriveOrb orb = _orbPool.Get();
+
+        if (orb == null)
+            return;
+
+        orb.transform.position = pos;
+        orb.Setup(_target);
+    }
+
+    public void ReleaseOrb(OverdriveOrb orb)
+    {
+        if (_orbPool != null)
+            _orbPool.Release(orb);
     }
     #endregion
 }

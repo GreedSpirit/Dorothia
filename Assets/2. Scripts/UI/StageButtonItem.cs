@@ -25,6 +25,13 @@ public class StageButtonItem : MonoBehaviour
 
     private Action<int> _onClick;
 
+    private UnityEngine.Events.UnityAction _cachedClick;
+
+    private void Awake()
+    {
+        _cachedClick = HandleClick;
+    }
+
     //displayNumber + realSectionNumber 분리
     public void Initialize(int displayNumber, int realSectionNumber,
         StageStateType stateType, Action<int> clickAction)
@@ -54,8 +61,16 @@ public class StageButtonItem : MonoBehaviour
 
         SetSelected(false);
 
-        _button.onClick.RemoveAllListeners();
-        _button.onClick.AddListener(() => _onClick?.Invoke(RealSectionNumber));
+        if (_button != null)
+        {
+            _button.onClick.RemoveListener(_cachedClick);
+            _button.onClick.AddListener(_cachedClick);
+        }
+    }
+
+    private void HandleClick()
+    {
+        _onClick?.Invoke(RealSectionNumber);
     }
 
     public void SetSelected(bool selected)

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class PlayerMoveState : IPlayerState<PlayerCtrl>
@@ -53,7 +54,7 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
             player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRot, Time.deltaTime * 10f);
 
             //이동
-            float speed = player.PlayerStats._agi;
+            float speed = (float)StatManager.Instance.stats[Status.MoveSpeed].FinalValue;
             //player.transform.position += moveDir * speed * Time.deltaTime;
             player.NavMesh.Move(moveDir * speed * Time.deltaTime);
         }

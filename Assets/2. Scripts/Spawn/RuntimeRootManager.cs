@@ -2,13 +2,14 @@
 
 /// <summary>
 /// 런타임 오브젝트 정리
-/// 몬스터, 투사체, 이펙트 등
+/// 몬스터, 투사체, 오브 등
 /// </summary>
 public class RuntimeRootManager : MonoBehaviour
 {
     public static Transform Monsters { get; private set; }
     public static Transform Projectiles { get; private set; }
-    //추후 이펙트 파티클 추가가능
+    public static Transform Orbs { get; private set; }
+    public static Transform Maps { get; private set; }
 
     private void Awake()
     {
@@ -19,6 +20,8 @@ public class RuntimeRootManager : MonoBehaviour
         if (Projectiles == null)
             Projectiles = CreateRoot("Projectiles");    // 투사체
 
+        if (Orbs == null)
+            Orbs = CreateRoot("Orbs");                  // 오버드라이브 오브
     }
 
     private Transform CreateRoot(string name)
