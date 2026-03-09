@@ -28,6 +28,8 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private Transform skillInven;
     [SerializeField] private GameObject skillItemPrefab;
 
+    public SkillSOData testSkill;
+
     // 패시브 스킬 슬롯
     private const int PASSIVESLOT_COUNT = 5;
     public List<PassiveSkill> passiveSkillSlots = new List<PassiveSkill>();
