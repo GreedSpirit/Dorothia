@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum MoneyType
 {
-    Scrap, Gold
+    Scrap, Gold, GremlinPiece
 }
 public class MoneyManager : MonoBehaviour
 {
@@ -29,7 +29,13 @@ public class MoneyManager : MonoBehaviour
         }
     }
 
+    //잔고 조회
+    public int GetMoneyAmount(MoneyType type)
+    {
+        return _money[type];
+    }
 
+    //재화획득시 호출할 함수
     public void GetMoney(MoneyType type, int amount)
     {
         _money[type] += amount;
@@ -53,12 +59,28 @@ public class MoneyManager : MonoBehaviour
         
     }
 
+    //싱글플레이 기준 저장
+    void SaveMoney()
+    {
+        PlayerPrefs.SetInt("Gold", _money[MoneyType.Gold]);
+        PlayerPrefs.SetInt("Scrap", _money[MoneyType.Scrap]);
+        PlayerPrefs.SetInt("GremlinPiece", _money[MoneyType.GremlinPiece]);
+
+        PlayerPrefs.Save();
+    }
+
+
+
     /*
-     * 재화불러오기 예시
+    파이어베이스 재화불러오기
     void LoadMoney()
     {
-      Savedata data = SaveManager.Instance.Load();
-      _money = data.gold;
+      //파이어베이스 사용시 서버데이터 불러오고
+      //Savedata data = SaveManager.Instance.Load();
+
+      _money[MoneyType.Gold] = data.Gold;
+      _money[MoneyType.Scrap] = data.Scrap;
+      _money[MoneyType.GremlinPiece] = data.GremlinPiece;
     }
     */
 }
