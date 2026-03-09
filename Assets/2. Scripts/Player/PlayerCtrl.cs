@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.VFX;
 
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
@@ -55,6 +54,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [SerializeField] ParticleSystem _attackHitEffect;
     [SerializeField] ParticleSystem _attackHitEffect2;
     [SerializeField] ParticleSystem _attackHitEffect3;
+
+    private Vector3 _originPos3;
+    private Quaternion _originRot3;
+    private Vector3 _originHitPos3;
+    private Quaternion _originHitRot3;
 
     PlayerStats _playerStats;
     OverDriveMode _odm;
@@ -110,6 +114,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         //상태 초기화
         _currentState = _idleState;
         _currentState.Enter(this);
+
+        _originPos3 = _attackEffect3.transform.localPosition;
+        _originRot3 = _attackEffect3.transform.localRotation;
+
+        _originHitPos3 = _attackHitEffect3.transform.localPosition;
+        _originHitRot3 = _attackHitEffect3.transform.localRotation;
     }
 
     private void OnEnable()
@@ -338,62 +348,50 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _hitBox3.enabled = false;
     }
 
-    public void EnableAttackEffect(int index)   //공격이펙트
+    public void EnableAttackEffect(int index)
     {
-        ParticleSystem[] effects = { _attackEffect3, _attackHitEffect2, _attackHitEffect3 };
+        Transform[] effectTransforms = { _attackEffect1.transform, _attackEffect2.transform, _attackEffect3.transform };
+        Transform[] hitEffectTransforms = { _attackHitEffect.transform, _attackHitEffect2.transform, _attackHitEffect3.transform };
+
+        if (index < 1 || index > 3) return;
+        int arrayIdx = index - 1;
+
+        ResetEffect3Transform();
 
         if (_odm.IsModeOn)
         {
-            float rotX = index switch
-            {
-                1 => 35f,
-                2 => -215f,
-                _ => 0f
-            };
+            _attackEffect3.transform.SetPositionAndRotation(
+                effectTransforms[arrayIdx].position,
+                effectTransforms[arrayIdx].rotation
+            );
+            _attackHitEffect3.transform.SetPositionAndRotation(
+                hitEffectTransforms[arrayIdx].position,
+                hitEffectTransforms[arrayIdx].rotation
+            );
 
-            ResetCombo3RotationX(rotX, effects);
-            foreach (var effect in effects)
-            {
-                effect.Play();
-            }
+            _attackEffect3.Play();
+            _attackHitEffect3.Play();
         }
         else
         {
+            // 일반 모드: 각 인덱스에 맞는 이펙트 재생
             switch (index)
             {
-                case 1:
-                    _attackEffect1.Play();
-                    _attackHitEffect.Play();
-                    Debug.LogWarning("이펙트1");
-                    break;
-                case 2:
-                    _attackEffect2.Play();
-                    _attackHitEffect.Play();
-                    Debug.LogWarning("이펙트2");
-                    break;
-                case 3:
-                    ResetCombo3RotationX(0,effects);
-                    _attackEffect3.Play();
-                    _attackHitEffect2.Play();
-                    _attackHitEffect3.Play();
-                    Debug.LogWarning("이펙트3");
-                    break;
+                case 1: _attackEffect1.Play(); _attackHitEffect.Play(); break;
+                case 2: _attackEffect2.Play(); _attackHitEffect2.Play(); break;
+                case 3: _attackEffect3.Play(); _attackHitEffect.Play(); _attackHitEffect2.Play(); break;
             }
         }
     }
 
-    private void ResetCombo3RotationX(float rot, ParticleSystem[] effects)
+    // 이펙트 3번을 원래 태어났던(?) 자리로 되돌리는 함수
+    private void ResetEffect3Transform()
     {
-        foreach (var effect in effects)
-        {
-            if (effect == null) continue;
+        _attackEffect3.transform.localPosition = _originPos3;
+        _attackEffect3.transform.localRotation = _originRot3;
 
-            Vector3 currentEuler = effect.transform.localEulerAngles;
-
-            currentEuler.x = rot;
-
-            effect.transform.localEulerAngles = currentEuler;
-        }
+        _attackHitEffect3.transform.localPosition = _originHitPos3;
+        _attackHitEffect3.transform.localRotation = _originHitRot3;
     }
 
     //에디터 체크용 기즈모

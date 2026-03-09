@@ -60,6 +60,8 @@ public class OverDriveMode : MonoBehaviour
         Debug.Log("오버드라이브 시작");
         IsModeOn = true;
 
+        StatManager.Instance.RefreshStats();
+
         aura.enabled = true;
         afterImage.StartAfterImage();
         ApplyWeaponSettings(overDriveWeaponMesh, overDriveWeaponMat);
@@ -90,6 +92,8 @@ public class OverDriveMode : MonoBehaviour
         Debug.Log("오버드라이브 종료");
 
         IsModeOn = false;
+
+        StatManager.Instance.RefreshStats();
 
         overdriveRoutine = null;
     }

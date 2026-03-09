@@ -36,7 +36,6 @@ public class HitBox : MonoBehaviour
         _hitMonsters.Add(monster);
 
         int damage = Mathf.RoundToInt(_player.PlayerStats.Attack); // 플레이어스탯 공격력
-        if (odm.IsModeOn) damage *= 2;
 
         monster.TakeDamage(damage);
     }
