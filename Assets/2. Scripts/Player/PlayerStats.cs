@@ -1,6 +1,4 @@
-﻿using System;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
-using UnityEditor;
+using System;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
 {
