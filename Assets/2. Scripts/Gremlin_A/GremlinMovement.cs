@@ -19,6 +19,11 @@ public class GremlinMovement : MonoBehaviour
         HandleMovement();
     }
 
+    public void Init(Transform target)
+    {
+        followTarget = target;
+    }
+
     private void HandleMovement()
     {
         //추적할 대상이 없는 경우 반환합니다.
