@@ -3,16 +3,8 @@ using UnityEngine.UI;
 
 public abstract class BaseUI: MonoBehaviour
 {
-    [SerializeField] private Button background;
     public bool IsOpen { get; private set; }
 
-    private void Start()
-    {
-        if (background != null)
-        {
-            background.onClick.AddListener(Close);
-        }
-    }
     public virtual void Open()
     {
         gameObject.SetActive(true);
