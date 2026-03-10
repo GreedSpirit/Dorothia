@@ -16,6 +16,8 @@ using UnityEngine.Pool;
 /// </summary>
 public class MonsterSpawnManager : MonoBehaviour
 {
+    private bool _eventsRegistered;
+
     [Header("Spawn Settings")]
     [SerializeField] private int _maxMonsterCount = 120; // 물리적 제한 수치
 
@@ -100,12 +102,23 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private void OnEnable()
     {
-        MonsterController.OnMonsterKilledLifeTime += HandleMonsterKilled; // TTK
+        if (_eventsRegistered)
+            return;
+
+        MonsterController.OnMonsterKilledLifeTime -= HandleMonsterKilled;
+        MonsterController.OnMonsterKilledLifeTime += HandleMonsterKilled;
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         MonsterController.OnMonsterKilledLifeTime -= HandleMonsterKilled;
+
+        _eventsRegistered = false;
     }
 
     private void HandleMonsterKilled(float lifeTime)

@@ -31,6 +31,8 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int> OnStageCleared;
     public static event System.Action<int> OnSectionChanged;
 
+    private bool _eventsRegistered;
+
     [SerializeField] private MonsterSpawnManager _spawnManager;
     [SerializeField] private int _startStageId = 110001;
 
@@ -77,18 +79,32 @@ public class StageManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_eventsRegistered)
+            return;
+
+        MonsterController.OnMonsterKilled -= HandleMonsterKilled;
         MonsterController.OnMonsterKilled += HandleMonsterKilled;
 
         if (_player != null)
+        {
+            _player.OnDead -= HandlePlayerDead;
             _player.OnDead += HandlePlayerDead;
+        }
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         MonsterController.OnMonsterKilled -= HandleMonsterKilled;
 
         if (_player != null)
             _player.OnDead -= HandlePlayerDead;
+
+        _eventsRegistered = false;
     }
 
     private void Start()

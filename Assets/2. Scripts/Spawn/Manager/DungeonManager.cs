@@ -21,6 +21,8 @@ public class DungeonManager : MonoBehaviour
     public static event System.Action<int> OnDungeonFailed;
     public static event System.Action<int> OnDungeonWaveChanged;
 
+    private bool _eventsRegistered;
+
     [SerializeField] private MonsterSpawnManager _spawnManager;
     [SerializeField] private MapManager _mapManager;
     [SerializeField] private StageManager _stageManager;
@@ -78,18 +80,32 @@ public class DungeonManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_eventsRegistered)
+            return;
+
+        MonsterController.OnMonsterKilled -= HandleMonsterKilled;
         MonsterController.OnMonsterKilled += HandleMonsterKilled;
 
         if (_player != null)
+        {
+            _player.OnDead -= HandlePlayerDead;
             _player.OnDead += HandlePlayerDead;
+        }
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         MonsterController.OnMonsterKilled -= HandleMonsterKilled;
 
         if (_player != null)
             _player.OnDead -= HandlePlayerDead;
+
+        _eventsRegistered = false;
     }
 
     private void Update()
