@@ -36,6 +36,11 @@ public class GremlinUIItem : MonoBehaviour
         _btnItem.onClick.AddListener(OnClickItem);
     }
 
+    public Gremlin GetGremlin()
+    {
+        return _itemData;
+    }
+
     public void UpdateSelectState(bool isSelected)
     {
         //이미지 선택 보드가 존재할 때
