@@ -54,6 +54,14 @@ public class GremlinUITester : MonoBehaviour
         data = so.Result;
         TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
         _gremlinList.AddGremlin(TestGremlin2);
+
+        Gremlin TestGremlin3 = new Gremlin();
+
+        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Tique");
+        await so.Task;
+        data = so.Result;
+        TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
+        _gremlinList.AddGremlin(TestGremlin3);
         //
         //_gremlinList.AddGremlin(new GremlinItemData
         //{
