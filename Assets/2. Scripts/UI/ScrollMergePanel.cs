@@ -4,15 +4,8 @@ public class ScrollMergePanel : MonoBehaviour
 {
     [SerializeField] private GameObject mergeNotification;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Click_IsCraftSkill()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        mergeNotification.SetActive(true);
     }
 }
