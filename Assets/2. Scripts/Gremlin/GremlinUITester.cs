@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class GremlinUITester : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class GremlinUITester : MonoBehaviour
     [SerializeField] private GremlinUIPanel _gremlinUIPanel;
     [SerializeField] GremlinInventory _gremlinList;
 
-    private List<GremlinItemData> _dummyGremlins;
+    private List<Gremlin> _dummyGremlins;
 
     private void Start()
     {
@@ -21,7 +23,7 @@ public class GremlinUITester : MonoBehaviour
         if (_gremlinUIPanel != null)
         {
             // UI 패널 열기 및 더미 데이터 전달
-            //_gremlinUIPanel.OpenPanel(_gremlinList._gremlinInventory);
+            _gremlinUIPanel.OpenPanel(_gremlinList._gremlinInventory);
         }
         else
         {
@@ -30,22 +32,28 @@ public class GremlinUITester : MonoBehaviour
     }
 
     //더미데이터 생성
-    private void GenerateDummyData()
+    private async void GenerateDummyData()
     {
         //그렘린아이템데이터의 집합체
-        //_dummyGremlins = _gremlinList._gremlinInventory;
+        _dummyGremlins = _gremlinList._gremlinInventory;
 
         // 장착 중인 그렘린 (빨간 테두리 테스트용)
-        //_gremlinList.AddGremlin(new GremlinItemData
-        //{
-        //    id = 1,                               // 아이디값
-        //    gremlinName = "녹슨 톱니바퀴",         // 이름
-        //    currentLevel = 5,                     // 현재레벨
-        //    currentStat = 12.5f,                  // 현재스텟
-        //    tier = Rarity.Normal,                 // 현재등급
-        //    iconSprite = dummyIconNormal,         // 아이콘스프라이트
-        //    isEquipped = true                     // 장착여부
-        //});
+        Gremlin TestGremlin1 = new Gremlin();
+
+        var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
+        await so.Task;
+        GremlinSOData data = so.Result;
+        TestGremlin1.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        TestGremlin1._isEquipped = true;
+        _gremlinList.AddGremlin(TestGremlin1);
+
+        Gremlin TestGremlin2 = new Gremlin();
+
+        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Tique");
+        await so.Task;
+        data = so.Result;
+        TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin2);
         //
         //_gremlinList.AddGremlin(new GremlinItemData
         //{
@@ -72,6 +80,6 @@ public class GremlinUITester : MonoBehaviour
         //    });
         //}
         //
-        //Debug.Log($"[GremlinUITester] 총 {_gremlinList._gremlinInventory.Count}개의 더미 데이터가 생성되었습니다.");
+        Debug.Log($"[GremlinUITester] 총 {_gremlinList._gremlinInventory.Count}개의 더미 데이터가 생성되었습니다.");
     }
 }

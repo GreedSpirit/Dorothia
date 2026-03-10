@@ -24,9 +24,9 @@ public class GremlinManager : MonoBehaviour
     }
 
     //그렘린 생성
-    public async Task CreateGremlin()
+    public async void CreateGremlin()
     {
-        var handle = Addressables.LoadAssetAsync<GremlinSOData>("");
+        var handle = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
         await handle.Task;
 
         GremlinSOData so = handle.Result;

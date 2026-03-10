@@ -1453,7 +1453,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &731658096
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2356,6 +2356,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5257554559083494538, guid: e5e285f6377023e4597ad7bdd5487f7c, type: 3}
+      propertyPath: _behaviour
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7774246800127666542, guid: e5e285f6377023e4597ad7bdd5487f7c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.4379
@@ -3703,7 +3707,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1526597387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3978,6 +3982,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3bec29fe4e54c9428e4c382b9d72cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GremlinManager
+  _inventory: {fileID: 835028232}
   playerTransform: {fileID: 831619247}
   spawnEffectPrefab: {fileID: 0}
   despawnEffectPrefab: {fileID: 0}

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,16 +49,32 @@ public class DataManager : MonoBehaviour
         LoadData<Character_StatsData>("Character_Stats");
         LoadData<Character_UpgradeData>("Character_Upgrade");
 
+        //Gremlin 테이블
+        LoadData<GremlinData>("Gremlin");
+        LoadData<Gremlin_StatusData>("Gremlin_Status");
+        LoadData<Gremlin_TierData>("Gremlin_Tier");
+        LoadData<Gremlin_AtkerData>("Gremlin_Atker");
+        LoadData<Gremlin_BufferData>("Gremlin_Buffer");
+
         //Monster 테이블
         LoadData<Monster_Data>("Monster");
         LoadData<Monster_SpawnData>("Monster_Spawn");
         LoadData<Monster_ValueData>("Monster_Value");
+        LoadData<Monster_GroupData>("Monster_Group");
 
         //Stage 테이블
         LoadData<StageData>("Stage");
         LoadData<Stage_RewardData>("Stage_Reward");
         LoadData<Stage_SectionData>("Stage_Section");
         LoadData<Equip_Drop_RankData>("Equip_Drop_Rank");
+
+        //Dungeon 테이블
+        LoadData<DungeonData>("Dungeon");
+        LoadData<Dungeon_StepData>("Dungeon_Step");
+        LoadData<Dungeon_RewardData>("Dungeon_Reward");
+        LoadData<ConsumData>("Consum");
+        LoadData<Sk_SclData>("Sk_Scl");
+        LoadData<G_StoneData>("G_Stone");
         
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");

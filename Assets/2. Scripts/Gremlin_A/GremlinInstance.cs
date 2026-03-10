@@ -12,7 +12,8 @@ public class GremlinInstance : MonoBehaviour
     {
         if(gremlin._gremlinData.Type == Gremlin_Type.공격형)
         {
-            StrikerGremlin striker = new StrikerGremlin();
+            gameObject.AddComponent<StrikerGremlin>();
+            StrikerGremlin striker = GetComponent<StrikerGremlin>();
             striker.Init(DataManager.Instance.GetData<Gremlin_StatusData>(gremlin._gremlinData.PetID),
                 GremlinManager.Instance.PlayerTransform, gremlin._rarity);
             striker.finalAttack = (striker.attackDamage * DataManager.Instance.GetData<Gremlin_TierData>((int)gremlin._rarity).Gremlin_Tier_Multiplier)
@@ -21,7 +22,8 @@ public class GremlinInstance : MonoBehaviour
         }
         else if(gremlin._gremlinData.Type == Gremlin_Type.지원형)
         {
-            BufferGremlin buffer = new BufferGremlin();
+            gameObject.AddComponent<BufferGremlin>();
+            BufferGremlin buffer = GetComponent<BufferGremlin>();
             buffer.Init(DataManager.Instance.GetData<Gremlin_StatusData>(gremlin._gremlinData.PetID),
                 GremlinManager.Instance.PlayerTransform, gremlin._rarity);
             buffer.finalValue = (buffer._buffValue * DataManager.Instance.GetData<Gremlin_TierData>((int)gremlin._rarity).Gremlin_Tier_Multiplier)
