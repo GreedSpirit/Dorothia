@@ -23,6 +23,7 @@ public class GremlinUIPanel : BaseUI
     [SerializeField] private Button _btnGoMerge;        // 합성버튼
 
     [SerializeField] private GremlinInventory _gremlinList;
+    [SerializeField] private NoticeUIPanel _noticeUIPanel;
 
     private Gremlin _selectedGremlinData;               // 선택한 그렘린의 데이터
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
@@ -108,7 +109,6 @@ public class GremlinUIPanel : BaseUI
         if (_txtName != null)
         {
             Debug.Log(data._gremlinData.PetID);
-            Debug.Log(DataManager.Instance.GetData<GremlinData>(140001).Gremlin_Id);
             _txtName.text = DataManager.Instance.GetData<GremlinData>(data._gremlinData.PetID).Gremlin_Name;
         }
         //레벨이 존재하는 경우, 레벨 텍스트는 아래 형식.
@@ -124,7 +124,12 @@ public class GremlinUIPanel : BaseUI
         if (_selectedUIItem == null || _selectedGremlinData == null) return;
 
         // 이미 장착된 녀석이라면 무시
-        if (_selectedUIItem == _equippedUIItem) return;
+        if (_selectedUIItem == _equippedUIItem)
+        {
+            _noticeUIPanel.ChangeNoticeDescription("이미 장착된 그렘린입니다.");
+            _noticeUIPanel.Open();
+            return;
+        }
 
         //장비한 UIItem이 존재하는 경우
         if (_equippedUIItem != null)
@@ -176,6 +181,9 @@ public class GremlinUIPanel : BaseUI
 
     protected override void OnClose()
     {
-        
+        if(_selectedUIItem != null)
+        {
+            GremlinManager.Instance.StartCoroutine(GremlinManager.Instance.ChangeGremlin(_equippedUIItem.GetGremlin()));
+        }
     }
 }

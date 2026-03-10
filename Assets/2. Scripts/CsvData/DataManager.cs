@@ -60,7 +60,7 @@ public class DataManager : MonoBehaviour
         LoadData<Monster_Data>("Monster");
         LoadData<Monster_SpawnData>("Monster_Spawn");
         LoadData<Monster_ValueData>("Monster_Value");
-        LoadData<Monster_GroupData>("Monster_Group");
+        LoadListData<Monster_GroupData>("Monster_Group");
 
         //Stage 테이블
         LoadData<StageData>("Stage");

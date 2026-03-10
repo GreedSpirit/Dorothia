@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -16,6 +16,10 @@ using UnityEngine.Pool;
 /// </summary>
 public class MonsterSpawnManager : MonoBehaviour
 {
+    public static MonsterSpawnManager Instance { get; private set; }
+
+    private bool _eventsRegistered;
+
     [Header("Spawn Settings")]
     [SerializeField] private int _maxMonsterCount = 120; // 물리적 제한 수치
 
@@ -49,6 +53,9 @@ public class MonsterSpawnManager : MonoBehaviour
     private int _currentBossMonsterId;              // 현재 스테이지 보스 ID
     private bool _isBossFight;                      // 보스전 플래그
 
+    private readonly List<(int id, int count)> _spawnCandidates = new(8);
+    private Coroutine _spawnRoutine;
+
     //동적 스폰
     private SpawnMetricsCollector _metrics;
     private DynamicSpawnPolicy _policy;
@@ -60,6 +67,13 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _target = _targetProvider as IMonsterTarget;
 
         if (_target == null)
@@ -94,17 +108,29 @@ public class MonsterSpawnManager : MonoBehaviour
         _stageSoftMaxCount = sameSpawnMax;
         _currentBossMonsterId = bossMonsterId;
 
+        _isBossFight = false; // 스테이지 재진입/복귀 시 플래그 초기화
         _policy.SetSoftMax(_stageSoftMaxCount); // 스테이지 시작마다 보스전 플래그 초기화
     }
 
     private void OnEnable()
     {
-        MonsterController.OnMonsterKilledLifeTime += HandleMonsterKilled; // TTK
+        if (_eventsRegistered)
+            return;
+
+        MonsterController.OnMonsterKilledLifeTime -= HandleMonsterKilled;
+        MonsterController.OnMonsterKilledLifeTime += HandleMonsterKilled;
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         MonsterController.OnMonsterKilledLifeTime -= HandleMonsterKilled;
+
+        _eventsRegistered = false;
     }
 
     private void HandleMonsterKilled(float lifeTime)
@@ -119,12 +145,24 @@ public class MonsterSpawnManager : MonoBehaviour
             return;
 
         _isSpawning = true;
-        StartCoroutine(SpawnRoutine());
+        _spawnRoutine = StartCoroutine(SpawnRoutine());
     }
 
     public void StopNormalSpawn()
     {
+        if (_spawnRoutine != null)
+        {
+            StopCoroutine(_spawnRoutine);
+            _spawnRoutine = null;
+        }
+
         _isSpawning = false;
+    }
+
+    public void StopAllSpawnForDungeon()
+    {
+        StopNormalSpawn();
+        _isBossFight = false;
     }
 
     /// <summary>
@@ -223,7 +261,7 @@ public class MonsterSpawnManager : MonoBehaviour
     /// <returns></returns>
     private List<(int id, int count)> BuildSpawnCandidates()
     {
-        List<(int id, int count)> list = new();
+        _spawnCandidates.Clear();
 
         void Add(int id, int count)
         {
@@ -239,7 +277,7 @@ public class MonsterSpawnManager : MonoBehaviour
             if (md != null && md.Monster_Type == Monster_Type.Boss)
                 return;
 
-            list.Add((id, count));
+            _spawnCandidates.Add((id, count));
         }
 
         //우선은 일반,앨리트 풀 1~7까지 사용
@@ -251,7 +289,7 @@ public class MonsterSpawnManager : MonoBehaviour
         Add(_currentSpawnData.Monster_Id_6, _currentSpawnData.Monster_Number_6);
         Add(_currentSpawnData.Monster_Id_7, _currentSpawnData.Monster_Number_7);
 
-        return list;
+        return _spawnCandidates;
     }
 
     /// <summary>
@@ -426,7 +464,7 @@ public class MonsterSpawnManager : MonoBehaviour
         if (!_isSpawning)
         {
             _isSpawning = true;
-            StartCoroutine(SpawnRoutine());
+            _spawnRoutine = StartCoroutine(SpawnRoutine());
         }
     }
 
@@ -579,4 +617,59 @@ public class MonsterSpawnManager : MonoBehaviour
             _orbPool.Release(orb);
     }
     #endregion
+
+    //던전 전용 단일 스폰
+    public bool SpawnSingleDungeon(int monsterId, Vector3 pos)
+    {
+        if (monsterId <= 0)
+        {
+            Debug.LogError("[MonsterSpawnManager] SpawnSingleDungeon monsterId <= 0");
+            return false;
+        }
+
+        Monster_Data data = DataManager.Instance.GetData<Monster_Data>(monsterId);
+        if (data == null)
+        {
+            Debug.LogError($"[DungeonSpawn] MonsterData 없음 {monsterId}");
+            return false;
+        }
+
+        MonsterController prefab = MonsterPrefabRegistry.Instance.GetPrefab(monsterId);
+        if (prefab == null)
+        {
+            Debug.LogError($"[DungeonSpawn] Prefab 없음 {monsterId}");
+            return false;
+        }
+
+        ObjectPool<MonsterController> pool = GetOrCreatePool(prefab);
+
+        MonsterController monster = pool.Get();
+
+        if (monster == null)
+        {
+            Debug.LogError($"[DungeonSpawn] Pool Get 실패 {monsterId}");
+            return false;
+        }
+
+        monster.transform.position = pos;
+
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+
+        _activeMonsters.Add(monster);
+        _currentMonsterCount++;
+
+        return true;
+    }
+
+    //DungeonManager에서 직접 위치를 얻을 수 있게
+    public bool TryGetSpawnPosition(out Vector3 pos)
+    {
+        if (_spawnAreaProvider == null)
+        {
+            pos = Vector3.zero;
+            return false;
+        }
+
+        return _spawnAreaProvider.TryGetSpawnPosition(out pos);
+    }
 }

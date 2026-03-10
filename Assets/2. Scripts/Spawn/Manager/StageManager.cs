@@ -23,6 +23,8 @@ public enum StageState
 /// </summary>
 public class StageManager : MonoBehaviour
 {
+    public static StageManager Instance { get; private set; }
+
     //이벤트
     public static event System.Action<int> OnStageIdChanged;
     public static event System.Action<StageState> OnStageStateChanged;
@@ -30,6 +32,8 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int> OnBossSpawned;
     public static event System.Action<int> OnStageCleared;
     public static event System.Action<int> OnSectionChanged;
+
+    private bool _eventsRegistered;
 
     [SerializeField] private MonsterSpawnManager _spawnManager;
     [SerializeField] private int _startStageId = 110001;
@@ -63,12 +67,19 @@ public class StageManager : MonoBehaviour
     public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
 
     //UI용
-    public int CurrentStageId => _stage.Stage_Id;
+    public int CurrentStageId => _stage != null ? _stage.Stage_Id : 0;
     public int CurrentProgressSection => _currentSection;
     public int MaxClearedSection => _maxClearedSection;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _player = _playerBehaviour as IMonsterTarget;
 
         if (_player == null)
@@ -77,18 +88,32 @@ public class StageManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_eventsRegistered)
+            return;
+
+        MonsterController.OnMonsterKilled -= HandleMonsterKilled;
         MonsterController.OnMonsterKilled += HandleMonsterKilled;
 
         if (_player != null)
+        {
+            _player.OnDead -= HandlePlayerDead;
             _player.OnDead += HandlePlayerDead;
+        }
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         MonsterController.OnMonsterKilled -= HandleMonsterKilled;
 
         if (_player != null)
             _player.OnDead -= HandlePlayerDead;
+
+        _eventsRegistered = false;
     }
 
     private void Start()
@@ -123,6 +148,23 @@ public class StageManager : MonoBehaviour
     public void StartStageFromSection(int stageId, int sectionNumber)
     {
         InternalStartStage(stageId, sectionNumber);
+    }
+
+    //던전 복귀용
+    public void ResumeStageFromSavedContext()
+    {
+        if (!DungeonReturnContext.HasContext)
+        {
+            Debug.LogWarning("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
+            return;
+        }
+
+        StartStageFromSection(
+            DungeonReturnContext.ReturnStageId,
+            DungeonReturnContext.ReturnSection
+        );
+
+        DungeonReturnContext.Clear();
     }
 
     private void InternalStartStage(int stageId, int startSection)
@@ -516,7 +558,7 @@ public class StageManager : MonoBehaviour
         Debug.Log("[Stage] Spawning 재시작");
 
         ChangeState(StageState.Spawning);
-    }
+    } 
 
     private void HandlePlayerDead()
     {
