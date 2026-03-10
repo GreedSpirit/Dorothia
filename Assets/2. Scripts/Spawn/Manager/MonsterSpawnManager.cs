@@ -16,6 +16,8 @@ using UnityEngine.Pool;
 /// </summary>
 public class MonsterSpawnManager : MonoBehaviour
 {
+    public static MonsterSpawnManager Instance { get; private set; }
+
     private bool _eventsRegistered;
 
     [Header("Spawn Settings")]
@@ -51,6 +53,9 @@ public class MonsterSpawnManager : MonoBehaviour
     private int _currentBossMonsterId;              // 현재 스테이지 보스 ID
     private bool _isBossFight;                      // 보스전 플래그
 
+    private readonly List<(int id, int count)> _spawnCandidates = new(8);
+    private Coroutine _spawnRoutine;
+
     //동적 스폰
     private SpawnMetricsCollector _metrics;
     private DynamicSpawnPolicy _policy;
@@ -62,6 +67,13 @@ public class MonsterSpawnManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _target = _targetProvider as IMonsterTarget;
 
         if (_target == null)
@@ -133,17 +145,23 @@ public class MonsterSpawnManager : MonoBehaviour
             return;
 
         _isSpawning = true;
-        StartCoroutine(SpawnRoutine());
+        _spawnRoutine = StartCoroutine(SpawnRoutine());
     }
 
     public void StopNormalSpawn()
     {
+        if (_spawnRoutine != null)
+        {
+            StopCoroutine(_spawnRoutine);
+            _spawnRoutine = null;
+        }
+
         _isSpawning = false;
     }
 
     public void StopAllSpawnForDungeon()
     {
-        _isSpawning = false;
+        StopNormalSpawn();
         _isBossFight = false;
     }
 
@@ -243,7 +261,7 @@ public class MonsterSpawnManager : MonoBehaviour
     /// <returns></returns>
     private List<(int id, int count)> BuildSpawnCandidates()
     {
-        List<(int id, int count)> list = new();
+        _spawnCandidates.Clear();
 
         void Add(int id, int count)
         {
@@ -259,7 +277,7 @@ public class MonsterSpawnManager : MonoBehaviour
             if (md != null && md.Monster_Type == Monster_Type.Boss)
                 return;
 
-            list.Add((id, count));
+            _spawnCandidates.Add((id, count));
         }
 
         //우선은 일반,앨리트 풀 1~7까지 사용
@@ -271,7 +289,7 @@ public class MonsterSpawnManager : MonoBehaviour
         Add(_currentSpawnData.Monster_Id_6, _currentSpawnData.Monster_Number_6);
         Add(_currentSpawnData.Monster_Id_7, _currentSpawnData.Monster_Number_7);
 
-        return list;
+        return _spawnCandidates;
     }
 
     /// <summary>
@@ -446,7 +464,7 @@ public class MonsterSpawnManager : MonoBehaviour
         if (!_isSpawning)
         {
             _isSpawning = true;
-            StartCoroutine(SpawnRoutine());
+            _spawnRoutine = StartCoroutine(SpawnRoutine());
         }
     }
 

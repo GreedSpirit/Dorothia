@@ -15,6 +15,8 @@ public enum DungeonState
 
 public class DungeonManager : MonoBehaviour
 {
+    public static DungeonManager Instance { get; private set; }
+
     //이벤트
     public static event System.Action<int> OnDungeonStarted;
     public static event System.Action<int> OnDungeonCleared;
@@ -63,6 +65,13 @@ public class DungeonManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _player = _playerBehaviour as IMonsterTarget;
 
         if (_player == null)
@@ -170,6 +179,16 @@ public class DungeonManager : MonoBehaviour
             Debug.LogError("[Dungeon] MonsterGroup 없음");
             return;
         }
+
+        //wave 정렬 안정화
+        _monsterGroup.Sort((a, b) =>
+        {
+            int waveCompare = a.Monster_Wave.CompareTo(b.Monster_Wave);
+            if (waveCompare != 0)
+                return waveCompare;
+
+            return a.Monster_Id.CompareTo(b.Monster_Id);
+        });
 
         //문자열 안전 파싱
         if (!float.TryParse(_stepData.Time_Limit, NumberStyles.Any, 
@@ -329,6 +348,7 @@ public class DungeonManager : MonoBehaviour
         if (start == -1)
         {
             Debug.LogError($"Wave 없음 {wave}");
+            ChangeState(DungeonState.Fail);
             return;
         }
 
@@ -345,6 +365,13 @@ public class DungeonManager : MonoBehaviour
             {
                 SpawnSingle(monsterId);
             }
+        }
+
+        //0마리 스폰 보호처리
+        if (_aliveMonsterCount <= 0)
+        {
+            Debug.LogError($"[Dungeon] Wave {wave} 스폰 결과가 0마리");
+            ChangeState(DungeonState.Fail);
         }
     }
 
@@ -440,6 +467,11 @@ public class DungeonManager : MonoBehaviour
         {
             _spawnManager.StopAllSpawnForDungeon();
             _spawnManager.ForceClearAll();
+        }
+
+        if (_mapManager != null && DungeonReturnContext.HasContext)
+        {
+            _mapManager.LoadStageMap(DungeonReturnContext.ReturnStageId);
         }
 
         //저장된 스테이지 진행도로 복귀

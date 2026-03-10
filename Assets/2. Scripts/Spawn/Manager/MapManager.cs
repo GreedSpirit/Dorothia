@@ -5,6 +5,10 @@ using UnityEngine.AI;
 
 public class MapManager : MonoBehaviour
 {
+    public static MapManager Instance { get; private set; }
+
+    private bool _eventsRegistered;
+
     [SerializeField] private Transform _mapRoot;
 
     [Header("Stage Map Table")]
@@ -26,6 +30,13 @@ public class MapManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         //MapRoot가 없으면 자동으로 자기 자신 사용
         if (_mapRoot == null)
         {
@@ -36,8 +47,7 @@ public class MapManager : MonoBehaviour
         BuildStageMapTable();
         BuildDungeonMapTable();
 
-        //MonsterSpawnManager 캐싱
-        _spawnManager = FindAnyObjectByType<MonsterSpawnManager>();
+        _spawnManager = MonsterSpawnManager.Instance;
 
         if (_spawnManager == null)
             Debug.LogError("[MapManager] MonsterSpawnManager 없음.");
@@ -45,12 +55,23 @@ public class MapManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_eventsRegistered)
+            return;
+
+        StageManager.OnStageIdChanged -= HandleStageChanged;
         StageManager.OnStageIdChanged += HandleStageChanged;
+
+        _eventsRegistered = true;
     }
 
     private void OnDisable()
     {
+        if (!_eventsRegistered)
+            return;
+
         StageManager.OnStageIdChanged -= HandleStageChanged;
+
+        _eventsRegistered = false;
     }
 
     private void BuildStageMapTable()
@@ -101,7 +122,7 @@ public class MapManager : MonoBehaviour
     public void LoadStageMap(int stageId)
     {
         //이미 로드된 맵이면 무시
-        if (_currentStageId == stageId)
+        if (_currentStageId == stageId && _currentMapInstance != null)
             return;
 
         if (!_stageMapTable.TryGetValue(stageId, out GameObject prefab))

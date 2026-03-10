@@ -23,6 +23,8 @@ public enum StageState
 /// </summary>
 public class StageManager : MonoBehaviour
 {
+    public static StageManager Instance { get; private set; }
+
     //이벤트
     public static event System.Action<int> OnStageIdChanged;
     public static event System.Action<StageState> OnStageStateChanged;
@@ -65,12 +67,19 @@ public class StageManager : MonoBehaviour
     public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
 
     //UI용
-    public int CurrentStageId => _stage.Stage_Id;
+    public int CurrentStageId => _stage != null ? _stage.Stage_Id : 0;
     public int CurrentProgressSection => _currentSection;
     public int MaxClearedSection => _maxClearedSection;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _player = _playerBehaviour as IMonsterTarget;
 
         if (_player == null)
