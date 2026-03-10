@@ -125,6 +125,23 @@ public class StageManager : MonoBehaviour
         InternalStartStage(stageId, sectionNumber);
     }
 
+    //던전 복귀용
+    public void ResumeStageFromSavedContext()
+    {
+        if (!DungeonReturnContext.HasContext)
+        {
+            Debug.LogWarning("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
+            return;
+        }
+
+        StartStageFromSection(
+            DungeonReturnContext.ReturnStageId,
+            DungeonReturnContext.ReturnSection
+        );
+
+        DungeonReturnContext.Clear();
+    }
+
     private void InternalStartStage(int stageId, int startSection)
     {
         if (DataManager.Instance == null)
@@ -516,7 +533,7 @@ public class StageManager : MonoBehaviour
         Debug.Log("[Stage] Spawning 재시작");
 
         ChangeState(StageState.Spawning);
-    }
+    } 
 
     private void HandlePlayerDead()
     {

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -94,6 +94,7 @@ public class MonsterSpawnManager : MonoBehaviour
         _stageSoftMaxCount = sameSpawnMax;
         _currentBossMonsterId = bossMonsterId;
 
+        _isBossFight = false; // 스테이지 재진입/복귀 시 플래그 초기화
         _policy.SetSoftMax(_stageSoftMaxCount); // 스테이지 시작마다 보스전 플래그 초기화
     }
 
@@ -125,6 +126,12 @@ public class MonsterSpawnManager : MonoBehaviour
     public void StopNormalSpawn()
     {
         _isSpawning = false;
+    }
+
+    public void StopAllSpawnForDungeon()
+    {
+        _isSpawning = false;
+        _isBossFight = false;
     }
 
     /// <summary>
@@ -579,4 +586,59 @@ public class MonsterSpawnManager : MonoBehaviour
             _orbPool.Release(orb);
     }
     #endregion
+
+    //던전 전용 단일 스폰
+    public bool SpawnSingleDungeon(int monsterId, Vector3 pos)
+    {
+        if (monsterId <= 0)
+        {
+            Debug.LogError("[MonsterSpawnManager] SpawnSingleDungeon monsterId <= 0");
+            return false;
+        }
+
+        Monster_Data data = DataManager.Instance.GetData<Monster_Data>(monsterId);
+        if (data == null)
+        {
+            Debug.LogError($"[DungeonSpawn] MonsterData 없음 {monsterId}");
+            return false;
+        }
+
+        MonsterController prefab = MonsterPrefabRegistry.Instance.GetPrefab(monsterId);
+        if (prefab == null)
+        {
+            Debug.LogError($"[DungeonSpawn] Prefab 없음 {monsterId}");
+            return false;
+        }
+
+        ObjectPool<MonsterController> pool = GetOrCreatePool(prefab);
+
+        MonsterController monster = pool.Get();
+
+        if (monster == null)
+        {
+            Debug.LogError($"[DungeonSpawn] Pool Get 실패 {monsterId}");
+            return false;
+        }
+
+        monster.transform.position = pos;
+
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+
+        _activeMonsters.Add(monster);
+        _currentMonsterCount++;
+
+        return true;
+    }
+
+    //DungeonManager에서 직접 위치를 얻을 수 있게
+    public bool TryGetSpawnPosition(out Vector3 pos)
+    {
+        if (_spawnAreaProvider == null)
+        {
+            pos = Vector3.zero;
+            return false;
+        }
+
+        return _spawnAreaProvider.TryGetSpawnPosition(out pos);
+    }
 }
