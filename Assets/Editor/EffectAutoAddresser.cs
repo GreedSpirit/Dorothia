@@ -51,6 +51,9 @@ public class SkillResourceAutoAddresser : AssetPostprocessor
             // 주소를 확장자 없는 파일 이름으로 설정 (예: FireBall_Icon)
             entry.address = Path.GetFileNameWithoutExtension(path);
 
+            // 라벨 넣을거라면
+            //entry.SetLabel("Effect", true);
+
             // 변경사항 기록
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, null, true);
         }
