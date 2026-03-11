@@ -96,7 +96,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterController
   _projectileDatabase: {fileID: 0}
   _hitCollider: {fileID: 795372224295805900}
-  _attackClip: {fileID: -203655887218126122, guid: 2f5ca7953dec65440b88989488c1d4cd, type: 3}
+  _attackClips:
+  - {fileID: -203655887218126122, guid: 2f5ca7953dec65440b88989488c1d4cd, type: 3}
+  - {fileID: -203655887218126122, guid: 2f5ca7953dec65440b88989488c1d4cd, type: 3}
+  - {fileID: -203655887218126122, guid: 2f5ca7953dec65440b88989488c1d4cd, type: 3}
+  _deathClips:
+  - {fileID: -203655887218126122, guid: 1ae5183529f3c90409d4207dc2f7d5ac, type: 3}
   _slotRefreshInterval: 0.45
   _slotRepathThreshold: 0.25
   _stuckSpeedThreshold: 0.15

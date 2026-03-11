@@ -28,7 +28,10 @@ public class MonsterController : MonoBehaviour, IMonster
     [SerializeField] private Collider _hitCollider; // 피격 판정용 콜라이더
 
     [Header("Attack Animation")]
-    [SerializeField] private AnimationClip _attackClip; // 공격 애니클립
+    [SerializeField] private AnimationClip[] _attackClips; // 공격 애니클립
+
+    [Header("Death Animation")]
+    [SerializeField] private AnimationClip[] _deathClips;   // 죽는 애니클립
 
     private IMonsterStats _stats;                   // 인터페이스 기반 스탯
 
@@ -422,6 +425,13 @@ public class MonsterController : MonoBehaviour, IMonster
         _agent.isStopped = true;
         _agent.ResetPath();
 
+        int deathIndex = 0;
+
+        //죽는 애니 랜덤
+        if (_deathClips != null && _deathClips.Length > 0)
+            deathIndex = Random.Range(0, _deathClips.Length);
+
+        _animator.SetInteger("DeathIndex", deathIndex);
         _animator.SetTrigger("Dead");
 
         if (_slotSystem != null && _mySlot != null)
@@ -466,7 +476,15 @@ public class MonsterController : MonoBehaviour, IMonster
 
         _isAttacking = true;
 
-        float baseLength = _attackClip.length; // 애니 길이 기준
+        int attackIndex = Random.Range(0, _attackClips.Length);
+        AnimationClip selectedClip = _attackClips[attackIndex];
+
+        Debug.Log($"{name} attack clip length : {selectedClip.length}");
+
+        //Animator 전달
+        _animator.SetInteger("AttackIndex", attackIndex);
+
+        float baseLength = selectedClip.length; // 애니 길이 기준
         _currentAttackDuration = baseLength * _stats.AttackCooldown; // 속도 배율
 
         _animator.speed = 1f / _stats.AttackCooldown; // 애니 속도 조절
