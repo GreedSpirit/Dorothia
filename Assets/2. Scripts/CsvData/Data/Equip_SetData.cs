@@ -16,15 +16,15 @@ public class Equip_SetData : ICSVLoad, ITableKey
 
     public void LoadFromCsv(string[] values)
     {
-        // 0: Equip_Set_ID (int)
+        // 0: Equip_Set_Id (int)
         if (values.Length > 0 && int.TryParse(values[0], out int v0)) Equip_Set_Id = v0;
-        // 1: Set_Manager_ID (int)
+        // 1: Set_Manager_Id (int)
         if (values.Length > 1 && int.TryParse(values[1], out int v1)) Set_Manager_Id = v1;
         // 2: Equip_Set_Need_Name (string)
         if (values.Length > 2) Equip_Set_Need_Name = values[2];
-        // 3: Equip_Set_Need_Nember (int)
+        // 3: Equip_Set_Need_Number (int)
         if (values.Length > 3 && int.TryParse(values[3], out int v3)) Equip_Set_Need_Number = v3;
-        // 4: Affection_Equip_Set (Status)
+        // 4: Affection_Equip_Set (enum)
         if (values.Length > 4 && Enum.TryParse(values[4], out Status v4)) Affection_Equip_Set = v4;
         // 5: Affection_Equip_Set_Value (float)
         if (values.Length > 5 && float.TryParse(values[5], out float v5)) Affection_Equip_Set_Value = v5;

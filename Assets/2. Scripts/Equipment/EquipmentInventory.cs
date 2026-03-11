@@ -133,7 +133,7 @@ public class EquipmentInventory : MonoBehaviour
         foreach (var data in saveData.EquipmentInventory)
         {
             //저장 데이터의 인벤토리 내에 담아둔 장비 저장 데이터를 기반으로 새롭게 장비를 생성합니다.
-            Equipment equipment = new Equipment(data.instanceGUID, DataManager.Instance.GetData<EquipData>(data.equipID), data.equipRarity, data.equipLevel);
+            Equipment equipment = new Equipment(data.instanceGUID, DataManager.Instance.GetData<EquipData>(data.equipID), (Rarity)data.equipRarity, data.equipLevel);
 
             //강화 단계와 강화 가중치, 합성 가중치는 0으로 생성되므로, 해당 값을 대입해줍니다.
             equipment.equip_Upgrade = data.equipEnchant;

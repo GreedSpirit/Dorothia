@@ -366,11 +366,11 @@ public class InventoryPanel : MonoBehaviour
             //시각적으로 볼 수 있도록 레어도에 맞게 이미지 색을 변경합니다.
             targetSlot.iconImage.sprite = equip.icon;
             targetSlot.iconImage.enabled = true;
-            targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
 
             //장비 슬롯이라면 장비를 장착합니다.
             if (targetSlot.slotType == SlotType.EquipSlot)
             {
+                targetSlot.iconImage.color = Color.white;
                 equip.SetEquipped(targetSlot.slotIndex);
                 EquipmentSlotManager.Instance.ApplyEquipmentSet();
                 onInventoryChanged?.Invoke();
@@ -378,6 +378,7 @@ public class InventoryPanel : MonoBehaviour
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(targetSlot.slotType == SlotType.FuseSlot)
             {
+                targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
                 equip.isFusing = true;
                 SetPanelActiveValue(false);
             }

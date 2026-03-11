@@ -22,8 +22,7 @@ public class GremlinUITester : MonoBehaviour
         //그렘린 UI 패널이 존재할 경우
         if (_gremlinUIPanel != null)
         {
-            // UI 패널 열기 및 더미 데이터 전달
-            _gremlinUIPanel.OpenPanel(_gremlinList._gremlinInventory);
+
         }
         else
         {
