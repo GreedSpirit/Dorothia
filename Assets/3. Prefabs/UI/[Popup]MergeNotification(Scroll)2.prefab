@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 8158915296365865157}
   - component: {fileID: 4104781961391618294}
   m_Layer: 5
-  m_Name: '[Text]Level'
+  m_Name: '[Text]HaveCount'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +80/100
+  m_text: 130/3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0a576d2b3be41eb499388e38bde8686a, type: 2}
   m_sharedMaterial: {fileID: 4646581783891549745, guid: 0a576d2b3be41eb499388e38bde8686a, type: 2}
@@ -1665,22 +1665,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SkillManager, Assembly-CSharp
-        m_MethodName: CraftSkill
+      - m_Target: {fileID: 700028256803222247}
+        m_TargetAssemblyTypeName: MergeNotificationPopup, Assembly-CSharp
+        m_MethodName: Click_Merge
         m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 8063739623290361244}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2264,6 +2252,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7879502803119968977}
   - component: {fileID: 8983603095082621782}
+  - component: {fileID: 700028256803222247}
   m_Layer: 5
   m_Name: '[Popup]MergeNotification(Scroll)2'
   m_TagString: Untagged
@@ -2303,6 +2292,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8063739623290361244}
   m_CullTransparentMesh: 1
+--- !u!114 &700028256803222247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8063739623290361244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd0264acc72a7f4abc93ade92631095, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MergeNotificationPopup
+  close: {fileID: 5358560478150811236}
+  icon: {fileID: 3624936598302026663}
+  skillName: {fileID: 5536442276767387525}
+  scrollCount: {fileID: 4104781961391618294}
+  mergeSlider: {fileID: 1891994229065855963}
+  mergeMaxCount: {fileID: 2326130841467763824}
 --- !u!1 &8292807176920344703
 GameObject:
   m_ObjectHideFlags: 0

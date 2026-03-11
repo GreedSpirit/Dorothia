@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class MergePanel : BaseUI
 {
-    [SerializeField] private GameObject scrollPanel;
-    [SerializeField] private GameObject skillPanel;
+    [SerializeField] private ScrollMergePanel scrollPanel;
+    [SerializeField] private SkillMergePanel skillPanel;
 
     protected override void OnClose()
     {
@@ -11,16 +11,16 @@ public class MergePanel : BaseUI
 
     protected override void OnOpen()
     {
-        scrollPanel.SetActive(false);
-        skillPanel.SetActive(false);
+        scrollPanel.gameObject.SetActive(false);
+        skillPanel.gameObject.SetActive(false);
     }
 
     public void Click_ScrollMergePanel()
     {
-        scrollPanel.SetActive(true);
+        UIManager.Instance.OpenPanel(scrollPanel);
     }
     public void Click_SkillMergePanel()
     {
-        scrollPanel.SetActive(true);
+        UIManager.Instance.OpenPanel(skillPanel);
     }
 }

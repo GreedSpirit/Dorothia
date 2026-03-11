@@ -268,7 +268,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 315, y: -393.4}
+  m_AnchoredPosition: {x: 315, y: -140}
   m_SizeDelta: {x: 590, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1153127763092260495
@@ -4720,6 +4720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02724eaf86021da4e8f05e6b9ad107c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillInfoPopup
+  close: {fileID: 7618924493836123782}
   title: {fileID: 5524876382995001276}
   icon: {fileID: 6533235539810408621}
   iconSkillLevel: {fileID: 0}
@@ -4744,7 +4745,7 @@ MonoBehaviour:
   currentGold: {fileID: 5505801139665694841}
   merge_equip_Btn: {fileID: 9178578302165116081}
   btnText: {fileID: 5554364014694426293}
-  notification: {fileID: 2894006001841326071}
+  notification: {fileID: 5654063358443446412}
 --- !u!1 &8226062622617125696
 GameObject:
   m_ObjectHideFlags: 0
@@ -5165,7 +5166,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5404362984076795321}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8120046943657703457}
+        m_TargetAssemblyTypeName: SkillInfoPopup, Assembly-CSharp
+        m_MethodName: OnClickMainButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8686949751055656580
 GameObject:
   m_ObjectHideFlags: 0
@@ -5691,13 +5704,19 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2eb76dd0d31f0e04b956ee8692289e37, type: 3}
---- !u!1 &2894006001841326071 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8063739623290361244, guid: 2eb76dd0d31f0e04b956ee8692289e37, type: 3}
-  m_PrefabInstance: {fileID: 5170619827838980715}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &3069244222185275578 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7879502803119968977, guid: 2eb76dd0d31f0e04b956ee8692289e37, type: 3}
   m_PrefabInstance: {fileID: 5170619827838980715}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5654063358443446412 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 700028256803222247, guid: 2eb76dd0d31f0e04b956ee8692289e37, type: 3}
+  m_PrefabInstance: {fileID: 5170619827838980715}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd0264acc72a7f4abc93ade92631095, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MergeNotificationPopup

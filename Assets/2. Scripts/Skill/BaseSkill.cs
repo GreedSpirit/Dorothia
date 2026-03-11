@@ -11,11 +11,19 @@ public abstract class BaseSkill
 
     static public BaseSkill Create(SkillData data, Skill_StatusData status)
     {
-        BaseSkill skill = (data.Skill_Type == Skill_Type.Active) ? new ActiveSkill() : new PassiveSkill();
-        skill.Initialize(data, status);
+        BaseSkill skill = data.Job_Skill_Id switch
+        {
+            101 => new ActiveSkill(),
+            102 => new ActiveSkill(),
+            103 => new ActiveSkill(),
+            104 => new ActiveSkill(),
+            _ => skill = (data.Skill_Type == Skill_Type.Active) ? new ActiveSkill() : new PassiveSkill()
+        };
 
+        skill.Initialize(data, status);
         return skill;
     }
+
     public void Initialize(SkillData skillData, Skill_StatusData statusData)
     {
         Data = skillData;
@@ -24,6 +32,6 @@ public abstract class BaseSkill
         Level = 1;
     }
 
-    public abstract void Execute();
+    public abstract void Execute(PlayerCtrl owner = null);
     public abstract void Undo();
 }

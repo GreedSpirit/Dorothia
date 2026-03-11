@@ -1,13 +1,8 @@
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-public class SkillInfoPopup : MonoBehaviour
+public class SkillInfoPopup : BaseUI
 {
     private SkillKey key;
 
@@ -42,16 +37,20 @@ public class SkillInfoPopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI currentGold;
     [SerializeField] private Button merge_equip_Btn;
     [SerializeField] private TextMeshProUGUI btnText;
-    [SerializeField] private GameObject notification;
+    [SerializeField] private MergeNotificationPopup notification;
 
-    private void Awake()
+    private void Start()
     {
         // 토글 리스너 등록
         basicToggle.onValueChanged.AddListener((isOn) => { if (isOn) UpdatePanel(true); });
         gradeToggle.onValueChanged.AddListener((isOn) => { if (isOn) UpdatePanel(false); });
     }
 
-    private void OnDisable()
+    protected override void OnOpen()
+    {
+    }
+
+    protected override void OnClose()
     {
         SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
         AddressableManager.Instance.ReleaseAsset(data.Skill_Icon);
@@ -64,9 +63,6 @@ public class SkillInfoPopup : MonoBehaviour
         SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
 
         title.text = $"{data.Skill_Name} 정보";
-
-        Debug.Log(key.sid);
-        Debug.Log(key.isScroll);
 
         AddressableManager.Instance.LoadAsset<Sprite>(data.Skill_Icon, (sprite) =>
         {
@@ -90,9 +86,11 @@ public class SkillInfoPopup : MonoBehaviour
                 levelText.text = skill.Level.ToString();
             }
         }
-        
+
         // 기본 정보 셋팅
-        skillName.text = $"{data.Skill_Name} <color={RarityColor.GetColor(key.rarity)}><{key.rarity}></color>";
+        Color color = RarityColor.GetColor(key.rarity);
+        string hexColor = ColorUtility.ToHtmlStringRGB(color);
+        skillName.text = $"{data.Skill_Name} <color=#{hexColor}><{key.rarity}></color>";
         cooldown.text = $"{data.Skill_Cooltime}s";
         description.text = $"스킬 설명 컬럼이 없음"; 
 
@@ -111,8 +109,8 @@ public class SkillInfoPopup : MonoBehaviour
         }
 
         // 버튼 상태 제어
-        // 주문서면 '합성' 버튼 활성, 스킬이면 '강화' 버튼 활성 로프
-        btnText.text = key.isScroll ? "합성" : "강화";
+        // 주문서면 '합성' 버튼 활성, 스킬이면 '장착' 버튼 활성 로프
+        btnText.text = key.isScroll ? "합성" : "장착";
 
         // 골드 관련 데이터 연결 (임시)
         needsGold.text = "1,000";
@@ -134,16 +132,18 @@ public class SkillInfoPopup : MonoBehaviour
     {
         if (key.isScroll)
         {
-            notification.SetActive(true);
-            SkillManager.Instance.CraftSkill(key);
+            notification.Key = key;
+            UIManager.Instance.OpenPanel(notification);
         }
         else
         {
-            // SkillManager에 구현할 Reinforce 호출
-            // SkillManager.Instance.Reinforce(key);
+            SkillManager.Instance.EquipSkill(key);
+            UIManager.Instance.CloseTopPanel();
         }
 
         // 데이터 변했으니 UI 갱신
         Setup(key);
     }
+
+   
 }

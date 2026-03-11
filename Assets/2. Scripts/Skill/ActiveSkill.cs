@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ActiveSkill : BaseSkill
 {
-    public override void Execute()
+    public override void Execute(PlayerCtrl owner = null)
     {
         throw new System.NotImplementedException();
     }

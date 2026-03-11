@@ -1,9 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class BaseUI: MonoBehaviour
+public abstract class BaseUI : MonoBehaviour
 {
+    [SerializeField] private Button close;
+
     public bool IsOpen { get; private set; }
+
+    private void Awake()
+    {
+        if (close != null)
+        {
+            Debug.Log(gameObject.name);
+            close.onClick.AddListener(() => UIManager.Instance.CloseTopPanel());
+        }
+    }
 
     public virtual void Open()
     {
