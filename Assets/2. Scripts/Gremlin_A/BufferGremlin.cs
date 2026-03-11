@@ -1,27 +1,58 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class BufferGremlin : GremlinBehaviour
 {
-    public Status _buffStatus;      // 버프로 영향을 줄 스테이터스
     public float _buffCooltime;     // 버프의 쿨타임
     public float _buffDuration;     // 버프의 지속시간
     private Rarity _rarity;         // 등급
+    public Dictionary<Status, float> ActiveStatus {  get; private set; }
+    public Dictionary<Status, float> PassiveStatus {  get; private set; }
 
-    public float _buffValue { get; private set; }       // 버프로 올라가는 스텟의 값
+    public Action onActing;
 
     private float _timer;
-    private PlayerCtrl _player;
+    [SerializeField]private PlayerCtrl _player;
 
     public float finalValue { get; set; }
 
-    public void Init(Gremlin_StatusData data, Transform transform, Rarity rarity)
+    private void Awake()
     {
-        _buffStatus = data.Gremlin_Buff;
+        //플레이어 찾기
+        _player = FindAnyObjectByType<PlayerCtrl>();
+        onActing += ApplyBuff;
+    }
 
+    private void Update()
+    {
+        if(_buffCooltime > 0)
+        {
+            Tick();
+        }
+    }
+    public void Init(List<Gremlin_StatusData> data, Transform transform, Rarity rarity)
+    {
+        ActiveStatus = new Dictionary<Status, float>();
+        PassiveStatus = new Dictionary<Status, float>();
+
+        foreach(var statusdata in data)
+        {
+            if(statusdata.Effect_Type == Effect_Type.Active)
+            {
+                ActiveStatus.Add(statusdata.Gremlin_Buff, statusdata.Buff_Value);
+                _buffCooltime = statusdata.Gremlin_Cooltime;
+                Debug.Log($"{statusdata.Gremlin_Buff}를 {statusdata.Buff_Value}만큼 건드는 액티브 추가");
+            }
+            else if(statusdata.Effect_Type==Effect_Type.Passive)
+            {
+                PassiveStatus.Add(statusdata.Gremlin_Buff, statusdata.Buff_Value);
+                Debug.Log($"{statusdata.Gremlin_Buff}를 {statusdata.Buff_Value}만큼 건드는 패시브 추가");
+            }
+        }
         _rarity = rarity;
-        _buffCooltime = data.Gremlin_Atk;
-
-        _buffValue = 5f; // 임시값
+        StatManager.Instance.RefreshStats();
     }
 
     public override void Tick()
@@ -31,18 +62,28 @@ public class BufferGremlin : GremlinBehaviour
         {
             if (_player != null)
             {
+                onActing?.Invoke();
                 _timer = 0f;
-                ApplyBuff();
             }
         }
     }
 
     private void ApplyBuff()
     {
-        float buffValue = finalValue;
+        //현재로서는 체력 회복만. 액티브 스킬의 버프로 스탯 상승은 구현되지 않았으며, 확장 가능성이 매우 낮다고 함.
+        if(ActiveStatus.TryGetValue(Status.HP, out float value))
+        {
+            int healamount = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP) * value);
+            int maxHealAmount = Mathf.FloorToInt(_player.PlayerStats._maxHp - _player.PlayerStats._currentHp);
 
-        //TODO 플레이어한테 버프 주기
-
-        Debug.Log($"그렘린이 플레이어에게 {buffValue}만큼의 버프 시전");
+            if(healamount > maxHealAmount)
+            {
+                _player.ApplyDamage(-maxHealAmount);
+            }
+            else
+            {
+                _player.ApplyDamage(-healamount);
+            }
+        }
     }
 }

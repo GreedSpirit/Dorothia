@@ -19,7 +19,7 @@ public class GremlinManager : MonoBehaviour
     [SerializeField] private GameObject despawnEffectPrefab; // 해제/교체 시 재생될 이펙트, 파티클
     [SerializeField] private GameObject _gremlinPrefab;
 
-    private GremlinInstance currentGremlin;
+    public GremlinInstance currentGremlin { get; private set; }
     public Gremlin gremlinInstance { get; private set; }
 
     private void Awake()

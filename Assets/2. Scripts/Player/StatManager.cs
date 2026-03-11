@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -175,6 +175,18 @@ public class StatManager : MonoBehaviour
                 Status type = skill.Status.Affection_Skill;
                 float value = skill.Status.Affection_Skill_Value;
                 stats[type].AddMultiModifier(value);
+            }
+        }
+        //그렘린 패시브 적용
+        if (GremlinManager.Instance != null && GremlinManager.Instance.gremlinInstance != null)
+        {
+            BufferGremlin gremlin = GremlinManager.Instance.currentGremlin._behaviour as BufferGremlin;
+            if(gremlin != null)
+            {
+                foreach (var passive in gremlin.PassiveStatus.Keys)
+                {
+                    stats[passive].AddMultiModifier(gremlin.PassiveStatus[passive]);
+                }
             }
         }
     }
