@@ -182,17 +182,17 @@ public class MapManager : MonoBehaviour
 
         //런타임 BuildNavMesh
         //빌드 환경에서 Read/Write Enabled 문제를 꼭 처리해야 함
-        NavMeshSurface surface =
-            _currentMapInstance.GetComponentInChildren<NavMeshSurface>();
+        //NavMeshSurface surface =
+        //    _currentMapInstance.GetComponentInChildren<NavMeshSurface>();
 
-        if (surface != null)
-        {
-            surface.BuildNavMesh();
-        }
-        else
-        {
-            Debug.LogWarning("[MapManager] NavMeshSurface를 찾지 못함");
-        }
+        //if (surface != null)
+        //{
+        //    surface.BuildNavMesh();
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("[MapManager] NavMeshSurface를 찾지 못함");
+        //}
     }
 
     /// <summary>
@@ -205,6 +205,8 @@ public class MapManager : MonoBehaviour
             //SpawnAreaProvider 참조 제거
             if (_spawnManager != null)
                 _spawnManager.SetSpawnAreaProvider(null);
+
+            NavMesh.RemoveAllNavMeshData();
 
             Destroy(_currentMapInstance);
             _currentMapInstance = null;
