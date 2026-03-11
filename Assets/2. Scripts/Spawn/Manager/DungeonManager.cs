@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
+using GameUtility;
+using System.Numerics;
 
 public enum DungeonState
 {
@@ -380,8 +382,8 @@ public class DungeonManager : MonoBehaviour
         if (_spawnManager == null)
             return;
 
-        if (!_spawnManager.TryGetSpawnPosition(out Vector3 pos))
-            pos = Vector3.zero;
+        if (!_spawnManager.TryGetSpawnPosition(out UnityEngine.Vector3 pos))
+            pos = UnityEngine.Vector3.zero;
 
         if (_spawnManager.SpawnSingleDungeon(monsterId, pos))
         {
@@ -451,7 +453,9 @@ public class DungeonManager : MonoBehaviour
         }
 
         //현재 Reward_Min / Max가 int 타입이라 소수/콤마가 들어가는 csv는 파싱 단계에서 정리 필요
-        int amount = Random.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+        BigInteger amount = BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+        
 
         Debug.Log($"[Dungeon] Reward 지급 ConsumId={reward.Consum_Id}," +
             $" Amount={amount}, Rank={reward.Reward_Rank}");

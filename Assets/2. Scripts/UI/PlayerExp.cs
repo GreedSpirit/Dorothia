@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +34,7 @@ public class PlayerExp : MonoBehaviour
         _slider.value = 0f;
     }
 
-    void ChangeExpBar(float currentExp, double maxExp)
+    void ChangeExpBar(BigInteger currentExp, BigInteger maxExp)
     {
         _slider.value = (float)(currentExp / maxExp);
     }
