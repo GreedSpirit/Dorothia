@@ -391,4 +391,24 @@ public static class ItemCalculator
         }
         return set_id;
     }
+
+    public static List<Gremlin_StatusData> GetGremlinEffect(int SetID)
+    {
+        //세트효과를 찾습니다.
+        Dictionary<int, List<Gremlin_StatusData>> allSets = DataManager.Instance.GetListDict<Gremlin_StatusData>();
+        int set_id = SetID;
+        List<Gremlin_StatusData> statusList = new List<Gremlin_StatusData>();
+        foreach (var Set in allSets.Values)
+        {
+            foreach (var item in Set)
+            {
+                if (item.Gremlin_Id == SetID)
+                {
+                    statusList.Add(item);
+                }
+            }
+        }
+        Debug.Log("해당 아이디값은 발동 타입이 없습니다.");
+        return statusList.Count > 0 ? statusList : null;
+    }
 }
