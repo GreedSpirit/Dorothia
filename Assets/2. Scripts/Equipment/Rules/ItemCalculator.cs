@@ -120,26 +120,26 @@ public static class ItemCalculator
     public static int RarityCalculator()
     {
         int value = Random.Range(1, 10001);
-        int rarity = 40001;
+        int rarity = 1;
         if(value <= 9400)
         {
-            rarity = 40001;
+            rarity = 1;
         }
         else if(value > 9400 && value <= 9900)
         {
-            rarity = 40002;
+            rarity = 2;
         }
         else if(value > 9900 && value <= 9990)
         {
-            rarity = 40003;
+            rarity = 3;
         }
         else if(value > 9990 && value <= 9999)
         {
-            rarity = 40004;
+            rarity = 4;
         }
         else if(value == 10000)
         {
-            rarity = 40005;
+            rarity = 5;
         }
         return rarity;
     }
@@ -198,12 +198,12 @@ public static class ItemCalculator
         float multiply = 1;
         if (equip.equip_Upgrade != 0)
         {
-            multiply += DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Value;
+            multiply = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Value;
         }
 
         //레벨에 따른 상승량 값이 존재함에도 굳이 레벨*비율을 사용하는 이유는 혹시 모를 예외 상황에 대비하기 위함.
         return equip.equip_status.TryGetValue(equipStatus, out float value) ?
-            value * multiply * ItemCalculator.RarityMultiplyerCalculation(equip.equipment_Rarity)+ equip.equip_level * 1.5f
+            value * multiply * RarityMultiplyerCalculation(equip.equipment_Rarity)+ DataManager.Instance.GetData<Equip_LevelData>(equip.equip_level).Equip_Level_Value
             : 0f;
     }
 

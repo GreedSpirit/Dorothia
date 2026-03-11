@@ -77,9 +77,9 @@ public class FusePanel : MonoBehaviour
         }
 
         //신화 등급의 장비를 합성에 사용하려고 시도할 경우 불가능하다는 안내를 띄웁니다.
-        if(mainEquipment.equipment_Rarity == 40005 ||
-            subEquipmentOne.equipment_Rarity == 40005 ||
-            subEquipmentTwo.equipment_Rarity == 40005)
+        if((Rarity)mainEquipment.equipment_Rarity == Rarity.Mythtic ||
+            (Rarity)subEquipmentOne.equipment_Rarity == Rarity.Mythtic ||
+            (Rarity)subEquipmentTwo.equipment_Rarity == Rarity.Mythtic)
         {
             Debug.Log("신화 장비는 합성할 수 없습니다.");
             return;
@@ -107,13 +107,14 @@ public class FusePanel : MonoBehaviour
 
         //성공을 결정할 숫자는, 장비 등급에 따라 결정됩니다.
         float successNumber = Mathf.RoundToInt(DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Success_Prob * 100);
+        float failNumber = 100 - successNumber;
 
         if(_isUsingWeight == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
             if (successNumber + mainEquipment.equip_Fuse_Weight <= 100)
             {
-                successNumber += Mathf.RoundToInt(mainEquipment.equip_Fuse_Weight * 100);
+                successNumber += Mathf.RoundToInt(mainEquipment.equip_Fuse_Weight);
             }
             //초과하는 경우라면, 100을 달성할 값까지만 사용합니다.
             else
@@ -129,6 +130,12 @@ public class FusePanel : MonoBehaviour
         if (randomNumber <= successNumber)
         {
             Debug.Log("합성에 성공하였습니다! 장비의 레어도가 상승합니다.");
+            //가중치를 사용한 것인 경우, 체크하고 감소시킵니다.
+            if(_isUsingWeight == true)
+            {
+                mainEquipment.equip_Fuse_Weight = mainEquipment.equip_Fuse_Weight >= failNumber?
+                    mainEquipment.equip_Fuse_Weight - failNumber : 0;
+            }
 
             //장비의 레어도를 1 올려, 메인 장비의 레어도를 1 올립니다.
             int rarity = mainEquipment.equipment_Rarity;
@@ -137,26 +144,34 @@ public class FusePanel : MonoBehaviour
             mainEquipment.AddSubStatusOnUpgrade(DataManager.Instance.GetData<EquipData>(mainEquipment.equip_id),
                 (Rarity)DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity - 1).Equip_Rank,
                 (Rarity)DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity).Equip_Rank);
+
+            //합성에 성공하여 장비의 등급이 신화까지 올라간 경우, 가지고 있는 가중치를 일괄 삭제합니다. (만에 하나 방지 코드가 작동 안할 경우를 대비)
+            if((Rarity)mainEquipment.equipment_Rarity == Rarity.Mythtic)
+            {
+                mainEquipment.equip_Fuse_Weight = 0;
+            }
         }
 
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
         else
         {
-            Debug.Log($"합성에 실패하였습니다. 가중치를 {DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure}만큼 획득합니다.");
+            Debug.Log($"합성에 실패하였습니다. 가중치를 {DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure * 100}만큼 획득합니다.");
             //만약 가중치를 사용했다면, 가중치를 0으로 초기화합니다.
             if(_isUsingWeight == true)
             {
-                mainEquipment.equip_Fuse_Weight = 0;
+                mainEquipment.equip_Fuse_Weight = mainEquipment.equip_Fuse_Weight >= failNumber?
+                    mainEquipment.equip_Fuse_Weight - failNumber : 0;
             }
 
             //실패한 등급 기준 가중치를 획득합니다.
-            mainEquipment.equip_Fuse_Weight += DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity+1).Equip_Rank_Failure;
+            mainEquipment.equip_Fuse_Weight += DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure * 100;
+            Debug.Log($"현재 합성 가중치는 {mainEquipment.equip_Fuse_Weight}입니다.");
         }
 
         //재료로 넣은 장비 두 개를 슬롯에서 삭제합니다.
         subSlot1.ClearSlot();
         subSlot2.ClearSlot();
-
+        
         //재료로 넣었던 장비 두 개를 인벤토리에서 삭제합니다.
         inventory.RemoveEquipment(subEquipmentOne);
         inventory.RemoveEquipment(subEquipmentTwo);
@@ -175,25 +190,25 @@ public class FusePanel : MonoBehaviour
         int successRate = 0;
 
         //인자값으로 받은 장비의 레어도에 따라 성공률을 결정합니다. (하드코딩)
-        switch (mainEquipment.equipment_Rarity)
+        switch ((Rarity)mainEquipment.equipment_Rarity)
         {
-            case 40001:
+            case Rarity.Normal:
                 successRate = 90;
                 break;
 
-            case 40002:
+            case Rarity.Uncommon:
                 successRate = 50;
                 break;
 
-            case 40003:
+            case Rarity.Rare:
                 successRate = 25;
                 break;
 
-            case 40004:
+            case Rarity.Legendary:
                 successRate = 5;
                 break;
 
-            case 40005:
+            case Rarity.Mythtic:
                 successRate = 0;
                 break;
         }
