@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Numerics;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
 {
@@ -7,7 +8,7 @@ public class PlayerStats : MonoBehaviour
     int _playerstats_id = 70001;
 
     public int _level;         //레벨
-    public float _currentExp;  //현재 경험치
+    public BigInteger _currentExp;  //현재 경험치
     public float _maxHp;       //체력
     public float _currentHp;   //현재 체력
     public float _atk;         //공격력
@@ -20,12 +21,12 @@ public class PlayerStats : MonoBehaviour
     public float _hp_regen;    //체력재생력
     public float _agi;         //이동속도
     public int _upgrade_scrap_n; //첫업그레이드 시 소비하는 스크랩
-    public double _level_exp_n;     //첫레벨업 시 필요한 경험치
+    public BigInteger _level_exp_n;     //첫레벨업 시 필요한 경험치
 
     //TODO : 오버드라이브게이지에 반영할 변수값, 이벤트 추가예정
 
     public event Action<float,float> OnHpChanged;
-    public event Action<float,double> OnExpChanged;
+    public event Action<BigInteger,BigInteger> OnExpChanged;
     public event Action<int> OnLevelChanged;
     public event Action LevelChanged;
     public event Action OnDead;
@@ -66,7 +67,7 @@ public class PlayerStats : MonoBehaviour
         _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
         _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
         _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);
-        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
+        _level_exp_n = StatManager.Instance.GetBigStat(Status.Level_Exp_N);
 
         _currentHp = _maxHp;
 
@@ -103,7 +104,7 @@ public class PlayerStats : MonoBehaviour
     public void AddExp(int mosterId, bool isBoss)
     {
         //경험치 증가
-        _currentExp += 500f;
+        _currentExp += 500;
 
         //현재경험치가 경험치통보다 많으면서 현재 레벨이 200 아니면 반복
         while (_currentExp >= _level_exp_n && _level < 200)
@@ -119,7 +120,7 @@ public class PlayerStats : MonoBehaviour
         if (_level >= 200) return;
 
         //요구했던 경험치량 저장
-        double save_Level_Exp_N = _level_exp_n;
+        BigInteger save_Level_Exp_N = _level_exp_n;
 
         //레벨업
         _level++;
@@ -138,10 +139,10 @@ public class PlayerStats : MonoBehaviour
         _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
         _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
         _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);        
-        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
+        _level_exp_n = StatManager.Instance.GetBigStat(Status.Level_Exp_N);
 
         _currentHp = _maxHp;
-        _currentExp -= (float)save_Level_Exp_N;
+        _currentExp -= save_Level_Exp_N;
 
         OnLevelChanged?.Invoke(_level);
         LevelChanged?.Invoke();
@@ -161,7 +162,7 @@ public class PlayerStats : MonoBehaviour
         _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
         _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
         _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);
-        _level_exp_n = StatManager.Instance.GetStat(Status.Level_Exp_N);
+        _level_exp_n = StatManager.Instance.GetBigStat(Status.Level_Exp_N);
     }
 
     

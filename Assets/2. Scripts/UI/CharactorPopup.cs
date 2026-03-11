@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +61,7 @@ public class CharactorPopup : BaseUI
         UIManager.Instance.OpenPanel(statUpgradePopup);
     }
 
-    void UpdateExp(float currentExp, double maxExp)
+    void UpdateExp(BigInteger currentExp, BigInteger maxExp)
     {
         expSlider.value = (float)(currentExp / maxExp);
 
