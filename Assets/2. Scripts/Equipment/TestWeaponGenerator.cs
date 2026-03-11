@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TestWeaponGenerator : MonoBehaviour
 {
@@ -18,25 +19,39 @@ public class TestWeaponGenerator : MonoBehaviour
         }
 
         Instance = this;
+
+        //GetComponent<Button>().onClick.AddListener(() =>
+        //{
+        //    Test2(10, 3);
+        //}); 테스트용!
     }
 
-    public void Test(int equipLevel)
+    /// <summary>
+    /// 장비 생성에 필요한 숫자를 생성합니다.
+    /// </summary>
+    /// <returns></returns>
+    public int GetNumber()
     {
-        if (equipmentInventory == null)
-        {
-            Debug.LogError("EquipmentInventory를 연결해주세요!");
-            return;
-        }
-
         //랜덤 숫자를 생성합니다. (90% 확률로 미획득, 1.25% 확률로 부위별 획득 - 현재는 전부 무기로.)
         int rng = Random.Range(0, 40);
 
-        int variation = Random.Range(0, 2);
         //60% 확률로 드랍하는 메인 그룹의 장비와 40% 확률로 드랍하는 서브 그룹의 장비입니다.
-        int result = rng < 24? (rng) / 6 : (rng)/4;
-        EquipData _equipData = new EquipData();
+        int result = rng < 24 ? (rng) / 6 : (rng) / 4;
 
-        switch (result)
+        return result;
+    }
+
+    /// <summary>
+    /// GetNumber을 통해 생성된 숫자를 기반으로 장비를 생성합니다.
+    /// </summary>
+    /// <param name="rng">GetNumber()을 통해 얻은 숫자</param>
+    /// <returns></returns>
+    public EquipData GetEquipmentData(int rng)
+    {
+        EquipData _equipData = new EquipData();
+        int variation = Random.Range(0, 2);
+
+        switch (rng)
         {
             //1을 더했을 때 각각의 장착 부위가 되도록 생성합니다. 8번은 열거형 값에 존재하지 않으므로 7번을 중복 사용했습니다.
             case 0:
@@ -64,17 +79,19 @@ public class TestWeaponGenerator : MonoBehaviour
                 _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
                 break;
         }
-        int Rarity = ItemCalculator.RarityCalculator();
-        Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, Rarity, equipLevel);
-
-        if (_equipData != null)
+        return _equipData;
+    }
+    public void Test(int equipLevel)
+    {
+        if (equipmentInventory == null)
         {
-            Debug.Log($"이름 : {testWeapon.equip_name}, 종류 : {testWeapon.equip_type}");
-            Debug.Log($"등급 : {testWeapon.equipment_Rarity}, 착용레벨 : {testWeapon.equip_level}");
-            Debug.Log($"강화 : {testWeapon.equip_Upgrade}, 세트 : {testWeapon.equip_set_id}, 레벨 : {testWeapon.equip_level}");
+            Debug.LogError("EquipmentInventory를 연결해주세요!");
+            return;
         }
-        testWeapon.equip_type = _equipData.Equip_Type;
-        testWeapon.equip_name = _equipData.Equip_Name;
+
+        EquipData _equipData = GetEquipmentData(GetNumber());
+        int Rarity = ItemCalculator.RarityCalculator();
+        Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
 
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
@@ -84,8 +101,31 @@ public class TestWeaponGenerator : MonoBehaviour
         {
             inventoryPanel.Refresh();
         }
+    }
 
-        int count = equipmentInventory.GetInventory(Equip_Type.Weapon).Count;
-        Debug.Log($"현재 인벤토리의 무기 개수: {count}");
+
+    public void Test2(int equipLevel, int Rarity)
+    {
+        if (equipmentInventory == null)
+        {
+            Debug.LogError("EquipmentInventory를 연결해주세요!");
+            return;
+        }
+
+        EquipData _equipData = GetEquipmentData(GetNumber());
+        if(Rarity < 1 || Rarity > 5)
+        {
+            Rarity = ItemCalculator.RarityCalculator();
+        }
+        Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
+
+        //해당 장비를 인벤토리에 넣습니다.
+        equipmentInventory.AddEquipment(testWeapon);
+        Debug.Log("장비 획득 성공!");
+
+        if (inventoryPanel.currentPart != 0)
+        {
+            inventoryPanel.Refresh();
+        }
     }
 }

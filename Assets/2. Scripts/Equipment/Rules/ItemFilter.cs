@@ -24,27 +24,27 @@ public static class ItemFilter
                 Debug.Log("업그레이드된 장비는 불가능!");
                 continue;
             }    
-            if(Normal == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Equip_Rank.Normal)
+            if(Normal == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Rarity.Normal)
             {
                 Debug.Log("노말 장비는 적용 안됨!");
                 continue;
             }
-            if(Uncommon == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Equip_Rank.Uncommon)
+            if(Uncommon == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Rarity.Uncommon)
             {
                 Debug.Log("희귀 장비는 적용 안됨!");
                 continue;
             }
-            if(Rare == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Equip_Rank.Rare)
+            if(Rare == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Rarity.Rare)
             {
                 Debug.Log("레어 장비는 적용 안됨!");
                 continue;
             }
-            if(Legendary == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Equip_Rank.Legendary)
+            if(Legendary == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Rarity.Legendary)
             {
                 Debug.Log("전설 장비는 적용 안됨!");
                 continue;
             }
-            if(Mythtic == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Equip_Rank.Mythtic)
+            if(Mythtic == false && DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank == Rarity.Mythtic)
             {
                 Debug.Log("신화 장비는 적용 안됨!");
                 continue;

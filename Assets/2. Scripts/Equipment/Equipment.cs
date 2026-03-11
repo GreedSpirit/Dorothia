@@ -79,7 +79,7 @@ public class Equipment
     /// </summary>
     /// <param name="equipData">id값을 통해 데이터 테이블로부터 빼온 장비 id값</param>
     /// <param name="rarity">해당 장비의 등급</param>
-    public Equipment(string GUID, EquipData equipData, int rarity, int equipLevel)
+    public Equipment(string GUID, EquipData equipData, Rarity rarity, int equipLevel)
     {
         InstanceGUID = GUID;                          // 생성된 장비를 구분하기 위한 고유 GUID값
         equip_id = equipData.Equip_Id;                                            // 장비 id값
@@ -88,7 +88,7 @@ public class Equipment
         equip_icon = equipData.Equip_Icon;                                        // 장비 아이콘
         equip_price = equipData.Equip_Price;                                      // 장비 판매 가격
 
-        equipment_Rarity = rarity;                                                                                       // 장비 등급
+        equipment_Rarity = (int)rarity;                                                                                       // 장비 등급
         equip_Fuse_Weight = 0;
 
         equip_status = new Dictionary<Status, float>();

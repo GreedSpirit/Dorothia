@@ -126,7 +126,7 @@ public class EquipEnchant : MonoBehaviour
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         _costGold = Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
-                * ItemCalculator.GetEnchantWeightByRarity((Rarity)DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
+                * ItemCalculator.GetEnchantWeightByRarity(DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         _costGoldText.text = $"{_costGold}<color=orange>G</color>";
@@ -196,7 +196,9 @@ public class EquipEnchant : MonoBehaviour
             //강화 보정치를 사용해서 강화했다면 0으로 초기화시킵니다.
             if(_isUsingFailureCount == true)
             {
-                equip.equip_Upgrade_Weight = 0;
+                //가중치 + 성공률이 1 이상일 경우, 가중치에서 소모량만큼 감소, 그 외에는 0으로 초기화합니다.
+                equip.equip_Upgrade_Weight = equip.equip_Upgrade_Weight + upgradeData.Equip_Success_Prob >= 1?
+                    equip.equip_Upgrade_Weight - (1 - upgradeData.Equip_Success_Prob): 0;
             }
 
             //강화 성공 시 강화 구간이 변경되는 경우에만, 강화 보정치를 초기화합니다.
