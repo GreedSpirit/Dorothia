@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 [Serializable]
@@ -77,6 +78,8 @@ public class StatManager : MonoBehaviour
 
     public Dictionary<Status, FinalStat> stats = new Dictionary<Status, FinalStat>();
 
+    public Dictionary<Status, BigInteger> bigStats = new Dictionary<Status, BigInteger>();
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -116,7 +119,7 @@ public class StatManager : MonoBehaviour
         stats[Status.MagicDEF] = new FinalStat(data.Character_Def_M);
         stats[Status.HPRegen] = new FinalStat(data.Character_Hp_Regen);
         stats[Status.MoveSpeed] = new FinalStat(data.Character_Agi);
-        stats[Status.Level_Exp_N] = new FinalStat(data.Character_Level_Exp_N);
+        bigStats[Status.Level_Exp_N] = data.Character_Level_Exp_N;
 
     }
 
@@ -177,6 +180,18 @@ public class StatManager : MonoBehaviour
                 stats[type].AddMultiModifier(value);
             }
         }
+        //그렘린 패시브 적용
+        if (GremlinManager.Instance != null && GremlinManager.Instance.gremlinInstance != null)
+        {
+            BufferGremlin gremlin = GremlinManager.Instance.currentGremlin._behaviour as BufferGremlin;
+            if(gremlin != null)
+            {
+                foreach (var passive in gremlin.PassiveStatus.Keys)
+                {
+                    stats[passive].AddMultiModifier(gremlin.PassiveStatus[passive]);
+                }
+            }
+        }
     }
 
     private void ApplyEquipmentStats()
@@ -218,5 +233,10 @@ public class StatManager : MonoBehaviour
     public double GetStat(Status type)
     {
         return stats[type].FinalValue;
+    }
+
+    public BigInteger GetBigStat(Status type)
+    {
+        return bigStats[type];
     }
 }

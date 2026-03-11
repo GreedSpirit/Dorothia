@@ -29,6 +29,7 @@ public class GremlinUIPanel : BaseUI
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
     private GremlinUIItem _equippedUIItem;              // 장착 오브젝트 보여줄 UI
     private List<GremlinUIItem> _createdItems = new List<GremlinUIItem>(); // 생성된 아이템 리스트
+    private bool isAccepted = false;
 
     private void Awake()
     {
@@ -127,7 +128,20 @@ public class GremlinUIPanel : BaseUI
         if (_selectedUIItem == _equippedUIItem)
         {
             _noticeUIPanel.ChangeNoticeDescription("이미 장착된 그렘린입니다.");
+            _noticeUIPanel.ChangeNoticePanelLogic(true);
             _noticeUIPanel.Open();
+            return;
+        }
+
+        if(isAccepted == false && _selectedUIItem.GetGremlin()._rarity < _equippedUIItem.GetGremlin()._rarity)
+        {
+            _noticeUIPanel.ChangeNoticeDescription("장착 중인 그렘린보다 약합니다. 정말 교체하시겠습니까?");
+            _noticeUIPanel.ChangeNoticePanelLogic(false);
+            _noticeUIPanel.Open();
+
+            _noticeUIPanel.Acceptbtn.onClick.AddListener(AcceptModify);
+            _noticeUIPanel.Acceptbtn.onClick.AddListener(OnClickEquip);
+            _noticeUIPanel.Acceptbtn.onClick.AddListener(_noticeUIPanel.Close);
             return;
         }
 
@@ -145,6 +159,16 @@ public class GremlinUIPanel : BaseUI
 
         // TODO: 여기서 GremlinManager.EquipGremlin() 호출
         Debug.Log($"[{DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name}] 장착 완료!");
+        if(isAccepted == true)
+        {
+            AcceptModify();
+        }
+        _noticeUIPanel.Acceptbtn.onClick.RemoveAllListeners();
+    }
+
+    private void AcceptModify()
+    {
+        isAccepted = !isAccepted;
     }
 
     private void OnClickGoEnhance()

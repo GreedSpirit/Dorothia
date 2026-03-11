@@ -51,10 +51,11 @@ public class DataManager : MonoBehaviour
 
         //Gremlin 테이블
         LoadData<GremlinData>("Gremlin");
-        LoadData<Gremlin_StatusData>("Gremlin_Status");
         LoadData<Gremlin_TierData>("Gremlin_Tier");
         LoadData<Gremlin_AtkerData>("Gremlin_Atker");
         LoadData<Gremlin_BufferData>("Gremlin_Buffer");
+        LoadData<Gremlin_UpgradeData>("Gremlin_Upgrade");
+        LoadListData<Gremlin_StatusData>("Gremlin_Status");
 
         //Monster 테이블
         LoadData<Monster_Data>("Monster");
