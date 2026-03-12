@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Numerics;
+using UnityEngine;
 
 [Serializable]
 public class Character_StatsData : ICSVLoad, ITableKey
@@ -48,7 +48,7 @@ public class Character_StatsData : ICSVLoad, ITableKey
         if (values.Length > 10 && float.TryParse(values[10], out float v10)) Character_Hp_Regen = v10;
         // 11: Character_Agi (float)
         if (values.Length > 11 && float.TryParse(values[11], out float v11)) Character_Agi = v11;
-        // 12: Character_Level_Exp_N (float)
+        // 12: Character_Level_Exp_N (string)
         if (values.Length > 12 && BigInteger.TryParse(values[12], out BigInteger v12)) Character_Level_Exp_N = v12;
     }
 }
