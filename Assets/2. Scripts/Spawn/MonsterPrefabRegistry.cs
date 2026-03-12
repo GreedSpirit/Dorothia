@@ -17,8 +17,14 @@ public class MonsterPrefabRegistry : MonoBehaviour
 
     public static MonsterPrefabRegistry Instance { get; private set; }
 
-    [Header("Monster Prefabs")]
-    [SerializeField] private List<Entry> _entries = new();
+    [Header("Normal Monsters")]
+    [SerializeField] private List<Entry> _normalEntries = new();
+
+    [Header("Elite Monsters")]
+    [SerializeField] private List<Entry> _eliteEntries = new();
+
+    [Header("Boss Monsters")]
+    [SerializeField] private List<Entry> _bossEntries = new();
 
     //런타임 조회용 캐시 (monsterId -> Prefab)
     private readonly Dictionary<int, MonsterController> _map = new();
@@ -27,7 +33,6 @@ public class MonsterPrefabRegistry : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[MonsterPrefabRegistry] Duplicate instance detected. Destroying.");
             Destroy(gameObject);
             return;
         }
@@ -45,17 +50,33 @@ public class MonsterPrefabRegistry : MonoBehaviour
     }
 
     /// <summary>
-    /// Inspector Entries -> Dictionary 캐시 생성
-    /// 중복 monsterId는 경고 후 무시(첫 등록 유지)
+    /// Inspector 데이터 -> Dictionary 캐시 생성
     /// </summary>
     private void BuildCache()
     {
         _map.Clear();
 
-        for (int i = 0; i < _entries.Count; i++)
+        AddEntries(_normalEntries, "Normal");
+        AddEntries(_eliteEntries, "Elite");
+        AddEntries(_bossEntries, "Boss");
+    }
+
+    /// <summary>
+    /// 리스트를 캐시에 등록
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="category"></param>
+    private void AddEntries(List<Entry> list, string category)
+    {
+        if (list == null)
+            return;
+
+        for (int i = 0; i < list.Count; i++)
         {
-            var e = _entries[i];
-            if (e == null) continue;
+            var e = list[i];
+
+            if (e == null)
+                continue;
 
             if (e.monsterId <= 0)
                 continue;
@@ -65,7 +86,8 @@ public class MonsterPrefabRegistry : MonoBehaviour
 
             if (_map.ContainsKey(e.monsterId))
             {
-                Debug.LogWarning($"[MonsterPrefabRegistry] 중복 {e.monsterId}");
+                Debug.LogWarning($"[MonsterPrefabRegistry] 중복 MonsterId " +
+                    $"({category}) : {e.monsterId}");
                 continue;
             }
 

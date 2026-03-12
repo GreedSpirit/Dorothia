@@ -517,6 +517,9 @@ public class DungeonManager : MonoBehaviour
 
     public void StartTestDungeon()  // 테스트용
     {
-        StartDungeon(150001, 160001);
+        //StartDungeon(150002, 160501);   //광신도
+        //StartDungeon(150003, 161001);   //암살자
+        //StartDungeon(150004, 161501);   //마법사
+        StartDungeon(150005, 162001);   //실력자
     }
 }
