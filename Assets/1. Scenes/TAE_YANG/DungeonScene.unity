@@ -264,7 +264,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Dungeon
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -291,13 +291,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 42
+  m_fontSizeBase: 42
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -560,8 +560,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 400, y: 0}
+  m_SizeDelta: {x: 200, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &979854798
 MonoBehaviour:
@@ -1141,6 +1141,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3023697634948432035, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3048533330391109340, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: m_Name
       value: '[Panel]InGameUIRoot'
@@ -1365,10 +1369,18 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 4919384416805473493, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -19.849854
+      objectReference: {fileID: 0}
     - target: {fileID: 4920311763494515565, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: inventory
       value: 
       objectReference: {fileID: 1941664641}
+    - target: {fileID: 5345243761954013837, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -10.678772
+      objectReference: {fileID: 0}
     - target: {fileID: 5349726894055315162, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1392,6 +1404,10 @@ PrefabInstance:
     - target: {fileID: 5349726894055315162, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5748784815314201003, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -53.66565
       objectReference: {fileID: 0}
     - target: {fileID: 6190563278408484418, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -2594,6 +2610,8 @@ MonoBehaviour:
     MapPrefab: {fileID: 1803815277330901322, guid: 64b988a4e7c97164db65b7a5d0d96e04, type: 3}
   - DungeonId: 150004
     MapPrefab: {fileID: 1803815277330901322, guid: bb85957719cdbaf408fc628b0e54e6ed, type: 3}
+  - DungeonId: 150005
+    MapPrefab: {fileID: 1803815277330901322, guid: 8bba6f4c95f5d9849996a77d487600ed, type: 3}
 --- !u!4 &2065555326
 Transform:
   m_ObjectHideFlags: 0
