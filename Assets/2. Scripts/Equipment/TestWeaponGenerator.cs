@@ -49,7 +49,7 @@ public class TestWeaponGenerator : MonoBehaviour
     public EquipData GetEquipmentData(int rng)
     {
         EquipData _equipData = new EquipData();
-        int variation = Random.Range(0, 2);
+        int variation = Random.Range(0, 25);
 
         switch (rng)
         {
@@ -76,7 +76,7 @@ public class TestWeaponGenerator : MonoBehaviour
                 _equipData = DataManager.Instance.GetData<EquipData>(56000 + variation);
                 break;
             case 9:
-                _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
+                _equipData = DataManager.Instance.GetData<EquipData>(56026 + variation);
                 break;
         }
         return _equipData;
