@@ -36,6 +36,6 @@ public class PlayerExp : MonoBehaviour
 
     void ChangeExpBar(BigInteger currentExp, BigInteger maxExp)
     {
-        _slider.value = (float)(currentExp / maxExp);
+        _slider.value = (float)((double)currentExp / (double)maxExp);
     }
 }
