@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -51,6 +50,7 @@ public class SkillManager : MonoBehaviour
 
     // 슬롯 관리 (PlayerCtrl이 참조할 실시간 리스트)
     [SerializeField] private List<Image> ingameSlots = new List<Image>();
+    [SerializeField] private Image ingameUltiSlots;
     private HashSet<string> releaseIconStr = new HashSet<string>();
 
     public List<BaseSkill> SkillSlots { get; private set; } = new List<BaseSkill>();
@@ -104,6 +104,18 @@ public class SkillManager : MonoBehaviour
         if (Keyboard.current.rKey.wasPressedThisFrame)
         {
             for (int i = 0; i < 30; i++) GetRandomScroll();
+        }
+
+        // 신비게이지 테스트
+        //if (Keyboard.current.sKey.wasPressedThisFrame)
+        //{
+        //    MysteryGauge += 1000;
+        //}
+
+        float dt = Time.deltaTime;
+        for (int i = 0; i < SkillSlots.Count; i++)
+        {
+            SkillSlots[i].UpdateCooldown(dt);
         }
     }
 
@@ -184,6 +196,8 @@ public class SkillManager : MonoBehaviour
         // 데이터 및 확률 로드
         Skill_RankData rankData = DataManager.Instance.GetData<Skill_RankData>((int)skillKey.rarity);
         float successProb = rankData.Skill_Success_Prob;
+
+        if (isMysteryOn) successProb *= 2;
 
         // 합성 시도 횟수 계산
         int attemptCount = currentAmount / 3;
@@ -334,11 +348,13 @@ public class SkillManager : MonoBehaviour
         }
 
         var activeSkills = SkillSlots.Where(x => x.Data.Skill_Type == Skill_Type.Active).ToList();
+        var ultiSkill = SkillSlots.FirstOrDefault(x => x.Data.Skill_Type == Skill_Type.Ultimate);
+
+        string address = string.Empty;
 
         for (int i = 0; i < activeSkills.Count; i++)
         {
-            string address = activeSkills[i].Data.Skill_Icon;
-
+            address = activeSkills[i].Data.Skill_Icon;
             if (!releaseIconStr.Contains(address))
             {
                 releaseIconStr.Add(address);
@@ -348,5 +364,13 @@ public class SkillManager : MonoBehaviour
 
             AddressableManager.Instance.LoadAsset<Sprite>(address, x => slot.sprite = x);
         }
+
+        address = ultiSkill.Data.Skill_Icon;
+        if (!releaseIconStr.Contains(address))
+        {
+            releaseIconStr.Add(address);
+        }
+
+        AddressableManager.Instance.LoadAsset<Sprite>(address, x => ingameUltiSlots.sprite = x);
     }
 }
