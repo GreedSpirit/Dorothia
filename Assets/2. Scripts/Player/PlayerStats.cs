@@ -8,6 +8,7 @@ public class PlayerStats : MonoBehaviour
     int _playerstats_id = 70001;
 
     public int _level;         //레벨
+    public int _currentLevel;
     public BigInteger _currentExp;  //현재 경험치
     public float _maxHp;       //체력
     public float _currentHp;   //현재 체력
@@ -50,6 +51,9 @@ public class PlayerStats : MonoBehaviour
 
         //TODO : 불러오기 함수 호출
 
+
+        //TODO : 불러온 레벨로 현재레벨 셋팅
+        _currentLevel = _level;
 
         //스탯매니저계산값 적용
         StatManager.Instance.RefreshStats(_level);
@@ -103,11 +107,12 @@ public class PlayerStats : MonoBehaviour
     //경험치 변화 알림
     public void AddExp(int mosterId, bool isBoss)
     {
+        Debug.LogError($"현재 경험치: {_currentExp}, 필요 경험치: {_level_exp_n}");
         //경험치 증가
         _currentExp += 4500;
 
         //현재경험치가 경험치통보다 많으면서 현재 레벨이 200 아니면 반복
-        while (_currentExp >= _level_exp_n && _level < 200)
+        while (_currentExp >= _level_exp_n && _currentLevel < 200)
         {
             LevelUp();
         }
@@ -117,34 +122,28 @@ public class PlayerStats : MonoBehaviour
 
     public void LevelUp()
     {
-        if (_level >= 200) return;
+        if (_currentLevel >= 200) return;
 
         //요구했던 경험치량 저장
         BigInteger save_Level_Exp_N = _level_exp_n;
 
         //레벨업
-        _level++;
+        _currentLevel++;
 
         //업된 레벨기준 재계산
-        StatManager.Instance.RefreshStats(_level);
+        StatManager.Instance.RefreshStats(_currentLevel);
 
         //스탯 적용
         _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
         _atk = (float)StatManager.Instance.GetStat(Status.ATK);
-        _atk_m = (float)StatManager.Instance.GetStat(Status.MagicATK);
-        _dps = (float)StatManager.Instance.GetStat(Status.AttackSpeed);
-        _crt_prob = (float)StatManager.Instance.GetStat(Status.CriticalChance);
-        _crt_dmg = (float)StatManager.Instance.GetStat(Status.CriticalDamage);
         _def = (float)StatManager.Instance.GetStat(Status.DEF);
-        _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF);
-        _hp_regen = (float)StatManager.Instance.GetStat(Status.HPRegen);
-        _agi = (float)StatManager.Instance.GetStat(Status.MoveSpeed);        
+        _def_m = (float)StatManager.Instance.GetStat(Status.MagicDEF); 
         _level_exp_n = StatManager.Instance.GetBigStat(Status.Level_Exp_N);
 
         _currentHp = _maxHp;
         _currentExp -= save_Level_Exp_N;
 
-        OnLevelChanged?.Invoke(_level);
+        OnLevelChanged?.Invoke(_currentLevel);
         LevelChanged?.Invoke();
     }
 

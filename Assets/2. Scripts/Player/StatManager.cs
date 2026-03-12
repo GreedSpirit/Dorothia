@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameUtility;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
@@ -72,6 +73,9 @@ public class StatManager : MonoBehaviour
 {
     //캐싱시킬 레벨변수
     int _currentLevel;
+    BigInteger _baseLevelExp;
+    float _expWeight = 0.1f;
+
 
     private static StatManager instance;
     public static StatManager Instance => instance;
@@ -119,7 +123,10 @@ public class StatManager : MonoBehaviour
         stats[Status.MagicDEF] = new FinalStat(data.Character_Def_M);
         stats[Status.HPRegen] = new FinalStat(data.Character_Hp_Regen);
         stats[Status.MoveSpeed] = new FinalStat(data.Character_Agi);
-        bigStats[Status.Level_Exp_N] = data.Character_Level_Exp_N;
+
+        _baseLevelExp = data.Character_Level_Exp_N;
+
+        UpdateLevelExp();
 
     }
 
@@ -160,7 +167,9 @@ public class StatManager : MonoBehaviour
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
             stat.UpdateFinalValue(level);
         }
-        
+
+        UpdateLevelExp();
+
     }
 
     private void ApplyGrowStats()
@@ -238,5 +247,11 @@ public class StatManager : MonoBehaviour
     public BigInteger GetBigStat(Status type)
     {
         return bigStats[type];
+    }
+
+    private void UpdateLevelExp()
+    {
+        bigStats[Status.Level_Exp_N] = BigIntRandom.Growth(_baseLevelExp, _currentLevel, _expWeight);
+        Debug.Log($"Level: {_currentLevel}, Next Exp: {bigStats[Status.Level_Exp_N]}"); // 여기서 0이 찍히는지 확인
     }
 }

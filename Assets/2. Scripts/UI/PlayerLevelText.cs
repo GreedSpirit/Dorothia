@@ -31,7 +31,7 @@ public class PlayerLevelText : MonoBehaviour
     IEnumerator UpdateDelay()
     {
         yield return null;
-        _text.text = ($" Level {_playerStats._level}");
+        _text.text = ($" Level {_playerStats._currentLevel}");
     }
 
     void ChangeLevel(int currentLevel)
