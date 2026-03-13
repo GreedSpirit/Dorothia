@@ -2,7 +2,6 @@
 using System.Globalization;
 using UnityEngine;
 using GameUtility;
-using System.Numerics;
 
 public enum DungeonState
 {
@@ -15,6 +14,26 @@ public enum DungeonState
     Exit
 }
 
+/// <summary>
+/// 룰에서 사용할 간단한 웨이브 스폰 정보
+/// </summary>
+public readonly struct DungeonWaveSpawnEntry
+{
+    public readonly int monsterId;
+    public readonly int spawnNum;
+
+    public DungeonWaveSpawnEntry(int monsterId, int spawnNum)
+    {
+        this.monsterId = monsterId;
+        this.spawnNum = spawnNum;
+    }
+}
+
+/// <summary>
+/// 던전 공통 진행 매니저
+/// 입장 / 준비 / 전투 / 실패 / 클리어 / 복귀 공통 처리
+/// 실제 던전별 진행 규칙은 IDungeonRule 구현체가 담당
+/// </summary>
 public class DungeonManager : MonoBehaviour
 {
     public static DungeonManager Instance { get; private set; }
@@ -24,6 +43,14 @@ public class DungeonManager : MonoBehaviour
     public static event System.Action<int> OnDungeonCleared;
     public static event System.Action<int> OnDungeonFailed;
     public static event System.Action<int> OnDungeonWaveChanged;
+
+    //UI 연결용 이벤트
+    public static event System.Action<DungeonState> OnDungeonStateChanged;
+    public static event System.Action<int, int> OnDungeonStepStarted;              // dungeonId, stepId
+    public static event System.Action<int, int, int> OnDungeonWaveProgressChanged; // currentWave, maxWave, alive
+    public static event System.Action<int, int, int> OnDungeonEntryCountChanged;   // dungeonId, used, max
+    public static event System.Action<float> OnDungeonTimeLimitChanged;            // timeLimit
+    public static event System.Action<float> OnDungeonPrepareStarted;
 
     private bool _eventsRegistered;
 
@@ -49,6 +76,10 @@ public class DungeonManager : MonoBehaviour
 
     private bool _isDungeonRunning;
 
+    private IDungeonRule _rule;
+
+    private DungeonSpawnAreaProvider _dungeonSpawnProvider; // 현재 던전맵 전용 스폰 Provider
+
     private struct WaveEntry
     {
         public int wave;
@@ -64,6 +95,17 @@ public class DungeonManager : MonoBehaviour
 
     private int _maxWave;           // 최대 wave
     private int _currentWave;       // 현재 wave
+
+    public bool IsDungeonRunning => _isDungeonRunning;
+    public DungeonState CurrentState => _state;
+    public int CurrentWave => _currentWave;
+    public int MaxWave => _maxWave;
+    public int AliveMonsterCount => _aliveMonsterCount;
+    public int CurrentDungeonId => _dungeon != null ? _dungeon.Dungeon_Id : 0;
+    public int CurrentDungeonStepId => _stepData != null ? _stepData.Dungeon_Step_Id : 0;
+    public float CurrentTimeLimit => _timeLimit;
+    public DungeonData CurrentDungeonData => _dungeon;
+    public Dungeon_StepData CurrentStepData => _stepData;
 
     private void Awake()
     {
@@ -182,6 +224,20 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
+        //일일 입장 횟수 체크
+        if (!DungeonEntryTracker.TryConsumeEntry(
+            dungeonId,
+            _dungeon.Daily_Entry,
+            out int usedCount,
+            out int remainCount))
+        {
+            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={dungeonId}");
+            OnDungeonEntryCountChanged?.Invoke(dungeonId, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
+            return;
+        }
+
+        OnDungeonEntryCountChanged?.Invoke(dungeonId, usedCount, _dungeon.Daily_Entry);
+
         //wave 정렬 안정화
         _monsterGroup.Sort((a, b) =>
         {
@@ -199,6 +255,8 @@ public class DungeonManager : MonoBehaviour
             Debug.LogWarning($"[Dungeon] Time_Limit 파싱 실패: {_stepData.Time_Limit}, 기본 60초 사용");
             _timeLimit = 60f;
         }
+
+        OnDungeonTimeLimitChanged?.Invoke(_timeLimit);
 
         //현재 스테이지 진행 상태 저장
         if (_stageManager != null)
@@ -223,9 +281,16 @@ public class DungeonManager : MonoBehaviour
         if (_mapManager != null)
         {
             _mapManager.LoadDungeonMap(_dungeon.Dungeon_Id);
+            _dungeonSpawnProvider = _mapManager.CurrentDungeonSpawnProvider;
         }
 
+        _rule = DungeonRuleFactory.CreateRule(_dungeon.Dungeon_Id);
+        _rule.Initialize(this);
+
         _isDungeonRunning = true;
+
+        OnDungeonStepStarted?.Invoke(dungeonId, stepId);
+
         ChangeState(DungeonState.Enter);
     }
     #endregion
@@ -279,6 +344,8 @@ public class DungeonManager : MonoBehaviour
     {
         _state = newState;
 
+        OnDungeonStateChanged?.Invoke(_state);
+
         switch (_state)
         {
             case DungeonState.Enter:
@@ -311,6 +378,8 @@ public class DungeonManager : MonoBehaviour
     {
         Debug.Log($"[Dungeon] 진입 {_dungeon.Dungeon_Name}");
 
+        MovePlayerToSpawn();
+
         OnDungeonStarted?.Invoke(_dungeon.Dungeon_Id);
 
         ChangeState(DungeonState.Prepare);
@@ -321,6 +390,10 @@ public class DungeonManager : MonoBehaviour
         Debug.Log("[Dungeon] 준비");
 
         _prepareStartTime = Time.time;
+
+        OnDungeonPrepareStarted?.Invoke(3f);
+
+        _rule?.OnPrepareStarted();
     }
 
     #region 전투 로직
@@ -329,93 +402,90 @@ public class DungeonManager : MonoBehaviour
         Debug.Log("[Dungeon] 전투 시작");
 
         _combatStartTime = Time.time;
-
-        _currentWave = 1;
-
         ChangeState(DungeonState.Combat);
-        SpawnWave(_currentWave);
-    }
 
-    private void SpawnWave(int wave)
-    {
-        if (wave > _maxWave)
-        {
-            ChangeState(DungeonState.Clear);
-            return;
-        }
+        _rule?.OnCombatStarted(); // 실제 스폰은 룰이 담당
 
-        int start = _waveStartIndex[wave];
-        int end = _waveEndIndex[wave];
-
-        if (start == -1)
-        {
-            Debug.LogError($"Wave 없음 {wave}");
-            ChangeState(DungeonState.Fail);
-            return;
-        }
-
-        _aliveMonsterCount = 0;
-
-        OnDungeonWaveChanged?.Invoke(wave);
-
-        for (int i = start; i <= end; i++)
-        {
-            int monsterId = _waveEntries[i].monsterId;
-            int spawnNum = _waveEntries[i].spawnNum;
-
-            for (int j = 0; j < spawnNum; j++)
-            {
-                SpawnSingle(monsterId);
-            }
-        }
-
-        //0마리 스폰 보호처리
+        //혹시 룰 구현 오류로 0마리 스폰이면 실패 처리
         if (_aliveMonsterCount <= 0)
         {
-            Debug.LogError($"[Dungeon] Wave {wave} 스폰 결과가 0마리");
+            Debug.LogError("[Dungeon] 룰 실행 후 스폰된 몬스터가 없음");
             ChangeState(DungeonState.Fail);
-        }
-    }
-
-    private void SpawnSingle(int monsterId)
-    {
-        if (_spawnManager == null)
-            return;
-
-        if (!_spawnManager.TryGetSpawnPosition(out UnityEngine.Vector3 pos))
-            pos = UnityEngine.Vector3.zero;
-
-        if (_spawnManager.SpawnSingleDungeon(monsterId, pos))
-        {
-            _aliveMonsterCount++;
-        }
-        else
-        {
-            Debug.LogWarning($"[Dungeon] Spawn 실패 monsterId={monsterId}");
         }
     }
     #endregion
 
+    //private void SpawnWave(int wave)
+    //{
+    //    if (wave > _maxWave)
+    //    {
+    //        ChangeState(DungeonState.Clear);
+    //        return;
+    //    }
+
+    //    int start = _waveStartIndex[wave];
+    //    int end = _waveEndIndex[wave];
+
+    //    if (start == -1)
+    //    {
+    //        Debug.LogError($"Wave 없음 {wave}");
+    //        ChangeState(DungeonState.Fail);
+    //        return;
+    //    }
+
+    //    _aliveMonsterCount = 0;
+
+    //    OnDungeonWaveChanged?.Invoke(wave);
+
+    //    for (int i = start; i <= end; i++)
+    //    {
+    //        int monsterId = _waveEntries[i].monsterId;
+    //        int spawnNum = _waveEntries[i].spawnNum;
+
+    //        for (int j = 0; j < spawnNum; j++)
+    //        {
+    //            SpawnSingle(monsterId);
+    //        }
+    //    }
+
+    //    //0마리 스폰 보호처리
+    //    if (_aliveMonsterCount <= 0)
+    //    {
+    //        Debug.LogError($"[Dungeon] Wave {wave} 스폰 결과가 0마리");
+    //        ChangeState(DungeonState.Fail);
+    //    }
+    //}
+
+    //private void SpawnSingle(int monsterId)
+    //{
+    //    if (_spawnManager == null)
+    //        return;
+
+    //    if (!_spawnManager.TryGetSpawnPosition(out UnityEngine.Vector3 pos))
+    //        pos = UnityEngine.Vector3.zero;
+
+    //    if (_spawnManager.SpawnSingleDungeon(monsterId, pos))
+    //    {
+    //        _aliveMonsterCount++;
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning($"[Dungeon] Spawn 실패 monsterId={monsterId}");
+    //    }
+    //}
+
     private void HandleMonsterKilled(int monsterId, bool isBoss)
     {
+        if (!_isDungeonRunning)
+            return;
+
         if (_state != DungeonState.Combat)
             return;
 
         _aliveMonsterCount = Mathf.Max(0, _aliveMonsterCount - 1);
+        NotifyWaveProgressChanged();
 
-        if (_aliveMonsterCount > 0)
-            return;
-
-        //마지막 몬스터를 잡았을 때 다음 웨이브 또는 클리어
-        if (_currentWave < _maxWave)
-        {
-            _currentWave++;
-            SpawnWave(_currentWave);
-        }
-        else
-        {
-            ChangeState(DungeonState.Clear);
-        }
+        _rule?.OnMonsterKilled(monsterId);
     }
 
     #region 성공 / 실패
@@ -452,11 +522,9 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        //현재 Reward_Min / Max가 int 타입이라 소수/콤마가 들어가는 csv는 파싱 단계에서 정리 필요
-
-        BigInteger amount = BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+        System.Numerics.BigInteger amount = 
+            BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
         
-
         Debug.Log($"[Dungeon] Reward 지급 ConsumId={reward.Consum_Id}," +
             $" Amount={amount}, Rank={reward.Reward_Rank}");
     }
@@ -502,6 +570,9 @@ public class DungeonManager : MonoBehaviour
         _maxWave = 0;
         _timeLimit = 0f;
 
+        _rule = null;
+        _dungeonSpawnProvider = null;
+
         _isDungeonRunning = false;
         _state = DungeonState.None;
     }
@@ -515,11 +586,223 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
+    private void MovePlayerToSpawn()
+    {
+        if (_player == null)
+            return;
+
+        if (TryGetDungeonSpecialPoint(
+            DungeonSpecialPointType.PlayerSpawn,
+            out Vector3 pos))
+        {
+            Transform playerTransform = ((MonoBehaviour)_player).transform;
+            playerTransform.position = pos;
+        }
+        else
+        {
+            Debug.LogWarning("[Dungeon] PlayerSpawnPoint 없음");
+        }
+    }
+
+    #region Rule 전용
+    public void SetCurrentWave(int Wave)
+    {
+        _currentWave = Wave;
+    }
+
+    public void NotifyWaveChanged()
+    {
+        OnDungeonWaveChanged?.Invoke(_currentWave);
+        NotifyWaveProgressChanged();
+    }
+
+    public void NotifyWaveProgressChanged()
+    {
+        OnDungeonWaveProgressChanged?.Invoke(_currentWave, _maxWave, _aliveMonsterCount);
+    }
+
+    public void AdvanceToNextWave()
+    {
+        _currentWave++;
+        NotifyWaveChanged();
+
+        //기본 룰은 다음 웨이브를 ordered 방식으로 스폰
+        //실제 wave spawn 방식은 current rule에 의해 재사용되는 helper를 통해 제어
+        if (_rule is StandardWaveDungeonRule)
+        {
+            // StandardWaveDungeonRule 내부 로직과 맞추기 위해
+            // 다시 룰 쪽 spawn helper를 쓰도록 간단히
+            // current wave combat started와 동일하게 처리하지 않고,
+            // DungeonRuleBase가 직접 manager helpers를 호출하는 구조를 유지함.
+            // 여기서는 Rule instance가 다음 웨이브 스폰까지 담당하도록 명시 호출 대신 아래 방식 사용.
+            SpawnCurrentWaveByRuleFallback();
+        }
+        else
+        {
+            SpawnCurrentWaveByRuleFallback();
+        }
+    }
+
+    /// <summary>
+    /// 룰이 웨이브 전환 후 별도 로직 없이 ordered spawn을 쓰는 기본 fallback
+    /// StandardWaveDungeonRule를 위해 준비한 helper
+    /// </summary>
+    private void SpawnCurrentWaveByRuleFallback()
+    {
+        if (_dungeon == null)
+            return;
+
+        //150002, 150003, 150004는 ordered spawn 기반 공통 처리
+        switch (_dungeon.Dungeon_Id)
+        {
+            case 150002:
+            case 150003:
+            case 150004:
+                SpawnWaveOrderedInternal(_currentWave);
+                break;
+
+            default:
+                SpawnWaveOrderedInternal(_currentWave);
+                break;
+        }
+    }
+
+    public void RequestClear()
+    {
+        ChangeState(DungeonState.Clear);
+    }
+
+    public void RequestFail()
+    {
+        ChangeState(DungeonState.Fail);
+    }
+
+    public bool SpawnDungeonMonster(int monsterId, Vector3 pos)
+    {
+        if (_spawnManager == null)
+            return false;
+
+        if (_spawnManager.SpawnSingleDungeon(monsterId, pos))
+        {
+            _aliveMonsterCount++;
+            NotifyWaveProgressChanged();
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryGetDungeonOrderedSpawnPoint(int orderIndex, out Vector3 pos)
+    {
+        if (_dungeonSpawnProvider != null &&
+            _dungeonSpawnProvider.TryGetOrderedPointOnNavMesh(orderIndex, out pos))
+        {
+            return true;
+        }
+
+        pos = Vector3.zero;
+        return false;
+    }
+
+    public bool TryGetDungeonRandomSpawnPoint(out Vector3 pos)
+    {
+        if (_dungeonSpawnProvider != null &&
+            _dungeonSpawnProvider.TryGetRandomPointOnNavMesh(out pos))
+        {
+            return true;
+        }
+
+        //던전 provider가 없으면 기존 랜덤 필드 provider fallback
+        if (_spawnManager != null && _spawnManager.TryGetSpawnPosition(out pos))
+            return true;
+
+        pos = Vector3.zero;
+        return false;
+    }
+
+    public bool TryGetDungeonSpecialPoint(DungeonSpecialPointType type, out Vector3 pos)
+    {
+        if (_dungeonSpawnProvider != null &&
+            _dungeonSpawnProvider.TryGetSpecialPointOnNavMesh(type, out pos))
+        {
+            return true;
+        }
+
+        pos = Vector3.zero;
+        return false;
+    }
+
+    public List<DungeonWaveSpawnEntry> GetWaveEntries(int wave)
+    {
+        List<DungeonWaveSpawnEntry> result = new();
+
+        if (_waveStartIndex == null || _waveEndIndex == null)
+            return result;
+
+        if (wave <= 0 || wave >= _waveStartIndex.Length)
+            return result;
+
+        int start = _waveStartIndex[wave];
+        int end = _waveEndIndex[wave];
+
+        if (start == -1 || end == -1)
+            return result;
+
+        for (int i = start; i <= end; i++)
+        {
+            result.Add(new DungeonWaveSpawnEntry(
+                _waveEntries[i].monsterId,
+                _waveEntries[i].spawnNum
+            ));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// DungeonRuleBase fallback용 내부 ordered spawn
+    /// </summary>
+    /// <param name="wave"></param>
+    private void SpawnWaveOrderedInternal(int wave)
+    {
+        List<DungeonWaveSpawnEntry> entries = GetWaveEntries(wave);
+        int pointOrder = 0;
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            for (int j = 0; j < entries[i].spawnNum; j++)
+            {
+                if (TryGetDungeonOrderedSpawnPoint(pointOrder, out Vector3 pos))
+                {
+                    if (SpawnDungeonMonster(entries[i].monsterId, pos))
+                        pointOrder++;
+                }
+                else if (TryGetDungeonRandomSpawnPoint(out Vector3 fallbackPos))
+                {
+                    if (SpawnDungeonMonster(entries[i].monsterId, fallbackPos))
+                        pointOrder++;
+                }
+            }
+        }
+
+        if (_aliveMonsterCount <= 0)
+        {
+            Debug.LogError($"[Dungeon] Wave {wave} 스폰 결과가 0마리");
+            ChangeState(DungeonState.Fail);
+        }
+    }
+    #endregion
+
     public void StartTestDungeon()  // 테스트용
     {
-        //StartDungeon(150002, 160501);   //광신도
-        //StartDungeon(150003, 161001);   //암살자
-        //StartDungeon(150004, 161501);   //마법사
-        StartDungeon(150005, 162001);   //실력자
+        DungeonEntryTracker.ForceSetUsedCount(150002, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150003, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150004, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150005, 0);
+
+        //StartDungeon(150002, 160501);     //광신도
+        //StartDungeon(150003, 161001);     //암살자
+        StartDungeon(150004, 161501);       //마법사, 침묵의 성역 1단계 버튼
+        //StartDungeon(150005, 162001);     //실력자
     }
 }
