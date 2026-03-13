@@ -28,6 +28,8 @@ public class MapManager : MonoBehaviour
 
     private MonsterSpawnManager _spawnManager;
 
+    public DungeonSpawnAreaProvider CurrentDungeonSpawnProvider { get; private set; }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -131,7 +133,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        LoadMapCommon(prefab);
+        LoadMapCommon(prefab, isDungeon: false);
 
         _currentStageId = stageId;
         _currentDungeonId = -1;
@@ -141,7 +143,7 @@ public class MapManager : MonoBehaviour
 
     public void LoadDungeonMap(int dungeonId)
     {
-        if (_currentDungeonId == dungeonId)
+        if (_currentDungeonId == dungeonId && _currentMapInstance != null)
             return;
 
         if (!_dungeonMapTable.TryGetValue(dungeonId, out GameObject prefab))
@@ -150,7 +152,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        LoadMapCommon(prefab);
+        LoadMapCommon(prefab, isDungeon: true);
 
         _currentDungeonId = dungeonId;
         _currentStageId = -1;
@@ -160,9 +162,10 @@ public class MapManager : MonoBehaviour
 
     /// <summary>
     /// Stage / Dungeon 공통 로딩 처리
+    /// 던전맵이면 DungeonSpawnAreaProvider도 캐싱
     /// </summary>
     /// <param name="prefab"></param>
-    private void LoadMapCommon(GameObject prefab)
+    private void LoadMapCommon(GameObject prefab, bool isDungeon)
     {
         ClearCurrentMap();
 
@@ -178,6 +181,22 @@ public class MapManager : MonoBehaviour
         else
         {
             Debug.LogWarning("[MapManager] SpawnAreaProvider를 찾지 못함");
+        }
+
+        //던전 전용 provider 찾기
+        if (isDungeon)
+        {
+            CurrentDungeonSpawnProvider =
+                _currentMapInstance.GetComponentInChildren<DungeonSpawnAreaProvider>();
+
+            if (CurrentDungeonSpawnProvider == null)
+            {
+                Debug.LogWarning("[MapManager] DungeonSpawnAreaProvider를 찾지 못함");
+            }
+        }
+        else
+        {
+            CurrentDungeonSpawnProvider = null;
         }
 
         //런타임 BuildNavMesh
@@ -205,6 +224,8 @@ public class MapManager : MonoBehaviour
             //SpawnAreaProvider 참조 제거
             if (_spawnManager != null)
                 _spawnManager.SetSpawnAreaProvider(null);
+
+            CurrentDungeonSpawnProvider = null; // 현재 던전 Provider 해제
 
             NavMesh.RemoveAllNavMeshData();
 
