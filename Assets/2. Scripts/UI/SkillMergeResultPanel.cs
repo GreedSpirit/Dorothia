@@ -10,11 +10,9 @@ public class SkillMergeResultPanel : BaseUI
     [SerializeField] private Color failColor = Color.gray;
 
     [Header("획득 아이템 정보")]
-    [SerializeField] private Image resultIcon;
+    [SerializeField] private SkillItem resultIcon;
     [SerializeField] private TextMeshProUGUI resultNameText;
     //[SerializeField] private GameObject effectVisual; // 성공 시 연출용 이펙트 (선택 사항)
-
-    private string _currentIconKey;
 
     protected override void OnOpen()
     {
@@ -23,7 +21,6 @@ public class SkillMergeResultPanel : BaseUI
 
     protected override void OnClose()
     {
-        AddressableManager.Instance.ReleaseAsset(_currentIconKey);
     }
 
     /// <summary>
@@ -50,11 +47,7 @@ public class SkillMergeResultPanel : BaseUI
         {
             resultNameText.text = data.Skill_Name;
 
-            _currentIconKey = data.Skill_Icon;
-            AddressableManager.Instance.LoadAsset<Sprite>(_currentIconKey, (sprite) =>
-            {
-                if (resultIcon != null) resultIcon.sprite = sprite;
-            });
+            resultIcon.SetSlotData(SkillItem.SlotType.MergeResult, rewardKey);
         }
     }
 

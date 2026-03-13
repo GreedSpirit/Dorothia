@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using UnityEngine;
 
@@ -34,7 +35,11 @@ public class ScrollMergePanel : BaseUI
         for (int i = 0; i < targetSkills.Count; i++)
         {
             SkillItem item = GetOrCreateItem(i);
-            item.Setup(targetSkills[i].Key, SkillItem.DisplayMode.Info);
+            SkillKey key = targetSkills[i].Key;
+            SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
+
+            item.SetSlotData(SkillItem.SlotType.Scroll, key, -1,SkillItem.DisplayMode.Info);
+            //item.set(targetSkills[i].Key, SkillItem.DisplayMode.Info);
 
             item.gameObject. SetActive(true);
 

@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEditor.EventSystems;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
@@ -61,7 +63,8 @@ public class SkillMergePanel : BaseUI
         {
             SkillItem item = GetOrCreateItem(i);
             SkillKey key = targetSkills[i].Key;
-            item.Setup(key, SkillItem.DisplayMode.Selection, SelectSKill);
+
+            item.SetSlotData(SkillItem.SlotType.Skill, key, -1, SkillItem.DisplayMode.Selection, SelectSKill);
 
             item.gameObject.SetActive(true);
 
@@ -72,10 +75,29 @@ public class SkillMergePanel : BaseUI
 
     private void SelectSKill(SkillKey key, SkillItem item)
     {
-        upgradeButton.interactable = true;
+        // 같은 아이템이라면
+        if (currentItem == item)
+        {
+            upgradeButton.interactable = false;
+            currentItem.gradeOutlineImage.sprite = SkillManager.Instance.GetSpriteByGrade(key.rarity);
+            currentItem = null;
+            return;
+        }
 
+        // 다른 아이템이라면
+        if (currentItem != null)
+        {
+            // 원래 등급에 맞는 스프라이트로 되돌림
+            currentItem.gradeOutlineImage.sprite = SkillManager.Instance.GetSpriteByGrade(currentKey.rarity);
+        }
+
+        // 새로운 아이템 선택 적용
         currentKey = key;
         currentItem = item;
+
+        // 새 선택 UI 연출
+        currentItem.gradeOutlineImage.sprite = SkillManager.Instance.pickSprite;
+        upgradeButton.interactable = true;
     }
 
     private SkillItem GetOrCreateItem(int index)
