@@ -447,16 +447,16 @@ public class MonsterSpawnManager : MonoBehaviour
 
         if (_spawnAreaProvider == null)
         {
-            Debug.LogError("SpawnAreaProvider missing");
+            Debug.LogError("SpawnAreaProvider 없음");
             return;
         }
 
-        if (!_spawnAreaProvider.TryGetSpawnPosition(out Vector3 spawnPos))
+        if (!_spawnAreaProvider.TryGetBossSpawnPosition(out Vector3 spawnPos))
             spawnPos = Vector3.zero;
 
         SpawnSingle(bossMonsterId, spawnPos);
 
-        Debug.Log($"[SpawnManager] Boss Spawned : {bossMonsterId}");
+        Debug.Log($"[SpawnManager] 보스 소환 : {bossMonsterId}");
     }
 
     public void EndBossFight()
