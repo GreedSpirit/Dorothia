@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
@@ -5,15 +6,16 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
 
-public class SkillAddressableEditor : EditorWindow
+public class AddressableEditor : EditorWindow
 {
     private const string EffectFolder = "Assets/3. Prefabs/Effects";
     private const string IconFolder = "Assets/Image/Skills";
+    private const string EquipFolder = "Assets/99. IgnoredAssets/EquipIcon/";
 
     [MenuItem("Tools/Skill Resource Manager")]
     public static void ShowWindow()
     {
-        GetWindow<SkillAddressableEditor>("Skill Resource Manager");
+        GetWindow<AddressableEditor>("Skill Resource Manager");
     }
 
     private void OnGUI()
@@ -21,7 +23,9 @@ public class SkillAddressableEditor : EditorWindow
         GUILayout.Label("Skill Resource Auto Addressable Tool", EditorStyles.boldLabel);
         EditorGUILayout.Space();
 
-        EditorGUILayout.HelpBox($"설정된 경로:\n1. 이펙트: {EffectFolder}\n2. 아이콘: {IconFolder}", MessageType.Info);
+        EditorGUILayout.HelpBox($"설정된 경로:\n1. 스킬 이펙트: {EffectFolder}" +
+        $"\n2. 스킬 아이콘: {IconFolder}" +
+        $"\n2. 장비 아이콘: {EquipFolder}", MessageType.Info);
 
         EditorGUILayout.Space();
 
@@ -46,12 +50,20 @@ public class SkillAddressableEditor : EditorWindow
         }
 
         int count = 0;
-        // 이펙트 폴더 스캔
+        // 스킬 이펙트 폴더 스캔
         count += ScanDirectory(settings, EffectFolder, "SkillEffect", "*.prefab");
-        // 아이콘 폴더 스캔 (다중 확장자 지원)
+        // 스킬 아이콘 폴더 스캔 (다중 확장자 지원)
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.png");
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.jpg");
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.tga");
+        // 장비 아이콘 폴더 스캔
+        foreach (var type in Enum.GetValues(typeof(Equip_Type)))
+        {
+            string folderPath = EquipFolder + type.ToString();
+            count += ScanDirectory(settings, folderPath, type.ToString(), "*.png");
+            count += ScanDirectory(settings, folderPath, type.ToString(), "*.jpg");
+            count += ScanDirectory(settings, folderPath, type.ToString(), "*.tga");
+        }
 
         AssetDatabase.SaveAssets();
         Debug.Log($"[Skill Tool] 총 {count}개의 에셋이 어드레서블로 업데이트되었습니다.");
