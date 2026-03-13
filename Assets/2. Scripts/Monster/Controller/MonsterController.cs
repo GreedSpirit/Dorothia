@@ -432,6 +432,9 @@ public class MonsterController : MonoBehaviour, IMonster
             deathIndex = Random.Range(0, _deathClips.Length);
 
         _animator.SetInteger("DeathIndex", deathIndex);
+
+        _animator.speed = 1f;
+
         _animator.SetTrigger("Dead");
 
         if (_slotSystem != null && _mySlot != null)
@@ -454,8 +457,6 @@ public class MonsterController : MonoBehaviour, IMonster
 
         //스테이지 매니저가 킬카운트/보스판정 받게
         OnMonsterKilled?.Invoke(_monsterId, IsBoss);
-
-        //Invoke(nameof(ForceDespawn), 1f); // 1초후 풀 반환
     }
 
     //애니메이션 이벤트용
@@ -478,8 +479,6 @@ public class MonsterController : MonoBehaviour, IMonster
 
         int attackIndex = Random.Range(0, _attackClips.Length);
         AnimationClip selectedClip = _attackClips[attackIndex];
-
-        Debug.Log($"{name} attack clip length : {selectedClip.length}");
 
         //Animator 전달
         _animator.SetInteger("AttackIndex", attackIndex);

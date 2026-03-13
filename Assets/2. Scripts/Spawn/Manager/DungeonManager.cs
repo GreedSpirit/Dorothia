@@ -800,9 +800,9 @@ public class DungeonManager : MonoBehaviour
         DungeonEntryTracker.ForceSetUsedCount(150004, 0);
         DungeonEntryTracker.ForceSetUsedCount(150005, 0);
 
-        //StartDungeon(150002, 160501);   //광신도
-        //StartDungeon(150003, 161001);   //암살자
-        StartDungeon(150004, 161501);   //마법사
-        //StartDungeon(150005, 162001);   //실력자
+        //StartDungeon(150002, 160501);     //광신도
+        //StartDungeon(150003, 161001);     //암살자
+        StartDungeon(150004, 161501);       //마법사, 침묵의 성역 1단계 버튼
+        //StartDungeon(150005, 162001);     //실력자
     }
 }
