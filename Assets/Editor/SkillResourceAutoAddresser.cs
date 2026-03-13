@@ -1,0 +1,107 @@
+using System.IO;
+using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using UnityEngine;
+
+public class SkillAddressableEditor : EditorWindow
+{
+    private const string EffectFolder = "Assets/3. Prefabs/Effects";
+    private const string IconFolder = "Assets/Image/Skills";
+
+    [MenuItem("Tools/Skill Resource Manager")]
+    public static void ShowWindow()
+    {
+        GetWindow<SkillAddressableEditor>("Skill Resource Manager");
+    }
+
+    private void OnGUI()
+    {
+        GUILayout.Label("Skill Resource Auto Addressable Tool", EditorStyles.boldLabel);
+        EditorGUILayout.Space();
+
+        EditorGUILayout.HelpBox($"설정된 경로:\n1. 이펙트: {EffectFolder}\n2. 아이콘: {IconFolder}", MessageType.Info);
+
+        EditorGUILayout.Space();
+
+        if (GUILayout.Button("전체 에셋 다시 스캔 및 등록", GUILayout.Height(40)))
+        {
+            RefreshAllSkillAssets();
+        }
+
+        if (GUILayout.Button("Addressable 설정 열기", GUILayout.Height(30)))
+        {
+            EditorApplication.ExecuteMenuItem("Window/Asset Management/Addressables/Groups");
+        }
+    }
+
+    private void RefreshAllSkillAssets()
+    {
+        var settings = AddressableAssetSettingsDefaultObject.Settings;
+        if (settings == null)
+        {
+            Debug.LogError("Addressable Settings를 찾을 수 없습니다. 먼저 Settings를 생성하세요.");
+            return;
+        }
+
+        int count = 0;
+        // 이펙트 폴더 스캔
+        count += ScanDirectory(settings, EffectFolder, "SkillEffect", "*.prefab");
+        // 아이콘 폴더 스캔 (다중 확장자 지원)
+        count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.png");
+        count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.jpg");
+        count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.tga");
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[Skill Tool] 총 {count}개의 에셋이 어드레서블로 업데이트되었습니다.");
+        EditorUtility.DisplayDialog("완료", $"{count}개의 에셋 등록 완료!", "확인");
+    }
+
+    private int ScanDirectory(AddressableAssetSettings settings, string path, string groupName, string filter)
+    {
+        if (!Directory.Exists(path))
+        {
+            Debug.LogWarning($"경로가 존재하지 않습니다: {path}");
+            return 0;
+        }
+
+        string[] files = Directory.GetFiles(path, filter, SearchOption.AllDirectories);
+        int updatedCount = 0;
+
+        foreach (string filePath in files)
+        {
+            // 시스템 경로를 유니티 프로젝트 상대 경로로 변환
+            string relativePath = filePath.Replace(Application.dataPath, "Assets").Replace("\\", "/");
+
+            if (ApplyAddressable(settings, relativePath, groupName))
+            {
+                updatedCount++;
+            }
+        }
+        return updatedCount;
+    }
+
+    private bool ApplyAddressable(AddressableAssetSettings settings, string path, string groupName)
+    {
+        AddressableAssetGroup targetGroup = settings.FindGroup(groupName);
+        if (targetGroup == null)
+        {
+            targetGroup = settings.CreateGroup(groupName, false, false, true, null, typeof(ContentUpdateGroupSchema), typeof(BundledAssetGroupSchema));
+        }
+
+        string guid = AssetDatabase.AssetPathToGUID(path);
+        var entry = settings.CreateOrMoveEntry(guid, targetGroup);
+
+        if (entry != null)
+        {
+            string newAddress = Path.GetFileNameWithoutExtension(path);
+            if (entry.address == newAddress) return false;
+
+            entry.address = newAddress;
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
+            return true;
+        }
+        return false;
+    }
+}
