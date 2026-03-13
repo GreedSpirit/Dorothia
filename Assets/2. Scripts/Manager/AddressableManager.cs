@@ -19,33 +19,27 @@ public class AddressableManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public void LoadAsset<T>(string address, Action<T> onComplete) where T : UnityEngine.Object
+    public void LoadAsset<T>(string address, Action<T> onComplete = null) where T : UnityEngine.Object
     {
         if (string.IsNullOrEmpty(address)) return;
+        address = address.Trim(); // 공백 방지
 
-        // 1. 이미 캐시에 존재하고 유효한지 확인
+        // 이미 캐시에 존재한다면 (로드 중이거나 완료됨)
         if (_assetCache.TryGetValue(address, out AsyncOperationHandle handle))
         {
             _refCounts[address]++;
 
-            if (handle.IsDone)
+            // Completed 이벤트는 이미 완료된 상태여도 다음 프레임에 호출되거나 
+            // 즉시 실행되므로 통합 관리 가능
+            handle.Completed += (op) =>
             {
-                // 이미 로드 완료됨
-                onComplete?.Invoke(handle.Result as T);
-            }
-            else
-            {
-                // 로드 중: 완료 시점에 호출되도록 등록
-                handle.Completed += (op) =>
-                {
-                    if (op.Status == AsyncOperationStatus.Succeeded)
-                        onComplete?.Invoke(op.Result as T);
-                };
-            }
+                if (op.Status == AsyncOperationStatus.Succeeded)
+                    onComplete?.Invoke(op.Result as T);
+            };
             return;
         }
 
-        // 2. 신규 로드 시작
+        // 신규 로드 시작
         var newHandle = Addressables.LoadAssetAsync<T>(address);
         _assetCache[address] = newHandle;
         _refCounts[address] = 1;
@@ -54,12 +48,11 @@ public class AddressableManager : MonoBehaviour
         {
             if (op.Status == AsyncOperationStatus.Succeeded)
             {
-                onComplete?.Invoke(op.Result);
+                onComplete?.Invoke(op.Result as T);
             }
             else
             {
                 Debug.LogError($"[Addressable] 로드 실패: {address}");
-                // 실패 시 데이터 청소
                 _assetCache.Remove(address);
                 _refCounts.Remove(address);
                 if (newHandle.IsValid()) Addressables.Release(newHandle);
@@ -70,13 +63,14 @@ public class AddressableManager : MonoBehaviour
     public void ReleaseAsset(string address)
     {
         if (string.IsNullOrEmpty(address)) return;
+        address = address.Trim();
+
         if (!_assetCache.TryGetValue(address, out AsyncOperationHandle handle)) return;
 
         _refCounts[address]--;
 
         if (_refCounts[address] <= 0)
         {
-            // 실제 메모리 해제
             if (handle.IsValid())
             {
                 Addressables.Release(handle);
@@ -84,7 +78,6 @@ public class AddressableManager : MonoBehaviour
 
             _assetCache.Remove(address);
             _refCounts.Remove(address);
-            Debug.Log($"[Addressable] 메모리 완전 해제: {address}");
         }
     }
 
