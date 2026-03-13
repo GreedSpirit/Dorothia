@@ -1,4 +1,3 @@
-﻿using GameUtility;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -73,9 +72,6 @@ public class StatManager : MonoBehaviour
 {
     //캐싱시킬 레벨변수
     int _currentLevel;
-    BigInteger _baseLevelExp;
-    float _expWeight = 0.1f;
-
 
     private static StatManager instance;
     public static StatManager Instance => instance;
@@ -123,10 +119,7 @@ public class StatManager : MonoBehaviour
         stats[Status.MagicDEF] = new FinalStat(data.Character_Def_M);
         stats[Status.HPRegen] = new FinalStat(data.Character_Hp_Regen);
         stats[Status.MoveSpeed] = new FinalStat(data.Character_Agi);
-
-        _baseLevelExp = data.Character_Level_Exp_N;
-
-        UpdateLevelExp();
+        bigStats[Status.Level_Exp_N] = data.Character_Level_Exp_N;
 
     }
 
@@ -167,9 +160,7 @@ public class StatManager : MonoBehaviour
             //stat.UpdateFinalValue(currentLevel, promotion, 0);
             stat.UpdateFinalValue(level);
         }
-
-        UpdateLevelExp();
-
+        
     }
 
     private void ApplyGrowStats()
@@ -180,15 +171,15 @@ public class StatManager : MonoBehaviour
     private void ApplyPassiveEffects()
     {
         // 패시브 스킬 적용
-        if (SkillManager.Instance != null)
-        {
-            foreach (var skill in SkillManager.Instance.passiveSkillSlots)
-            {
-                Status type = skill.Status.Affection_Skill;
-                float value = skill.Status.Affection_Skill_Value;
-                stats[type].AddMultiModifier(value);
-            }
-        }
+        //if (SkillManager.Instance != null)
+        //{
+        //    foreach (var skill in SkillManager.Instance.PassiveSkillSlots)
+        //    {
+        //        Status type = skill.Status.Affection_Skill;
+        //        float value = skill.Status.Affection_Skill_Value;
+        //        stats[type].AddMultiModifier(value);
+        //    }
+        //}
         //그렘린 패시브 적용
         if (GremlinManager.Instance != null && GremlinManager.Instance.gremlinInstance != null)
         {
@@ -247,11 +238,5 @@ public class StatManager : MonoBehaviour
     public BigInteger GetBigStat(Status type)
     {
         return bigStats[type];
-    }
-
-    private void UpdateLevelExp()
-    {
-        bigStats[Status.Level_Exp_N] = BigIntRandom.Growth(_baseLevelExp, _currentLevel, _expWeight);
-        Debug.Log($"Level: {_currentLevel}, Next Exp: {bigStats[Status.Level_Exp_N]}"); // 여기서 0이 찍히는지 확인
     }
 }

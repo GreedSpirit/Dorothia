@@ -1,258 +1,433 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+public struct SkillKey
+{
+    public int sid;
+    public Skill_Type type;
+    public Rarity rarity;
+    public bool isScroll;
+
+    public SkillKey(int sid, Skill_Type type, Rarity rarity, bool isScroll = false)
+    {
+        this.sid = sid;
+        this.type = type;
+        this.rarity = rarity;
+        this.isScroll = isScroll;
+    }
+
+    public static bool operator ==(SkillKey left, SkillKey right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(SkillKey left, SkillKey right)
+    {
+        return !left.Equals(right);
+    }
+
+    public bool Equals(SkillKey other)
+    {
+        return sid == other.sid && type == other.type && rarity == other.rarity && isScroll == other.isScroll;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is SkillKey other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(sid, type, rarity, isScroll);
+    }
+}
 
 public class SkillManager : MonoBehaviour
 {
-    static private SkillManager instance;
-    static public SkillManager Instance { get => instance; set => instance = value; }
+    public static SkillManager Instance { get; private set; }
+
+    [Header("등급 별 머테리얼")]
+    [SerializeField] private List<Sprite> grades = new List<Sprite>();
+    [SerializeField] private Sprite newSprite;
+    [SerializeField] public Sprite pickSprite;
+
+
+    public BaseSkill[] ActiveSlots { get; private set; } = new BaseSkill[ACTIVE_SLOT_MAX];
+    public BaseSkill[] PassiveSlots { get; private set; } = new BaseSkill[PASSIVE_SLOT_MAX];
+    public BaseSkill UltimateSlot { get; private set; }
+
+    public const int ACTIVE_SLOT_MAX = 3;
+    public const int PASSIVE_SLOT_MAX = 5;
+
+    // 데이터 저장소 (Key: SkillKey, Value: 보유 수량)
+    public IReadOnlyDictionary<SkillKey, int> Inventory => _inventory;
+    private Dictionary<SkillKey, int> _inventory = new Dictionary<SkillKey, int>();
+
+    // 해금된 실제 스킬 객체들 (Logic 인스턴스)
+    public IReadOnlyDictionary<SkillKey, BaseSkill> UnlockedSkills => _unlockedSkills;
+    private Dictionary<SkillKey, BaseSkill> _unlockedSkills = new Dictionary<SkillKey, BaseSkill>();
+
+    // 이미 확인(클릭)한 스킬들의 ID를 저장 (중복 방지를 위해 HashSet 사용)
+    private HashSet<string> _confirmedSkillIds = new HashSet<string>();
+
+    // UI 아이템 캐싱
+    private Dictionary<SkillKey, SkillItem> _uiCache = new Dictionary<SkillKey, SkillItem>();
+
+    // 신비 게이지 현황
+    public const float MYSTERY_LIMIT = 100000;
+    private float _mysteryGauge;
+    public float MysteryGauge
+    {
+        get => _mysteryGauge;
+        set
+        {
+            _mysteryGauge = value;
+            if (_mysteryGauge > MYSTERY_LIMIT) _mysteryGauge = MYSTERY_LIMIT;
+            OnMysteryGaugeChanged?.Invoke(_mysteryGauge);
+        }
+    }
+    public event Action<float> OnMysteryGaugeChanged;
+    public event Action<Skill_Type, int> OnEquipSkillChanged;
+
+    // 이벤트: 데이터 변경 시 (키)
+    public event Action<SkillKey> OnInventoryChanged;
 
     private void Awake()
     {
-        if (instance != null && instance != this)
+        if (Instance != null)
         {
-            Destroy(gameObject);
-            return;
+            Destroy(gameObject); return;
         }
-
-        instance = this;
+        Instance = this;
     }
 
-    // 패시브 스킬 슬롯
-    private const int PASSIVESLOT_COUNT = 5;
-    public List<PassiveSkill> passiveSkillSlots = new List<PassiveSkill>();
-
-    // 액티브 스킬 슬롯
-    //private const int ACTIVESLOT_COUNT = 5;
-    public List<BaseSkill> activeSkillSlots = new List<BaseSkill>();
-
-    // 스킬 관리
-    private Dictionary<int, BaseSkill> unlockedSkill = new Dictionary<int, BaseSkill>();
-    private Dictionary<int, int> skills = new Dictionary<int, int>();
-
-    // 스킬주문서 관리 (스킬id,개수)
-    [SerializeField] private Transform inven;
-    [SerializeField] private GameObject scrollItem;
-    public Dictionary<int, int> scrolls = new Dictionary<int, int>();
-    public Dictionary<int, SkillItem> items = new Dictionary<int, SkillItem>();
-
-    // 등급별 신비 게이지
-    private Dictionary<Rarity, float> rarityGauge = new Dictionary<Rarity, float>();
-
-    public event Action<int> OnAddScroll;
-
-    // 1. 특수 던전에서 클리어 시 스킬주문서 획득
-    // 2. 상점에서 골드로 스킬주문서 획득
-    public void TestGetScrolls()
+    private void Update()
     {
-
-        foreach (var skill in DataManager.Instance.GetDict<SkillData>())
+        if (Keyboard.current.rKey.wasPressedThisFrame)
         {
-            Debug.Log($"{skill.Value.Job_Skill_Id}\n" +
-            $"스킬명 : {skill.Value.Skill_Name}\n" +
-            $"타입 : {skill.Value.Skill_Type}\n" +
-            $"쿨타임 : {skill.Value.Skill_Cooltime}\n" +
-            $"statusId : {skill.Value.Skill_Status_Id}\n");
-
-            Skill_StatusData status = DataManager.Instance.GetData<Skill_StatusData>(skill.Value.Skill_Status_Id);
-
-            Debug.Log($"type : {status.Affection_Skill}\n" +
-           $"increaseValue : {status.Affection_Skill_Value}");
-
-            AddScroll(skill.Value.Job_Skill_Id);
+            for (int i = 0; i < 3000; i++) GetRandomScroll();
         }
+
+        // 신비게이지 테스트
+        //if (Keyboard.current.sKey.wasPressedThisFrame)
+        //{
+        //    MysteryGauge += 1000;
+        //}
+
+        float dt = Time.deltaTime;
+        // 액티브 슬롯 쿨다운 업데이트
+        for (int i = 0; i < ActiveSlots.Length; i++)
+        {
+            ActiveSlots[i]?.UpdateCooldown(dt);
+        }
+
+        // 궁극기 쿨다운 업데이트
+        UltimateSlot?.UpdateCooldown(dt);
+    }
+
+    public void GetRandomScroll()
+    {
+        AddItem(GetRandomkey());
     }
 
 
-    #region 스킬 주문서 관련
-    public void AddScroll(int sId, int count = 1)
+    private SkillKey GetRandomkey()
     {
+        var seed = DataManager.Instance.GetDict<SkillData>().ToList();
+        int count = seed.Count;
 
-        if (scrolls.ContainsKey(sId))
+        int id = UnityEngine.Random.Range(0, count);
+
+        return new SkillKey(seed[id].Key, seed[id].Value.Skill_Type, Rarity.Normal, true);
+    }
+
+    #region Inventory Core Logic
+
+    public void AddItem(SkillKey key, int count = 1)
+    {
+        if (!_inventory.ContainsKey(key))
         {
-            scrolls[sId] += count;
+            _inventory[key] = 0;
+        }
+
+        _inventory[key] += count;
+        //Debug.Log($"{key.sid}, {_inventory[key]}");
+        OnInventoryChanged?.Invoke(key);
+    }
+
+    public BaseSkill GetSkill(SkillKey key) => UnlockedSkills.TryGetValue(key, out BaseSkill bs) ? bs : null;
+    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity];
+    public int GetItemCount(SkillKey key) => _inventory.GetValueOrDefault(key, 0);
+    public bool IsNewSkill(SkillKey key) => UnlockedSkills.ContainsKey(key);
+
+    #endregion
+
+    #region Craft & Merge
+
+    // 주문서 3개 -> 노말 스킬 1개
+    public void CraftSkill(SkillKey scrollKey, int craftCount = 1)
+    {
+        if (!scrollKey.isScroll || GetItemCount(scrollKey) < 3) return;
+
+        int vaildCount = Inventory[scrollKey] / 3;
+        if (vaildCount < craftCount) return;
+
+        //int craftCount = _inventory[scrollKey] / 3;
+        _inventory[scrollKey] -= (3 * craftCount);
+        OnInventoryChanged?.Invoke(scrollKey);
+
+        // 주문서와 같은 ID의 'Normal' 등급 스킬 생성
+        SkillKey skillKey = new SkillKey(scrollKey.sid, scrollKey.type, Rarity.Normal, false);
+
+        UnlockAndAddItem(skillKey, craftCount);
+    }
+
+    // 같은 등급 스킬 3개 -> 다음 등급 스킬 1개
+    public bool MergeSkill(SkillKey skillKey, bool isMysteryOn = false)
+    {
+        // 기본 조건 체크
+        if (skillKey.isScroll || skillKey.rarity == Rarity.Legendary) return false;
+
+        int currentAmount = GetItemCount(skillKey);
+        if (currentAmount < 3) return false;
+
+        // 데이터 및 확률 로드
+        Skill_RankData rankData = DataManager.Instance.GetData<Skill_RankData>((int)skillKey.rarity);
+        float successProb = rankData.Skill_Success_Prob;
+
+        if (isMysteryOn) successProb *= 2;
+
+        // 합성 시도 횟수 계산
+        int attemptCount = currentAmount / 3;
+        int successCount = 0;
+
+        // 재료 선소모 (3의 배수만큼 모두 소모)
+        _inventory[skillKey] -= (attemptCount * 3);
+
+        // 각 횟수마다 개별 확률 계산
+        for (int i = 0; i < attemptCount; i++)
+        {
+            float randomValue = UnityEngine.Random.value;
+            if (randomValue <= successProb)
+            {
+                successCount++;
+            }
+        }
+
+        // 인벤토리 UI 갱신 (재료 감소 반영)
+        OnInventoryChanged?.Invoke(skillKey);
+
+        // 성공 결과 지급
+        if (successCount > 0)
+        {
+            Rarity nextRarity = (Rarity)((int)skillKey.rarity + 1);
+            SkillKey upgradedKey = new SkillKey(skillKey.sid, skillKey.type, nextRarity, false);
+
+            Debug.Log($"{skillKey.sid} 합성 시도: {attemptCount}회 | 성공: {successCount}회!");
+            UnlockAndAddItem(upgradedKey, successCount);
+            return true;
         }
         else
         {
-            scrolls[sId] = count;
+            int failCount = attemptCount - successCount;
+            MysteryGauge += rankData.Skill_Rank_Failure;
 
-            GameObject scroll = Instantiate(scrollItem, inven);
-
-            SkillData data = DataManager.Instance.GetData<SkillData>(sId);
-
-            SkillItem item = scroll.GetComponent<SkillItem>();
-            item.Setup(data);
-            items[sId] = item;
+            Debug.Log($"{skillKey.sid} 합성 {attemptCount}회 모두 실패...");
+            return false;
         }
-        OnAddScroll?.Invoke(sId);
     }
 
-
-    // 스킬주문서 3개 -> 스킬 1개
-    public void CraftSkill(int sId)
+    // 공통: 스킬 인스턴스 생성 및 인벤토리 추가 루틴
+    private void UnlockAndAddItem(SkillKey skillKey, int count)
     {
-        // 혹시 모를 예외 방지
-        if (!scrolls.ContainsKey(sId) || scrolls[sId] < 3) return;
-
-        int result = scrolls[sId] / 3;
-
-        scrolls[sId] %= 3;
-
-        // 데이터 가져오기
-        SkillData skillData = DataManager.Instance.GetData<SkillData>(sId);
-        Skill_StatusData statusData = DataManager.Instance.GetData<Skill_StatusData>(skillData.Skill_Status_Id);
-
-        // 스킬 데이터 생성
-        if (!unlockedSkill.TryGetValue(sId, out BaseSkill skill))
+        if (!_unlockedSkills.ContainsKey(skillKey))
         {
+            var sData = DataManager.Instance.GetData<SkillData>(skillKey.sid);
+            var stData = DataManager.Instance.GetData<Skill_StatusData>(sData.Skill_Status_Id);
 
-            skill = BaseSkill.Create(skillData, statusData);
-            unlockedSkill[sId] = skill;
+            BaseSkill newSkill = BaseSkill.Create(sData, stData);
+            newSkill.Rarity = skillKey.rarity; // 스킬 객체에도 등급 설정
+            _unlockedSkills[skillKey] = newSkill;
         }
 
-        Debug.Log($"{sId}스킬 {result}개 생성 완료. \n 해당 주문서 남은 개수 {scrolls[sId]}");
-
-        AddSkill(skill, result);
+        AddItem(skillKey, count);
     }
 
-    public void SelectScrollMerge(List<int> sids)
+    // UI 등에서 호출할 일괄 합성 버튼용
+    public void AllCraftAndMerge()
     {
+        var keys = _inventory.Keys.ToList();
 
-    }
-
-    //일괄적으로합성 가능한스킬들을합성함.
-    public void AllScrollMerge()
-    {
-        foreach (var scroll in scrolls)
+        foreach (var key in keys)
         {
-            int count = scroll.Value;
-            if (count < 3) continue;
+            if (key.isScroll)
+            {
+                int craftCount = Inventory[key] / 3;
+                CraftSkill(key, craftCount);
+            }
 
-            CraftSkill(scroll.Key);
+            // 스킬 일괄 합성이 있다면
+            //else
+            //    MergeSkill(key);
         }
     }
+
     #endregion
 
-    #region 스킬 관련
+    #region Slot Management
 
-    public void AddSkill(BaseSkill skill, int count = 1)
+    public bool IsEquipped(SkillKey key)
     {
-        int sId = skill.Data.Job_Skill_Id;
+        return ActiveSlots.Any(s => s != null && s.Data.Job_Skill_Id == key.sid && s.Rarity == key.rarity) ||
+               PassiveSlots.Any(s => s != null && s.Data.Job_Skill_Id == key.sid && s.Rarity == key.rarity) ||
+               (UltimateSlot != null && UltimateSlot.Data.Job_Skill_Id == key.sid && UltimateSlot.Rarity == key.rarity);
+    }
 
-        if (skills.ContainsKey(sId))
+    public int GetEquippedIndex(SkillKey key)
+    {
+        var sData = DataManager.Instance.GetData<SkillData>(key.sid);
+        if (sData == null) return -1;
+
+        Skill_Type type = sData.Skill_Type;
+
+        if (type == Skill_Type.Active)
         {
-            skills[sId] += count;
+            for (int i = 0; i < ActiveSlots.Length; i++)
+            {
+                if (ActiveSlots[i] != null &&
+                    ActiveSlots[i].Data.Job_Skill_Id == key.sid &&
+                    ActiveSlots[i].Rarity == key.rarity)
+                {
+                    return i;
+                }
+            }
         }
-        else
+        else if (type == Skill_Type.Passive)
         {
-            skills[sId] = 1;
+            for (int i = 0; i < PassiveSlots.Length; i++)
+            {
+                if (PassiveSlots[i] != null &&
+                    PassiveSlots[i].Data.Job_Skill_Id == key.sid &&
+                    PassiveSlots[i].Rarity == key.rarity)
+                {
+                    return i;
+                }
+            }
+        }
+        else if (type == Skill_Type.Ultimate)
+        {
+            if (UltimateSlot != null &&
+                UltimateSlot.Data.Job_Skill_Id == key.sid &&
+                UltimateSlot.Rarity == key.rarity)
+            {
+                return 0;
+            }
+        }
+
+        return -1; // 장착되어 있지 않음
+    }
+    public void AutoEquip()
+    {
+
+    }
+
+    public void EquipSkill(SkillKey key, int targetIndex = -1)
+    {
+        if (!_unlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
+        if (IsEquipped(key)) return;
+
+        Skill_Type type = skill.Data.Skill_Type;
+
+        if (type == Skill_Type.Active)
+        {
+            EquipActive(skill, targetIndex);
+        }
+        else if (type == Skill_Type.Passive)
+        {
+            EquipPassive(skill, targetIndex);
+        }
+        else if (type == Skill_Type.Ultimate)
+        {
+            EquipUltimate(skill);
+        }
+
+        OnEquipSkillChanged?.Invoke(type, targetIndex);
+    }
+
+    private void EquipActive(BaseSkill skill, int targetIndex)
+    {
+        int index = (targetIndex >= 0) ? targetIndex : Array.FindIndex(ActiveSlots, s => s == null);
+
+        if (index >= 0 && index < ACTIVE_SLOT_MAX)
+        {
+            if (ActiveSlots[index] != null) UnequipActive(index);
+            ActiveSlots[index] = skill;
+            AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
         }
     }
-    public void SkillMerge(int sId)
+
+    private void EquipPassive(BaseSkill skill, int targetIndex)
     {
-        //같은 스킬, 같은 등급 3개로 레어리티 1향상
-        BaseSkill skill = unlockedSkill[sId];
+        int index = (targetIndex >= 0) ? targetIndex : Array.FindIndex(PassiveSlots, s => s == null);
 
-        Rarity rarity = skill.Rarity;
+        if (index >= 0 && index < PASSIVE_SLOT_MAX)
+        {
+            // 1. 기존 패시브가 있다면 해제 (스탯 원복 등)
+            if (PassiveSlots[index] != null) UnequipPassive(index);
 
-        Skill_RankData rankData = DataManager.Instance.GetData<Skill_RankData>((int)rarity);
+            // 2. 새 패시브 장착
+            PassiveSlots[index] = skill;
 
-        //상승값
-        float increaseVal = rankData.Skill_Value;
-        //실패 보정치 = 신비게이지 상승 값
-        float failureVal = rankData.Skill_Rank_Failure;
-        //성공확률
-        float perSuccess = rankData.Skill_Success_Prob;
+            // 3. 패시브 효과 적용 (PlayerCtrl 등에 스탯 반영 알림)
+            StatManager.Instance.RefreshStats();
 
-        //신비게이지 확인
-        rarityGauge[rarity] += failureVal;
-
-        skills[sId] -= 3;
+            AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
+            // 패시브는 인게임 퀵슬롯(ingameSlots)에 들어가지 않으므로 UpdateInGameSlots 생략 가능
+        }
     }
 
-    public void SkillUpgrade(int sId)
+    private void EquipUltimate(BaseSkill skill)
     {
-        BaseSkill skill = unlockedSkill[sId];
-
-        Skill_UpgradeData upgradeData = DataManager.Instance.GetData<Skill_UpgradeData>(skill.Level);
-
-
-        //스킬레벨 1업
-
-        //100레벨이상 불가
+        if (UltimateSlot != null) UnequipUltimate();
+        UltimateSlot = skill;
+        AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
     }
+
+    public void UnequipPassive(int index)
+    {
+        if (index < 0 || index >= PASSIVE_SLOT_MAX || PassiveSlots[index] == null) return;
+
+        string iconAddr = PassiveSlots[index].Data.Skill_Icon;
+        PassiveSlots[index] = null;
+
+        AddressableManager.Instance.ReleaseAsset(iconAddr);
+        OnEquipSkillChanged?.Invoke(Skill_Type.Passive, index);
+    }
+
+    public void UnequipActive(int index)
+    {
+        if (index < 0 || index >= ACTIVE_SLOT_MAX || ActiveSlots[index] == null) return;
+
+        string iconAddr = ActiveSlots[index].Data.Skill_Icon;
+        ActiveSlots[index] = null;
+
+        AddressableManager.Instance.ReleaseAsset(iconAddr);
+        OnEquipSkillChanged?.Invoke(Skill_Type.Active, index);
+    }
+
+    public void UnequipUltimate()
+    {
+        if (UltimateSlot == null) return;
+
+        string iconAddr = UltimateSlot.Data.Skill_Icon;
+        UltimateSlot = null;
+
+        AddressableManager.Instance.ReleaseAsset(iconAddr);
+        OnEquipSkillChanged?.Invoke(Skill_Type.Ultimate, 0);
+    }
+
     #endregion
-
-
-    /*
-     합성 실패 시 게이지가차오름.
-
-     합성 10000번에 한 번씩 게이지가완전히충전됨.
-     게이지를최대로채울 시 100% 강화 성공
-     게이지양에 따라 1~100% 확률이존재함
-    3개의 같은 등급, 같은 스킬 합성 시 상위 등급 스킬 획득 가능.
- 스킬 합성 시에 높은 등급으로갈수록합성 성공 확률.
-➢ 일반:100% 희귀: 50% 레어: 20% 전설: 10% ->신화: 1%
-➢ 만약 스킬이 강화된 스킬을 재료로 합성 시도하면 최대 10% 보정확률 추가.
-✓ + 50강화 = 10%
-
- 합성 실패 시 ‘신비 게이지(가칭)’ 상승하여게이지가한계치에도달하면100% 업그레이드.
- 등급에따라 게이지의천장이달라짐. (등급이낮을수록신비 게이지천장이낮음.)
-    .*/
-
-    // 등급, 스킬(%) 순으로 자동 편성
-    public void AutomaticSkillFormation_Passive()
-    {
-
-    }
-
-    public void AutomaticSkillFormation_Active()
-    {
-
-    }
-
-
-    //// 스킬 장착
-    //public void AttachSkill(BaseSkill skill)
-    //{
-    //    // 액티브는 플레이어에서 실행
-    //    // 패시브는 바로 실행
-    //    if (skill.Data.Skill_Type == Skill_Type.Passive)
-    //    {
-    //        skill.Execute();
-
-    //        if (!passiveSkillSlots.Contains(skill) && passiveSkillSlots.Count < PASSIVESLOT_COUNT)
-    //        {
-    //            passiveSkillSlots.Add(skill);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (!activeSkillSlots.Contains(skill))
-    //        {
-    //            activeSkillSlots.Add(skill);
-    //        }
-    //    }
-    //}
-
-    //public void DettachSkill(BaseSkill skill)
-    //{
-    //    if (skill.Data.Skill_Type == Skill_Type.Passive)
-    //    {
-    //        if (passiveSkillSlots.Contains(skill))
-    //        {
-    //            skill.Undo();
-    //            passiveSkillSlots.Remove(skill);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (activeSkillSlots.Contains(skill))
-    //        {
-    //            activeSkillSlots.Remove(skill);
-    //        }
-    //    }
-    //}
-
 }

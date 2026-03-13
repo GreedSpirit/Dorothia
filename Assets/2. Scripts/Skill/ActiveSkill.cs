@@ -2,9 +2,13 @@ using UnityEngine;
 
 public class ActiveSkill : BaseSkill
 {
-    public override void Execute()
+    public override void Execute(PlayerCtrl owner = null)
     {
-        throw new System.NotImplementedException();
+        if (!IsReady) return;
+
+        Debug.Log($"{Data.Skill_Name} 시전!");
+
+        StartCooldown();
     }
 
     public override void Undo()
