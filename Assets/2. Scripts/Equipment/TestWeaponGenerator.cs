@@ -11,6 +11,8 @@ public class TestWeaponGenerator : MonoBehaviour
     [SerializeField] Sprite weaponSprite;                                     // 획득 무기에 적용할 스프라이트.
     [SerializeField] InventoryPanel inventoryPanel;                           // 갱신해야 할 인벤토리.
 
+    private Dictionary<Equip_Type, List<EquipData>> _equipList;
+
     private void Awake()
     {
         if(Instance != null && Instance != this)
@@ -24,6 +26,23 @@ public class TestWeaponGenerator : MonoBehaviour
         //{
         //    Test2(10, 3);
         //}); 테스트용!
+    }
+
+    private void Start()
+    {
+        _equipList = new Dictionary<Equip_Type, List<EquipData>>();
+        Dictionary<int, EquipData> data = DataManager.Instance.GetDict<EquipData>();
+
+        foreach(var table in data.Values)
+        {
+            if (!_equipList.ContainsKey(table.Equip_Type))
+            {
+                _equipList[table.Equip_Type] = new List<EquipData>();
+            }
+
+            _equipList[table.Equip_Type].Add(table);
+        }
+        
     }
 
     /// <summary>
@@ -49,34 +68,33 @@ public class TestWeaponGenerator : MonoBehaviour
     public EquipData GetEquipmentData(int rng)
     {
         EquipData _equipData = new EquipData();
-        int variation = Random.Range(0, 2);
 
         switch (rng)
         {
             //1을 더했을 때 각각의 장착 부위가 되도록 생성합니다. 8번은 열거형 값에 존재하지 않으므로 7번을 중복 사용했습니다.
             case 0:
-                _equipData = DataManager.Instance.GetData<EquipData>(50001 + variation);
+                _equipData = _equipList[Equip_Type.Weapon][Random.Range(0, _equipList.Count)];
                 break;
             case 1:
-                _equipData = DataManager.Instance.GetData<EquipData>(51000 + variation);
+                _equipData = _equipList[Equip_Type.Clothes][Random.Range(0, _equipList.Count)];
                 break;
             case 2:
-                _equipData = DataManager.Instance.GetData<EquipData>(52000 + variation);
+                _equipData = _equipList[Equip_Type.Pants][Random.Range(0, _equipList.Count)];
                 break;
             case 3:
-                _equipData = DataManager.Instance.GetData<EquipData>(53000 + variation);
+                _equipData = _equipList[Equip_Type.Gloves][Random.Range(0, _equipList.Count)];
                 break;
             case 6:
-                _equipData = DataManager.Instance.GetData<EquipData>(54000 + variation);
+                _equipData = _equipList[Equip_Type.Shoes][Random.Range(0, _equipList.Count)];
                 break;
             case 7:
-                _equipData = DataManager.Instance.GetData<EquipData>(55000 + variation);
+                _equipData = _equipList[Equip_Type.Necklace][Random.Range(0, _equipList.Count)];
                 break;
             case 8:
-                _equipData = DataManager.Instance.GetData<EquipData>(56000 + variation);
+                _equipData = _equipList[Equip_Type.Ring][Random.Range(0, _equipList.Count)];
                 break;
             case 9:
-                _equipData = DataManager.Instance.GetData<EquipData>(56002 + variation);
+                _equipData = _equipList[Equip_Type.Ring][Random.Range(0, _equipList.Count)];
                 break;
         }
         return _equipData;
