@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -135,10 +135,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
     void Update()
     {
-        if (Keyboard.current.oKey.wasPressedThisFrame)
-        {
-            ExecuteNextSkill();
-        }
+        //if (Keyboard.current.oKey.wasPressedThisFrame)
+        //{
+        //ExecuteNextSkill();
+        //}
 
         //죽은상태면 리턴
         if (_isDead == true) return;
@@ -402,60 +402,60 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
 
 
-    public void ExecuteNextSkill()
-    {
-        // 스킬 매니저에서 장착된 액티브 스킬 리스트를 가져옴
-        var skills = SkillManager.Instance.testSkill;
-        //var skills = SkillManager.Instance.activeSkillSlots;
+    //public void ExecuteNextSkill()
+    //{
+    //    // 스킬 매니저에서 장착된 액티브 스킬 리스트를 가져옴
+    //    var skills = SkillManager.Instance.testSkill;
+    //    //var skills = SkillManager.Instance.activeSkillSlots;
 
-        //if (skills == null || skills.Count == 0) return;
+    //    //if (skills == null || skills.Count == 0) return;
 
-        // 인덱스 범위 체크 (장착 해제 등으로 리스트가 줄었을 경우 대비)
-        //if (_currentSkillIndex >= skills.Count) _currentSkillIndex = 0;
+    //    // 인덱스 범위 체크 (장착 해제 등으로 리스트가 줄었을 경우 대비)
+    //    //if (_currentSkillIndex >= skills.Count) _currentSkillIndex = 0;
 
-        // 현재 순서의 스킬 데이터 가져오기
-        //BaseSkill skillToUse = skills[_currentSkillIndex];
-        SkillSOData skillToUse = skills;
+    //    // 현재 순서의 스킬 데이터 가져오기
+    //    //BaseSkill skillToUse = skills[_currentSkillIndex];
+    //    SkillSOData skillToUse = skills;
 
-        if (skillToUse != null)
-        {
-            // 1. 애니메이터에 스킬 트리거 전달 
-            // (BaseSkill 데이터에 정의된 애니메이션 파라미터 이름이 있다면 그것을 사용)
-            _anima.SetTrigger("Skill");
-            _anima.SetInteger("Skill_Id", skillToUse.Job_Skill_Id);
+    //    if (skillToUse != null)
+    //    {
+    //        // 1. 애니메이터에 스킬 트리거 전달 
+    //        // (BaseSkill 데이터에 정의된 애니메이션 파라미터 이름이 있다면 그것을 사용)
+    //        _anima.SetTrigger("Skill");
+    //        _anima.SetInteger("Skill_Id", skillToUse.Job_Skill_Id);
 
 
-            // 만약 스킬마다 애니메이션이 다르다면 skillToUse.AnimationName 등으로 구분
-            Debug.Log($"스킬 실행: {skillToUse.name} (Index: {_currentSkillIndex})");
+    //        // 만약 스킬마다 애니메이션이 다르다면 skillToUse.AnimationName 등으로 구분
+    //        Debug.Log($"스킬 실행: {skillToUse.name} (Index: {_currentSkillIndex})");
 
-            // 2. 다음 스킬을 위해 인덱스 증가 (순환 구조)
-            //_currentSkillIndex = (_currentSkillIndex + 1) % skills.Count;
-            _currentSkillIndex = Math.Min(_currentSkillIndex++, 4);
-        }
-    }
+    //        // 2. 다음 스킬을 위해 인덱스 증가 (순환 구조)
+    //        //_currentSkillIndex = (_currentSkillIndex + 1) % skills.Count;
+    //        _currentSkillIndex = Math.Min(_currentSkillIndex++, 4);
+    //    }
+    //}
 
-    // 스킬 애니메이션의 특정 프레임에서 호출될 이벤트 함수
-    public void OnSkillEffectTrigger()
-    {
-        SkillSOData skill = SkillManager.Instance.testSkill;
-        EffectManager.Instance.PlayEffect(skill.Skill_Effect, transform.position, transform.rotation);
+    //// 스킬 애니메이션의 특정 프레임에서 호출될 이벤트 함수
+    //public void OnSkillEffectTrigger()
+    //{
+    //    SkillSOData skill = SkillManager.Instance.testSkill;
+    //    EffectManager.Instance.PlayEffect(skill.Skill_Effect, transform.position, transform.rotation);
 
-        //// 현재 실행 중인 스킬의 인덱스는 방금 증가했으므로, 
-        //// 실제 실행 중인 스킬은 (_currentSkillIndex - 1)입니다. (음수 처리 포함)
-        //int lastIdx = (_currentSkillIndex - 1 + SkillManager.Instance.activeSkillSlots.Count) % SkillManager.Instance.activeSkillSlots.Count;
-        //BaseSkill currentSkill = SkillManager.Instance.activeSkillSlots[lastIdx];
+    //    //// 현재 실행 중인 스킬의 인덱스는 방금 증가했으므로, 
+    //    //// 실제 실행 중인 스킬은 (_currentSkillIndex - 1)입니다. (음수 처리 포함)
+    //    //int lastIdx = (_currentSkillIndex - 1 + SkillManager.Instance.activeSkillSlots.Count) % SkillManager.Instance.activeSkillSlots.Count;
+    //    //BaseSkill currentSkill = SkillManager.Instance.activeSkillSlots[lastIdx];
 
-        //if (currentSkill != null)
-        //{
-        //    // 여기서 스킬 고유의 이펙트를 생성하거나 재생합니다.
-        //    // 스킬 데이터(BaseSkill)에 이펙트 프리팹 정보가 있다면 여기서 Instantiate 하거나
-        //    // 전용 파티클 시스템을 재생하는 로직을 넣으세요.
-        //    Debug.Log($"{currentSkill.name} 이펙트 발동!");
+    //    //if (currentSkill != null)
+    //    //{
+    //    //    // 여기서 스킬 고유의 이펙트를 생성하거나 재생합니다.
+    //    //    // 스킬 데이터(BaseSkill)에 이펙트 프리팹 정보가 있다면 여기서 Instantiate 하거나
+    //    //    // 전용 파티클 시스템을 재생하는 로직을 넣으세요.
+    //    //    Debug.Log($"{currentSkill.name} 이펙트 발동!");
 
-        //    // 예: 스킬 자체에 있는 실행 로직 호출 (데미지 계산 등)
-        //    // currentSkill.Use(this); 
-        //}
-    }
+    //    //    // 예: 스킬 자체에 있는 실행 로직 호출 (데미지 계산 등)
+    //    //    // currentSkill.Use(this); 
+    //    //}
+    //}
 
     //에디터 체크용 기즈모
     void OnDrawGizmos()
