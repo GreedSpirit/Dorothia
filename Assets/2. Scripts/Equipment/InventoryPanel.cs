@@ -39,6 +39,7 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] Button _confirmButton;                  // 합성 전용 확인버튼
     [SerializeField] Button _cancelButton;                   // 합성 전용 취소버튼
     [SerializeField] Button _equipButton;                    // 장비를 장착합니다.
+    [SerializeField] TextMeshProUGUI _equipButtonText;
     [SerializeField] Button _closeButton;
 
     public EquipSlot targetSlot;                             // 장비를 받기 위한 대상 슬롯입니다.
@@ -141,6 +142,7 @@ public class InventoryPanel : MonoBehaviour
         
         _infoDescription.text = EquipmentSlotManager.Instance.GetEquipStatusString(equip);
 
+        _equipButtonText.text = equip.isEquipped == true ? "장비 해제" : "장비 장착";
         //확인 버튼에 있던 기능을 지우고, 합성 슬롯에 집어넣기 기능을 추가합니다.
         //현재는 장착 기능을 구현하지 않았으므로 예외 처리 없이 바로 넣습니다.
         _confirmButton.onClick.RemoveAllListeners();
@@ -337,6 +339,16 @@ public class InventoryPanel : MonoBehaviour
             {
                 return;
             }
+            //해당 슬롯에 무언가 장착되어있다면, 장착한 슬롯의 장비와 장착을 시도하는 "장착 중인" 장비의 GUID를 비교하고, 다를 경우 반환합니다.
+            else if (targetSlot.equipped != null && equip.isEquipped == true & targetSlot.equipped == equip)
+            {
+                targetSlot.equipped.UnEquip();
+                targetSlot.ClearSlot();
+                EquipmentSlotManager.Instance.ApplyEquipmentSet();
+                onInventoryChanged?.Invoke();
+                _equipButtonText.text = "장비 장착";
+                return;
+            }
 
             //합성 슬롯에 이미 장착 중인 장비를 넣으려고 할 경우, 경고를 출력하고 반환합니다.
             if (targetSlot.slotType == SlotType.FuseSlot && equip.isEquipped == true)
@@ -374,6 +386,7 @@ public class InventoryPanel : MonoBehaviour
                 equip.SetEquipped(targetSlot.slotIndex);
                 EquipmentSlotManager.Instance.ApplyEquipmentSet();
                 onInventoryChanged?.Invoke();
+                _equipButtonText.text = "장비 장착";
             }
             //합성 슬롯이라면 합성 재료로 사용중임을 표시합니다.
             else if(targetSlot.slotType == SlotType.FuseSlot)
