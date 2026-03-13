@@ -60,6 +60,8 @@ public class MonsterSpawnManager : MonoBehaviour
     private SpawnMetricsCollector _metrics;
     private DynamicSpawnPolicy _policy;
 
+    public int CurrentMonsterCount => _currentMonsterCount;
+
     public void SetSpawnAreaProvider(SpawnAreaProvider provider)
     {
         _spawnAreaProvider = provider;

@@ -389,6 +389,10 @@ public class StageManager : MonoBehaviour
     /// <param name="isBoss"></param>
     private void HandleMonsterKilled(int monsterId, bool isBoss)
     {
+        //던전 진행 중에는 스테이지 킬카운트/보스 진행을 절대 처리하지 않음
+        if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
+            return;
+
         if (_state == StageState.Clear)
             return;
 
@@ -562,6 +566,10 @@ public class StageManager : MonoBehaviour
 
     private void HandlePlayerDead()
     {
+        //던전 진행 중 플레이어 사망은 DungeonManager가 처리하므로 StageManager는 무시
+        if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
+            return;
+
         if (_bossAlive)
         {
             Debug.Log("플레이어 사망 -> 보스전 실패");
