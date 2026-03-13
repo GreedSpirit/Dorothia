@@ -1,18 +1,19 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UI;
 
 public class SkillInfoPopup : BaseUI
 {
     private SkillKey key;
+    private int _targetIdx = -1;
 
     [SerializeField] private TextMeshProUGUI title;
 
     [Header("아이콘 관련")]
-    [SerializeField] private Image icon;
+    [SerializeField] private SkillItem icon;
     [SerializeField] private TextMeshProUGUI iconSkillLevel;
-    [SerializeField] private TextMeshProUGUI skillCount;
 
     [Header("스킬 기본 정보")]
     [SerializeField] private TextMeshProUGUI skillName;
@@ -59,26 +60,21 @@ public class SkillInfoPopup : BaseUI
         AddressableManager.Instance.ReleaseAsset(data.Skill_Icon);
     }
 
-    public void Setup(SkillKey key)
+    public void Setup(SkillKey key, int targetIdx = -1)
     {
         this.key = key;
+        _targetIdx = targetIdx;
+
         var sm = SkillManager.Instance;
         SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
 
         title.text = $"{data.Skill_Name} 정보";
 
-        AddressableManager.Instance.LoadAsset<Sprite>(data.Skill_Icon, (sprite) =>
-        {
-            icon.sprite = sprite;
-        });
+        icon.SetSlotData(SkillItem.SlotType.InfoDetail, key);
 
         // 주문서 여부에 따른 레벨 및 개수 표시 수정
         //iconSkillLevel.gameObject.SetActive(!key.isScroll);
         levelText.gameObject.SetActive(!key.isScroll);
-
-        // 현재 아이템 개수 가져오기 (리팩토링된 GetItemCount 사용)
-        int currentCount = sm.GetItemCount(key);
-        skillCount.text = $"{currentCount}/3";
 
         if (!key.isScroll)
         {
@@ -112,11 +108,8 @@ public class SkillInfoPopup : BaseUI
         }
 
         // 버튼 상태 제어
-        // 주문서면 '합성' 버튼 활성, 스킬이면 '장착' 버튼 활성 로프
-        btnText.text = key.isScroll ? "합성" : "장착";
-
-        // 장착 중이면 장착 해제로
-        RefreshEquipStatus();
+        btnText.text = "합성";
+        if (!key.isScroll) RefreshEquipStatus();
 
         // 골드 관련 데이터 연결 (임시)
         needsGold.text = "1,000";
@@ -145,26 +138,38 @@ public class SkillInfoPopup : BaseUI
         {
             if (isEquip)
             {
-                SkillManager.Instance.UnequipSkill(key);
+                int idx = SkillManager.Instance.GetEquippedIndex(key);
+
+                Skill_Type type = SkillManager.Instance.GetSkill(key).Data.Skill_Type;
+                if (type == Skill_Type.Active)
+                {
+
+                    SkillManager.Instance.UnequipActive(idx);
+                }
+                else if (type == Skill_Type.Ultimate)
+                {
+
+                    SkillManager.Instance.UnequipUltimate();
+                }
+                else
+                {
+                    SkillManager.Instance.UnequipPassive(idx);
+                }
             }
             else
             {
-                SkillManager.Instance.EquipSkill(key);
+                SkillManager.Instance.EquipSkill(key, _targetIdx);
             }
             UIManager.Instance.CloseTopPanel();
         }
 
         // 데이터 변했으니 UI 갱신
-        Setup(key);
+        Setup(key, _targetIdx);
     }
     private void RefreshEquipStatus()
     {
-        isEquip = SkillManager.Instance.EquipedSkill(key);
-        btnText.text = isEquip ? "장착 해제" : "장착";
-
-        // 개수 텍스트 등도 변했을 수 있으니 갱신
-        int currentCount = SkillManager.Instance.GetItemCount(key);
-        skillCount.text = $"{currentCount}/3";
+        isEquip = SkillManager.Instance.IsEquipped(key);
+        btnText.text = isEquip ? "장착 중" : "장착";
     }
 
 }

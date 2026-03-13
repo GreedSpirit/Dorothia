@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class MergeNotificationPopup : BaseUI
 {
     [Header("아이콘 관련")]
-    [SerializeField] private Image icon;
+    [SerializeField] private SkillItem icon;
     [SerializeField] private TextMeshProUGUI skillName;
     [SerializeField] private TextMeshProUGUI scrollCount;
 
@@ -23,7 +23,6 @@ public class MergeNotificationPopup : BaseUI
     {
         // 이벤트 리스너 제거 (메모리 누수 방지)
         mergeSlider.onValueChanged.RemoveListener(UpdateMergeCountText);
-        AddressableManager.Instance.ReleaseAsset(data.Skill_Icon);
     }
 
     protected override void OnOpen()
@@ -35,7 +34,7 @@ public class MergeNotificationPopup : BaseUI
         }
 
         data = DataManager.Instance.GetData<SkillData>(Key.sid);
-        AddressableManager.Instance.LoadAsset<Sprite>(data.Skill_Icon, s => icon.sprite = s);
+        icon.SetSlotData(SkillItem.SlotType.Scroll, Key,-1, SkillItem.DisplayMode.None);
         skillName.text = data.Skill_Name;
 
         int total = SkillManager.Instance.GetItemCount(Key);

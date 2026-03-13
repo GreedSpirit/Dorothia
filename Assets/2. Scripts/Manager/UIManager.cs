@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 
 public class UIManager : MonoBehaviour
 {
@@ -18,7 +20,17 @@ public class UIManager : MonoBehaviour
         instance = this;
     }
 
+
     private Stack<BaseUI> uiStack = new Stack<BaseUI>();
+
+    private void Update()
+    {
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            CloseTopPanel();
+        }
+    }
+
 
     public void OpenPanel(BaseUI baseUI)
     {

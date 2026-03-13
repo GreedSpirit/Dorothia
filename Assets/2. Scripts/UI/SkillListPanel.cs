@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,8 @@ public class SkillListPanel : BaseUI
 
     private Skill_Type openType = Skill_Type.Active;
 
+    private int _slotIdx = -1; // 장착을 요청한 슬롯의 번호
+
     private void Start()
     {
         activeBtn.onClick.AddListener(() => UpdateSkillItem(Skill_Type.Active));
@@ -25,7 +28,11 @@ public class SkillListPanel : BaseUI
         ultimateBtn.onClick.AddListener(() => UpdateSkillItem(Skill_Type.Ultimate));
     }
 
-    public void SetOpenType(Skill_Type type) => openType = type;
+    public void SetOpenType(Skill_Type type, int slotIndex = -1)
+    {
+        openType = type;
+        _slotIdx = slotIndex;
+    }
 
     protected override void OnOpen()
     {
@@ -54,9 +61,8 @@ public class SkillListPanel : BaseUI
             itemUI.gameObject.SetActive(true);
 
             // 데이터 설정 (아이콘, 이름, 개수 등)
-            var skillData = filteredSkills[i].Key;
-            var skillCount = filteredSkills[i].Value;
-            itemUI.Setup(skillData, SkillItem.DisplayMode.Info, OnSkillSelected);
+            var key = filteredSkills[i].Key;
+            itemUI.SetSlotData(SkillItem.SlotType.Skill, key, _slotIdx, SkillItem.DisplayMode.Info);
         }
     }
 
@@ -72,10 +78,10 @@ public class SkillListPanel : BaseUI
         return _pool[index];
     }
 
-    private void OnSkillSelected(SkillKey key, SkillItem item)
+    public void OnSelectSkill(SkillKey selectedKey)
     {
-        // 스킬 선택 시 처리할 로직 (앞서 구현한 선택 상태 관리 로직과 연결)
-        Debug.Log($"선택된 스킬: {key.sid}");
+
+
     }
 
     protected override void OnClose() { }
