@@ -144,6 +144,19 @@ public class SkillManager : MonoBehaviour
         return new SkillKey(seed[id].Key, seed[id].Value.Skill_Type, Rarity.Normal, true);
     }
 
+    public BaseSkill GetReadySkill()
+    {
+        // 장착된 액티브 스킬 루프 돌면서 쿨타임이 0이고 마나가 충분한 스킬 반환
+        foreach (var slot in ActiveSlots)
+        {
+            if (slot != null && slot.IsReady) // IsReady는 쿨타임/코스트 체크 프로퍼티
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
+
     #region Inventory Core Logic
 
     public void AddItem(SkillKey key, int count = 1)
