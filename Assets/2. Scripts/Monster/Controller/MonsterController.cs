@@ -33,6 +33,10 @@ public class MonsterController : MonoBehaviour, IMonster
     [Header("Death Animation")]
     [SerializeField] private AnimationClip[] _deathClips;   // 죽는 애니클립
 
+    [Header("Static Monster")]
+    [SerializeField] private GameObject _aliveModel;
+    [SerializeField] private GameObject _brokenModel;
+
     private IMonsterStats _stats;                   // 인터페이스 기반 스탯
 
     private MonsterSpawnManager _owner;             // 스폰매니저
@@ -184,6 +188,39 @@ public class MonsterController : MonoBehaviour, IMonster
 
         CancelInvoke();
         ChangeState(MonsterState.Spawn); // 상태 시작
+
+        if (_stats.Archetype == Monster_Kind.Passive)
+        {
+            SetupStaticMonster(); // 특이 몬스터
+        }
+    }
+
+    /// <summary>
+    /// 특이 몬스터 예외처리
+    /// </summary>
+    private void SetupStaticMonster()
+    {
+        if (_agent != null)
+        {
+            _agent.speed = 0f;
+            _agent.isStopped = true;
+            _agent.updateRotation = false;
+            _agent.updatePosition = false;
+
+            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+        }
+
+        if (_attack != null)
+            _attack.enabled = false;
+
+        if (_animator != null)
+            _animator.enabled = false;
+
+        if (_aliveModel != null)
+            _aliveModel.SetActive(true);
+
+        if (_brokenModel != null)
+            _brokenModel.SetActive(false);
     }
 
     private void ApplyNavMeshSettings()
@@ -205,6 +242,14 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private void Update()
     {
+        if (_stats.Archetype == Monster_Kind.Passive) // 특이 몬스터
+        {
+            if (_hp <= 0 && _currentState != MonsterState.Dead)
+                ChangeState(MonsterState.Dead);
+
+            return;
+        }
+
         if (_currentState == MonsterState.Dead)
             return;
 
@@ -422,6 +467,25 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private void EnterDead()
     {
+        if (_stats.Archetype == Monster_Kind.Passive) // 특이 몬스터
+        {
+            if (_aliveModel != null)
+                _aliveModel.SetActive(false);
+
+            if (_brokenModel != null)
+                _brokenModel.SetActive(true);
+
+            if (_hitCollider != null)
+                _hitCollider.enabled = false;
+
+            float brokenTime = Mathf.Max(0.01f, Time.time - _spawnTime);
+            OnMonsterKilledLifeTime?.Invoke(brokenTime);
+            OnMonsterKilled?.Invoke(_monsterId, IsBoss);
+
+            Invoke(nameof(ForceDespawn), 1f);
+            return;
+        }
+
         _agent.isStopped = true;
         _agent.ResetPath();
 
@@ -472,6 +536,9 @@ public class MonsterController : MonoBehaviour, IMonster
     /// </summary>
     private void StartAttack()
     {
+        if (_attackClips == null || _attackClips.Length == 0)
+            return;
+
         if (_isAttacking)
             return;
 

@@ -7,6 +7,7 @@
 
 public enum Monster_Kind
 {
+    Passive = 0,
     Melee = 1,
     Ranged = 2,
 }
