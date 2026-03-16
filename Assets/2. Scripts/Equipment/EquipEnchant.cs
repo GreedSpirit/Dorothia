@@ -2,14 +2,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EquipEnchant : MonoBehaviour
+public class EquipEnchant : BaseUI
 {
     [Header("인벤토리 창 관련")]
     [SerializeField] InventoryPanel _inventoryPanel;
     [SerializeField] Button _enchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
-
-    [Header("강화 창 캔버스그룹(패널)")]
-    [SerializeField] CanvasGroup _enchantPanel;                       // 장비 강화와 관련된 패널 담당용 캔버스 그룹입니다. 해당 패널에 캔버스그룹을 추가해 넣어주십시오.
 
     [Header("강화 창 내의 강화 버튼")]
     [SerializeField] Button _proceedEnchantButton;                    // 실제 장비 강화를 진행하기 위한 버튼. 강화 창에서의 장비 강화 진행용 버튼을 연결해 주십시오.
@@ -20,6 +17,7 @@ public class EquipEnchant : MonoBehaviour
     [Header("강화 대상 장비 이미지 표현용")]
     [SerializeField] Image _beforeEnchantEquipment;                   // 장비 강화가 성공하기 전, 인벤토리 내의 해당 장비 이미지입니다.
     [SerializeField] Image _afterEnchantEquipment;                    // 장비 강화가 성공하고 난 후, 해당 장비를 보여주기 위한 이미지입니다.
+    [SerializeField] TextMeshProUGUI EquipNameTitle;                      // 장비의 이름을 출력할 텍스트입니다.
 
     [Header("강화 관련 툴팁 표현용 TMP")]
     [SerializeField] TextMeshProUGUI _beforeEnchantUpgradeValueText;  // 장비의 현재 강화 수치를 보여주기 위한 텍스트입니다.
@@ -43,7 +41,6 @@ public class EquipEnchant : MonoBehaviour
             if (_inventoryPanel.CheckEquipmentSelected() == true)
             {
                 GetEquipment(_inventoryPanel.GiveEquipmentData());
-                SetPanelActiveValue(true);
                 RefreshEnchantPanel(_equipment);
             }
         });
@@ -59,6 +56,11 @@ public class EquipEnchant : MonoBehaviour
         _inventoryPanel.onInventoryChanged += DisableInteractable;
         _inventoryPanel.onInventoryClosed += DisableInteractable;
         _inventoryPanel.onClickEquipment += EnableInteractable;
+    }
+
+    private void Start()
+    {
+        Close();
     }
 
     private void OnDisable()
@@ -95,25 +97,19 @@ public class EquipEnchant : MonoBehaviour
     }
 
     /// <summary>
-    /// 패널의 활성화 여부를 정합니다.
-    /// </summary>
-    /// <param name="value">활성화 여부</param>
-    public void SetPanelActiveValue(bool value)
-    {
-        //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
-        _enchantPanel.alpha = value == true ? 1 : 0;
-
-        //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
-        _enchantPanel.interactable = value;
-        _enchantPanel.blocksRaycasts = value;
-    }
-
-    /// <summary>
     /// 장비의 정보가 갱신됨에 따라, 장비 강화 패널의 정보들 또한 갱신시킵니다.
     /// </summary>
     /// <param name="equip">강화하고자 하는 장비</param>
     public void RefreshEnchantPanel(Equipment equip)
     {
+        if(equip.isEquipped == true)
+        {
+            EquipNameTitle.text = $"{equip.equip_name}[착용중] +{equip.equip_Upgrade}";
+        }
+        else
+        {
+            EquipNameTitle.text = $"{equip.equip_name} +{equip.equip_Upgrade}";
+        }
         //강화를 진행하기 전과 성공 후의 장비를 나타내기 위해, 우선 해당 이미지를 현재 장비와 동일하게 맞춥니다.
         //테스트를 위해 아이콘을 넣어 생성하도록 하였으니, 해당 조건을 기반으로 스프라이트 참조 조건을 지정하겠습니다.
         //(icon이 존재하지 않을 경우에는, equip_icon의 경로를 기반으로 스프라이트를 생성, 존재하는 경우에는 해당 icon을 그대로 사용)
@@ -229,5 +225,13 @@ public class EquipEnchant : MonoBehaviour
         RefreshEnchantPanel(equip);
     }
 
-    
+    protected override void OnOpen()
+    {
+        
+    }
+
+    protected override void OnClose()
+    {
+        
+    }
 }
