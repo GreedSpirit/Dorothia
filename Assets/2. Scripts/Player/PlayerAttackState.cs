@@ -9,11 +9,24 @@ public class PlayerAttackState : IPlayerState<PlayerCtrl>
         player.Anima.SetInteger("Combo", 1);
         player.Anima.SetBool("Attack", true);
 
+        // IsSkill이 false임을 명시적으로 보장
+        player.Anima.SetBool("IsSkill", false);
         LookAtTarget(player);
     }
 
     public void Execute(PlayerCtrl player)
     {
+        if (player.IsAutoMode)
+        {
+            BaseSkill readySkill = SkillManager.Instance.GetReadySkill();
+            if (readySkill != null)
+            {
+                player.ExecuteFullReset();       // 공격 상태 초기화
+                player.PerformSkill(readySkill); // 스킬 상태로 전환
+                return;
+            }
+        }
+
         // 조이스틱을 아주 강하게 밀었을 때만 공격 캔슬
         if (player.MoveInput.sqrMagnitude > 0.2f)
         {

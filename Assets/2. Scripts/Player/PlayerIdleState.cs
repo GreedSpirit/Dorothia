@@ -13,8 +13,7 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
             player.NavMesh.ResetPath();
         }
         player.Anima.SetBool("Run", false);
-        player.Anima.SetBool("Attack", false);
-        player.ComboIndex = 0;
+        player.ExecuteFullReset();
     }
 
     public void Execute(PlayerCtrl player)

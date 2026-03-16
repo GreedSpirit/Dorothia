@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
@@ -517,6 +517,8 @@ public class MonsterController : MonoBehaviour, IMonster
         if (_currentState == MonsterState.Dead)
             return;
 
+            //todo : 테스트 코드
+        DamageTextManager.Instance.ShowDamage(amount, transform.position, Random.value < 0.5 ? false : true);
         _hp -= amount;
 
         if (_hp <= 0)

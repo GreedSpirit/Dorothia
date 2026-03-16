@@ -36,7 +36,17 @@ public class HitBox : MonoBehaviour
         _hitMonsters.Add(monster);
 
         int damage = Mathf.RoundToInt(_player.PlayerStats.Attack); // 플레이어스탯 공격력
-
+        //bool isCritical = CalcCritical();
+        //bool testCri = Random.value < 0.5 ? false : true;
+        //DamageTextManager.Instance.ShowDamage(damage, monster.Transform.position, testCri);
         monster.TakeDamage(damage);
+    }
+
+    private bool CalcCritical()
+    {
+        float cri = (float)StatManager.Instance.stats[Status.CriticalChance].FinalValue;
+        float seed = Random.value;
+
+        return seed <= cri;
     }
 }
