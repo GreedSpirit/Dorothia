@@ -7,7 +7,8 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance;
 
     private Dictionary<Type, ITable> _tables = new Dictionary<Type, ITable>();
-
+    private Dictionary<int, int> _dungeonClearCounts = new Dictionary<int, int>();
+    private Dictionary<int, int> _dungeonMaxCounts = new Dictionary<int, int>();
     private void Awake()
     {
         if(Instance != null && Instance != this)
@@ -19,7 +20,54 @@ public class DataManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         LoadAllData();
+
+        //던전 매니저의 클리어 이벤트를 구독하여 누적 횟수 자동 증가
+        DungeonManager.OnDungeonCleared -= OnDungeonCleared;
+        DungeonManager.OnDungeonCleared += OnDungeonCleared;
+
+        DungeonManager.OnDungeonEntryCountChanged -= OnEntryCountChanged;
+        DungeonManager.OnDungeonEntryCountChanged += OnEntryCountChanged;
     }
+
+    // 클리어/소탕 완료 시 자동 갱신
+    private void OnEntryCountChanged(int dungeonId, int used, int max)
+    {
+        _dungeonClearCounts[dungeonId] = used;
+        _dungeonMaxCounts[dungeonId] = max;
+    }
+
+    private void OnDungeonCleared(int dungeonId)
+    {
+        AddClearCount(dungeonId);
+    }
+
+
+    // UI에서 패널 열릴 때 호출
+    public int GetUsedEntryCount(int dungeonId)
+    {
+        // 캐시에 없으면 PlayerPrefs에서 직접 읽기
+        if (_dungeonClearCounts.TryGetValue(dungeonId, out int used))
+            return used;
+
+        return DungeonEntryTracker.GetUsedCount(dungeonId);
+    }
+
+    // 소탕 해금 조건 확인용 (누적 클리어 횟수 반환)
+    public int GetClearCount(int dungeonId)
+    {
+        return _dungeonClearCounts.TryGetValue(dungeonId, out int count) ? count : 0;
+    }
+
+    // 클리어/소탕 성공 시 누적 카운트 증가
+    public void AddClearCount(int dungeonId)
+    {
+        if (!_dungeonClearCounts.ContainsKey(dungeonId))
+            _dungeonClearCounts[dungeonId] = 0;
+
+        _dungeonClearCounts[dungeonId]++;
+        Debug.Log($"[DataManager] {dungeonId} 누적 클리어: {_dungeonClearCounts[dungeonId]}");
+    }
+
 
     private void LoadAllData()
     {

@@ -6,12 +6,18 @@ using UnityEngine.UI;
 public class DungeonInfo : MonoBehaviour
 {
     [SerializeField] DungeonLevelSelect[] _levelButtons;
+    [SerializeField] DungeonSelect _dungeonSelect;
+    [SerializeField] private GameObject _cantClearCountPanel;
+    [SerializeField] private GameObject _cantClearPanel;
+    [SerializeField] private GameObject _clearPanel;
+
 
     [SerializeField] TextMeshProUGUI _dungeonName;
     [SerializeField] TextMeshProUGUI _dungeonPower;
     [SerializeField] TextMeshProUGUI _dungeonTime;
     [SerializeField] Image _dungeonImage;
     [SerializeField] TextMeshProUGUI _dungeonMessage;
+    [SerializeField] TextMeshProUGUI _clearCount;
 
     //이미지 들고있는 SO
     [SerializeField] DungeonUIData _dungeonUIData;
@@ -19,7 +25,10 @@ public class DungeonInfo : MonoBehaviour
     //단계버튼 리스트
     Dictionary<int, List<Dungeon_StepData>> _dungeonStep;
 
-    
+
+    private int _currentStepIndex = 0;
+    private int _currentDungeonId = 0;
+    int _maxCount = 3;
 
     private void Init()
     {
@@ -51,6 +60,8 @@ public class DungeonInfo : MonoBehaviour
 
         //패널 활성화하고
         gameObject.SetActive(true);
+        _currentDungeonId = dungeonId;
+        _currentStepIndex = startLevel;
 
         Init();
         Debug.LogError(dungeonId);
@@ -79,10 +90,16 @@ public class DungeonInfo : MonoBehaviour
 
         //초기 버튼들 알파값 셋팅
         DungeonLevelClick(dungeonId, startLevel);
+        //클리어카운트
+        int used = DataManager.Instance.GetUsedEntryCount(_currentDungeonId);
+        _clearCount.text = $"클리어 횟수 {used}/{_maxCount}";
     }
 
     public void DungeonLevelClick(int dungeonId, int level)
     {
+        _currentStepIndex = level;
+        _currentDungeonId = dungeonId;
+
         //던전이름 정보 가져오고
         var dungeonData = DataManager.Instance.GetData<DungeonData>(dungeonId);
 
@@ -99,9 +116,8 @@ public class DungeonInfo : MonoBehaviour
         //던전단계데이터에 키가있으면 steps에 값 넘기기
         if (!_dungeonStep.TryGetValue(dungeonId, out var steps)) return;
 
-            //1단계는 0이니깐 
-            int index = level;
-        if (index < 0 || index >= steps.Count) return;
+            
+        if (level < 0 || level >= steps.Count) return;
 
         Dungeon_StepData stepData = steps[level];
         
@@ -116,5 +132,75 @@ public class DungeonInfo : MonoBehaviour
 
         //TODO 메세지 테이블값으로 바꿔야함
         _dungeonMessage.text = level.ToString();      
+    }
+
+
+    //소탕 버튼 클릭 로직
+    public void OnDungeonClearBtcClick()
+    {
+        int count = DungeonManager.Instance._currentCount;
+        //일일 입장 횟수 체크
+        if (count < 1)
+        {
+            _cantClearCountPanel.SetActive(true);
+            return;
+        }
+
+        //소탕 해금 여부 체크 (누적 클리어 1회 이상)
+        if (count >= 1)
+        {
+            _clearPanel.SetActive(true);
+            _cantClearPanel.SetActive(false);
+        }
+        else
+        {
+            _clearPanel.SetActive(false);
+            _cantClearPanel.SetActive(true);
+        }
+    }
+
+    //실제 소탕 실행
+    public void DungeonClear()
+    {
+        if (DungeonEntryTracker.TryConsumeEntry(_currentDungeonId, _maxCount, out int used, out int remain))
+        {
+            // 소탕 기록도 누적 클리어에 반영 (자격 유지용)
+            DataManager.Instance.AddClearCount(_currentDungeonId);
+            int usedCount = DungeonEntryTracker.GetUsedCount(_currentDungeonId);
+            _clearCount.text = $"클리어 횟수 {usedCount}/{_maxCount}";
+            Debug.Log($"[소탕 성공] 오늘 {_currentDungeonId} 사용 횟수: {used}");
+        }
+        _clearPanel.SetActive(false);
+    }
+
+    // 입장 버튼 클릭
+    public void OnDungeonEnterBtnClick()
+    {
+        if (!DungeonEntryTracker.CanEnter(_currentDungeonId, _maxCount))
+        {
+            _cantClearCountPanel.SetActive(true);
+            return;
+        }
+
+        if (_dungeonStep.TryGetValue(_currentDungeonId, out var steps))
+        {
+            if (_currentStepIndex >= 0 && _currentStepIndex < steps.Count)
+            {
+                // 리스트에서 현재 선택된 인덱스의 실제 고유 ID를 가져옴
+                int StepId = steps[_currentStepIndex].Dungeon_Step_Id;
+
+                Debug.Log($"[Dungeon] 입장 시도: {_currentDungeonId} / 실제 단계ID: {StepId}");
+                DungeonManager.Instance.StartDungeon(_currentDungeonId, StepId);
+
+                Invoke(nameof(ClosePanel), 0.5f);
+                return;
+            }
+        }
+    }
+
+    private void ClosePanel()
+    {
+        gameObject.SetActive(false);
+        _dungeonSelect.Close();
     }
 }
