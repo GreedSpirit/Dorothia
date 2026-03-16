@@ -9,13 +9,14 @@ using UnityEngine;
 public class AddressableEditor : EditorWindow
 {
     private const string EffectFolder = "Assets/3. Prefabs/Effects";
+    private const string MotionFolder = "Assets/3. Prefabs/Motion";
     private const string IconFolder = "Assets/Image/Skills";
     private const string EquipFolder = "Assets/99. IgnoredAssets/EquipIcon/";
 
-    [MenuItem("Tools/Skill Resource Manager")]
+    [MenuItem("Tools/Resource Manager")]
     public static void ShowWindow()
     {
-        GetWindow<AddressableEditor>("Skill Resource Manager");
+        GetWindow<AddressableEditor>("Resource Manager");
     }
 
     private void OnGUI()
@@ -50,6 +51,8 @@ public class AddressableEditor : EditorWindow
         }
 
         int count = 0;
+        // 스킬 모션 폴더 스캔
+        count += ScanDirectory(settings, MotionFolder, "SkillMotion", "*.anim");
         // 스킬 이펙트 폴더 스캔
         count += ScanDirectory(settings, EffectFolder, "SkillEffect", "*.prefab");
         // 스킬 아이콘 폴더 스캔 (다중 확장자 지원)
