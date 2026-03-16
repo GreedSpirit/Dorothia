@@ -3,14 +3,16 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FusePanel : MonoBehaviour
+public class FusePanel : BaseUI
 {
+    [SerializeField] EquipmentInventory inventory;      // 실질적인 인벤토리입니다.
+
+    [Header("합성 슬롯")]
     [SerializeField] EquipSlot mainSlot;                // 합성으로 등급 상승을 노릴, 사라지지 않는 메인 장비를 놓을 공간입니다.
     [SerializeField] EquipSlot subSlot1;                // 합성으로 인해 소모될, 재료 장비를 놓을 공간입니다.
     [SerializeField] EquipSlot subSlot2;                // 합성으로 인해 소모될, 재료 장비를 놓을 공간입니다.
+
     [SerializeField] Button fuseButton;                 // 합성 준비가 되었을 때 합성을 진행하도록 해줄 버튼입니다.
-    [SerializeField] EquipmentInventory inventory;      // 실질적인 인벤토리입니다.
-    [SerializeField] CanvasGroup _fusePanelGroup;       // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
     [SerializeField] InventoryPanel _inventoryPanel;    // 인벤토리를 열고 닫기 위한 패널입니다.
     [SerializeField] Toggle _useWeightToggle;           // 가중치를 사용할지 결정하기 위한 토글입니다.
     [SerializeField] TextMeshProUGUI _toggleText;
@@ -37,6 +39,11 @@ public class FusePanel : MonoBehaviour
             subSlot2.OnClickSlot();
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
+    }
+
+    private void Start()
+    {
+        Close();
     }
 
     private void UseWeight(bool value)
@@ -217,26 +224,13 @@ public class FusePanel : MonoBehaviour
         return successRate;
     }
 
-    /// <summary>
-    /// 패널의 활성화 여부를 정합니다.
-    /// </summary>
-    /// <param name="value">활성화 여부</param>
-    public void SetPanelActiveValue(bool value)
+    protected override void OnOpen()
     {
-        if(value == false)
-        {
-            mainSlot.equipped?.CancelFuseMaterial();
-            mainSlot.ClearSlot();
-            subSlot1.equipped?.CancelFuseMaterial();
-            subSlot1.ClearSlot();
-            subSlot2.equipped?.CancelFuseMaterial();
-            subSlot2.ClearSlot();
-        }
-        //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
-        _fusePanelGroup.alpha = value == true ? 1 : 0;
+        
+    }
 
-        //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
-        _fusePanelGroup.interactable = value;
-        _fusePanelGroup.blocksRaycasts = value;
+    protected override void OnClose()
+    {
+        
     }
 }

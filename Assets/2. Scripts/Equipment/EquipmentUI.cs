@@ -6,11 +6,9 @@ public class EquipmentUI : BaseUI
 {
     [Header("버튼의 리스트")]
     [SerializeField] List<EquipSlot> _partSlots;        // 반지 슬롯을 제외한 나머지 버튼을 등록하기 위한 버튼의 리스트입니다.
-    [SerializeField] EquipSlot _firstRingSlot;
-    [SerializeField] EquipSlot _secondRingSlot;
+    public EquipSlot _firstRingSlot;
+    public EquipSlot _secondRingSlot;
     [SerializeField] InventoryPanel _inventoryPanel;   // 인벤토리를 담당하는 패널
-    [SerializeField] CanvasGroup _equipmentUIGroup;    // 자기 자신을 넣어주면 되는, 캔버스 그룹 제어용.
-    [SerializeField] Button _equipButton;              // 장비 관련 기능을 열기 위한 버튼
 
     [SerializeField] EquipmentSlotManager _equipmentSlotManager;
 
@@ -28,14 +26,6 @@ public class EquipmentUI : BaseUI
             Debug.LogWarning("EquipmentUI - 파트별 버튼이 모자랍니다!");
         if (_inventoryPanel == null)
             Debug.LogError("EquipmentUI - 장비를 담은 인벤토리 확인용 창이 등록되지 않았습니다!");
-
-        if(_equipButton != null)
-        {
-            _equipButton.onClick.AddListener(() =>
-            {
-                SetPanelActiveValue(true);
-            });
-        }
     }
 
     private void Start()
@@ -57,19 +47,21 @@ public class EquipmentUI : BaseUI
             _partSlots[i].gameObject.GetComponent<Button>().onClick.AddListener(() =>
             {
                 _inventoryPanel.SetTargetSlot(_partSlots[index]);
-                _inventoryPanel.Open(partMapping[index], 0);
+                _inventoryPanel.OpenInventory(partMapping[index], 0);
             });
         }
         _firstRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
         {
             _inventoryPanel.SetTargetSlot(_firstRingSlot);
-            _inventoryPanel.Open(Equip_Type.Ring, 0);
+            _inventoryPanel.OpenInventory(Equip_Type.Ring, 0);
         });
         _secondRingSlot.gameObject.GetComponent<Button>().onClick.AddListener(() => 
         {
             _inventoryPanel.SetTargetSlot(_secondRingSlot);
-            _inventoryPanel.Open(Equip_Type.Ring, 1);
+            _inventoryPanel.OpenInventory(Equip_Type.Ring, 1);
         });
+
+        Close();
     }
 
     /// <summary>
@@ -79,7 +71,7 @@ public class EquipmentUI : BaseUI
     public void OpenInventory(EquipSlot slot)
     {
         //그 슬롯의 장착 부위에 맞는 인벤토리를 엽니다.
-        _inventoryPanel.Open(slot.part, slot.slotIndex);
+        _inventoryPanel.OpenInventory(slot.part, slot.slotIndex);
     }
 
     public void SetSlot(EquipSlot slot)
@@ -117,20 +109,6 @@ public class EquipmentUI : BaseUI
     public void SecondRingSlotFunction()
     {
         _slotIndex = 1;
-    }
-
-    /// <summary>
-    /// 패널의 활성화 여부를 정합니다.
-    /// </summary>
-    /// <param name="value">활성화 여부</param>
-    public void SetPanelActiveValue(bool value)
-    {
-        //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
-        _equipmentUIGroup.alpha = value == true ? 1 : 0;
-
-        //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
-        _equipmentUIGroup.interactable = value;
-        _equipmentUIGroup.blocksRaycasts = value;
     }
 
     protected override void OnOpen()

@@ -4,28 +4,20 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //분해와 판매를 담당하는 클래스입니다.
-public class EquipmentExchangeFunction : MonoBehaviour
+public class EquipmentExchangeFunction : BaseUI
 {
     [Header("인벤토리 패널로부터 받아와야 하는 목록")]
     [SerializeField] InventoryPanel _inventoryPanel;
     [SerializeField] EquipmentInventory _equipmentInventory;
 
     [Header("장비 분해 / 판매 관련")]
-    [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
-    [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
     [SerializeField] Button _salvageAtOnceButton;            // 일괄 분해 시도를 위한 인벤토리 내 버튼입니다.
     [SerializeField] Button _sellAtOnceButton;               // 일괄 판매 시도를 위한 인벤토리 내 버튼입니다.
-
-    [Header("일반 판매/분해 전용 패널 관련")]
-    [SerializeField] CanvasGroup _noticePanel;               // 장비 분해를 시도할 때 나타나도록 할 안내용 창입니다.
-    [SerializeField] TextMeshProUGUI _noticeMessage;         // 안내용 창의 안내 메세지입니다.
-    [SerializeField] Button _AcceptButton;                   // 장비 분해/판매 결정의 경우를 위한 안내창 내 Y 버튼입니다.
-    [SerializeField] TextMeshProUGUI _buttonText;            // 분해/판매 선택에 따라 변경하기 위한 동의 버튼의 텍스트입니다.
-    [SerializeField] Button _RejectButton;                   // 장비 분해/판매 취소의 경우를 위한 안내창 내 N 버튼입니다.
 
     [Header("일괄 판매/분해 전용 패널 관련")]
     [SerializeField] CanvasGroup _multiSelectPanel;          // 일괄 판매나 분해를 눌렀을 시 조건을 분류하기 위한 패널입니다.
     [SerializeField] TextMeshProUGUI _multiModifyTitleText;  // 해당 패널의 제목입니다.
+    [SerializeField] TextMeshProUGUI _multiModifyDescriptionText;      // 일괄 "분해"인지 "판매"인지 구분해야 하는 텍스트입니다.
     [SerializeField] TextMeshProUGUI _multiModifyAcceptText; // 일괄 분해 및 일괄 판매의 진행 버튼 텍스트입니다.
     [SerializeField] Toggle _includeUpgradedButton;          // 강화 장비를 포함할지 여부를 결정지을 버튼입니다.
     [SerializeField] Toggle _normalButton;                    // 일반 등급 버튼입니다. 일반 등급의 장비를 일괄 선택합니다.
@@ -49,64 +41,14 @@ public class EquipmentExchangeFunction : MonoBehaviour
 
     private void Awake()
     {
-        _salvageButton.onClick.AddListener(() =>
-        {
-            if (_inventoryPanel.CheckEquipmentSelected() == true)
-            {
-                if(_inventoryPanel.CheckLocked() == true)
-                {
-                    return;
-                }
-                _isSalvage = true;
-                _noticeMessage.text = "정말 분해하시겠습니까?";
-                _buttonText.text = "분해";
-                _noticePanel.alpha = 1;
-                _noticePanel.interactable = true;
-                _noticePanel.blocksRaycasts = true;
-            }
-        });
-        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
-        _sellButton.onClick.AddListener(() =>
-        {
-            if (_inventoryPanel.CheckEquipmentSelected() == true)
-            {
-                if(_inventoryPanel.CheckLocked() == true)
-                {
-                    return;
-                }
-                _isSalvage = false;
-                _noticeMessage.text = "정말 판매하시겠습니까?";
-                _buttonText.text = "판매";
-                _noticePanel.alpha = 1;
-                _noticePanel.interactable = true;
-                _noticePanel.blocksRaycasts = true;
-            }
-        });
-        //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
-        _AcceptButton.onClick.AddListener(() =>
-        {
-            SalvageOrSellEquip(_inventoryPanel.GiveEquipmentData(), _inventoryPanel.GiveCurrentSlotData());
-            _noticePanel.alpha = 0;
-            _noticePanel.interactable = false;
-            _noticePanel.blocksRaycasts = false;
-        });
-        //안내패널 내 N버튼 기능 추가 - 안내패널 비활성화
-        _RejectButton.onClick.AddListener(() =>
-        {
-            _noticePanel.alpha = 0;
-            _noticePanel.interactable = false;
-            _noticePanel.blocksRaycasts = false;
-        });
         _salvageAtOnceButton.onClick.AddListener(() =>
         {
             _isSalvage = true;
-            SetPanelActiveValue(true);
             MultiPanelFunction();
         });
         _sellAtOnceButton.onClick.AddListener(() =>
         {
             _isSalvage = false;
-            SetPanelActiveValue(true);
             MultiPanelFunction();
         });
         _includeUpgradedButton.onValueChanged.AddListener(IncludeUpgrade);
@@ -115,45 +57,22 @@ public class EquipmentExchangeFunction : MonoBehaviour
         _rareButton.onValueChanged.AddListener(IncludeRare);
         _legendaryButton.onValueChanged.AddListener(IncludeLegendary);
         _mythticButton.onValueChanged.AddListener(IncludeMythtic);
-
-        _inventoryPanel.onInventoryChanged += DisableInteractable;
-        _inventoryPanel.onInventoryClosed += DisableInteractable;
-        _inventoryPanel.onInventoryClosed += OnCloseInventory;
-        _inventoryPanel.onClickEquipment += EnableInteractable;
-    }
-
-    private void OnDisable()
-    {
-        _inventoryPanel.onInventoryChanged -= DisableInteractable;
-        _inventoryPanel.onInventoryClosed -= DisableInteractable;
-        _inventoryPanel.onInventoryClosed -= OnCloseInventory;
-        _inventoryPanel.onClickEquipment -= EnableInteractable;
-    }
-
-    public void OnCloseInventory()
-    {
-        if(_multiSelectPanel.alpha > 0)
+        //일괄 기능의 동작 버튼의 기능을 모두 없애고, 다중 분해/판매 기능과 패널의 비활성화 기능을 추가합니다.
+        _multiAcceptButton.onClick.RemoveAllListeners();
+        _multiAcceptButton.onClick.AddListener(() =>
         {
-            SetPanelActiveValue(false);
-        }
-        if(_noticePanel.alpha > 0)
+            MultiSalvageOrSell(_inventoryPanel.currentPart);
+            //작업 완료 후 해당 창을 닫거나 하는 것의 이슈는 작성되지 않아, 임시로 완료 후 닫도록 설정합니다.
+            //추후, 완료 후에는 안내 창을 띄워야 한다 같은 지시 사항이 존재할 경우 변경될 수 있습니다.
+            UIManager.Instance.CloseTopPanel();
+        });
+        //일괄 기능의 취소 버튼의 기능을 모두 없애고, 패널 비활성화 기능을 추가합니다.
+        _multiRejectButton.onClick.RemoveAllListeners();
+        _multiRejectButton.onClick.AddListener(() =>
         {
-            _noticePanel.alpha = 0;
-            _noticePanel.interactable = false;
-            _noticePanel.blocksRaycasts = false;
-        }
-    }
-
-    public void EnableInteractable()
-    {
-        _sellButton.interactable = true;
-        _salvageButton.interactable = true;
-    }
-
-    public void DisableInteractable()
-    {
-        _sellButton.interactable = false;
-        _salvageButton.interactable = false;
+            UIManager.Instance.CloseTopPanel();
+        });
+        Close();
     }
 
     /// <summary>
@@ -245,34 +164,15 @@ public class EquipmentExchangeFunction : MonoBehaviour
         if(_isSalvage == true)
         {
             _multiModifyTitleText.text = "일괄 분해 필터 설정";
-            _multiModifyAcceptText.text = "일괄 분해";
-            //일괄 기능의 동작 버튼의 기능을 모두 없애고, 다중 분해/판매 기능과 패널의 비활성화 기능을 추가합니다.
-            _multiAcceptButton.onClick.RemoveAllListeners();
-            _multiAcceptButton.onClick.AddListener(() =>
-            {
-                MultiSalvageOrSell(_inventoryPanel.currentPart);
-                SetPanelActiveValue(false);
-            });
-            //일괄 기능의 취소 버튼의 기능을 모두 없애고, 패널 비활성화 기능을 추가합니다.
-            _multiRejectButton.onClick.RemoveAllListeners();
-            _multiRejectButton.onClick.AddListener(() =>
-            {
-                SetPanelActiveValue(false);
-            });
+            _multiModifyAcceptText.text = "일괄 분해 실행";
+            _multiModifyDescriptionText.text = "강화된 장비도 분해 대상에 포함";
+            
         }
         else
         {
             _multiModifyTitleText.text = "일괄 판매 필터 설정";
-            _multiModifyAcceptText.text = "일괄 판매";
-            _multiAcceptButton.onClick.AddListener(() =>
-            {
-                MultiSalvageOrSell(_inventoryPanel.currentPart);
-            });
-            _multiRejectButton.onClick.RemoveAllListeners();
-            _multiRejectButton.onClick.AddListener(() =>
-            {
-                SetPanelActiveValue(false);
-            });
+            _multiModifyAcceptText.text = "일괄 판매 실행";
+            _multiModifyDescriptionText.text = "강화된 장비도 판매 대상에 포함";
         }
     }
 
@@ -297,17 +197,13 @@ public class EquipmentExchangeFunction : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 패널의 활성화 여부를 정합니다.
-    /// </summary>
-    /// <param name="value">활성화 여부</param>
-    public void SetPanelActiveValue(bool value)
+    protected override void OnOpen()
     {
-        //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
-        _multiSelectPanel.alpha = value == true ? 1 : 0;
+        
+    }
 
-        //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
-        _multiSelectPanel.interactable = value;
-        _multiSelectPanel.blocksRaycasts = value;
+    protected override void OnClose()
+    {
+        
     }
 }
