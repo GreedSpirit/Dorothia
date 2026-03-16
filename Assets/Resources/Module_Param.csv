@@ -1,0 +1,6 @@
+모듈의 파라미터,,,"모듈의 타입 (2: Melee, 3: MeleeAoe, 4: Projectile, 5: Teleport, 6: Dash, 7: Jump)",,,,,,,,
+"모듈 파라미터 id
+(220001부터 1씩 증가)",스킬 이펙트 파일명,스킬 이펙트 지속시간,모듈의 타입,타격 횟수,판정 범위,순간이동 후 간격,대쉬 거리,대쉬 시간(초),투사체 파일명,투사체 속도,스킬 효과음 위치
+Module_Param_Id,Skill_Effect_Name,Skill_Effect_Time,Module_Type,Hit_Count,Aoe_Radius,Behind_Offset,Dash_Distance,Dash_Duration,Projectile_Name,Projectile_Speed,Skill_Sfx_Patch
+int,string,float,enum,int,float,float,float,float,string,float,string
+220001,Sword Slash 7,,3,4,2.4,,,,,,
