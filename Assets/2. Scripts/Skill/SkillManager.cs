@@ -53,8 +53,6 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private List<Sprite> grades = new List<Sprite>();
     [SerializeField] private Sprite newSprite;
     [SerializeField] public Sprite pickSprite;
-
-
     public BaseSkill[] ActiveSlots { get; private set; } = new BaseSkill[ACTIVE_SLOT_MAX];
     public BaseSkill[] PassiveSlots { get; private set; } = new BaseSkill[PASSIVE_SLOT_MAX];
     public BaseSkill UltimateSlot { get; private set; }
@@ -94,6 +92,10 @@ public class SkillManager : MonoBehaviour
 
     // 이벤트: 데이터 변경 시 (키)
     public event Action<SkillKey> OnInventoryChanged;
+
+    // 사이클 위치를 추적하기 위한 인덱스 (0, 1, 2: 액티브 / 3: 궁극기)
+    private int _currentCycleIndex = 0;
+    private const int TOTAL_CYCLE_STEPS = 4; // 액티브 3개 + 궁극기 1개
 
     private void Awake()
     {
@@ -142,6 +144,49 @@ public class SkillManager : MonoBehaviour
         int id = UnityEngine.Random.Range(0, count);
 
         return new SkillKey(seed[id].Key, seed[id].Value.Skill_Type, Rarity.Normal, true);
+    }
+
+   
+
+    #region Skill Cycle
+    public BaseSkill GetReadySkill()
+    {
+        for (int i = 0; i < TOTAL_CYCLE_STEPS; i++)
+        {
+            // 현재 가리키는 순서의 스킬 확인
+            BaseSkill target = GetSkillByCycleIndex(_currentCycleIndex);
+
+            // 해당 단계의 스킬이 존재하고 준비되었다면
+            if (target != null && target.IsReady)
+            {
+                _currentCycleIndex = (_currentCycleIndex + 1) % TOTAL_CYCLE_STEPS;
+                return target;
+            }
+
+            _currentCycleIndex = (_currentCycleIndex + 1) % TOTAL_CYCLE_STEPS;
+        }
+
+        return null;
+    }
+
+    private BaseSkill GetSkillByCycleIndex(int index)
+    {
+        if (index >= 0 && index < ACTIVE_SLOT_MAX)
+        {
+            return ActiveSlots[index];
+        }
+        else if (index == 3) // 마지막 단계는 궁극기
+        {
+            return UltimateSlot;
+        }
+        return null;
+    }
+    #endregion
+
+    // 전투 종료나 맵 이동 시 사이클을 초기화하고 싶다면 호출
+    public void ResetSkillCycle()
+    {
+        _currentCycleIndex = 0;
     }
 
     #region Inventory Core Logic
@@ -366,6 +411,9 @@ public class SkillManager : MonoBehaviour
             if (ActiveSlots[index] != null) UnequipActive(index);
             ActiveSlots[index] = skill;
             AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
+
+            // 액티브 이펙트 로드
+            // 액티브 스킬 모션 로드
         }
     }
 
@@ -394,6 +442,9 @@ public class SkillManager : MonoBehaviour
         if (UltimateSlot != null) UnequipUltimate();
         UltimateSlot = skill;
         AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
+
+        // 궁극기 이펙트 로드
+        // 궁극기 스킬 모션 로드
     }
 
     public void UnequipPassive(int index)
@@ -415,6 +466,10 @@ public class SkillManager : MonoBehaviour
         ActiveSlots[index] = null;
 
         AddressableManager.Instance.ReleaseAsset(iconAddr);
+
+        // 액티브 이펙트 해제
+        // 액티브 스킬 모션 해제
+
         OnEquipSkillChanged?.Invoke(Skill_Type.Active, index);
     }
 
@@ -426,6 +481,10 @@ public class SkillManager : MonoBehaviour
         UltimateSlot = null;
 
         AddressableManager.Instance.ReleaseAsset(iconAddr);
+
+        // 궁극기 이펙트 해제
+        // 궁극기 스킬 모션 해제
+
         OnEquipSkillChanged?.Invoke(Skill_Type.Ultimate, 0);
     }
 

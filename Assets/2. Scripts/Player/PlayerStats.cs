@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
@@ -170,7 +170,7 @@ public class PlayerStats : MonoBehaviour
     {
         _currentHp -= amount;
 
-        Debug.Log($"Damaged: {amount}, HP: {_currentHp}");
+        //Debug.Log($"Damaged: {amount}, HP: {_currentHp}");
 
         OnHpChanged?.Invoke(_currentHp, _maxHp);
 

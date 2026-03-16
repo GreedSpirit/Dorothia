@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class PlayerIdleState : IPlayerState<PlayerCtrl>
 {
     IMonster _target;
     public void Enter(PlayerCtrl player)
     {
-        Debug.Log("아이들상태진입");
+        //Debug.Log("아이들상태진입");
         if (player.NavMesh != null &&
             player.NavMesh.isActiveAndEnabled &&
             player.NavMesh.isOnNavMesh)
@@ -13,8 +13,7 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
             player.NavMesh.ResetPath();
         }
         player.Anima.SetBool("Run", false);
-        player.Anima.SetBool("Attack", false);
-        player.ComboIndex = 0;
+        player.ExecuteFullReset();
     }
 
     public void Execute(PlayerCtrl player)
@@ -44,8 +43,9 @@ public class PlayerIdleState : IPlayerState<PlayerCtrl>
             player.transform.rotation = Quaternion.LookRotation(dir);
 
             //공격
-            player.Anima.SetBool("Attack", true);
-            player.Anima.SetInteger("Combo", player.ComboIndex);
+            player.ChangeState(player.AttackState);
+            //player.Anima.SetBool("Attack", true);
+            //player.Anima.SetInteger("Combo", player.ComboIndex);
         }
 
 
