@@ -27,7 +27,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [SerializeField] private ParticleSystem _attackEffect1, _attackEffect2, _attackEffect3;
     [SerializeField] private ParticleSystem _attackHitEffect, _attackHitEffect2, _attackHitEffect3;
 
-    // 프로퍼티
+    //  프로퍼티
     public Vector2 MoveInput => _moveInput;
     public PlayerStats PlayerStats => _playerStats;
     public Animator Anima => _anima;
@@ -40,11 +40,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public Transform Transform => transform;
     public bool IsAlive => !_isDead;
 
-    // 전투 관련 상태 변수 : 1부터 시작
     public int ComboIndex { get; set; } = 0;
     public bool IsAttack { get; set; } = false;
 
-    // 캐싱용 컴포넌트
+    // 캐싱
     private PlayerStats _playerStats;
     private OverDriveMode _odm;
     private Animator _anima;
@@ -52,7 +51,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     private NavMeshAgent _navMesh;
     private IMonster _currentTarget;
 
-    // 상태 클래스 인스턴스
+    // 상태 인스턴스
     public PlayerIdleState IdleState { get; private set; }
     public PlayerMoveState MoveState { get; private set; }
     public PlayerAttackState AttackState { get; private set; }
@@ -62,17 +61,19 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     private IPlayerState<PlayerCtrl> _currentState;
 
-    // 기타 내부 변수
+    // 내부 변수 
     private bool _isDead = false;
     private bool _isAutoMode = false;
     private bool _isDrag = false;
     private Vector2 _moveInput;
 
-    // 이펙트 복구용 데이터
     private Vector3 _originPos3, _originHitPos3;
     private Quaternion _originRot3, _originHitRot3;
 
     public event Action OnDead;
+
+    // ══════════════════════════════════════════════════════
+    #region Unity Lifecycle
 
     private void Awake()
     {
@@ -84,7 +85,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _odm = GetComponent<OverDriveMode>();
         _navMesh.updateRotation = false;
 
-        // 상태 초기화
         IdleState = new PlayerIdleState();
         MoveState = new PlayerMoveState();
         AttackState = new PlayerAttackState();
@@ -95,7 +95,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _currentState = IdleState;
         _currentState.Enter(this);
 
-        // 이펙트 데이터 백업
         _originPos3 = _attackEffect3.transform.localPosition;
         _originRot3 = _attackEffect3.transform.localRotation;
         _originHitPos3 = _attackHitEffect3.transform.localPosition;
@@ -109,37 +108,24 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         if (_isDead) return;
 
-        // 스킬 입력 예시 (S키)
         if (Keyboard.current.sKey.wasPressedThisFrame)
-        {
-            // 실제로는 퀵슬롯이나 스킬 매니저에서 가져옴
-            TryUseSkill(10001);
-        }
+            TryUseSkillById(10001);
 
         UpdateGlobalState();
         _currentState.Execute(this);
     }
 
-    public void TryUseSkill(int skillId)
-    {
-        // 이미 스킬 중이면 중복 사용 방지 (필요 시)
-        if (_currentState == SkillState) return;
+    #endregion
 
-        SkillData data = DataManager.Instance.GetData<SkillData>(skillId);
-        Skill_StatusData statusData = DataManager.Instance.GetData<Skill_StatusData>(data.Skill_Status_Id);
-
-        BaseSkill skill = BaseSkill.Create(data, statusData);
-        SkillState.SetSkill(skill);
-        ChangeState(SkillState);
-    }
+    // ══════════════════════════════════════════════════════
+    #region State Machine
 
     private void UpdateGlobalState()
     {
-        // [핵심] 스킬 상태일 때는 이동이나 Idle로의 전이를 원천 차단
         if (_currentState == SkillState) return;
 
         bool hasMoveInput = _moveInput.sqrMagnitude > 0.001f;
-        if (IsAttack) return; // 기본공격 중에도 대기
+        if (IsAttack) return;
 
         if (hasMoveInput) ChangeState(MoveState);
         else if (_isAutoMode) ChangeState(AutoState);
@@ -149,8 +135,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public void ChangeState(IPlayerState<PlayerCtrl> newState)
     {
         if (_currentState == newState || _isDead) return;
-
-        Debug.Log($"{newState.ToString()}");
 
         _currentState.Exit(this);
         _currentState = newState;
@@ -167,108 +151,132 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             ChangeState(IdleState);
     }
 
+    #endregion
 
-    #region Skill
-    public void PerformSkill(BaseSkill skill)
-    {
-        if (skill == null) return;
-        SkillState.SetSkill(skill);
+    // ══════════════════════════════════════════════════════
+    #region Skill - 진입점
 
-        ChangeState(SkillState);
-    }
-    public void RequestUseSkill(BaseSkill skill)
+    // ID로 스킬 생성 후 사용 (테스트 / 퀵슬롯 연동용)
+    public void TryUseSkillById(int skillId)
     {
-        // 현재 스킬을 쓸 수 있는 상태인지 체크
         if (_currentState == SkillState || _isDead) return;
 
-        // 스킬 준비 상태 체크 (쿨타임 등)
-        if (skill != null && skill.IsReady)
-        {
-            PerformSkill(skill);
-        }
-    }
-    public void OnSkillEffect()
-    {
-        if (SkillState.TargetSkill == null) return;
-        string addr = SkillState.TargetSkill.Data.Skill_Effect_Patch;
-        EffectManager.Instance.PlayEffect(addr, 2f, transform.position, transform.rotation);
+        SkillData data = DataManager.Instance.GetData<SkillData>(skillId);
+        BaseSkill skill = BaseSkill.Create(data);
+
+        TryUseSkill(skill);
     }
 
-    public void OnSkillHit(int hitCount)
+    // 이미 생성된 스킬 인스턴스로 사용 (SkillManager 슬롯 연동용)
+    public void TryUseSkill(BaseSkill skill)
     {
-        if (SkillState.TargetSkill == null) return;
+        if (_currentState == SkillState || _isDead) return;
+        if (skill == null || !skill.IsReady) return;
 
-        // 1. 스킬 데이터에서 범위(Radius) 가져오기 (없으면 기본값 3.0f)
-        //float radius = SkillState.TargetSkill.Data.Skill_Range;
-        float radius = 5;
-
-        // 2. 물리 오버랩으로 범위 내 콜라이더 검출 (몬스터 레이어만 체크 권장)
-        int monsterLayer = LayerMask.GetMask("Monster");
-        Collider[] targets = Physics.OverlapSphere(transform.position, radius, monsterLayer);
-
-        if (targets.Length > 0)
-        {
-            //hitCount = SkillState.TargetSkill.Data.hitCount;
-            hitCount = 4;
-            StartCoroutine(MultiHitRoutine(targets, hitCount));
-        }
+        SkillState.SetSkill(skill);
+        ChangeState(SkillState);
     }
 
-    private IEnumerator MultiHitRoutine(Collider[] targets, int hitCount)
+    // AutoState 등 내부에서 바로 전환 (IsReady 체크 생략)
+    public void PerformSkill(BaseSkill skill)
     {
-        var skill = SkillState.TargetSkill;
-        if (skill == null) yield break;
+        if (skill == null || _isDead) return;
 
-        // 총 데미지를 타수(hitCount)로 나눔
-        float totalDamage = CalculateSkillDamage(skill);
-        float damagePerHit = totalDamage / hitCount;
+        SkillState.SetSkill(skill);
+        ChangeState(SkillState);
+    }
 
-        // 크리티컬 여부 계산 (예시: 20% 확률)
-        //bool isCritical = UnityEngine.Random.value < 0.2f;
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Skill - 애니메이션 이벤트 수신
+
+    // 애니메이터 이벤트에서 직접 호출 ─ ModularSkill에 전달
+    private ModularSkill GetModularSkill()
+        => SkillState?.TargetSkill as ModularSkill;
+
+    public void OnSkillHit() => GetModularSkill()?.NotifyHit(this);
+    public void OnSkillDash() => GetModularSkill()?.NotifyDash(this);
+    public void OnSkillEffect() => GetModularSkill()?.NotifyEffect(this);
+    public void OnSkillJumpPeak() => GetModularSkill()?.NotifyJumpPeak(this);
+    public void OnSkillJumpLand() => GetModularSkill()?.NotifyJumpLand(this);
+
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Skill - 데미지 / 히트 루틴
+
+    // MeleeAttackModule, JumpAttackModule 에서 접근
+    internal float CalculateSkillDamage(BaseSkill skill)
+    {
+        if (skill?.Data == null) return 0f;
+        return (float)StatManager.Instance.stats[skill.Data.Affection_Skill].FinalValue
+               * skill.Data.Affection_Skill_Value;
+    }
+
+    // 단일 타겟 연타 (MeleeAttackModule 단일 모드)
+    internal IEnumerator SingleHitRoutine(IMonster target, int hitCount, float totalDamage)
+    {
+        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
         for (int i = 0; i < hitCount; i++)
         {
-            foreach (var target in targets)
-            {
-                // 이미 파괴되었거나 비활성화된 경우 제외
-                if (target == null || !target.gameObject.activeInHierarchy) continue;
+            if (target == null || !target.IsAlive) yield break;
 
-                IMonster monster = target.GetComponentInParent<IMonster>();
-                if (monster != null && monster.IsAlive)
-                {
-                    // 1. 실제 데미지 적용
-                    //monster.TakeDamage((int)damagePerHit);
-                    monster.TakeDamage((int)1);
+            target.TakeDamage((int)dmgPerHit);
+            // EffectManager.Instance.PlayEffect(...);
 
-                    // 2. 데미지 텍스트 출력 (앞서 만든 DamageTextManager 활용)
-                    // 타격 위치에 약간의 오프셋을 주어 텍스트가 겹치지 않게 함
-                    //DamageTextManager.Instance.ShowDamage((int)damagePerHit, target.transform.position, isCritical);
-
-                    // 3. 히트 이펙트 재생 (옵션)
-                    // EffectManager.Instance.PlayEffect(skill.Data.Skill_Hit_Effect, 1f, target.transform.position, Quaternion.identity);
-                }
-            }
-
-            // 연타 사이의 짧은 간격
             yield return new WaitForSeconds(0.08f);
         }
     }
 
-    private float CalculateSkillDamage(BaseSkill skill)
+    // 다수 타겟 연타 (MeleeAttackModule AOE 모드 / JumpAttackModule)
+    internal IEnumerator MultiHitRoutine(Collider[] targets, int hitCount, float totalDamage)
     {
-        // (스테이터스 최종 값 * 스킬 퍼센트) * (등급에따른스테이터스상승값) ∗ (강화증가폭∗ 강화횟수) <- 뭔지 물어봐야함
-        float damage = (float)StatManager.Instance.stats[skill.Status.Affection_Skill].FinalValue * skill.Status.Affection_Skill_Value;
+        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
-        // 계산된 최종 데미지
-        return damage;
+        for (int i = 0; i < hitCount; i++)
+        {
+            foreach (var col in targets)
+            {
+                if (col == null || !col.gameObject.activeInHierarchy) continue;
+
+                IMonster monster = col.GetComponentInParent<IMonster>();
+                if (monster != null && monster.IsAlive)
+                    monster.TakeDamage((int)1);
+                    //monster.TakeDamage((int)dmgPerHit);
+            }
+
+            yield return new WaitForSeconds(0.08f);
+        }
     }
+
     #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Skill - 렌더러 / 애니메이터 제어 (JumpAttackModule 전용)
+
+    // 캐릭터 메시 전체 표시 / 숨김
+    public void SetRenderersEnabled(bool isEnabled)
+    {
+        foreach (var r in GetComponentsInChildren<Renderer>())
+            r.enabled = isEnabled;
+    }
+
+    // 애니메이션 일시정지 / 재개 (D스킬 정점 대기)
+    public void PauseAnimation() => _anima.speed = 0f;
+    public void ResumeAnimation() => _anima.speed = 1f;
+
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Combo / Attack
 
     public void StartCombo()
     {
-        // 타겟이 있고 사거리 안에 있을 때만 다음 콤보 예약
         IMonster target = FindEnemy();
-        if (target != null && target.IsAlive && Vector3.Distance(transform.position, target.Transform.position) <= _attackRange)
+        if (target != null && target.IsAlive &&
+            Vector3.Distance(transform.position, target.Transform.position) <= _attackRange)
         {
             ComboIndex = (ComboIndex % _maxComboIndex) + 1;
             _anima.SetInteger("Combo", ComboIndex);
@@ -277,13 +285,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void ResetCombo()
     {
-        // 다음 공격으로 전이 중이거나 예약된 숫자가 현재보다 크면 초기화 방지
         if (_anima.IsInTransition(0) || _anima.GetInteger("Combo") > ComboIndex) return;
-
         ExecuteFullReset();
     }
 
-    // 상태 강제 초기화 (이동 캔슬이나 마지막 타격 후 호출)
     public void ExecuteFullReset()
     {
         ComboIndex = 0;
@@ -296,7 +301,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             ChangeState(IdleState);
     }
 
-    // --- 콜라이더 및 이펙트 관리 ---
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Collider / Effect
 
     public void EnableAttackCollider() => _hitBox.enabled = true;
     public void DisableAttackCollider() => _hitBox.enabled = false;
@@ -341,7 +349,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _attackHitEffect3.transform.localRotation = _originHitRot3;
     }
 
-    // --- 유틸리티 및 인터페이스 구현 ---
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Utility
 
     public IMonster FindEnemy()
     {
@@ -367,6 +378,20 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void ChangeAutoMode() => _isAutoMode = !_isAutoMode;
 
+    public void SetupNavMesh(bool isAuto)
+    {
+        if (isAuto)
+        {
+            _navMesh.acceleration = 60f;
+            _navMesh.stoppingDistance = 0f;
+        }
+        else
+        {
+            _navMesh.acceleration = 12f;
+            _navMesh.stoppingDistance = _attackRange - 0.2f;
+        }
+    }
+
     private void ChangeDead()
     {
         if (_isDead) return;
@@ -385,22 +410,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         ExecuteFullReset();
         if (_navMesh.isOnNavMesh) _navMesh.ResetPath();
     }
-    public void SetupNavMesh(bool isManual)
-    {
-        if (isManual)
-        {
-            // 즉각적인 반응을 위해 높은 가속도
-            _navMesh.acceleration = 60f;
-            _navMesh.stoppingDistance = 0f;
-        }
-        else
-        {
-            // 부드러운 이동
-            _navMesh.acceleration = 12f;
-            // 사거리보다 약간 앞에서 멈춤
-            _navMesh.stoppingDistance = _attackRange - 0.2f;
-        }
-    }
+
+    #endregion
+
+    // ══════════════════════════════════════════════════════
+    #region Input
 
     public void OnClick(InputAction.CallbackContext ctx)
     {
@@ -412,8 +426,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 _isDrag = true;
                 Vector2 localPoint;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, touchStart,
-                    canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera, out localPoint);
-
+                    canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+                    out localPoint);
                 joystickBase.anchoredPosition = localPoint;
                 joystickBase.gameObject.SetActive(true);
                 joystickHandle.anchoredPosition = Vector2.zero;
@@ -435,7 +449,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             Vector2 currentPos = Touchscreen.current.primaryTouch.position.ReadValue();
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, currentPos,
-                canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera, out localPoint);
+                canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+                out localPoint);
 
             Vector2 delta = localPoint - joystickBase.anchoredPosition;
             float distance = Mathf.Min(delta.magnitude, _dragDistance);
@@ -444,13 +459,15 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         }
     }
 
-    private bool IsPointerOverUI(Vector2 Pos)
+    private bool IsPointerOverUI(Vector2 pos)
     {
-        PointerEventData eventData = new PointerEventData(EventSystem.current) { position = Pos };
-        List<RaycastResult> results = new List<RaycastResult>();
+        var eventData = new PointerEventData(EventSystem.current) { position = pos };
+        var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 0;
     }
+
+    #endregion
 
     private void OnDrawGizmos()
     {

@@ -291,9 +291,9 @@ public class SkillManager : MonoBehaviour
         if (!_unlockedSkills.ContainsKey(skillKey))
         {
             var sData = DataManager.Instance.GetData<SkillData>(skillKey.sid);
-            var stData = DataManager.Instance.GetData<Skill_StatusData>(sData.Skill_Status_Id);
+            //var stData = DataManager.Instance.GetData<Skill_StatusData>(sData.Skill_Status_Id);
 
-            BaseSkill newSkill = BaseSkill.Create(sData, stData);
+            BaseSkill newSkill = BaseSkill.Create(sData);
             newSkill.Rarity = skillKey.rarity; // 스킬 객체에도 등급 설정
             _unlockedSkills[skillKey] = newSkill;
         }
@@ -430,7 +430,11 @@ public class SkillManager : MonoBehaviour
             PassiveSlots[index] = skill;
 
             // 3. 패시브 효과 적용 (PlayerCtrl 등에 스탯 반영 알림)
-            StatManager.Instance.RefreshStats();
+            if (skill is PassiveSkill passive)
+                passive.Apply();
+
+            // 3. 패시브 효과 적용 (PlayerCtrl 등에 스탯 반영 알림)
+            //StatManager.Instance.RefreshStats();
 
             AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
             // 패시브는 인게임 퀵슬롯(ingameSlots)에 들어가지 않으므로 UpdateInGameSlots 생략 가능
