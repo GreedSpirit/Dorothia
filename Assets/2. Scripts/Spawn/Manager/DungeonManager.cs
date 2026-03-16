@@ -96,6 +96,8 @@ public class DungeonManager : MonoBehaviour
     private int _maxWave;           // 최대 wave
     private int _currentWave;       // 현재 wave
 
+    public int _currentCount;
+
     public bool IsDungeonRunning => _isDungeonRunning;
     public DungeonState CurrentState => _state;
     public int CurrentWave => _currentWave;
@@ -184,6 +186,12 @@ public class DungeonManager : MonoBehaviour
     #region 던전 입장
     public void StartDungeon(int dungeonId, int stepId)
     {
+        DungeonEntryTracker.ForceSetUsedCount(150001, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150002, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150003, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150004, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150005, 0);
+
         if (_isDungeonRunning)
         {
             Debug.LogWarning("[Dungeon] 이미 던전 진행중");
@@ -224,19 +232,7 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        //일일 입장 횟수 체크
-        if (!DungeonEntryTracker.TryConsumeEntry(
-            dungeonId,
-            _dungeon.Daily_Entry,
-            out int usedCount,
-            out int remainCount))
-        {
-            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={dungeonId}");
-            OnDungeonEntryCountChanged?.Invoke(dungeonId, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
-            return;
-        }
-
-        OnDungeonEntryCountChanged?.Invoke(dungeonId, usedCount, _dungeon.Daily_Entry);
+        
 
         //wave 정렬 안정화
         _monsterGroup.Sort((a, b) =>
@@ -494,6 +490,20 @@ public class DungeonManager : MonoBehaviour
         Debug.Log("[Dungeon] 성공");
 
         GiveReward();
+
+        //일일 입장 횟수 체크
+        if (!DungeonEntryTracker.TryConsumeEntry(
+            _dungeon.Dungeon_Id,
+            _dungeon.Daily_Entry,
+            out int usedCount,
+            out int remainCount))
+        {
+            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={_currentCount}");
+            OnDungeonEntryCountChanged?.Invoke(_currentCount, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
+            return;
+        }
+
+        OnDungeonEntryCountChanged?.Invoke(_currentCount, usedCount, _dungeon.Daily_Entry);
 
         OnDungeonCleared?.Invoke(_dungeon.Dungeon_Id);
 
