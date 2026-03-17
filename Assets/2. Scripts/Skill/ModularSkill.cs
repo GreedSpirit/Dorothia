@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using UnityEngine;
 public class ModularSkill : BaseSkill
 {
     private readonly List<ISkillModule> _modules = new List<ISkillModule>();
@@ -7,6 +7,7 @@ public class ModularSkill : BaseSkill
 
     public ModularSkill AddModule(ISkillModule module)
     {
+        module.ModuleIndex = _modules.Count;
         _modules.Add(module);
         return this;
     }
@@ -15,13 +16,47 @@ public class ModularSkill : BaseSkill
     {
         Context = new SkillContext();
         StartCooldown();
-        foreach (var m in _modules) m.OnExecute(player, Context);
+        // TargetLock만 즉시 실행 (방향/타겟은 스킬 시작 시 필요)
+        foreach (var m in _modules)
+            if (m is TargetLockModule)
+                m.OnExecute(player, Context);
     }
 
-    // ★ OnHit 파라미터 제거
-    public void NotifyHit(PlayerCtrl player) => _modules.ForEach(m => m.OnHit(player, Context));
-    public void NotifyDash(PlayerCtrl player) => _modules.ForEach(m => m.OnDash(player, Context));
-    public void NotifyEffect(PlayerCtrl player) => _modules.ForEach(m => m.OnEffect(player, Context));
-    public void NotifyJumpPeak(PlayerCtrl player) => _modules.ForEach(m => m.OnJumpPeak(player, Context));
-    public void NotifyJumpLand(PlayerCtrl player) => _modules.ForEach(m => m.OnJumpLand(player, Context));
+    private ISkillModule GetModule(int moduleIndex)
+    {
+        Debug.Log($"{moduleIndex}");
+
+        return _modules.Find(m => m.ModuleIndex == moduleIndex);
+    }
+
+    // ─── 애니 이벤트 수신 ───────────────────────────────
+    // encoded = moduleIndex * 100 + hitIndex
+    // ex) module 2, hit 0 → 200 / module 3, hit 1 → 301
+    public void NotifyHit(PlayerCtrl player, int encoded)
+    {
+        int moduleIndex = encoded / 100;
+        int hitIndex = encoded % 100;
+
+        Debug.Log($"{encoded},{moduleIndex},{hitIndex}");
+
+
+        GetModule(moduleIndex)?.OnHit(player, Context, hitIndex);
+    }
+
+    public void NotifyExecute(PlayerCtrl player, int moduleIndex)
+        => GetModule(moduleIndex)?.OnExecute(player, Context);
+
+    public void NotifyDash(PlayerCtrl player, int moduleIndex)
+        => GetModule(moduleIndex)?.OnDash(player, Context);
+
+    public void NotifyTeleport(PlayerCtrl player, int moduleIndex)
+    {
+        GetModule(moduleIndex)?.OnTeleport(player, Context);
+    }
+
+    public void NotifyHide(PlayerCtrl player, int moduleIndex)
+        => GetModule(moduleIndex)?.OnHide(player, Context);
+
+    public void NotifyAppear(PlayerCtrl player, int moduleIndex)
+        => GetModule(moduleIndex)?.OnAppear(player, Context);
 }

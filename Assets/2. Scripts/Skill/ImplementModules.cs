@@ -1,10 +1,16 @@
-// 타겟 탐색 + 회전 모듈 (거의 모든 스킬에 포함)
+// ═══════════════════════════════════════════════════════
+// 1. TargetLockModule - 반복 시 매번 타겟 재탐색
+// ═══════════════════════════════════════════════════════
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class TargetLockModule : BaseSkillModule
 {
     public override void OnExecute(PlayerCtrl player, SkillContext ctx)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, ExecuteOnce));
+
+    private void ExecuteOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
         IMonster target = player.FindEnemy();
         if (target == null || !target.IsAlive)
@@ -14,9 +20,8 @@ public class TargetLockModule : BaseSkillModule
         }
 
         ctx.LockedTarget = target;
-
-        // 타겟 방향 즉시 회전
-        Vector3 dir = (target.Transform.position - player.transform.position);
+        //ctx.TeleportPosition = target.Transform.position;
+        Vector3 dir = target.Transform.position - player.transform.position;
         dir.y = 0;
         ctx.DashDirection = dir.normalized;
 
@@ -25,126 +30,133 @@ public class TargetLockModule : BaseSkillModule
     }
 }
 
-// 근접 공격 모듈
-public class MeleeAttackModule : BaseSkillModule
+// ═══════════════════════════════════════════════════════
+// 2. MeleeModule
+// ═══════════════════════════════════════════════════════
+public class MeleeModule : BaseSkillModule
 {
-    private readonly bool _isAoe;
-    private readonly float _aoeRadius;
+    public override void OnHit(PlayerCtrl player, SkillContext ctx, int hitIndex)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, hitIndex, HitOnce));
 
-    public MeleeAttackModule() { _isAoe = false; }
-    public MeleeAttackModule(float radius) { _isAoe = true; _aoeRadius = radius; }
-
-    // ★ 파라미터 없음 - 테이블의 HitCount 사용
-    public override void OnHit(PlayerCtrl player, SkillContext ctx)
+    private void HitOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-        float totalDmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+        if (ctx.LockedTarget == null || !ctx.LockedTarget.IsAlive) return;
 
-        if (_isAoe)
-        {
-            Collider[] hits = Physics.OverlapSphere(
-                player.transform.position, _aoeRadius, LayerMask.GetMask("Monster"));
+        PlayMyEffect(player);
 
-            if (hits.Length > 0)
-                player.StartCoroutine(player.MultiHitRoutine(hits, HitCount, totalDmg));
-        }
-        else
-        {
-            if (ctx.LockedTarget == null || !ctx.LockedTarget.IsAlive) return;
-            player.StartCoroutine(player.SingleHitRoutine(ctx.LockedTarget, HitCount, totalDmg));
-        }
+        int count = GetHitCount(hitIndex);
+        float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+
+        player.StartCoroutine(player.SingleHitRoutine(ctx.LockedTarget, count, dmg));
     }
 }
 
-// 투사체 발사 모듈
+// ═══════════════════════════════════════════════════════
+// 3. MeleeAoeModule
+// ═══════════════════════════════════════════════════════
+public class MeleeAoeModule : BaseSkillModule
+{
+    public override void OnHit(PlayerCtrl player, SkillContext ctx, int hitIndex)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, hitIndex, HitOnce));
+
+    private void HitOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
+    {
+        PlayMyEffect(player);
+
+        int count = GetHitCount(hitIndex);
+        float radius = GetAoeRadius(hitIndex);
+        float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+
+        Collider[] hits = Physics.OverlapSphere(
+            player.transform.position, radius, LayerMask.GetMask("Monster"));
+
+        if (hits.Length > 0)
+            player.StartCoroutine(player.MultiHitRoutine(hits, count, dmg));
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+// 4. ProjectileModule
+// ═══════════════════════════════════════════════════════
 //public class ProjectileModule : BaseSkillModule
 //{
-//    private readonly string _projectilePrefabAddr; // Addressable 주소
-//    private readonly float _speed;
+//    public override void OnExecute(PlayerCtrl player, SkillContext ctx)
+//        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, FireOnce));
 
-//    public ProjectileModule(string prefabAddr, float speed = 15f)
-//    {
-//        _projectilePrefabAddr = prefabAddr;
-//        _speed = speed;
-//    }
-
-//    public override void OnHit(PlayerCtrl player, SkillContext ctx, int hitCount)
+//    private void FireOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
 //    {
 //        if (ctx.LockedTarget == null) return;
 
-//        // 투사체 생성 (Addressable / Pool 방식에 맞게 교체)
-//        AddressableManager.Instance.LoadAsset<GameObject>(_projectilePrefabAddr, prefab =>
+//        AddressableManager.Instance.LoadAsset<GameObject>(ProjectileName, prefab =>
 //        {
-//            var go = Object.Instantiate(prefab, player.transform.position + Vector3.up, Quaternion.identity);
-//            var projectile = go.GetComponent<SkillProjectile>();
-//            projectile.Init(ctx.LockedTarget, hitCount, _speed, player);
+//            var go = Object.Instantiate(
+//                prefab,
+//                player.transform.position + Vector3.up,
+//                player.transform.rotation);
+
+//            if (go.TryGetComponent<SkillProjectile>(out var projectile))
+//                projectile.Init(ctx.LockedTarget, GetHitCount(0), ProjectileSpeed, player);
 //        });
 //    }
 //}
 
-// 순간이동 모듈
+// ═══════════════════════════════════════════════════════
+// 5. TeleportModule
+// ═══════════════════════════════════════════════════════
 public class TeleportModule : BaseSkillModule
 {
-    private readonly float _behindOffset;
+    public override void OnTeleport(PlayerCtrl player, SkillContext ctx)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, TeleportOnce));
 
-    public TeleportModule(float behindOffset = 1.2f)
+    private void TeleportOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-        _behindOffset = behindOffset;
-    }
-
-    public override void OnExecute(PlayerCtrl player, SkillContext ctx)
-    {
-        if (ctx.LockedTarget == null) return;
-
-        Vector3 targetPos = ctx.LockedTarget.Transform.position;
-        Vector3 teleportPos = targetPos - ctx.DashDirection * _behindOffset;
-
-        if (UnityEngine.AI.NavMesh.SamplePosition(teleportPos, out var hit, 2f,
-            UnityEngine.AI.NavMesh.AllAreas))
+            Debug.Log(ctx);
+        if (ctx.LockedTarget == null)
         {
-            player.NavMesh.Warp(hit.position);
+            return;
         }
 
-        // 순간이동 후 타겟 방향 재정렬
-        Vector3 lookDir = (targetPos - player.transform.position);
+        Vector3 targetPos = ctx.LockedTarget.Transform.position;
+        Vector3 teleportPos = targetPos - ctx.DashDirection * BehindOffset;
+
+        if (NavMesh.SamplePosition(teleportPos, out var hit, 2f, NavMesh.AllAreas))
+            player.NavMesh.Warp(hit.position);
+
+        Vector3 lookDir = targetPos - player.transform.position;
         lookDir.y = 0;
         if (lookDir != Vector3.zero)
             player.transform.rotation = Quaternion.LookRotation(lookDir);
+
+        PlayMyEffect(player);
     }
 }
 
-// 대쉬 모듈
+// ═══════════════════════════════════════════════════════
+// 6. DashModule
+// ═══════════════════════════════════════════════════════
 public class DashModule : BaseSkillModule
 {
-    private readonly float _distance;
-    private readonly float _duration;
-
-    public DashModule(float distance = 5f, float duration = 0.3f)
-    {
-        _distance = distance;
-        _duration = duration;
-    }
-
     public override void OnDash(PlayerCtrl player, SkillContext ctx)
-    {
-        player.StartCoroutine(DashRoutine(player, ctx));
-    }
+        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, DashOnce));
+
+    private void DashOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
+        => player.StartCoroutine(DashRoutine(player, ctx));
 
     private IEnumerator DashRoutine(PlayerCtrl player, SkillContext ctx)
     {
+        PlayMyEffect(player);
+
         float elapsed = 0f;
         Vector3 startPos = player.transform.position;
-        Vector3 destination = startPos + ctx.DashDirection * _distance;
+        Vector3 destination = startPos + ctx.DashDirection * DashDistance;
 
-        if (UnityEngine.AI.NavMesh.SamplePosition(destination, out var hit, 3f,
-            UnityEngine.AI.NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(destination, out var hit, 3f, NavMesh.AllAreas))
             destination = hit.position;
 
-        while (elapsed < _duration)
+        while (elapsed < DashDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / _duration;
-            float easedT = 1f - Mathf.Pow(1f - t, 3f); // EaseOut Cubic
-
+            float easedT = 1f - Mathf.Pow(1f - elapsed / DashDuration, 3f);
             player.NavMesh.Warp(Vector3.Lerp(startPos, destination, easedT));
             yield return null;
         }
@@ -153,46 +165,56 @@ public class DashModule : BaseSkillModule
     }
 }
 
-// 점프 공격 모듈
-public class JumpAttackModule : BaseSkillModule
+// ═══════════════════════════════════════════════════════
+// 7. HideAppearModule
+// ═══════════════════════════════════════════════════════
+public class HideAppearModule : BaseSkillModule
 {
-    private readonly float _effectDuration;
+    public override void OnHide(PlayerCtrl player, SkillContext ctx)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, HideOnce));
 
-    public JumpAttackModule(float effectDuration = 1.5f)
+    public override void OnAppear(PlayerCtrl player, SkillContext ctx)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, 0, AppearOnce));
+
+    private void HideOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-        _effectDuration = effectDuration;
-    }
-
-    public override void OnJumpPeak(PlayerCtrl player, SkillContext ctx)
-        => player.StartCoroutine(PeakRoutine(player, ctx));
-
-    private IEnumerator PeakRoutine(PlayerCtrl player, SkillContext ctx)
-    {
-        player.PauseAnimation();
+        PlayMyEffect(player);
         player.SetRenderersEnabled(false);
+        player.PauseAnimation();
         ctx.IsCharacterHidden = true;
-
-        // ★ BaseSkillModule.EffectName 사용
-        if (!string.IsNullOrEmpty(EffectName))
-            EffectManager.Instance.PlayEffect(
-                EffectName, EffectDuration,
-                player.transform.position,
-                player.transform.rotation);
-
-        yield return new WaitForSeconds(EffectDuration);
-
-        player.SetRenderersEnabled(true);
-        ctx.IsCharacterHidden = false;
-        player.ResumeAnimation();
     }
 
-    public override void OnJumpLand(PlayerCtrl player, SkillContext ctx)
+    private void AppearOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
+        player.SetRenderersEnabled(true);
+        player.ResumeAnimation();
+        ctx.IsCharacterHidden = false;
+        PlayMyEffect(player);
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+// 8. EffectHitModule
+// ═══════════════════════════════════════════════════════
+public class EffectHitModule : BaseSkillModule
+{
+    public override void OnHit(PlayerCtrl player, SkillContext ctx, int hitIndex)
+        => player.StartCoroutine(RepeatRoutine(player, ctx, hitIndex, HitOnce));
+
+    private void HitOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
+    {
+        PlayMyEffect(player);
+
+        int count = GetHitCount(hitIndex);
+        float radius = GetAoeRadius(hitIndex);
+        float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+
         Collider[] hits = Physics.OverlapSphere(
-            player.transform.position, 4f, LayerMask.GetMask("Monster"));
-        float totalDmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+            player.transform.position,
+            radius > 0 ? radius : 1f,
+            LayerMask.GetMask("Monster"));
 
         if (hits.Length > 0)
-            player.StartCoroutine(player.MultiHitRoutine(hits, HitCount, totalDmg));
+            player.StartCoroutine(player.MultiHitRoutine(hits, count, dmg));
     }
 }

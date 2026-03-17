@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -7,10 +8,9 @@ using UnityEngine;
 public abstract class BaseSkill
 {
     public SkillData Data { get; set; }
+    public float CurrentCooldown { get; private set; }
     public Rarity Rarity { get; set; }
     public int Level { get; set; }
-
-    public float CurrentCooldown { get; private set; }
     public bool IsReady => CurrentCooldown <= 0f;
     public float CooldownRatio
     {
@@ -20,24 +20,21 @@ public abstract class BaseSkill
             return Mathf.Clamp01((Data.Skill_Cooltime - CurrentCooldown) / Data.Skill_Cooltime);
         }
     }
-
-    public static BaseSkill Create(SkillData data, Skill_StatusData statusData = null)
+    public static BaseSkill Create(SkillData data)
     {
-        if (data.Skill_Type == Skill_Type.Passive)
-            return CreatePassive(data, statusData);
-
-        return CreateModular(data);
+        return data.Skill_Type == Skill_Type.Passive
+            ? new PassiveSkill { Data = data }
+            : CreateModular(data);
     }
 
     private static BaseSkill CreateModular(SkillData data)
     {
         var skill = new ModularSkill { Data = data };
-
-        var moduleList = DataManager.Instance.GetList<SkillModuleData>(10001);
+        var moduleList = DataManager.Instance.GetList<SkillModuleData>(data.Job_Skill_Id);
 
         if (moduleList == null || moduleList.Count == 0)
         {
-            Debug.LogWarning($"[BaseSkill] {data.Job_Skill_Id} 스킬의 모듈 데이터 없음");
+            Debug.LogWarning($"[BaseSkill] {data.Job_Skill_Id} 모듈 데이터 없음");
             return skill;
         }
 
@@ -45,15 +42,11 @@ public abstract class BaseSkill
         {
             ModuleParamData param = DataManager.Instance
                 .GetData<ModuleParamData>(moduleData.Module_Param_Id);
+
             skill.AddModule(BuildModule(moduleData.Module_Type, param));
         }
 
         return skill;
-    }
-
-    private static BaseSkill CreatePassive(SkillData data, Skill_StatusData statusData)
-    {
-        return new PassiveSkill { Data = data};
     }
 
     private static ISkillModule BuildModule(Skill_Module type, ModuleParamData p)
@@ -61,21 +54,22 @@ public abstract class BaseSkill
         ISkillModule module = type switch
         {
             Skill_Module.TargetLock => new TargetLockModule(),
-            Skill_Module.Melee => new MeleeAttackModule(),
-            Skill_Module.MeleeAoe => new MeleeAttackModule(p.Aoe_Radius),
-            //Skill_Module.Projectile => new ProjectileModule(p.Projectile_Name, p.Projectile_Speed),
-            Skill_Module.Teleport => new TeleportModule(p.Behind_Offset),
-            Skill_Module.Dash => new DashModule(p.Dash_Distance, p.Dash_Duration),
-            Skill_Module.Jump => new JumpAttackModule(p.Skill_Effect_Time),
-            _ => throw new System.ArgumentException($"[BaseSkill] 미정의 모듈: {type}")
+            Skill_Module.Melee => new MeleeModule(),
+            Skill_Module.MeleeAoe => new MeleeAoeModule(),
+            //Skill_Module.Projectile => new ProjectileModule(),
+            Skill_Module.Teleport => new TeleportModule(),
+            Skill_Module.Dash => new DashModule(),
+            Skill_Module.HideAppear => new HideAppearModule(),
+            Skill_Module.EffectHit => new EffectHitModule(),
+            _ => throw new ArgumentException($"[BuildModule] 미정의 모듈: {type}")
         };
 
-        if (module is BaseSkillModule baseModule)
-            baseModule.SetParamData(p);
+        if (module is BaseSkillModule base_)
+            base_.SetParamData(p);
 
         return module;
     }
-    // 공통
+
     public void UpdateCooldown(float dt)
         => CurrentCooldown = Mathf.Max(0f, CurrentCooldown - dt);
 

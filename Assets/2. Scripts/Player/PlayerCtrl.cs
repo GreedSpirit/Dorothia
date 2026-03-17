@@ -109,7 +109,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (_isDead) return;
 
         if (Keyboard.current.sKey.wasPressedThisFrame)
-            TryUseSkillById(10001);
+            TryUseSkillById(10003);
 
         UpdateGlobalState();
         _currentState.Execute(this);
@@ -192,14 +192,25 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     #region Skill - 애니메이션 이벤트 수신
 
     // 애니메이터 이벤트에서 직접 호출 ─ ModularSkill에 전달
-    private ModularSkill GetModularSkill()
-        => SkillState?.TargetSkill as ModularSkill;
+    // encoded = moduleIndex * 100 + hitIndex
+    // 스킬A(MeleeAoe)    : OnSkillHit(000)        → module 0, hit 0
+    // 스킬B(Teleport+Melee): OnSkillTeleport(1)   → module 1
+    //                        OnSkillHit(200)       → module 2, hit 0
+    // 스킬C(Melee*3+Dash): OnSkillHit(100)         → module 1, hit 0
+    //                       OnSkillHit(200)        → module 2, hit 0
+    //                       OnSkillHit(300)        → module 3, hit 0
+    //                       OnSkillDash(4)         → module 4
+    // 스킬D(Hide+EffectHit): OnSkillHide(0)        → module 0 Hide
+    //                         OnSkillHit(100)      → module 1, hit 0
+    //                         OnSkillAppear(0)     → module 0 Appear
 
-    public void OnSkillHit() => GetModularSkill()?.NotifyHit(this);
-    public void OnSkillDash() => GetModularSkill()?.NotifyDash(this);
-    public void OnSkillEffect() => GetModularSkill()?.NotifyEffect(this);
-    public void OnSkillJumpPeak() => GetModularSkill()?.NotifyJumpPeak(this);
-    public void OnSkillJumpLand() => GetModularSkill()?.NotifyJumpLand(this);
+    private ModularSkill GetModularSkill(BaseSkill skill) => skill is ModularSkill ms ? ms : null;
+    public void OnSkillHit(int encoded) => GetModularSkill(SkillState.TargetSkill)?.NotifyHit(this, encoded);
+    public void OnSkillExecute(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyExecute(this, moduleIndex);
+    public void OnSkillDash(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyDash(this, moduleIndex);
+    public void OnSkillTeleport(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyTeleport(this, moduleIndex);
+    public void OnSkillHide(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyHide(this, moduleIndex);
+    public void OnSkillAppear(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyAppear(this, moduleIndex);
 
     #endregion
 
@@ -244,7 +255,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 IMonster monster = col.GetComponentInParent<IMonster>();
                 if (monster != null && monster.IsAlive)
                     monster.TakeDamage((int)1);
-                    //monster.TakeDamage((int)dmgPerHit);
+                //monster.TakeDamage((int)dmgPerHit);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -358,11 +369,13 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // ══════════════════════════════════════════════════════
     #region Utility
 
-    public IMonster FindEnemy()
+    public IMonster FindEnemy(float skillCast_Range=0)
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, _enemyFindRange, _enemyLayer);
+        float find_Range = skillCast_Range > 0 ? skillCast_Range : _enemyFindRange; 
+
+            Collider[] colliders = Physics.OverlapSphere(transform.position, find_Range, _enemyLayer);
         IMonster nearest = null;
-        float minSqrDistance = _enemyFindRange * _enemyFindRange;
+        float minSqrDistance = find_Range * find_Range;
 
         foreach (var col in colliders)
         {

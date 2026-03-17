@@ -56,6 +56,23 @@ public class EffectManager : MonoBehaviour
                 maxSize: 15
             );
 
+            //_effectPools[effectName] = new ObjectPool<GameObject>(
+            //createFunc: () => Instantiate(prefab),
+            //actionOnGet: (obj) =>
+            //{
+            //    obj.SetActive(true);
+            //    foreach (var ps in obj.GetComponentsInChildren<ParticleSystem>())
+            //    {
+            //        ps.Clear(); // 이전 잔상 제거
+            //        ps.Play();  // 다시 재생
+            //    }
+            //},
+            //actionOnRelease: (obj) => obj.SetActive(false),
+            //actionOnDestroy: (obj) => Destroy(obj),
+            //defaultCapacity: 5,
+            //maxSize: 15
+            //);
+
             Spawn(_effectPools[effectName], effectName, duration, pos, rot, parent);
         };
     }
