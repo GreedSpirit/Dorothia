@@ -52,33 +52,11 @@ public class EquipEnchant : BaseUI
             Enchant(_equipment);
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
-
-        _inventoryPanel.onInventoryChanged += DisableInteractable;
-        _inventoryPanel.onInventoryClosed += DisableInteractable;
-        _inventoryPanel.onClickEquipment += EnableInteractable;
     }
 
     private void Start()
     {
         Close();
-    }
-
-    private void OnDisable()
-    {
-        _inventoryPanel.onInventoryChanged -= DisableInteractable;
-        _inventoryPanel.onInventoryClosed -= DisableInteractable;
-        _inventoryPanel.onClickEquipment -= EnableInteractable;
-    }
-
-
-    public void EnableInteractable()
-    {
-        _enchantButton.interactable = true;
-    }
-
-    public void DisableInteractable()
-    {
-        _enchantButton.interactable = false;
     }
 
     private void UseWeight(bool value)

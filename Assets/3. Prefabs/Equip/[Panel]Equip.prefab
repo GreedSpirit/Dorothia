@@ -403,7 +403,6 @@ GameObject:
   - component: {fileID: 694067958118891513}
   - component: {fileID: 4405200753767009509}
   - component: {fileID: 7723447468332195814}
-  - component: {fileID: 1277198949340517331}
   - component: {fileID: 8083956520508711222}
   m_Layer: 5
   m_Name: '[Panel]Equip'
@@ -471,27 +470,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1277198949340517331
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4345273186547808941}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 538a3f2ee557b6c4ebdc0b2e304f8fa3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EquipmentSlotManager
-  equipSlots:
-  - {fileID: 4469692207445860337}
-  - {fileID: 7750860396270688147}
-  - {fileID: 2278435989069157879}
-  - {fileID: 5091650570304661033}
-  - {fileID: 1412104798972774507}
-  - {fileID: 4440886957358447628}
-  - {fileID: 732851923688886360}
-  - {fileID: 6843148028408734201}
 --- !u!114 &8083956520508711222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -504,7 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97b9687b11f254b459e3defd6ddf089c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EquipmentUI
-  background: {fileID: 8776903707125381306}
+  close: {fileID: 0}
   _partSlots:
   - {fileID: 4469692207445860337}
   - {fileID: 7750860396270688147}
@@ -515,7 +493,7 @@ MonoBehaviour:
   _firstRingSlot: {fileID: 732851923688886360}
   _secondRingSlot: {fileID: 6843148028408734201}
   _inventoryPanel: {fileID: 0}
-  _equipmentSlotManager: {fileID: 1277198949340517331}
+  _equipmentSlotManager: {fileID: 0}
   _currentSelectedPart: 0
   _currentSelectedSlot: {fileID: 0}
 --- !u!1 &7942106013714962607
