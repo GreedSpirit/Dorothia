@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -272,6 +272,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         {
             ComboIndex = (ComboIndex % _maxComboIndex) + 1;
             _anima.SetInteger("Combo", ComboIndex);
+        }
+        else
+        {
+            ResetCombo();
         }
     }
 

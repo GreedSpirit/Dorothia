@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
@@ -51,6 +51,10 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private PlayerCombatSlots _slotSystem;          // 슬롯시스템
     private Transform _mySlot;
+
+    private Vector3 _lockedSlotPosition;
+    private float _slotLockTime;
+    private float _slotLockDuration = 0.6f;
 
     private int _hp;                                // 체력
 
@@ -440,6 +444,16 @@ public class MonsterController : MonoBehaviour, IMonster
     /// </summary>
     private void HandleMeleeChase()
     {
+        //플레이어가 공격 가서리 안이면 슬롯 무시하고 즉시 공격
+        float playerDistance = DistanceXZ(transform.position, _target.Transform.position);
+        if (playerDistance <= _stats.AttackRange * 1.1f) // 여유 조금 추가
+        {
+            _agent.isStopped = true;
+            _agent.ResetPath();
+            ChangeState(MonsterState.Attack);
+            return;
+        }
+
         Vector3 destination;
 
         //슬롯 확보
@@ -465,15 +479,29 @@ public class MonsterController : MonoBehaviour, IMonster
 
         //목적지 결정
         if (_mySlot != null)
-            destination = _mySlot.position;
+        {
+            //일정 시간마다만 슬롯 위치 갱신
+            if (Time.time >= _slotLockTime)
+            {
+                _lockedSlotPosition = _mySlot.position;
+                _slotLockTime = Time.time + _slotLockDuration;
+            }
+
+            destination = _lockedSlotPosition;
+        }
         else
+        {
             destination = _target.Transform.position; // fallback
+        }
 
         // 이동
         if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 
             _slotRepathThreshold * _slotRepathThreshold)
         {
-            _agent.SetDestination(destination);
+            if (Time.time >= _nextSlotRefreshTime)
+            {
+                _agent.SetDestination(destination);
+            }
         }
 
         RotateToTarget(_target.Transform.position);
@@ -537,37 +565,45 @@ public class MonsterController : MonoBehaviour, IMonster
     {
         RotateToTarget(_target.Transform.position);
 
-        //Melee는 슬롯 기준
-        if (_stats.Archetype == Monster_Kind.Melee)
+        float distance = DistanceXZ(transform.position, _target.Transform.position);
+
+        if (distance > _stats.AttackRange)
         {
-            if (_mySlot == null)
-            {
-                ChangeState(MonsterState.Chase);
-                return;
-            }
-
-            float slotDistance = DistanceXZ(transform.position, _mySlot.position);
-
-            //슬롯에서 벗어나면 다시 Chase
-            if (slotDistance > 1.0f)
-            {
-                _agent.isStopped = false;
-                ChangeState(MonsterState.Chase);
-                return;
-            }
+            _agent.isStopped = false;
+            ChangeState(MonsterState.Chase);
+            return;
         }
-        else
-        {
-            //원거리 기존 유지
-            float distance = DistanceXZ(transform.position, _target.Transform.position);
+        ////Melee는 슬롯 기준
+        //if (_stats.Archetype == Monster_Kind.Melee)
+        //{
+        //    if (_mySlot == null)
+        //    {
+        //        ChangeState(MonsterState.Chase);
+        //        return;
+        //    }
 
-            if (distance > _stats.AttackRange)
-            {
-                _agent.isStopped = false;
-                ChangeState(MonsterState.Chase);
-                return;
-            }
-        }
+        //    float slotDistance = DistanceXZ(transform.position, _mySlot.position);
+
+        //    //슬롯에서 벗어나면 다시 Chase
+        //    if (slotDistance > 1.0f)
+        //    {
+        //        _agent.isStopped = false;
+        //        ChangeState(MonsterState.Chase);
+        //        return;
+        //    }
+        //}
+        //else
+        //{
+        //    //원거리 기존 유지
+        //    float distance = DistanceXZ(transform.position, _target.Transform.position);
+
+        //    if (distance > _stats.AttackRange)
+        //    {
+        //        _agent.isStopped = false;
+        //        ChangeState(MonsterState.Chase);
+        //        return;
+        //    }
+        //}
 
         // 공격 루프
         if (!_isAttacking)
