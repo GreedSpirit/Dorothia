@@ -240,4 +240,11 @@ public class FusePanel : BaseUI
         subSlot2.equipped?.CancelFuseMaterial();
         subSlot2.ClearSlot();
     }
+
+    public void FuseCheat()
+    {
+        if (mainSlot.equipped == null) return;
+        if(mainSlot.equipped.equip_Fuse_Weight < 100)
+        mainSlot.equipped.equip_Fuse_Weight += 100;
+    }
 }
