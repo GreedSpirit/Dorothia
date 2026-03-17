@@ -16,7 +16,7 @@ public class PlayerCombatSlots : MonoBehaviour
 
     [Header("Base Slot Layout")]
     [SerializeField] private int _baseSlotCount = 12;               // 플레이어 주변 슬롯 수
-    [SerializeField] private float _baseRadius = 1.2f;              // 플레이어 중심에서 슬롯까지 거리
+    [SerializeField] private float _baseRadius = 1f;              // 플레이어 중심에서 슬롯까지 거리
     [SerializeField] private float _randomOffset = 0.35f;           // 슬롯 퍼짐 정도
 
     [Header("Adaptive Slot (Rings)")]
