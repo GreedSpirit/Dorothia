@@ -33,7 +33,7 @@ public class RewardManager : MonoBehaviour
         //현재 Stage_Section_Id(120001, 120002)
         int currentStageSectionId = _stageManager.CurrentStageSectionId;
 
-        Debug.Log($"드랍 섹션 확인 Section:{currentSection}, SectionId:{currentStageSectionId}");
+        //Debug.Log($"드랍 섹션 확인 Section:{currentSection}, SectionId:{currentStageSectionId}");
 
         var DropData = DataManager.Instance.GetData<Stage_SectionData>(currentStageSectionId);
 

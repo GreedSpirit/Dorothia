@@ -155,8 +155,13 @@ public class StageManager : MonoBehaviour
     {
         if (!DungeonReturnContext.HasContext)
         {
-            Debug.LogWarning("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
+            Debug.Log("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
             return;
+        }
+
+        if (_player is IResettable resettable)
+        {
+            resettable.ResetState();
         }
 
         StartStageFromSection(
@@ -172,6 +177,7 @@ public class StageManager : MonoBehaviour
         //기존 몬스터 완전 초기화
         if (_spawnManager != null)
         {
+            _spawnManager.ResetSpawnState();
             _spawnManager.StopNormalSpawn();   // 기존 스폰 루틴 중지
             _spawnManager.ForceClearAll();     // 필드 몬스터 전부 제거
         }
@@ -569,13 +575,16 @@ public class StageManager : MonoBehaviour
         Debug.Log("[Stage] Spawning 재시작");
 
         ChangeState(StageState.Spawning);
-    } 
+    }
 
     private void HandlePlayerDead()
     {
         //던전 진행 중 플레이어 사망은 DungeonManager가 처리하므로 StageManager는 무시
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
+        {
+            Debug.LogWarning("던전 진행중이라 StageManager 처리 스킵");
             return;
+        }
 
         if (_bossAlive)
         {
