@@ -34,23 +34,15 @@ public class InventoryPartButton : MonoBehaviour
     /// </summary>
     public void SendSlot()
     {
+        if(_inventoryPanel.status == InventoryStatus.Fuse)
+        {
+            _inventoryPanel.OpenInventory(_slot.part, _slot.slotIndex);
+        }
         //반지 슬롯이 아닐 경우 통상 진행
-        if(_slot.part != Equip_Type.Ring)
+        else if(_inventoryPanel.status == InventoryStatus.Equip)
         {
             _inventoryPanel.targetSlot = _slot;
             _inventoryPanel.OpenInventory(_slot.part, _slot.slotIndex);
-        }
-        //반지 슬롯이면, 첫번째 슬롯에 장착된 게 없거나 두번째 슬롯에 장착된 게 있으면 첫번째 슬롯을 변경
-        else if(_slot.equipped == null || _ringSlot.equipped != null)
-        {
-            _inventoryPanel.targetSlot = _slot;
-            _inventoryPanel.OpenInventory(_slot.part, _slot.slotIndex);
-        }
-        //첫번째 슬롯에 장착된 게 있고 두번째 슬롯이 비었으면 두번째 슬롯 변경
-        else
-        {
-            _inventoryPanel.targetSlot = _ringSlot;
-            _inventoryPanel.OpenInventory(_slot.part, _ringSlot.slotIndex);
         }
     }
 

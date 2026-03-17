@@ -109,6 +109,10 @@ public class InventoryEquipFunction : MonoBehaviour
             //따라서, 여기까지 왔으면 다음 단계로 넘어갑니다.
         }
         //전부 진행했다면, 해당 장비를 장착합니다.
+        if (equipmentToEquip.isEquipped == true)
+        {
+            return;
+        }
         _inventoryPanel.AddToSlot(equipmentToEquip);
     }
     public void ChangeLockButtonState(Equipment equip)
