@@ -2775,6 +2775,7 @@ MonoBehaviour:
   _maxMonsterCount: 120
   _spawnAreaProvider: {fileID: 2083373618}
   _targetProvider: {fileID: 58927744}
+  _combatSlots: {fileID: 1945194692}
   _projectileDatabase: {fileID: 11400000, guid: d9d18fcdbfcb59e4887d9a61aee48378, type: 2}
   _overdriveOrbPrefab: {fileID: 8829868700708202650, guid: 868faa38bd0280540878aa24061860b8, type: 3}
 --- !u!4 &2008451729
@@ -2821,7 +2822,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d7aa229c2cbdd14385eabb4ed90579f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnAreaProvider
-  _mapHalfSize: 30
+  _mapSize: {x: 60, y: 60}
+  _mapCenter: {x: 0, y: 0, z: 0}
   _player: {fileID: 58927735}
 --- !u!4 &2083373619
 Transform:

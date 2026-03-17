@@ -42,11 +42,11 @@ public abstract class BaseSkillModule : ISkillModule
     protected int GetHitCount(int i) => HitCounts[Mathf.Clamp(i, 0, HitCounts.Length - 1)];
     protected int GetRepeatCount(int i) => RepeatCount;
     protected float GetRepeatInterval(int i) => RepeatIntervals[Mathf.Clamp(i, 0, RepeatIntervals.Length - 1)];
-    protected float GetAoeRadius(int i) => AoeRadius[Mathf.Clamp(i, 0, AoeRadius.Length - 1)]; 
+    protected float GetAoeRadius(int i) => AoeRadius[Mathf.Clamp(i, 0, AoeRadius.Length - 1)];
     public void SetParamData(ModuleParamData p)
     {
         if (p == null) return;
-        EffectName = p.Skill_Effect_Name ?? string.Empty;
+        EffectName = p.Skill_Effect_Name ?? null;
         EffectDuration = p.Skill_Effect_Time;
         HitCounts = p.Hit_Count_Array;
         RepeatCount = p.Repeat_Count > 0 ? p.Repeat_Count : 1;
@@ -59,17 +59,21 @@ public abstract class BaseSkillModule : ISkillModule
         ProjectileSpeed = p.Projectile_Speed > 0 ? p.Projectile_Speed : 15f;
         CastRange = p.SkillCast_Range;
     }
-    protected void PlayMyEffect(PlayerCtrl player)
+    protected void PlayMyEffect(PlayerCtrl player, Vector3 centerPoint = default)
     {
-        if (string.IsNullOrEmpty(EffectName)) return;
+        if (string.IsNullOrEmpty(EffectName)) {
+            Debug.Log($"{EffectName}======================");
+        return;
+        }
 
-        Debug.Log($"{EffectName},{ModuleIndex}");
+        Debug.Log($"{EffectName},{ModuleIndex},{centerPoint}");
+
+        Vector3 effectPoint = centerPoint == default ? player.transform.position : centerPoint;
 
         EffectManager.Instance.PlayEffect(
             EffectName, EffectDuration,
-            player.transform.position,
-            player.transform.rotation,
-            player.transform);
+            effectPoint,
+            player.transform.rotation);
     }
     protected IEnumerator RepeatRoutine(PlayerCtrl player, SkillContext ctx, int hitIndex,
         Action<PlayerCtrl, SkillContext, int> action)

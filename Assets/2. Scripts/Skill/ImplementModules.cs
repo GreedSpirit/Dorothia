@@ -2,6 +2,7 @@
 // 1. TargetLockModule - 반복 시 매번 타겟 재탐색
 // ═══════════════════════════════════════════════════════
 using System.Collections;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -40,9 +41,9 @@ public class MeleeModule : BaseSkillModule
 
     private void HitOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-        if (ctx.LockedTarget == null || !ctx.LockedTarget.IsAlive) return;
-
         PlayMyEffect(player);
+
+        if (ctx.LockedTarget == null || !ctx.LockedTarget.IsAlive) return;
 
         int count = GetHitCount(hitIndex);
         float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
@@ -110,7 +111,6 @@ public class TeleportModule : BaseSkillModule
 
     private void TeleportOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-            Debug.Log(ctx);
         if (ctx.LockedTarget == null)
         {
             return;
@@ -144,7 +144,21 @@ public class DashModule : BaseSkillModule
 
     private IEnumerator DashRoutine(PlayerCtrl player, SkillContext ctx)
     {
-        PlayMyEffect(player);
+        // 1. 타겟 존재 여부 확인 후 중앙 위치 계산
+        Vector3 centerPoint = player.transform.position; // 기본값은 플레이어 위치
+
+        if (ctx.LockedTarget != null)
+        {
+            // 산술 평균 방식: (A + B) / 2
+            centerPoint = (player.transform.position + ctx.LockedTarget.Transform.position) * 0.5f;
+
+            // 또는 Lerp 방식 (위와 동일한 결과)
+            // centerPoint = Vector3.Lerp(player.transform.position, ctx.LockedTarget.transform.position, 0.5f);
+        }
+
+        player.EnableAttackCollider();
+
+        PlayMyEffect(player, centerPoint);
 
         float elapsed = 0f;
         Vector3 startPos = player.transform.position;
@@ -162,6 +176,7 @@ public class DashModule : BaseSkillModule
         }
 
         player.NavMesh.Warp(destination);
+        player.DisableAllAttackColliders();
     }
 }
 

@@ -108,8 +108,14 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         if (_isDead) return;
 
-        if (Keyboard.current.sKey.wasPressedThisFrame)
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+            TryUseSkillById(10001);
+        if (Keyboard.current.wKey.wasPressedThisFrame)
             TryUseSkillById(10003);
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+            TryUseSkillById(10012);
+        //if (Keyboard.current.rKey.wasPressedThisFrame)
+        //    TryUseSkillById(18003);
 
         UpdateGlobalState();
         _currentState.Execute(this);

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 public class ModularSkill : BaseSkill
 {
     private readonly List<ISkillModule> _modules = new List<ISkillModule>();
@@ -24,8 +23,6 @@ public class ModularSkill : BaseSkill
 
     private ISkillModule GetModule(int moduleIndex)
     {
-        Debug.Log($"{moduleIndex}");
-
         return _modules.Find(m => m.ModuleIndex == moduleIndex);
     }
 
@@ -36,8 +33,6 @@ public class ModularSkill : BaseSkill
     {
         int moduleIndex = encoded / 100;
         int hitIndex = encoded % 100;
-
-        Debug.Log($"{encoded},{moduleIndex},{hitIndex}");
 
 
         GetModule(moduleIndex)?.OnHit(player, Context, hitIndex);
