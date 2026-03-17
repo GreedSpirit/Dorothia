@@ -92,21 +92,37 @@ public class EquipEnchant : BaseUI
         //테스트를 위해 아이콘을 넣어 생성하도록 하였으니, 해당 조건을 기반으로 스프라이트 참조 조건을 지정하겠습니다.
         //(icon이 존재하지 않을 경우에는, equip_icon의 경로를 기반으로 스프라이트를 생성, 존재하는 경우에는 해당 icon을 그대로 사용)
         _beforeEnchantEquipment.sprite = equip.icon == null ? Resources.Load<Sprite>(equip.equip_icon) : equip.icon;
-        _afterEnchantEquipment.sprite = equip.icon == null ? Resources.Load<Sprite>(equip.equip_icon) : equip.icon;
+        if (equip.equip_Upgrade < 50)
+        {
+            _afterEnchantEquipment.sprite = equip.icon == null ? Resources.Load<Sprite>(equip.equip_icon) : equip.icon;
+        }
+        else
+        {
+            _afterEnchantEquipment.sprite = null;
+            _afterEnchantEquipment.color = new Color32(255,255,255,0);
+        }
 
-        //강화가 되기 전과 성공했을 때의 강화 수치를 기록하는 텍스트를 변경해줍니다.
-        _beforeEnchantUpgradeValueText.text = $"{equip.equip_Upgrade}";
-        _afterEnchantUpgradeValueText.text = $"{equip.equip_Upgrade + 1}";
+            //강화가 되기 전과 성공했을 때의 강화 수치를 기록하는 텍스트를 변경해줍니다.
+        _beforeEnchantUpgradeValueText.text = $"+{equip.equip_Upgrade}";
+        _afterEnchantUpgradeValueText.text = equip.equip_Upgrade < 50? $"+{equip.equip_Upgrade + 1}" : "";
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
-        _costGold = Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
-                * ItemCalculator.GetEnchantWeightByRarity(DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank));
+        _costGold = equip.equip_Upgrade < 50?Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
+                * ItemCalculator.GetEnchantWeightByRarity(DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)): 99999999;
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
-        _costGoldText.text = $"{_costGold}<color=orange>G</color>";
+        if (equip.equip_Upgrade >= 50)
+        {
+            _costGoldText.text = "<color=orange>G</color>";
+        }
+        else if(equip.equip_Upgrade < 50)
+            _costGoldText.text = $"{_costGold}<color=orange>G</color>";
 
         //현재의 골드량은, (테스트를 위해 임시로 작성한 테스트용)소지 중인 골드 값 뒤에 주황색 G를 붙여 표현합니다.
-        _currentGoldText.text = $"{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>";
+        _currentGoldText.text = TestGoldAndScrapManager.Instance.testGold >= _costGold?
+            $"{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>":
+            $"<color=red>{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>";
+
     }
 
     /// <summary>
@@ -211,5 +227,18 @@ public class EquipEnchant : BaseUI
     protected override void OnClose()
     {
         
+    }
+
+    public void UpgradeCheatA()
+    {
+        if (_equipment == null || _equipment.equip_Upgrade > 49) return;
+        _equipment.equip_Upgrade++;
+        RefreshEnchantPanel(_equipment);
+    }
+    public void UpgradeCheatB()
+    {
+        if (_equipment == null || _equipment.equip_Upgrade > 45) return;
+        _equipment.equip_Upgrade += 5;
+        RefreshEnchantPanel(_equipment);
     }
 }
