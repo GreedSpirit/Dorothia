@@ -109,12 +109,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         if (_isDead) return;
 
-        // 스킬 입력 예시 (S키)
-        if (Keyboard.current.sKey.wasPressedThisFrame)
-        {
-            // 실제로는 퀵슬롯이나 스킬 매니저에서 가져옴
-            TryUseSkill(10001);
-        }
+        //// 스킬 입력 예시 (S키)
+        //if (Keyboard.current.sKey.wasPressedThisFrame)
+        //{
+        //    // 실제로는 퀵슬롯이나 스킬 매니저에서 가져옴
+        //    TryUseSkill(10001);
+        //}
 
         UpdateGlobalState();
         _currentState.Execute(this);

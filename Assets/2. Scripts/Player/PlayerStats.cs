@@ -134,6 +134,7 @@ public class PlayerStats : MonoBehaviour
         StatManager.Instance.RefreshStats(_currentLevel);
 
         //스탯 적용
+        _level = _currentLevel;
         _maxHp = (float)StatManager.Instance.GetStat(Status.HP);
         _atk = (float)StatManager.Instance.GetStat(Status.ATK);
         _def = (float)StatManager.Instance.GetStat(Status.DEF);
