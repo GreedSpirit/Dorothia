@@ -41,7 +41,7 @@ public class MonsterStatsFromCSV : IMonsterStats
 
     public float AttackRange => _data.Monster_Atk_Range;
     public float AttackCooldown => 1f;
-    public float PreferredRange => _data.Monster_Atk_Range - 0.2f;
+    //public float PreferredRange => _data.Monster_Atk_Range - 0.2f;
 
     public float AgentRadius => _agentRadius;
     public int AvoidancePriorityMin => 60;

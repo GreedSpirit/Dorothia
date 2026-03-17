@@ -169,6 +169,13 @@ public class StageManager : MonoBehaviour
 
     private void InternalStartStage(int stageId, int startSection)
     {
+        //기존 몬스터 완전 초기화
+        if (_spawnManager != null)
+        {
+            _spawnManager.StopNormalSpawn();   // 기존 스폰 루틴 중지
+            _spawnManager.ForceClearAll();     // 필드 몬스터 전부 제거
+        }
+
         if (DataManager.Instance == null)
         {
             Debug.LogError("[StageManager] DataManager NULL");

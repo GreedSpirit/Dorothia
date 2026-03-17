@@ -39,7 +39,7 @@ public class GremlinUITester : MonoBehaviour
         // 장착 중인 그렘린 (빨간 테두리 테스트용)
         Gremlin TestGremlin1 = new Gremlin();
 
-        var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
+        var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
         await so.Task;
         GremlinSOData data = so.Result;
         TestGremlin1.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);

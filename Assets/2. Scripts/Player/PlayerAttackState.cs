@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerAttackState : IPlayerState<PlayerCtrl>
 {
@@ -39,6 +39,14 @@ public class PlayerAttackState : IPlayerState<PlayerCtrl>
         // 공격 중 타겟 바라보기 유지
         if (player.CurrentTarget != null)
         {
+            Vector3 dis = player.CurrentTarget.Transform.position - player.transform.position;
+            dis.y = 0;
+
+            if (dis.sqrMagnitude > player.AttackRange * player.AttackRange)
+            {
+                player.ResetCombo();
+                return;
+            }
             LookAtTarget(player, true);
         }
     }

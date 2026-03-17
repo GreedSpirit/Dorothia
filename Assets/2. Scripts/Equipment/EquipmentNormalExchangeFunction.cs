@@ -62,28 +62,7 @@ public class EquipmentNormalExchangeFunction : BaseUI
             UIManager.Instance.CloseTopPanel();
         });
 
-        _inventoryPanel.onInventoryChanged += DisableInteractable;
-        _inventoryPanel.onInventoryClosed += DisableInteractable;
-        _inventoryPanel.onClickEquipment += EnableInteractable;
         Close();
-    }
-
-    private void OnDisable()
-    {
-        _inventoryPanel.onInventoryChanged -= DisableInteractable;
-        _inventoryPanel.onInventoryClosed -= DisableInteractable;
-        _inventoryPanel.onClickEquipment -= EnableInteractable;
-    }
-    public void EnableInteractable()
-    {
-        _sellButton.interactable = true;
-        _salvageButton.interactable = true;
-    }
-
-    public void DisableInteractable()
-    {
-        _sellButton.interactable = false;
-        _salvageButton.interactable = false;
     }
 
     /// <summary>

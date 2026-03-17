@@ -281,6 +281,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             ComboIndex = (ComboIndex % _maxComboIndex) + 1;
             _anima.SetInteger("Combo", ComboIndex);
         }
+        else
+        {
+            ResetCombo();
+        }
     }
 
     public void ResetCombo()

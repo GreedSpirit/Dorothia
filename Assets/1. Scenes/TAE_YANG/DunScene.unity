@@ -3426,7 +3426,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatSlots
   _targetPlayer: {fileID: 58927735}
   _baseSlotCount: 12
-  _baseRadius: 1.5
+  _baseRadius: 1.2
   _randomOffset: 0.35
   _useAdaptive: 1
   _maxRings: 3
@@ -3438,7 +3438,7 @@ MonoBehaviour:
   _sideBias: 0.2
   _backBias: 0.15
   _biasSharpness: 2
-  _rebuildInterval: 1.2
+  _rebuildInterval: 2
   _rebuildMoveThreshold: 1
   _rotateSlotsWithFacing: 0
 --- !u!4 &1945194693
@@ -3503,6 +3503,7 @@ MonoBehaviour:
   _maxMonsterCount: 120
   _spawnAreaProvider: {fileID: 0}
   _targetProvider: {fileID: 58927744}
+  _combatSlots: {fileID: 1945194692}
   _projectileDatabase: {fileID: 11400000, guid: d9d18fcdbfcb59e4887d9a61aee48378, type: 2}
   _overdriveOrbPrefab: {fileID: 8829868700708202650, guid: 868faa38bd0280540878aa24061860b8, type: 3}
 --- !u!4 &2008451729
