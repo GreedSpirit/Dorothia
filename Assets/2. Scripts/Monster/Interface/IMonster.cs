@@ -10,7 +10,8 @@ public interface IMonster
         IMonsterTarget target, 
         MonsterController poolKeyPrefab,
         int monsterId,
-        ProjectileDatabase projectileDb
+        ProjectileDatabase projectileDb,
+        PlayerCombatSlots slotSystem
         );
     void TakeDamage(int amount);
     void ForceDespawn();

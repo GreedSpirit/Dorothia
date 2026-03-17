@@ -26,6 +26,7 @@ public class MonsterSpawnManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private SpawnAreaProvider _spawnAreaProvider;
     [SerializeField] private MonoBehaviour _targetProvider;
+    [SerializeField] private PlayerCombatSlots _combatSlots;
 
     [Header("Projectile Database")]
     [SerializeField] private ProjectileDatabase _projectileDatabase;
@@ -363,7 +364,7 @@ public class MonsterSpawnManager : MonoBehaviour
         MonsterController monster = pool.Get();
         monster.transform.position = pos;
 
-        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase, _combatSlots);
 
         _activeMonsters.Add(monster);
         _currentMonsterCount++;
@@ -665,7 +666,7 @@ public class MonsterSpawnManager : MonoBehaviour
 
         monster.transform.position = pos;
 
-        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase, _combatSlots);
 
         _activeMonsters.Add(monster);
         _currentMonsterCount++;

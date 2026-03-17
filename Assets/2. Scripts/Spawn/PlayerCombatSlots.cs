@@ -16,7 +16,7 @@ public class PlayerCombatSlots : MonoBehaviour
 
     [Header("Base Slot Layout")]
     [SerializeField] private int _baseSlotCount = 12;               // 플레이어 주변 슬롯 수
-    [SerializeField] private float _baseRadius = 1.5f;              // 플레이어 중심에서 슬롯까지 거리
+    [SerializeField] private float _baseRadius = 1.2f;              // 플레이어 중심에서 슬롯까지 거리
     [SerializeField] private float _randomOffset = 0.35f;           // 슬롯 퍼짐 정도
 
     [Header("Adaptive Slot (Rings)")]
@@ -34,8 +34,8 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private float _biasSharpness = 2.0f;           //가중치 곡선(클수록 특정 방향에 더 몰림)
 
     [Header("Slot Refresh")]
-    [SerializeField] private float _rebuildInterval = 1.2f;        //목표 이동에 맞춰 슬롯 재배치 간격
-    [SerializeField] private float _rebuildMoveThreshold = 1.0f;   //플레이어 이동량이 이 이상이면 재배치
+    [SerializeField] private float _rebuildInterval = 2.0f;        //목표 이동에 맞춰 슬롯 재배치 간격
+    [SerializeField] private float _rebuildMoveThreshold = 1f;   //플레이어 이동량이 이 이상이면 재배치
     [SerializeField] private bool _rotateSlotsWithFacing = false;    //플레이어 진행방향에 따라 슬롯 원형을 회전
 
     // 내부 캐시/풀
@@ -149,18 +149,6 @@ public class PlayerCombatSlots : MonoBehaviour
 
         //플레이어 진행 방향(또는 이동 방향) 기반 회전 각
         float yawOffsetRad = 0f;
-
-        //if (_rotateSlotsWithFacing)
-        //{
-        //    Vector3 fwd = transform.forward;
-        //    fwd.y = 0f;
-
-        //    if (fwd.sqrMagnitude > 0.001f)
-        //    {
-        //        fwd.Normalize();
-        //        yawOffsetRad = Mathf.Atan2(fwd.z, fwd.x); // x=cos, z=sin 기준의 라디안
-        //    }
-        //}
 
         //각 슬롯 위치 계산
         int total = _slotData.Length;
@@ -310,7 +298,7 @@ public class PlayerCombatSlots : MonoBehaviour
         Vector3 monsterPos = monster.Transform.position;
 
         //플레이어 "진행 방향" (혹은 facing)
-        Vector3 forward = transform.forward;
+        Vector3 forward = _targetPlayer.forward;
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.001f)
             forward = Vector3.forward;
@@ -380,6 +368,16 @@ public class PlayerCombatSlots : MonoBehaviour
     public Transform RequestSlot(IMonster monster)
     {
         return AcquireOrRefreshSlot(monster, forceRefresh: false);
+    }
+
+    public bool IsInnerRing(Transform slot)
+    {
+        for (int i = 0; i < _slotData.Length; i++)
+        {
+            if (_slotData[i].tr == slot)
+                return _slotData[i].ring == 0;
+        }
+        return false;
     }
 
     public void ReleaseSlot(IMonster monster)

@@ -14,7 +14,7 @@ public interface IMonsterStats
 
     float AttackRange { get; }
     float AttackCooldown { get; }
-    float PreferredRange { get; }
+    //float PreferredRange { get; }
 
     float AgentRadius { get; }
     int AvoidancePriorityMin { get; }

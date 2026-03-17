@@ -134,12 +134,14 @@ public class MonsterController : MonoBehaviour, IMonster
         IMonsterTarget target, 
         MonsterController poolKeyPrefab, 
         int monsterId, 
-        ProjectileDatabase projectileDb)
+        ProjectileDatabase projectileDb,
+        PlayerCombatSlots slotsystem)
     {
         _owner = owner;
         _target = target;
         _poolKeyPrefab = poolKeyPrefab;
         _projectileDatabase = projectileDb;
+        _slotSystem = slotsystem;
 
         _monsterId = monsterId;
 
@@ -227,6 +229,8 @@ public class MonsterController : MonoBehaviour, IMonster
     {
         _agent.speed = _stats.MoveSpeed;
         _agent.radius = _stats.AgentRadius;
+
+        _agent.stoppingDistance = 0.25f;
         
         //RVO 충돌 우선순위 랜덤화 -> 군집 이동할때 자연스러움 증가
         _agent.avoidancePriority = 
@@ -322,115 +326,206 @@ public class MonsterController : MonoBehaviour, IMonster
         ChangeState(MonsterState.Chase); // 스폰 직후 바로 추격으로
     }
 
-    /// <summary>
-    /// 추격 상태
-    /// 근접 몬스터
-    /// 플레이어 중심이 아닌 '전투 슬롯 위치'를 목표로 이동
-    /// 슬롯 시스템을 통해 겹침 및 밀림 현상 방지
-    /// 
-    /// 원거리 몬스터
-    /// 플레이어와의 거리(PreferredRange)를 유지
-    /// 사거리보다 멀면 접근, 가까우면 정지 후 공격
-    /// 
-    /// 공통
-    /// 항상 플레이어 방향으로 회전
-    /// 실제 공격 사거리(AttackRange)에 진입하면 Attack 상태로 전환
-    /// </summary>
     private void UpdateChase()
     {
         //슬롯 시스템 가져오기
         if (_slotSystem == null && _target is MonoBehaviour mono)
         {
             _slotSystem = mono.GetComponent<PlayerCombatSlots>();
-        }
 
-        Vector3 destination;
+            if (_slotSystem == null)
+                Debug.LogError("SlotSystem NULL");
+        }
 
         if (_stats.Archetype == Monster_Kind.Melee)
         {
-            //Melee는 "Adaptive Slot + Refresh + Angle Bias" 사용
-            // - 슬롯이 없으면 즉시 요청
-            // - 일정 주기/정체 시 재요청 (Refresh)
-            if (_slotSystem != null)
-            {
-                if (_mySlot == null)
-                {
-                    _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: false);
-                }
-                else
-                {
-                    bool stuck = UpdateStuckAndCheck();
-
-                    if (stuck)
-                    {
-                        _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: true);
-                        _stuckTimer = 0f;
-                    }
-                }
-            }
-
-            if (_mySlot != null)
-                destination = _mySlot.position;
-            else
-                destination = _target.Transform.position; // 슬롯 없다면 플레이어로 fallback
+            HandleMeleeChase();
         }
         else
         {
-            //원거리 몬스터 -> 플레이어 거리 유지
-            float distance =
-                DistanceXZ(transform.position, _target.Transform.position);
+            HandleRangedChase();
+        }
 
-            if (distance > _stats.PreferredRange)
+        //Vector3 destination;
+
+        //if (_stats.Archetype == Monster_Kind.Melee)
+        //{
+        //    //Melee는 "Adaptive Slot + Refresh + Angle Bias" 사용
+        //    // - 슬롯이 없으면 즉시 요청
+        //    // - 일정 주기/정체 시 재요청 (Refresh)
+        //    if (_slotSystem != null)
+        //    {
+        //        if (_mySlot == null)
+        //        {
+        //            _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: false);
+        //        }
+        //        else
+        //        {
+        //            bool stuck = UpdateStuckAndCheck();
+
+        //            if (stuck)
+        //            {
+        //                _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: true);
+        //                _stuckTimer = 0f;
+        //            }
+        //        }
+        //    }
+
+        //    if (_mySlot != null)
+        //        destination = _mySlot.position;
+        //    else
+        //        destination = _target.Transform.position; // 슬롯 없다면 플레이어로 fallback
+        //}
+        //else
+        //{
+        //    //원거리 몬스터 -> 플레이어 거리 유지
+        //    float distance =
+        //        DistanceXZ(transform.position, _target.Transform.position);
+
+        //    if (distance > _stats.PreferredRange)
+        //    {
+        //        //사거리 보다 멀면 접근
+        //        destination = _target.Transform.position;
+        //    }
+        //    else
+        //    {
+        //        //적정 거리 유지 -> 이동 정지 후 공격
+        //        _agent.ResetPath();
+        //        RotateToTarget(_target.Transform.position);
+        //        return;
+        //    }
+        //}
+
+        ////슬롯 목표는 "움직일 수 있음"
+        //// - 슬롯이 리프레시되면 destination이 조금씩 변함
+        //// - hasPath + destination delta 체크로 갱신
+        //if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 
+        //    _slotRepathThreshold * _slotRepathThreshold)
+        //{
+        //    _agent.SetDestination(destination);
+        //}
+
+        //RotateToTarget(_target.Transform.position); // 항상 플레이어 방향 보게
+
+        ////공격 가능 여부 판단
+        ////근접 몬스터는 슬롯 도착 여부로 공격 판단
+        //if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
+        //{
+        //    float slotDistance =
+        //        DistanceXZ(transform.position, _mySlot.position);
+
+        //    if (slotDistance < 0.8f) // 슬롯 거의 도착
+        //    {
+        //        ChangeState(MonsterState.Attack);
+        //        return;
+        //    }
+        //}
+        //else
+        //{
+        //    //원거리 몬스터는 기존 거리 판단 유지
+        //    float attackDistance =
+        //        DistanceXZ(transform.position, _target.Transform.position);
+
+        //    if (attackDistance <= _stats.AttackRange)
+        //    {
+        //        _agent.ResetPath();
+        //        ChangeState(MonsterState.Attack);
+        //        return;
+        //    }
+        //}
+    }
+
+    /// <summary>
+    /// 근접 몬스터 Chase
+    /// </summary>
+    private void HandleMeleeChase()
+    {
+        Vector3 destination;
+
+        //슬롯 확보
+        if (_slotSystem != null)
+        {
+            if (_mySlot == null)
             {
-                //사거리 보다 멀면 접근
-                destination = _target.Transform.position;
+                _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
             }
             else
             {
-                //적정 거리 유지 -> 이동 정지 후 공격
-                _agent.ResetPath();
-                RotateToTarget(_target.Transform.position);
-                return;
+                bool stuck = UpdateStuckAndCheck();
+
+                if (stuck && Time.time >= _nextSlotRefreshTime)
+                {
+                    _mySlot = _slotSystem.AcquireOrRefreshSlot(this, true);
+                    _stuckTimer = 0f;
+
+                    _nextSlotRefreshTime = Time.time + _slotRefreshInterval;
+                }
             }
         }
 
-        //슬롯 목표는 "움직일 수 있음"
-        // - 슬롯이 리프레시되면 destination이 조금씩 변함
-        // - hasPath + destination delta 체크로 갱신
+        //목적지 결정
+        if (_mySlot != null)
+            destination = _mySlot.position;
+        else
+            destination = _target.Transform.position; // fallback
+
+        // 이동
         if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 
             _slotRepathThreshold * _slotRepathThreshold)
         {
             _agent.SetDestination(destination);
         }
 
-        RotateToTarget(_target.Transform.position); // 항상 플레이어 방향 보게
+        RotateToTarget(_target.Transform.position);
 
-        //공격 가능 여부 판단
-        //근접 몬스터는 슬롯 도착 여부로 공격 판단
-        if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
+        //공격 진입 조건
+        if (_slotSystem != null && _mySlot != null)
         {
-            float slotDistance =
-                DistanceXZ(transform.position, _mySlot.position);
+            if (!_slotSystem.IsInnerRing(_mySlot))
+                return;
 
-            if (slotDistance < 0.8f) // 슬롯 거의 도착
+            if (!_agent.pathPending &&
+                _agent.remainingDistance <= _agent.stoppingDistance + 0.15f)
             {
+                _agent.isStopped = true;
                 ChangeState(MonsterState.Attack);
                 return;
             }
+        }
+
+        // 슬롯 시스템 자체가 없을 때만 fallback
+        //if (_slotSystem == null)
+        //{
+        //    float dist = DistanceXZ(transform.position, _target.Transform.position);
+
+        //    if (dist <= _stats.AttackRange)
+        //    {
+        //        ChangeState(MonsterState.Attack);
+        //    }
+        //}
+    }
+
+    /// <summary>
+    /// 원거리 몬스터 Chase
+    /// </summary>
+    private void HandleRangedChase()
+    {
+        float distance = DistanceXZ(transform.position, _target.Transform.position);
+
+        //사거리 밖이면 이동
+        if (distance > _stats.AttackRange)
+        {
+            _agent.isStopped = false;
+            _agent.SetDestination(_target.Transform.position);
         }
         else
         {
-            //원거리 몬스터는 기존 거리 판단 유지
-            float attackDistance =
-                DistanceXZ(transform.position, _target.Transform.position);
-
-            if (attackDistance <= _stats.AttackRange)
-            {
-                _agent.ResetPath();
-                ChangeState(MonsterState.Attack);
-                return;
-            }
+            //사거리 안이면 바로 공격
+            _agent.ResetPath();
+            ChangeState(MonsterState.Attack);
         }
+
+        RotateToTarget(_target.Transform.position);
     }
 
     /// <summary>
@@ -440,28 +535,53 @@ public class MonsterController : MonoBehaviour, IMonster
     /// </summary>
     private void UpdateAttack()
     {
-        float distance = DistanceXZ(transform.position, _target.Transform.position);
-
         RotateToTarget(_target.Transform.position);
 
-        //사거리 밖이면 다시 추격
-        if (distance > _stats.AttackRange)
+        //Melee는 슬롯 기준
+        if (_stats.Archetype == Monster_Kind.Melee)
         {
-            ChangeState(MonsterState.Chase);
-            return;
+            if (_mySlot == null)
+            {
+                ChangeState(MonsterState.Chase);
+                return;
+            }
+
+            float slotDistance = DistanceXZ(transform.position, _mySlot.position);
+
+            //슬롯에서 벗어나면 다시 Chase
+            if (slotDistance > 1.0f)
+            {
+                _agent.isStopped = false;
+                ChangeState(MonsterState.Chase);
+                return;
+            }
+        }
+        else
+        {
+            //원거리 기존 유지
+            float distance = DistanceXZ(transform.position, _target.Transform.position);
+
+            if (distance > _stats.AttackRange)
+            {
+                _agent.isStopped = false;
+                ChangeState(MonsterState.Chase);
+                return;
+            }
         }
 
-        //사거리 안이면 계속 공격
+        // 공격 루프
         if (!_isAttacking)
+        {
+            StartAttack();
             return;
+        }
 
         _attackTimer += Time.deltaTime;
 
         if (_attackTimer >= _currentAttackDuration)
         {
             _isAttacking = false;
-            _animator.speed = 1f; // 속도 복구
-            ChangeState(MonsterState.Chase);
+            _animator.speed = 1f;
         }
     }
 
