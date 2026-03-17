@@ -6,20 +6,14 @@ public abstract class BaseSkill
 {
     public SkillData Data { get; set; }
     public Skill_StatusData Status { get; set; }
+    public float CurrentCooldown { get; protected set; }
     public Rarity Rarity { get; set; }
     public int Level { get; set; }
 
-    public float CurrentCooldown { get; protected set; }
-    public virtual bool IsReady => CurrentCooldown <= 0f;
-    public float CooldownRatio
+    public virtual void Initialize(SkillData data, Skill_StatusData status)
     {
-        get
-        {
-            if (Data == null || Data.Skill_Cooltime <= 0) return 1f;
-
-            float ratio = (Data.Skill_Cooltime - CurrentCooldown) / Data.Skill_Cooltime;
-            return Mathf.Clamp01(ratio);
-        }
+        Data = data;
+        Status = status;
     }
 
     public static BaseSkill Create(SkillData data, Skill_StatusData status)
@@ -37,28 +31,6 @@ public abstract class BaseSkill
         return skill;
     }
 
-    public void Initialize(SkillData skillData, Skill_StatusData statusData)
-    {
-        Data = skillData;
-        Status = statusData;
-        Rarity = Rarity.Normal;
-        Level = 1;
-
-        CurrentCooldown = 0f;
-    }
-
-    public virtual void UpdateCooldown(float deltaTime)
-    {
-        if (CurrentCooldown > 0)
-        {
-            CurrentCooldown -= deltaTime;
-
-            // 오차 방지
-            if (CurrentCooldown < 0)
-                CurrentCooldown = 0f;
-        }
-    }
-
     public virtual void StartCooldown()
     {
         if (Data != null)
@@ -66,7 +38,24 @@ public abstract class BaseSkill
             CurrentCooldown = Data.Skill_Cooltime;
         }
     }
+    public virtual void Execute(PlayerCtrl owner)
+    {
+        StartCooldown();
+        // 마나 소모 등 공통 로직
+    }
 
-    public abstract void Execute(PlayerCtrl owner = null);
     public abstract void Undo();
+
+    public void UpdateCooldown(float dt) => CurrentCooldown = Mathf.Max(0, CurrentCooldown - dt);
+    public virtual bool IsReady => CurrentCooldown <= 0f;
+    public float CooldownRatio
+    {
+        get
+        {
+            if (Data == null || Data.Skill_Cooltime <= 0) return 1f;
+
+            float ratio = (Data.Skill_Cooltime - CurrentCooldown) / Data.Skill_Cooltime;
+            return Mathf.Clamp01(ratio);
+        }
+    }
 }

@@ -30,10 +30,6 @@ public class EquipmentInventory : MonoBehaviour
             return false;
         }
 
-        //그 리스트가 16개의 값을 이미 담고 있거나 그 이상을 담았을 경우 (테스트용) 범위를 넘어갔으므로 실패를 반환합니다.
-        if (list.Count >= 16)
-            return false;
-
         //해당 리스트에 해당 장비를 추가합니다.
         list.Add(equip);
         //성공을 반환합니다.

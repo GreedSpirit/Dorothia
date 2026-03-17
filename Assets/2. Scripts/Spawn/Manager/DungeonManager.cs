@@ -96,6 +96,8 @@ public class DungeonManager : MonoBehaviour
     private int _maxWave;           // 최대 wave
     private int _currentWave;       // 현재 wave
 
+    public int _currentCount;
+
     public bool IsDungeonRunning => _isDungeonRunning;
     public DungeonState CurrentState => _state;
     public int CurrentWave => _currentWave;
@@ -184,6 +186,12 @@ public class DungeonManager : MonoBehaviour
     #region 던전 입장
     public void StartDungeon(int dungeonId, int stepId)
     {
+        DungeonEntryTracker.ForceSetUsedCount(150001, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150002, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150003, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150004, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150005, 0);
+
         if (_isDungeonRunning)
         {
             Debug.LogWarning("[Dungeon] 이미 던전 진행중");
@@ -224,19 +232,7 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        //일일 입장 횟수 체크
-        if (!DungeonEntryTracker.TryConsumeEntry(
-            dungeonId,
-            _dungeon.Daily_Entry,
-            out int usedCount,
-            out int remainCount))
-        {
-            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={dungeonId}");
-            OnDungeonEntryCountChanged?.Invoke(dungeonId, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
-            return;
-        }
-
-        OnDungeonEntryCountChanged?.Invoke(dungeonId, usedCount, _dungeon.Daily_Entry);
+        
 
         //wave 정렬 안정화
         _monsterGroup.Sort((a, b) =>
@@ -495,6 +491,20 @@ public class DungeonManager : MonoBehaviour
 
         GiveReward();
 
+        //일일 입장 횟수 체크
+        if (!DungeonEntryTracker.TryConsumeEntry(
+            _dungeon.Dungeon_Id,
+            _dungeon.Daily_Entry,
+            out int usedCount,
+            out int remainCount))
+        {
+            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={_currentCount}");
+            OnDungeonEntryCountChanged?.Invoke(_currentCount, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
+            return;
+        }
+
+        OnDungeonEntryCountChanged?.Invoke(_currentCount, usedCount, _dungeon.Daily_Entry);
+
         OnDungeonCleared?.Invoke(_dungeon.Dungeon_Id);
 
         ChangeState(DungeonState.Exit);
@@ -513,15 +523,31 @@ public class DungeonManager : MonoBehaviour
     #region 던전 보상
     private void GiveReward()
     {
+        /* 여기만 쓰면 될 것 같습니다
+        //던전 보상 조회
         var reward =
             DataManager.Instance.GetData<Dungeon_RewardData>(_stepData.Reward_Group_Id);
+        //기존에 있던 스테이지 섹션 아이디 조회
+        var Ddata = DataManager.Instance.GetData<Stage_SectionData>(DungeonReturnContext.ReturnSection);
 
+        //반복할 횟수 랜덤 뽑기
+        int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+        //랜덤으로 뽑은 횟수만큼 장비생성
+        for (int i = 0; i < a; i++)
+        {
+            TestWeaponGenerator.Instance.Test2(Ddata.Equip_Drop_Level, (int)reward.Reward_Rank);
+        }
+        
         if (reward == null)
         {
             Debug.LogError("RewardData 없음");
             return;
         }
+        */
 
+        var reward =
+            DataManager.Instance.GetData<Dungeon_RewardData>(_stepData.Reward_Group_Id);
         System.Numerics.BigInteger amount = 
             BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
         

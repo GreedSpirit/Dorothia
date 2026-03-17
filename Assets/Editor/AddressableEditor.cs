@@ -84,7 +84,13 @@ public class AddressableEditor : EditorWindow
         foreach (string filePath in files)
         {
             // 시스템 경로를 유니티 프로젝트 상대 경로로 변환
-            string relativePath = filePath.Replace(Application.dataPath, "Assets").Replace("\\", "/");
+            //string relativePath = filePath.Replace(Application.dataPath, "Assets").Replace("\\", "/");
+
+            string relativePath = filePath.Replace("\\", "/");
+            if (relativePath.StartsWith(Application.dataPath.Replace("\\", "/")))
+            {
+                relativePath = "Assets" + relativePath.Substring(Application.dataPath.Length);
+            }
 
             if (ApplyAddressable(settings, relativePath, groupName))
             {

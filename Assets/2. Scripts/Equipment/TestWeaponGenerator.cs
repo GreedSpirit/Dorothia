@@ -8,7 +8,6 @@ public class TestWeaponGenerator : MonoBehaviour
     public static TestWeaponGenerator Instance;
 
     [SerializeField] private EquipmentInventory equipmentInventory;           // 현재 사용할 인벤토리.
-    [SerializeField] Sprite weaponSprite;                                     // 획득 무기에 적용할 스프라이트.
     [SerializeField] InventoryPanel inventoryPanel;                           // 갱신해야 할 인벤토리.
 
     private Dictionary<Equip_Type, List<EquipData>> _equipList;

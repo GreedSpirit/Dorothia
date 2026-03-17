@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,8 +10,7 @@ public enum InventoryStatus
     Equip, Fuse
 }
 [RequireComponent(typeof(InventoryEquipFunction))]
-[RequireComponent(typeof(EquipmentExchangeFunction))]
-public class InventoryPanel : MonoBehaviour
+public class InventoryPanel : BaseUI
 {
     public InventoryStatus status = InventoryStatus.Equip;
     public Equip_Type currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
@@ -21,13 +21,17 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] EquipmentUI _equipmentUI;                   // 장착 중인 장비를 보여주는 UI
 
     [Header("인벤토리 관련")]
-    [SerializeField] private List<InventorySlot> _slots;         // 인벤토리 슬롯의 배열
-    [SerializeField] EquipmentInventory _equipmentInventory;     // 인벤토리
-    [SerializeField] CanvasGroup _inventoryPanelGroup;           // 패널 자신을 넣으면 되는, 캔버스 그룹 제어용.
+    [SerializeField] Transform content;                                                      // 인벤토리 생성 위치
+    [SerializeField] private List<InventorySlot> _slots = new List<InventorySlot>();         // 인벤토리 슬롯의 배열
+    [SerializeField] private InventorySlot _slotPrefab;                                      // 생성할 인벤토리 프리팹
+    [SerializeField] EquipmentInventory _equipmentInventory;                                 // 인벤토리
+    [SerializeField] CanvasGroup _inventoryPanelGroup;                                       // 패널 자신을 넣으면 되는, 캔버스 그룹 제어용.
 
     [Header("인벤토리 상태별 활성화할 버튼 오브젝트 모음")]
     [SerializeField] GameObject _equipButtons;                   // 장착 슬롯을 눌렀을 때의 버튼입니다.
     [SerializeField] GameObject _fuseButtons;                    // 합성 슬롯을 눌렀을 때의 버튼입니다.
+    [SerializeField] GameObject _normalButtons;                  // 다른 장비 버튼들을 눌렀을 때의 버튼입니다.
+    [SerializeField] GameObject _ringButtons;                    // 반지 장비 버튼을 눌렀을 때의 버튼입니다.
 
     [Header("장비 정보 출력용")]
     [SerializeField] GameObject _infoPanel;                  // 정보를 담을 패널
@@ -39,7 +43,11 @@ public class InventoryPanel : MonoBehaviour
     [SerializeField] Button _confirmButton;                  // 합성 전용 확인버튼
     [SerializeField] Button _cancelButton;                   // 합성 전용 취소버튼
     [SerializeField] Button _equipButton;                    // 장비를 장착합니다.
+    [SerializeField] Button _equipRightButton;                    // 장비를 장착합니다.
+    [SerializeField] Button _equipLeftButton;                    // 장비를 장착합니다.
     [SerializeField] TextMeshProUGUI _equipButtonText;
+    [SerializeField] TextMeshProUGUI _equipRightButtonText;
+    [SerializeField] TextMeshProUGUI _equipLeftButtonText;
     [SerializeField] Button _closeButton;
 
     public EquipSlot targetSlot;                             // 장비를 받기 위한 대상 슬롯입니다.
@@ -58,6 +66,14 @@ public class InventoryPanel : MonoBehaviour
         {
             AddToSlot(_selectedEquipment);
         });
+        _equipRightButton.onClick.AddListener(() =>
+        {
+            SelectSlotAndEquip(_equipmentUI._secondRingSlot, _selectedEquipment);
+        });
+        _equipLeftButton.onClick.AddListener(() =>
+        {
+            SelectSlotAndEquip(_equipmentUI._firstRingSlot, _selectedEquipment);
+        });
         //분해 버튼 기능 추가 - 분해 상태 O. 안내패널 활성화
         
         //확인버튼 기능 추가 - 슬롯에 해당 장비 추가
@@ -73,7 +89,7 @@ public class InventoryPanel : MonoBehaviour
         {
             RemoveFromSlot();
         });
-        
+
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
         onInventoryChanged += ResetInfo;
@@ -84,10 +100,14 @@ public class InventoryPanel : MonoBehaviour
         _closeButton.onClick.AddListener(() =>
         {
             onInventoryClosed?.Invoke();
-            SetPanelActiveValue(false);
+            Close();
         });
     }
 
+    private void Start()
+    {
+        Close();
+    }
     private void OnDestroy()
     {
         onInventoryChanged -= Refresh;
@@ -180,7 +200,7 @@ public class InventoryPanel : MonoBehaviour
     /// 인자값으로 받은 장착 부위에 맞는 인벤토리를 엽니다.
     /// </summary>
     /// <param name="part">인벤토리를 확인하고자 하는 장착 부위</param>
-    public void Open(Equip_Type part, int slotIndex)
+    public void OpenInventory(Equip_Type part, int slotIndex)
     {
         //선택 중인 슬롯을 초기화합니다.
         ClearCurrentSlot();
@@ -192,10 +212,6 @@ public class InventoryPanel : MonoBehaviour
 
         //인벤토리를 다시 불러옵니다.
         onInventoryChanged.Invoke();
-
-        SetPanelActiveValue(true);
-
-
     }
 
     /// <summary>
@@ -203,24 +219,60 @@ public class InventoryPanel : MonoBehaviour
     /// </summary>
     public void Refresh()
     {
+        if(currentPart == Equip_Type.Ring)
+        {
+            _normalButtons.SetActive(false);
+            _ringButtons.SetActive(true);
+        }
+        else
+        {
+            _normalButtons.SetActive(true);
+            _ringButtons.SetActive(false);
+        }
         //장착 부위에 맞는 인벤토리를 가져옵니다.
         List<Equipment> list = _equipmentInventory.GetInventory(currentPart);
+        ClearScrollContent();
+
+        if (_slots.Count < list.Count)
+            CreateSlots(list.Count);
 
         //인벤토리 슬롯 길이만큼 다음 동작을 실행합니다.
-        for(int i = 0; i<_slots.Count; i++)
+        for (int i = 0; i<_slots.Count; i++)
         {
             //리스트에 있는 총 수보다 i가 적으면 그 리스트에서 장비 정보를 가져옵니다.
             if(i < list.Count)
             {
+                _slots[i].Set(list[i]);
                 SetSlot(_slots[i], list[i]);
+                _slots[i].gameObject.SetActive(true);
             }
-
-            //리스트에 있는 총 개수보다 i가 같거나 크면 비웁니다.
             else
             {
-                ClearSlot(_slots[i]);
+                _slots[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    void CreateSlots(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            InventorySlot slot = Instantiate(_slotPrefab, content);
+
+            _slots.Add(slot);
+        }
+    }
+
+    private void ClearScrollContent()
+    {
+        //생성된 아이템들 기준
+        foreach (var item in _slots)
+        {
+            //내용물이 있으면 파괴
+            if (item != null) Destroy(item.gameObject);
+        }
+        //생성된 아이템들 리스트 초기화
+        _slots.Clear();
     }
 
     /// <summary>
@@ -230,24 +282,8 @@ public class InventoryPanel : MonoBehaviour
     /// <param name="equip">해당 슬롯과 index가 일치하는 인벤토리 내 장비</param>
     private void SetSlot(InventorySlot slot, Equipment equip)
     {
-        //스프라이트를 동일하게 맞추고, 그 스프라이트를 활성화합니다.
-        slot.icon.sprite = equip.icon;
-        slot.icon.enabled = true;
-
-        //장착 중이라는 것을 볼 수 있도록 장착 표기를 활성화합니다.
-        slot.equipMark.SetActive(equip.isEquipped);
-
-        //합성 슬롯에 등록했다는 것을 볼 수 있도록 합성 재료 표기를 활성화합니다.
-        slot.fuseMark.SetActive(equip.isFusing);
-
-        //잠겨있는 장비인 경우, 잠금 상태인 것을 확인할 수 있도록 자물쇠 모양 표기를 활성화합니다.
-        slot.lockedMark.SetActive(equip.isLocked);
-
         //해당 슬롯이 지금 내가 선택하고 있는 슬롯이 맞다면, 해당 슬롯을 활성화합니다.
         slot.selectMark.SetActive(_currentSelectedSlot == slot);
-
-        //해당 슬롯에 존재하는 장비의 강화도를 표기해줍니다.
-        slot.UpgradeValue.text = $"+{equip.equip_Upgrade}";
 
         //해당 슬롯 버튼을 눌렀을 때의 동작을 전부 지우고 새로 추가합니다.
         slot.button.onClick.RemoveAllListeners();
@@ -289,22 +325,6 @@ public class InventoryPanel : MonoBehaviour
         slot.button.onClick.RemoveAllListeners();
     }
 
-    /// <summary>
-    /// 패널의 활성화 여부를 정합니다.
-    /// </summary>
-    /// <param name="value">활성화 여부</param>
-    public void SetPanelActiveValue(bool value)
-    {
-        //참이면 1, 거짓이면 0으로 하여 참일 경우에만 보이게 합니다.
-        _inventoryPanelGroup.alpha = value == true? 1 : 0;
-
-        //상호작용 여부와 뒤 오브젝트와의 상호작용 제한은 참일 경우에만 활성화되도록 합니다.
-        _inventoryPanelGroup.interactable = value;
-        _inventoryPanelGroup.blocksRaycasts = value;
-    }
-
-    
-
     public void ClearCurrentSlot()
     {
         _currentSelectedSlot = null;
@@ -317,9 +337,14 @@ public class InventoryPanel : MonoBehaviour
     public void SetTargetSlot(EquipSlot slot)
     {
         targetSlot = slot;
-        Open(slot.part, slot.slotIndex);
+        OpenInventory(slot.part, slot.slotIndex);
     }
 
+    public void SelectSlotAndEquip(EquipSlot slot, Equipment equip)
+    {
+        targetSlot = slot;
+        AddToSlot(equip);
+    }
     /// <summary>
     /// 슬롯에 해당 장비를 장착합니다.
     /// </summary>
@@ -393,7 +418,7 @@ public class InventoryPanel : MonoBehaviour
             {
                 targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
                 equip.isFusing = true;
-                SetPanelActiveValue(false);
+                Close();
             }
         }
     }
@@ -455,5 +480,15 @@ public class InventoryPanel : MonoBehaviour
             _equipButtons.SetActive(false);
             _fuseButtons.SetActive(true);
         }
+    }
+
+    protected override void OnOpen()
+    {
+        
+    }
+
+    protected override void OnClose()
+    {
+        
     }
 }

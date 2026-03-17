@@ -5,16 +5,26 @@ using UnityEngine.UI;
 public class DungeonSelect : BaseUI
 {
     [SerializeField] PlayerStats _playerStats;
-
     [SerializeField] GameObject[] _dungeons;
     [SerializeField] GameObject[] _lockDungeons;
-    //[SerializeField] TextMeshProUGUI[] _levelTexts;
     [SerializeField] TextMeshProUGUI[] _clearMessage;
     [SerializeField] int[] _dungeonsLevel;
+    [SerializeField] int[] _targetDungeonIds;
 
+    [SerializeField] Button[] _selectBtns;
 
+    int _maxCurrent = 3;
 
-    int _currentLevel;
+    protected override void OnOpen()
+    {
+        //플레이어 현재 레벨 값 가져오기
+        UpdateLevel(_playerStats._currentLevel);
+    }
+
+    protected override void OnClose()
+    {
+        
+    }
 
     private void OnEnable()
     {
@@ -24,17 +34,6 @@ public class DungeonSelect : BaseUI
     private void OnDisable()
     {
         _playerStats.OnLevelChanged -= UpdateLevel;
-    }
-
-    protected override void OnOpen()
-    {
-        //플레이어 현재 레벨 값 가져오기
-        UpdateLevel(_playerStats._level);
-    }
-
-    protected override void OnClose()
-    {
-        
     }
 
     void UpdateLevel(int currentLevel)
@@ -48,13 +47,28 @@ public class DungeonSelect : BaseUI
             //레벨조건이 만족하면 각오브젝트들 활성/비활성
             _dungeons[i].SetActive(isUnlocked);
             _lockDungeons[i].SetActive(!isUnlocked);
-            //_levelTexts[i].enabled = !isUnlocked;
 
-            //TODO : 던전클리어횟수변수 받아서 해당 값으로 텍스트입력
-            //던전매니저에도 클리어횟수를 배열로 저장해두고
-            //int clearCount = 던전매니저카운트[i];
-            _clearMessage[i].text = ($"클리어 횟수 3/3");
+            // DataManager 통해 조회
+            int dungeonId = _targetDungeonIds[i];
+            int used = DataManager.Instance.GetUsedEntryCount(dungeonId);
+            _clearMessage[i].text = $"클리어 횟수 {used}/{_maxCurrent}";
 
+        }
+    }
+
+    public void OnAllBtns()
+    {
+        foreach (var btn in _selectBtns)
+        {
+            btn.interactable = true;
+        }
+    }
+
+    public void OffAllBtns()
+    {
+        foreach (var btn in _selectBtns)
+        {
+            btn.interactable = false;
         }
     }
 }
