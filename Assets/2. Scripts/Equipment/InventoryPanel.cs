@@ -33,6 +33,12 @@ public class InventoryPanel : BaseUI
     [SerializeField] GameObject _normalButtons;                  // 다른 장비 버튼들을 눌렀을 때의 버튼입니다.
     [SerializeField] GameObject _ringButtons;                    // 반지 장비 버튼을 눌렀을 때의 버튼입니다.
 
+    [Header("장비 상태별 활성화할 버튼 모음")]
+    [SerializeField] Button _enchantButton;                  // 장비 강화 버튼입니다.
+    [SerializeField] Button _ringEnchantButton;                  // 장비 강화 버튼입니다.
+    [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
+    [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
+
     [Header("장비 정보 출력용")]
     [SerializeField] GameObject _infoPanel;                  // 정보를 담을 패널
     [SerializeField] Image _infoIcon;                        // 정보 패널에서의 장비 아이콘 출력용 이미지
@@ -93,9 +99,13 @@ public class InventoryPanel : BaseUI
         //인벤토리 변화 시 발생하는 이벤트에 새로고침 메서드 추가
         onInventoryChanged += Refresh;
         onInventoryChanged += ResetInfo;
+        onInventoryChanged += DisableInteractable;
 
         onInventoryClosed += Refresh;
         onInventoryClosed += ResetInfo;
+        onInventoryClosed += DisableInteractable;
+
+        onClickEquipment += EnableInteractable;
 
         _closeButton.onClick.AddListener(() =>
         {
@@ -112,9 +122,13 @@ public class InventoryPanel : BaseUI
     {
         onInventoryChanged -= Refresh;
         onInventoryChanged -= ResetInfo;
+        onInventoryChanged -= DisableInteractable;
 
         onInventoryClosed += Refresh;
         onInventoryClosed += ResetInfo;
+        onInventoryClosed -= DisableInteractable;
+
+        onClickEquipment -= EnableInteractable;
     }
 
     /// <summary>
@@ -194,7 +208,21 @@ public class InventoryPanel : BaseUI
         //없을 시 거짓을 반환합니다.
         return false;
     }
-    
+
+    public void EnableInteractable()
+    {
+        _enchantButton.interactable = true;
+        _ringEnchantButton.interactable = true;
+        _sellButton.interactable = true;
+        _salvageButton.interactable = true;
+    }
+    public void DisableInteractable()
+    {
+        _enchantButton.interactable = false;
+        _ringEnchantButton.interactable = false;
+        _sellButton.interactable = false;
+        _salvageButton.interactable = false;
+    }
 
     /// <summary>
     /// 인자값으로 받은 장착 부위에 맞는 인벤토리를 엽니다.

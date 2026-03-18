@@ -9,7 +9,9 @@ using UnityEngine.AI;
 public class SpawnAreaProvider : MonoBehaviour
 {
     [Header("Area Settings")]
-    [SerializeField] private float _mapHalfSize = 30f; // 맵 절반 크기 (중심 0,0 기준)
+    //[SerializeField] private float _mapHalfSize = 30f; // 맵 절반 크기 (중심 0,0 기준)
+    [SerializeField] private Vector2 _mapSize = new Vector2(60f, 60f);  // 맵 가로세로
+    [SerializeField] private Vector3 _mapCenter = Vector3.zero;         // 맵 중심점
 
     [Header("Player")]
     //[SerializeField] private Camera _playerCamera;
@@ -22,15 +24,14 @@ public class SpawnAreaProvider : MonoBehaviour
 
     private const int _maxTryCount = 20; // 무한루프 방지
 
-    public float MapHalfSize => _mapHalfSize;
+    //public float MapHalfSize => _mapHalfSize;
+    public Vector2 MapSize => _mapSize;
+    public Vector3 MapCenter => _mapCenter;
 
     private void Awake()
     {
         if (_player == null)
             _player = GameObject.FindGameObjectWithTag("Player")?.transform;
-
-        //if (_playerCamera == null)
-        //    _playerCamera = Camera.main;
     }
 
     /// <summary>
@@ -72,8 +73,14 @@ public class SpawnAreaProvider : MonoBehaviour
     /// <returns></returns>
     private Vector3 GetRandomInsideMap()
     {
-        float x = Random.Range(-_mapHalfSize, _mapHalfSize);
-        float z = Random.Range(-_mapHalfSize, _mapHalfSize);
+        //float x = Random.Range(-_mapHalfSize, _mapHalfSize);
+        //float z = Random.Range(-_mapHalfSize, _mapHalfSize);
+        float halfX = _mapSize.x * 0.5f;
+        float halfZ = _mapSize.y * 0.5f;
+
+        float x = Random.Range(-halfX, halfX);
+        float z = Random.Range(-halfZ, halfZ);
+
         return new Vector3(x, 0f, z);
     }
 
@@ -92,8 +99,13 @@ public class SpawnAreaProvider : MonoBehaviour
         Vector3 pos = _player.position + new Vector3(dir.x, 0f, dir.y) * radius;
 
         //맵 경계 제한
-        pos.x = Mathf.Clamp(pos.x, -_mapHalfSize, _mapHalfSize);
-        pos.z = Mathf.Clamp(pos.z, -_mapHalfSize, _mapHalfSize);
+        //pos.x = Mathf.Clamp(pos.x, -_mapHalfSize, _mapHalfSize);
+        //pos.z = Mathf.Clamp(pos.z, -_mapHalfSize, _mapHalfSize);
+        float halfX = _mapSize.x * 0.5f;
+        float halfZ = _mapSize.y * 0.5f;
+
+        pos.x = Mathf.Clamp(pos.x, _mapCenter.x - halfX, _mapCenter.x + halfZ);
+        pos.z = Mathf.Clamp(pos.z, _mapCenter.z - halfZ, _mapCenter.z + halfZ);
 
         return pos;
     }
@@ -115,8 +127,11 @@ public class SpawnAreaProvider : MonoBehaviour
         Vector3 candidate = new Vector3(
             _player.position.x + sideOffset, 0f, _player.position.z + forwardDistance);
 
-        candidate.x = Mathf.Clamp(candidate.x, -_mapHalfSize, _mapHalfSize);
-        candidate.z = Mathf.Clamp(candidate.z, -_mapHalfSize, _mapHalfSize);
+        float halfX = _mapSize.x * 0.5f;
+        float halfZ = _mapSize.y * 0.5f;
+
+        candidate.x = Mathf.Clamp(candidate.x, _mapCenter.x - halfX, _mapCenter.x + halfX);
+        candidate.z = Mathf.Clamp(candidate.z, _mapCenter.z - halfZ, _mapCenter.z + halfZ);
 
         if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 3f, NavMesh.AllAreas))
         {
@@ -128,35 +143,6 @@ public class SpawnAreaProvider : MonoBehaviour
         return false;
     }
 
-    //private bool IsInsideSafeZone(Vector3 pos)
-    //{
-    //    if (_player == null)
-    //        return false;
-
-    //    Vector3 p = _player.position;
-    //    p.y = 0f;
-    //    pos.y = 0f;
-
-    //    return Vector3.Distance(p, pos) < _safeZoneRadius;
-    //}
-
-    ///// <summary>
-    ///// 현재 플레이어 카메라의 시야 내부인지
-    ///// </summary>
-    ///// <param name="worldPos"></param>
-    ///// <returns></returns>
-    //private bool IsInPlayerView(Vector3 worldPos)
-    //{
-    //    if (_playerCamera == null)
-    //        return false;
-
-    //    Vector3 viewportPos = _playerCamera.WorldToViewportPoint(worldPos);
-
-    //    return viewportPos.z > 0 &&
-    //        viewportPos.x > 0 && viewportPos.x < 1 &&
-    //        viewportPos.y > 0 && viewportPos.y < 1;
-    //}
-
     #region 기즈모 영역
     private void OnDrawGizmos()
     {
@@ -165,7 +151,7 @@ public class SpawnAreaProvider : MonoBehaviour
 
         Gizmos.DrawWireCube(
             Vector3.zero,
-            new Vector3(_mapHalfSize * 2f, 0.1f, _mapHalfSize * 2f)
+            new Vector3(_mapSize.x, 0.1f, _mapSize.y)
         );
 
         //플레이어 근처 영역: 노란색

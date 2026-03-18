@@ -26,6 +26,7 @@ public class MonsterSpawnManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private SpawnAreaProvider _spawnAreaProvider;
     [SerializeField] private MonoBehaviour _targetProvider;
+    [SerializeField] private PlayerCombatSlots _combatSlots;
 
     [Header("Projectile Database")]
     [SerializeField] private ProjectileDatabase _projectileDatabase;
@@ -306,7 +307,12 @@ public class MonsterSpawnManager : MonoBehaviour
         float minDistance = 1.2f;
         int maxAttemptsPerMonster = 12;
 
-        float mapHalfSize = _spawnAreaProvider.MapHalfSize;
+        Vector2 mapSize = _spawnAreaProvider.MapSize;
+        Vector3 mapCenter = _spawnAreaProvider.MapCenter;
+
+        float halfX = mapSize.x * 0.5f;
+        float halfZ = mapSize.y * 0.5f;
+
         List<Vector3> usedPositions = new();
 
         for (int i = 0; i < clusterSize; i++)
@@ -316,7 +322,8 @@ public class MonsterSpawnManager : MonoBehaviour
 
             if (!TryGetClusterPosition(
                 centerPos,
-                mapHalfSize,
+                mapSize,
+                mapCenter,
                 maxRadius,
                 minDistance,
                 maxAttemptsPerMonster,
@@ -357,7 +364,7 @@ public class MonsterSpawnManager : MonoBehaviour
         MonsterController monster = pool.Get();
         monster.transform.position = pos;
 
-        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase, _combatSlots);
 
         _activeMonsters.Add(monster);
         _currentMonsterCount++;
@@ -378,7 +385,8 @@ public class MonsterSpawnManager : MonoBehaviour
     /// <returns></returns>
     private bool TryGetClusterPosition(
         Vector3 centerPos,
-        float mapHalfSize,
+        Vector2 mapSize,
+        Vector3 mapCenter,
         float maxRadius,
         float minDistance,
         int maxAttempts,
@@ -391,8 +399,11 @@ public class MonsterSpawnManager : MonoBehaviour
             Vector3 candidate = centerPos + new Vector3(r.x, 0f, r.y);
 
             //맵 경계 Clamp
-            candidate.x = Mathf.Clamp(candidate.x, -mapHalfSize, mapHalfSize);
-            candidate.z = Mathf.Clamp(candidate.z, -mapHalfSize, mapHalfSize);
+            float halfX = mapSize.x * 0.5f;
+            float halfZ = mapSize.y * 0.5f;
+
+            candidate.x = Mathf.Clamp(candidate.x, mapCenter.x - halfX, mapCenter.x + halfX);
+            candidate.z = Mathf.Clamp(candidate.z, mapCenter.z - halfZ, mapCenter.z + halfZ);
 
             //지형 높이 보정 (NavMesh 위로 스냅)
             if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2f, NavMesh.AllAreas))
@@ -655,7 +666,7 @@ public class MonsterSpawnManager : MonoBehaviour
 
         monster.transform.position = pos;
 
-        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase);
+        monster.Initialize(this, _target, prefab, monsterId, _projectileDatabase, _combatSlots);
 
         _activeMonsters.Add(monster);
         _currentMonsterCount++;

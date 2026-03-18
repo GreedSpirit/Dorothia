@@ -224,6 +224,8 @@ public class FusePanel : BaseUI
         return successRate;
     }
 
+
+
     protected override void OnOpen()
     {
         
@@ -231,6 +233,18 @@ public class FusePanel : BaseUI
 
     protected override void OnClose()
     {
-        
+        mainSlot.equipped?.CancelFuseMaterial();
+        mainSlot.ClearSlot();
+        subSlot1.equipped?.CancelFuseMaterial();
+        subSlot1.ClearSlot();
+        subSlot2.equipped?.CancelFuseMaterial();
+        subSlot2.ClearSlot();
+    }
+
+    public void FuseCheat()
+    {
+        if (mainSlot.equipped == null) return;
+        if(mainSlot.equipped.equip_Fuse_Weight < 100)
+        mainSlot.equipped.equip_Fuse_Weight += 100;
     }
 }

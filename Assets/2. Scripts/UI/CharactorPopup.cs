@@ -63,9 +63,9 @@ public class CharactorPopup : BaseUI
 
     void UpdateExp(BigInteger currentExp, BigInteger maxExp)
     {
-        expSlider.value = (float)(currentExp / maxExp);
+        float percent = (float)(currentExp * 100 / maxExp);
 
-        float percent = (float)(currentExp / maxExp) * 100f;
+        expSlider.value = (float)percent/100;
         exp.text = ($"EXP  {percent.ToString("F0")}%   ({currentExp.ToString("F0")} / {maxExp.ToString("F0")})");        
     }
 

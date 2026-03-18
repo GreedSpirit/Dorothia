@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -106,29 +106,29 @@ public class SkillManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Update()
-    {
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-        {
-            for (int i = 0; i < 3000; i++) GetRandomScroll();
-        }
-
-        // 신비게이지 테스트
-        //if (Keyboard.current.sKey.wasPressedThisFrame)
-        //{
-        //    MysteryGauge += 1000;
-        //}
-
-        float dt = Time.deltaTime;
-        // 액티브 슬롯 쿨다운 업데이트
-        for (int i = 0; i < ActiveSlots.Length; i++)
-        {
-            ActiveSlots[i]?.UpdateCooldown(dt);
-        }
-
-        // 궁극기 쿨다운 업데이트
-        UltimateSlot?.UpdateCooldown(dt);
-    }
+    //private void Update()
+    //{
+    //    //if (Keyboard.current.rKey.wasPressedThisFrame)
+    //    //{
+    //    //    for (int i = 0; i < 3000; i++) GetRandomScroll();
+    //    //}
+    //
+    //    // 신비게이지 테스트
+    //    //if (Keyboard.current.sKey.wasPressedThisFrame)
+    //    //{
+    //    //    MysteryGauge += 1000;
+    //    //}
+    //
+    //    //float dt = Time.deltaTime;
+    //    //// 액티브 슬롯 쿨다운 업데이트
+    //    //for (int i = 0; i < ActiveSlots.Length; i++)
+    //    //{
+    //    //    ActiveSlots[i]?.UpdateCooldown(dt);
+    //    //}
+    //    //
+    //    //// 궁극기 쿨다운 업데이트
+    //    //UltimateSlot?.UpdateCooldown(dt);
+    //}
 
     public void GetRandomScroll()
     {
