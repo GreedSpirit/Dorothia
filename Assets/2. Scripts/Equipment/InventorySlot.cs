@@ -18,7 +18,7 @@ public class InventorySlot : MonoBehaviour
         icon.sprite = equip.icon;
         icon.enabled = true;
 
-        UpgradeValue.text = "+" + equip.equip_Upgrade_Value;
+        UpgradeValue.text = "+" + equip.equip_Upgrade;
 
         lockedMark.SetActive(equip.isLocked);
 

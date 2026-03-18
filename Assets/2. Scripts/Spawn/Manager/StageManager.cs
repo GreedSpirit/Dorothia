@@ -598,4 +598,51 @@ public class StageManager : MonoBehaviour
             ResetSectionAndRespawn();
         }
     }
+
+    #region 테스트용
+    public void JumpSection(int amount)
+    {
+        int targetSection = _currentSection + amount;
+
+        Debug.Log($"[Cheat] Section Jump: {_currentSection} -> {targetSection}");
+
+        //현재 Stage 기준으로 Section 재계산
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+
+        if (dict == null)
+        {
+            Debug.LogError("[StageManager] SectionData Dict 없음");
+            return;
+        }
+
+        //전체 Section 중 targetSection이 포함된 구간 찾기
+        var matched = dict.Values
+            .Where(x => targetSection >= x.Section_Start && targetSection <= x.Section_End)
+            .FirstOrDefault();
+
+        if (matched == null)
+        {
+            Debug.LogError($"[Cheat] 해당 Section 없음: {targetSection}");
+            return;
+        }
+
+        //Stage 변경 필요 여부 체크
+        if (_stage.Stage_Id != matched.Stage_Id)
+        {
+            Debug.Log($"[Cheat] Stage 변경 필요: {_stage.Stage_Id} -> {matched.Stage_Id}");
+
+            //Stage 자체를 다시 시작 (맵 포함 전체 리셋)
+            StartStageFromSection(matched.Stage_Id, targetSection);
+            return;
+        }
+
+        //같은 Stage면 내부 값만 변경
+        _currentSection = targetSection;
+        _sectionData = matched;
+
+        OnSectionChanged?.Invoke(_currentSection);
+
+        Debug.Log($"[Cheat] Section 이동 완료: {_currentSection} (SectionId:{_sectionData.Stage_Section_Id})");
+    }
+    #endregion
 }
