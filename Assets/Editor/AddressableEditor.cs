@@ -8,9 +8,10 @@ using UnityEngine;
 
 public class AddressableEditor : EditorWindow
 {
-    private const string EffectFolder = "Assets/3. Prefabs/Effects";
-    private const string MotionFolder = "Assets/3. Prefabs/Motion";
-    private const string IconFolder = "Assets/Image/Skills";
+    private const string EffectFolder = "Assets/Resources/Skill/Effect";
+    private const string MotionFolder = "Assets/Resources/Skill/Motion";
+    private const string IconFolder = "Assets/Resources/Skill/Icon";
+
     private const string EquipFolder = "Assets/99. IgnoredAssets/EquipIcon/";
 
     [MenuItem("Tools/Resource Manager")]
@@ -69,7 +70,7 @@ public class AddressableEditor : EditorWindow
         }
 
         AssetDatabase.SaveAssets();
-        Debug.Log($"[Skill Tool] 총 {count}개의 에셋이 어드레서블로 업데이트되었습니다.");
+        Debug.Log($"총 {count}개의 에셋이 어드레서블로 업데이트되었습니다.");
         EditorUtility.DisplayDialog("완료", $"{count}개의 에셋 등록 완료!", "확인");
     }
 
