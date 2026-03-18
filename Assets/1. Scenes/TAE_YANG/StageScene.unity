@@ -1386,17 +1386,6 @@ PrefabInstance:
       addedObject: {fileID: 484373333}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e57eec668fc9b4441b5cbb83eff066ea, type: 3}
---- !u!114 &402800309 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
-  m_PrefabInstance: {fileID: 1501011581}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &484373332
 GameObject:
   m_ObjectHideFlags: 0
@@ -3103,6 +3092,34 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 820845023}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseTopPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564724086670347781, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 1629233313023111204, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3803,6 +3820,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -53.665527
       objectReference: {fileID: 0}
+    - target: {fileID: 5764414605084948922, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5893393103134917714, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: _targetpanel
       value: 
@@ -3903,10 +3924,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6326511554850307235, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
-      propertyPath: close
-      value: 
-      objectReference: {fileID: 402800309}
     - target: {fileID: 6326511554850307235, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: _stageManager
       value: 
@@ -4235,6 +4252,10 @@ PrefabInstance:
       propertyPath: targetPanel
       value: 
       objectReference: {fileID: 2069398324}
+    - target: {fileID: 7287191302557479051, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_Size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7298148578048699953, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: _targetpanel
       value: 
@@ -5785,7 +5806,7 @@ MonoBehaviour:
   _baseRadius: 1
   _randomOffset: 0.35
   _useAdaptive: 1
-  _maxRings: 4
+  _maxRings: 3
   _ringSpacing: 0.9
   _slotsPerRing: 12
   _maxSlots: 48
@@ -5984,6 +6005,10 @@ PrefabInstance:
       propertyPath: joystickHandle
       value: 
       objectReference: {fileID: 1042030021}
+    - target: {fileID: 5221601638537756902, guid: a7d5a1291db775049a25180b03402308, type: 3}
+      propertyPath: m_Speed
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5836150658412791258, guid: a7d5a1291db775049a25180b03402308, type: 3}
       propertyPath: m_Controller
       value: 
@@ -6064,6 +6089,22 @@ PrefabInstance:
       propertyPath: _mapRoot
       value: 
       objectReference: {fileID: 1651669250}
+    - target: {fileID: 1779217680831654421, guid: 55f4bda95fe77cf419584d4a57e1f95e, type: 3}
+      propertyPath: _dungeonMaps.Array.data[0].MapPrefab
+      value: 
+      objectReference: {fileID: 7326227451134329991, guid: 3b016b939b2c52e46905453b39fae254, type: 3}
+    - target: {fileID: 1779217680831654421, guid: 55f4bda95fe77cf419584d4a57e1f95e, type: 3}
+      propertyPath: _dungeonMaps.Array.data[1].MapPrefab
+      value: 
+      objectReference: {fileID: 7915974930960465470, guid: 3315b086e1eddf445bc5b95d7415dffa, type: 3}
+    - target: {fileID: 1779217680831654421, guid: 55f4bda95fe77cf419584d4a57e1f95e, type: 3}
+      propertyPath: _dungeonMaps.Array.data[2].MapPrefab
+      value: 
+      objectReference: {fileID: 1287316712632494590, guid: e39c88eefd78c3f49b43940493e49ade, type: 3}
+    - target: {fileID: 1779217680831654421, guid: 55f4bda95fe77cf419584d4a57e1f95e, type: 3}
+      propertyPath: _dungeonMaps.Array.data[3].MapPrefab
+      value: 
+      objectReference: {fileID: 2888197253569513724, guid: 10e41ea65e589454a814a04db835445b, type: 3}
     - target: {fileID: 3566570812140155335, guid: 55f4bda95fe77cf419584d4a57e1f95e, type: 3}
       propertyPath: m_Name
       value: MapManager

@@ -685,4 +685,17 @@ public class MonsterSpawnManager : MonoBehaviour
 
         return _spawnAreaProvider.TryGetSpawnPosition(out pos);
     }
+
+    public void ResetSpawnState()
+    {
+        //모든 상태 강제 초기화
+        if (_spawnRoutine != null)
+        {
+            StopCoroutine(_spawnRoutine);
+            _spawnRoutine = null;
+        }
+
+        _isSpawning = false;
+        _isBossFight = false;
+    }
 }
