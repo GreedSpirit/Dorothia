@@ -39,9 +39,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public float EnemyFindRange => _enemyFindRange;
     public Transform Transform => transform;
     public bool IsAlive => !_isDead;
-
     public int ComboIndex { get; set; } = 0;
     public bool IsAttack { get; set; } = false;
+    public bool IsInvincible{ get; set; }
 
     // 캐싱
     private PlayerStats _playerStats;
@@ -424,7 +424,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         OnDead?.Invoke();
     }
 
-    public void ApplyDamage(int amount) { if (!_isDead) _playerStats.TakeDamage(amount); }
+    public void ApplyDamage(int amount) { if (!_isDead || !IsInvincible) _playerStats.TakeDamage(amount); }
 
     public void ResetState()
     {

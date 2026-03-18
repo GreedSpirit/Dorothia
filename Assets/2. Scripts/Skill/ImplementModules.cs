@@ -156,6 +156,9 @@ public class DashModule : BaseSkillModule
             // centerPoint = Vector3.Lerp(player.transform.position, ctx.LockedTarget.transform.position, 0.5f);
         }
 
+        //todo : 1. 돌진 시, 힛박스를 켜서 스킬데미지를 넘겨주던가
+        //todo : 2. 돌진 시, 돌진하는동안 피직스오버랩으로 적찾고 주변 적 데미지 주던가
+
         player.EnableAttackCollider();
 
         PlayMyEffect(player, centerPoint);

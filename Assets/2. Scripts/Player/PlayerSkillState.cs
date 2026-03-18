@@ -42,6 +42,7 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
                 OnClipReady(player);
             });
         }
+        player.IsInvincible = true;
     }
 
     // 클립 교체 완료 후 공통 실행
@@ -84,11 +85,13 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
 
     public void Exit(PlayerCtrl player)
     {
+        player.IsInvincible = false;
         player.Anima.speed = 1f;
         player.Anima.SetBool("IsSkill", false);
         player.Anima.ResetTrigger("Skill");
         _targetSkill = null;
         _skillAnimStarted = false;
         _waitingForClip = false;
+
     }
 }
