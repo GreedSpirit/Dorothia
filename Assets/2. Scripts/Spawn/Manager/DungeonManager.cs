@@ -40,7 +40,7 @@ public class DungeonManager : MonoBehaviour
 
     //이벤트
     public static event System.Action<int> OnDungeonStarted;
-    public static event System.Action<int> OnDungeonCleared;
+    public static event System.Action<string, int, float> OnDungeonCleared;
     public static event System.Action<int> OnDungeonFailed;
     public static event System.Action<int> OnDungeonWaveChanged;
 
@@ -51,6 +51,10 @@ public class DungeonManager : MonoBehaviour
     public static event System.Action<int, int, int> OnDungeonEntryCountChanged;   // dungeonId, used, max
     public static event System.Action<float> OnDungeonTimeLimitChanged;            // timeLimit
     public static event System.Action<float> OnDungeonPrepareStarted;
+    public static event System.Action<List<Equipment>> OnDungeonEQReward;
+    public static event System.Action<List<G_StoneData>> OnDungeonGSReward;
+    public static event System.Action<List<Sk_SclData>> OnDungeonSKReward;
+    public static event System.Action<System.Numerics.BigInteger> OnDungeonReward;
 
     private bool _eventsRegistered;
 
@@ -185,6 +189,7 @@ public class DungeonManager : MonoBehaviour
     #region 던전 입장
     public void StartDungeon(int dungeonId, int stepId)
     {
+        //TODO : 테스트용 횟수초기화 삭제 예정
         DungeonEntryTracker.ForceSetUsedCount(150001, 0);
         DungeonEntryTracker.ForceSetUsedCount(150002, 0);
         DungeonEntryTracker.ForceSetUsedCount(150003, 0);
@@ -486,6 +491,8 @@ public class DungeonManager : MonoBehaviour
     #region 성공 / 실패
     private void ClearDungeon()
     {
+        float clearTime = (Time.time - _combatStartTime);
+
         Debug.Log("[Dungeon] 성공");
 
         GiveReward();
@@ -494,7 +501,7 @@ public class DungeonManager : MonoBehaviour
 
         OnDungeonEntryCountChanged?.Invoke(_dungeon.Dungeon_Id, usedCount, _dungeon.Daily_Entry);
 
-        OnDungeonCleared?.Invoke(_dungeon.Dungeon_Id);
+        OnDungeonCleared?.Invoke(_dungeon.Dungeon_Name, _stepData.Dungeon_Step_Id, clearTime);
 
         ChangeState(DungeonState.Exit);
     }
@@ -512,36 +519,103 @@ public class DungeonManager : MonoBehaviour
     #region 던전 보상
     private void GiveReward()
     {
-        /* 여기만 쓰면 될 것 같습니다
         //던전 보상 조회
         var reward =
             DataManager.Instance.GetData<Dungeon_RewardData>(_stepData.Reward_Group_Id);
-        //기존에 있던 스테이지 섹션 아이디 조회
-        var Ddata = DataManager.Instance.GetData<Stage_SectionData>(DungeonReturnContext.ReturnSection);
 
-        //반복할 횟수 랜덤 뽑기
-        int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
-
-        //랜덤으로 뽑은 횟수만큼 장비생성
-        for (int i = 0; i < a; i++)
-        {
-            TestWeaponGenerator.Instance.Test2(Ddata.Equip_Drop_Level, (int)reward.Reward_Rank);
-        }
-        
         if (reward == null)
         {
             Debug.LogError("RewardData 없음");
             return;
         }
-        */
 
-        var reward =
-            DataManager.Instance.GetData<Dungeon_RewardData>(_stepData.Reward_Group_Id);
-        System.Numerics.BigInteger amount = 
-            BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+        //클리어한 던전 보상이 골드, 경험치, 강자의증표
+        if (reward.Dungeon_Type == Dungeon_Type.Gold || reward.Dungeon_Type == Dungeon_Type.Exp || reward.Dungeon_Type == Dungeon_Type.TokenOfStrong)
+        {
+            System.Numerics.BigInteger amount =
+                BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+            Debug.Log($"[Dungeon] Reward 지급 ConsumId={reward.Consum_Id}," +
+                $" Amount={amount}, Rank={reward.Reward_Rank}");
+
+            //보상값 이벤트 보내기
+            OnDungeonReward?.Invoke(amount);
+        }
+
+        //클리어한 던전 보상이 스킬주문서
+        if (reward.Dungeon_Type == Dungeon_Type.SkillScroll)
+        {
+            //스킬주문서 데이터가져오고
+            var SData = DataManager.Instance.GetDict<Sk_SclData>();
+
+            var RandomList = new List<Sk_SclData>();
+
+            int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+            for (int i = 0; i < a; i++)
+            {
+                //값들 리스트 만들고
+                var list = new List<Sk_SclData>(SData.Values);
+                //랜덤돌리기
+                var random = list[Random.Range(0, list.Count)];
+                //선택된값 추가
+                RandomList.Add(random);
+            }
+
+            //랜덤값 이벤트 보내기
+            OnDungeonSKReward?.Invoke(RandomList);
+        }
+
+        //클리어한 던전 보상이 요정석
+        if (reward.Dungeon_Type == Dungeon_Type.FairyStone)
+        {
+            //요정석 데이터 가져오기
+            var GSData = DataManager.Instance.GetDict<G_StoneData>();
+
+            var RandomList = new List<G_StoneData>();
+
+            int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+            for (int i = 0; i < a; i++)
+            {                
+                //값들 list에 넣고
+                var list = new List<G_StoneData>(GSData.Values);
+                //랜덤선택
+                var random = list[Random.Range(0, list.Count)];
+                //선택된값 추가
+                RandomList.Add(random);
+            }
+
+            //랜덤값 이벤트 보내기
+            OnDungeonGSReward?.Invoke(RandomList);
+        }
+
+        //클리어한 던전 보상이 장비
+        if (reward.Dungeon_Type == Dungeon_Type.Equipment)
+        {
+            //기존에 있던 스테이지 섹션 아이디 조회
+            var Ddata = DataManager.Instance.GetData<Stage_SectionData>(DungeonReturnContext.ReturnSection);
+
+            //장비담아둘 리스트
+            var Equipmentlist = new List<Equipment>();
+
+            //반복할 횟수 랜덤 뽑기
+            int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+            //랜덤으로 뽑은 횟수만큼 장비생성
+            for (int i = 0; i < a; i++)
+            {
+                var Equipment = TestWeaponGenerator.Instance.Test2(Ddata.Equip_Drop_Level, (int)reward.Reward_Rank);
+
+                Equipmentlist.Add(Equipment);
+            }
+
+            //생성된 장비 이벤트 보내기
+            OnDungeonEQReward?.Invoke(Equipmentlist);
+        }
+
+
         
-        Debug.Log($"[Dungeon] Reward 지급 ConsumId={reward.Consum_Id}," +
-            $" Amount={amount}, Rank={reward.Reward_Rank}");
     }
     #endregion
 
