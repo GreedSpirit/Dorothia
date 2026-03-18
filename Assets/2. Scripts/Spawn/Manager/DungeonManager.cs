@@ -96,7 +96,6 @@ public class DungeonManager : MonoBehaviour
     private int _maxWave;           // 최대 wave
     private int _currentWave;       // 현재 wave
 
-    public int _currentCount;
 
     public bool IsDungeonRunning => _isDungeonRunning;
     public DungeonState CurrentState => _state;
@@ -491,19 +490,9 @@ public class DungeonManager : MonoBehaviour
 
         GiveReward();
 
-        //일일 입장 횟수 체크
-        if (!DungeonEntryTracker.TryConsumeEntry(
-            _dungeon.Dungeon_Id,
-            _dungeon.Daily_Entry,
-            out int usedCount,
-            out int remainCount))
-        {
-            Debug.LogWarning($"[Dungeon] 입장 횟수 부족 dungeonId={_currentCount}");
-            OnDungeonEntryCountChanged?.Invoke(_currentCount, _dungeon.Daily_Entry, _dungeon.Daily_Entry);
-            return;
-        }
+        DataManager.Instance.TryConsumeEntry(_dungeon.Dungeon_Id, _dungeon.Daily_Entry, out int usedCount);
 
-        OnDungeonEntryCountChanged?.Invoke(_currentCount, usedCount, _dungeon.Daily_Entry);
+        OnDungeonEntryCountChanged?.Invoke(_dungeon.Dungeon_Id, usedCount, _dungeon.Daily_Entry);
 
         OnDungeonCleared?.Invoke(_dungeon.Dungeon_Id);
 
