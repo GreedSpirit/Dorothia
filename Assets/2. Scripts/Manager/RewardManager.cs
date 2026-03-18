@@ -84,7 +84,7 @@ public class RewardManager : MonoBehaviour
         //지급
         BigInteger exp = isBoss ? bossExp : mobExp;
 
-        Debug.Log($"[RewardManager] Exp 지급 - Section:{sectionId}, IsBoss:{isBoss}, Exp:{exp}");
+        //Debug.Log($"[RewardManager] Exp 지급 - Section:{sectionId}, IsBoss:{isBoss}, Exp:{exp}");
 
         _playerStats.AddExp(exp);
     }

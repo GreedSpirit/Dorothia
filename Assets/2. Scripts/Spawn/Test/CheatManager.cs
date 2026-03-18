@@ -13,4 +13,12 @@ public class CheatManager : MonoBehaviour
 
         Debug.Log($"[Cheat] Exp 지급: {cheatExp}");
     }
+
+    public void JumpSectionCheat()
+    {
+        if (StageManager.Instance == null)
+            return;
+
+        StageManager.Instance.JumpSection(49);
+    }
 }
