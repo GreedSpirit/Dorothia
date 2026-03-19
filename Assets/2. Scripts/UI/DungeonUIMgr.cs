@@ -7,8 +7,10 @@ using UnityEngine.UI;
 public class DungeonUIMgr : MonoBehaviour
 {
     [SerializeField] GameObject _dungeonRewardPanel;
+    [SerializeField] GameObject _dungeonFailPanel;
     [SerializeField] TextMeshProUGUI _dungeonInfoText;
     [SerializeField] TextMeshProUGUI _dungeonRewardText;
+    [SerializeField] TextMeshProUGUI _dungeonFailText;
     [SerializeField] Button _dungeonClear;
     [SerializeField] Button _nextDungeon;
 
@@ -19,6 +21,7 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
         DungeonManager.OnDungeonReward += UpdateRewardUI;
         DungeonManager.OnDungeonCleared += UpdateDungeonInfo;
+        DungeonManager.OnDungeonFailed += UpdateDungeonFail;
     }
 
     private void OnDisable()
@@ -28,6 +31,7 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
         DungeonManager.OnDungeonReward -= UpdateRewardUI;
         DungeonManager.OnDungeonCleared -= UpdateDungeonInfo;
+        DungeonManager.OnDungeonFailed -= UpdateDungeonFail;
     }
 
 
@@ -108,10 +112,10 @@ public class DungeonUIMgr : MonoBehaviour
 
         string time = string.Format("{0:00}:{1:00}", minutes, seconds);
 
-        _dungeonInfoText.text = "";
+        _dungeonFailText.text = "";
 
-        _dungeonInfoText.text = ($"{dungeonName}\n{stepId}단계 Fail\n진행시간 {time}");
+        _dungeonFailText.text = ($"{dungeonName}\n{stepId}단계 Fail\n진행시간 {time}");
 
-        _dungeonRewardPanel.SetActive(true);
+        _dungeonFailPanel.SetActive(true);
     }
 }

@@ -41,7 +41,7 @@ public class DungeonManager : MonoBehaviour
     //이벤트
     public static event System.Action<int> OnDungeonStarted;
     public static event System.Action<string, int, float> OnDungeonCleared;
-    public static event System.Action<int> OnDungeonFailed;
+    public static event System.Action<string, int, float> OnDungeonFailed;
     public static event System.Action<int> OnDungeonWaveChanged;
 
     //UI 연결용 이벤트
@@ -508,9 +508,12 @@ public class DungeonManager : MonoBehaviour
 
     private void FailDungeon()
     {
+        float clearTime = (Time.time - _combatStartTime);
+        int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
+
         Debug.Log("[Dungeon] 실패");
 
-        OnDungeonFailed?.Invoke(_dungeon.Dungeon_Id);
+        OnDungeonFailed?.Invoke(_dungeon.Dungeon_Name, dungeonStep, clearTime);
 
         ChangeState(DungeonState.Exit);
     }
