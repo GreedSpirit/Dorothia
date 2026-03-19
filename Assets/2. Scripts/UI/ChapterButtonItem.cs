@@ -5,9 +5,10 @@ using UnityEngine.UI;
 public class ChapterButtonItem : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private TMP_Text _chapterNumberText; // 챕터 1
-    [SerializeField] private TMP_Text _chapterNameText;   // 론도니아
+    [SerializeField] private TMP_Text _chapterNumberText;   // 챕터 1
+    [SerializeField] private TMP_Text _chapterNameText;     // 론도니아
     [SerializeField] private Button _button;
+    [SerializeField] private Image _selectedHighlight;      // 선택된 버튼
 
     [Header("Data")]
     [SerializeField] private int _stageId;   // 이 챕터에 해당하는 Stage_Id
@@ -41,5 +42,11 @@ public class ChapterButtonItem : MonoBehaviour
             _chapterNumberText.text,
             _chapterNameText.text
         );
+    }
+
+    public void SetSelected(bool value)
+    {
+        if (_selectedHighlight != null)
+            _selectedHighlight.gameObject.SetActive(value);
     }
 }
