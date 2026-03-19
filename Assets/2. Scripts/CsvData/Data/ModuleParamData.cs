@@ -20,6 +20,8 @@ public class ModuleParamData : ICSVLoad, ITableKey
     public float Projectile_Speed { get; set; }
     public string Skill_Sfx_Patch { get; set; }
     public float SkillCast_Range { get; set; }
+    public float First_Delay { get; set; }
+    public Skill_Target Skill_Target { get; set; }
 
     int ITableKey.Id => Module_Param_Id;
     string ITableKey.Key => Module_Param_Id.ToString();
@@ -56,6 +58,10 @@ public class ModuleParamData : ICSVLoad, ITableKey
         if (values.Length > 13) Skill_Sfx_Patch = values[13];
         // 14: SkillCast_Range (float)
         if (values.Length > 14 && float.TryParse(values[14], out float v14)) SkillCast_Range = v14;
+        // 15: First_Delay (float)
+        if (values.Length > 15 && float.TryParse(values[15], out float v15)) First_Delay = v15;
+        // 16: Skill_Target (Skill_Target)
+        if (values.Length > 16 && Enum.TryParse(values[16], out Skill_Target v16)) Skill_Target = v16;
     }
     private int[] ParseIntArray(string value, int defaultVal)
     {
