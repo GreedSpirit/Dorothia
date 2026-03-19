@@ -23,7 +23,11 @@ public class GremlinUpgradePanel : BaseUI
     //합성 버튼
     [SerializeField] Button _fuseButton;
 
-    private int 
+    private int _normalGremlin;
+    private int _uncommonGremlin;
+    private int _rareGremlin;
+    private int _legendaryGremlin;
+    private int _mythticGremlin;
 
     //열었을 때
     private void Awake()
