@@ -23,43 +23,10 @@ public class EquipmentNormalExchangeFunction : BaseUI
 
     private void Awake()
     {
-        _salvageButton.onClick.AddListener(() =>
-        {
-            if (_inventoryPanel.CheckEquipmentSelected() == true)
-            {
-                if (_inventoryPanel.CheckLocked() == true)
-                {
-                    return;
-                }
-                _isSalvage = true;
-                _noticeMessage.text = "정말 분해하시겠습니까?";
-                _buttonText.text = "분해";
-            }
-        });
-        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
-        _sellButton.onClick.AddListener(() =>
-        {
-            if (_inventoryPanel.CheckEquipmentSelected() == true)
-            {
-                if (_inventoryPanel.CheckLocked() == true)
-                {
-                    return;
-                }
-                _isSalvage = false;
-                _noticeMessage.text = "정말 판매하시겠습니까?";
-                _buttonText.text = "판매";
-            }
-        });
         //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
         _AcceptButton.onClick.AddListener(() =>
         {
             SalvageOrSellEquip(_inventoryPanel.GiveEquipmentData(), _inventoryPanel.GiveCurrentSlotData());
-            UIManager.Instance.CloseTopPanel();
-        });
-        //안내패널 내 N버튼 기능 추가 - 안내패널 비활성화
-        _RejectButton.onClick.AddListener(() =>
-        {
-            UIManager.Instance.CloseTopPanel();
         });
 
         Close();
@@ -81,6 +48,34 @@ public class EquipmentNormalExchangeFunction : BaseUI
         {
             SellEquip(equip, slot);
         }
+    }
+
+    public void OnSalvage()
+    {
+        if (_inventoryPanel.CheckEquipmentSelected() == true)
+        {
+            if (_inventoryPanel.CheckLocked() == true)
+            {
+                return;
+            }
+            _isSalvage = true;
+            _noticeMessage.text = "정말 분해하시겠습니까?";
+            _buttonText.text = "분해";
+        }
+    }
+
+    public void OnSell()
+    {
+        if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                if (_inventoryPanel.CheckLocked() == true)
+                {
+                    return;
+                }
+                _isSalvage = false;
+                _noticeMessage.text = "정말 판매하시겠습니까?";
+                _buttonText.text = "판매";
+            }
     }
 
     /// <summary>
