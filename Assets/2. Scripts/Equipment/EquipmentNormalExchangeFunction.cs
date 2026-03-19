@@ -51,11 +51,13 @@ public class EquipmentNormalExchangeFunction : BaseUI
         if (_isSalvage == true)
         {
             Salvage(equip, slot);
+            Close();
         }
         //그것이 아니라면 판매를 진행합니다.
         else
         {
             SellEquip(equip, slot);
+            Close();
         }
     }
 
@@ -63,28 +65,30 @@ public class EquipmentNormalExchangeFunction : BaseUI
     {
         if (_inventoryPanel.CheckEquipmentSelected() == true)
         {
-            if (_inventoryPanel.CheckLocked() == true)
+            if (_inventoryPanel.CheckLocked() == true || _inventoryPanel.CheckEquipped() == true)
             {
                 return;
             }
             _isSalvage = true;
             _noticeMessage.text = "정말 분해하시겠습니까?";
             _buttonText.text = "분해";
+            Open();
         }
     }
 
     public void OnSell()
     {
         if (_inventoryPanel.CheckEquipmentSelected() == true)
+        {
+            if (_inventoryPanel.CheckLocked() == true || _inventoryPanel.CheckEquipped() == true)
             {
-                if (_inventoryPanel.CheckLocked() == true)
-                {
-                    return;
-                }
-                _isSalvage = false;
-                _noticeMessage.text = "정말 판매하시겠습니까?";
-                _buttonText.text = "판매";
+                return;
             }
+            _isSalvage = false;
+            _noticeMessage.text = "정말 판매하시겠습니까?";
+            _buttonText.text = "판매";
+            Open();
+        }
     }
 
     /// <summary>

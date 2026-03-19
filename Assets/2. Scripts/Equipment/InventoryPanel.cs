@@ -154,6 +154,11 @@ public class InventoryPanel : BaseUI
         return _selectedEquipment.isLocked;
     }
 
+    public bool CheckEquipped()
+    {
+        return _selectedEquipment.isEquipped;
+    }
+
     /// <summary>
     /// 장비를 클릭했을 때의 동작입니다.
     /// </summary>
