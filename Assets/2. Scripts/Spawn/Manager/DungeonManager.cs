@@ -492,7 +492,7 @@ public class DungeonManager : MonoBehaviour
     private void ClearDungeon()
     {
         float clearTime = (Time.time - _combatStartTime);
-
+        int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
         Debug.Log("[Dungeon] 성공");
 
         GiveReward();
@@ -501,7 +501,7 @@ public class DungeonManager : MonoBehaviour
 
         OnDungeonEntryCountChanged?.Invoke(_dungeon.Dungeon_Id, usedCount, _dungeon.Daily_Entry);
 
-        OnDungeonCleared?.Invoke(_dungeon.Dungeon_Name, _stepData.Dungeon_Step_Id, clearTime);
+        OnDungeonCleared?.Invoke(_dungeon.Dungeon_Name, dungeonStep, clearTime);
 
         ChangeState(DungeonState.Exit);
     }
@@ -550,12 +550,14 @@ public class DungeonManager : MonoBehaviour
 
             var RandomList = new List<Sk_SclData>();
 
+            //값들 리스트 만들고
+            var list = new List<Sk_SclData>(SData.Values);
+
             int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
 
             for (int i = 0; i < a; i++)
             {
-                //값들 리스트 만들고
-                var list = new List<Sk_SclData>(SData.Values);
+                
                 //랜덤돌리기
                 var random = list[Random.Range(0, list.Count)];
                 //선택된값 추가
