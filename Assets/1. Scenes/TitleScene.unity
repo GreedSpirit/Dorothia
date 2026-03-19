@@ -313,6 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33741ecc1692de04a984df775accd92a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TitleManager
+  image: {fileID: 695736489}
 --- !u!1 &321302183
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,12 +344,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1096288827}
-  - {fileID: 695736488}
   - {fileID: 1265811892}
   - {fileID: 628204300}
   - {fileID: 1455891925}
   - {fileID: 7907324231127124303}
   - {fileID: 5186464769992281694}
+  - {fileID: 695736488}
   m_Father: {fileID: 130879558}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1116,6 +1117,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e753728dce5033f498fb30d3d7f44f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  _dungeonRewardPanel: {fileID: 0}
+  _dungeonInfoText: {fileID: 0}
   _dungeonRewardText: {fileID: 0}
 --- !u!4 &626366089
 Transform:
@@ -1204,8 +1207,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -29.8047}
-  m_SizeDelta: {x: 772.5284, y: 1314.395}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1080, y: 1920}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &695736489
 MonoBehaviour:
@@ -1220,14 +1223,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9811321, g: 0.8731458, b: 0.8731458, a: 0.20784314}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: c3ce3d6c7c7c2a84481c827855504ee2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1621,7 +1624,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: d62184a80c9127d4aa37be69bb464625, type: 3}
+  m_Texture: {fileID: 2800000, guid: c3ce3d6c7c7c2a84481c827855504ee2, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
