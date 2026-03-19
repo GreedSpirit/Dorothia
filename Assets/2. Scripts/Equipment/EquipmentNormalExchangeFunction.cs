@@ -23,6 +23,15 @@ public class EquipmentNormalExchangeFunction : BaseUI
 
     private void Awake()
     {
+        _salvageButton.onClick.AddListener(() =>
+        {
+            OnSalvage();
+        });
+        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
+        _sellButton.onClick.AddListener(() =>
+        {
+            OnSell();
+        });
         //안내패널 내 Y버튼 기능 추가 - 분해, 안내패널 비활성화
         _AcceptButton.onClick.AddListener(() =>
         {

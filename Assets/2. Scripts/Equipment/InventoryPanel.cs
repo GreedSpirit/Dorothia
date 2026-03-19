@@ -61,9 +61,6 @@ public class InventoryPanel : BaseUI
     
     private InventoryEquipFunction _inventoryEquipFunction;
     private InventorySlot _currentSelectedSlot;
-
-    [SerializeField] EquipmentNormalExchangeFunction _normalExchangeUI;
-
     private void Awake()
     {
         //인스펙터상의 실수 확인용
@@ -113,15 +110,6 @@ public class InventoryPanel : BaseUI
         {
             onInventoryClosed?.Invoke();
             Close();
-        });
-        _salvageButton.onClick.AddListener(() =>
-        {
-            _normalExchangeUI.OnSalvage();
-        });
-        //판매 버튼 기능 추가 - 분해 상태 X. 안내패널 활성화
-        _sellButton.onClick.AddListener(() =>
-        {
-            _normalExchangeUI.OnSell();
         });
     }
 
