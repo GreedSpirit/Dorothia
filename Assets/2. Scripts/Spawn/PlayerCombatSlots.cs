@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using UnityEngine;
 
 /// <summary>
 /// 플레이어 주변에 근접 몬스터가 
@@ -17,14 +18,14 @@ public class PlayerCombatSlots : MonoBehaviour
     [Header("Base Slot Layout")]
     [SerializeField] private int _baseSlotCount = 12;               // 플레이어 주변 슬롯 수
     [SerializeField] private float _baseRadius = 1f;                // 플레이어 중심에서 슬롯까지 거리
-    [SerializeField] private float _randomOffset = 0.35f;           // 슬롯 퍼짐 정도
+    [SerializeField] private float _randomOffset = 0f;              // 슬롯 퍼짐 정도
 
     [Header("Adaptive Slot (Rings)")]
     [SerializeField] private bool _useAdaptive = true;
-    [SerializeField] private int _maxRings = 3;                     //링 최대 개수(120마리 대비)
-    [SerializeField] private float _ringSpacing = 0.9f;             //링 간 거리
-    [SerializeField] private int _slotsPerRing = 12;                //링당 슬롯 수(기본 12)
-    [SerializeField] private int _maxSlots = 48;                    //총 슬롯 최대(예: 12 * 4 = 48) / 근접 공격 가능 수 제한
+    [SerializeField] private int _maxRings = 4;                     //링 최대 개수(120마리 대비)
+    [SerializeField] private int[] _slotsPerRingList = new int[] { 16, 24, 32, 40 };
+    [SerializeField] private float _ringSpacing = 0.6f;             //링 간 거리
+    [SerializeField] private int _maxSlots = 120;                   
 
     [Header("Angle Bias")]
     [SerializeField] private bool _useAngleBias = false;
@@ -89,12 +90,11 @@ public class PlayerCombatSlots : MonoBehaviour
         //플레이어 이동/회전 기반 오프셋을 재계산
         _lastRebuildWorldPos = transform.position;
 
-        //총 슬롯 개수 결정
-        int desiredSlots = _useAdaptive
-            ? Mathf.Min(_maxSlots, _slotsPerRing * _maxRings)
-            : _baseSlotCount;
+        int totalSlots = 0;
+        for (int i = 0; i < _slotsPerRingList.Length; i++)
+            totalSlots += _slotsPerRingList[i]; // 총 슬롯 수 계산
 
-        if (desiredSlots <= 0) desiredSlots = 1;
+        int desiredSlots = Mathf.Min(_maxSlots, totalSlots); //총 슬롯 개수 결정
 
         //초기 1회: 배열/Transform 풀 구성
         if (_slotData == null || _slotData.Length != desiredSlots)
@@ -144,12 +144,14 @@ public class PlayerCombatSlots : MonoBehaviour
         int total = _slotData.Length;
         int idx = 0;
 
-        for (int ring = 0; ring < _maxRings && idx < total; ring++)
+        //링별 슬롯 생성
+        for (int ring = 0; ring < _slotsPerRingList.Length && idx < desiredSlots; ring++)
         {
             float radius = _baseRadius + _ringSpacing * ring;
-            int ringSlots = Mathf.Min(_slotsPerRing, total - idx);
 
-            for (int j = 0; j < ringSlots && idx < total; j++, idx++)
+            int ringSlots = Mathf.Min(_slotsPerRingList[ring], desiredSlots - idx);
+
+            for (int j = 0; j < ringSlots && idx < desiredSlots; j++, idx++)
             {
                 float t = (float)j / ringSlots;
                 float angle = t * Mathf.PI * 2f;
@@ -159,8 +161,7 @@ public class PlayerCombatSlots : MonoBehaviour
 
                 Vector3 offset = ComputeStableOffset(idx, dir, _randomOffset);
 
-                //월드 좌표 직접 계산
-                Vector3 worldPos = playerPos + basePos + offset;
+                Vector3 worldPos = playerPos + basePos + offset; // 월드 좌표 직접계산
 
                 _slotData[idx].ring = ring;
                 _slotData[idx].tr.position = worldPos;
@@ -200,11 +201,11 @@ public class PlayerCombatSlots : MonoBehaviour
         //이미 점유 중이면 반환 (forceRefresh가 true면 더 좋은 슬롯으로 교체 가능)
         if (_occupied.TryGetValue(monster, out int currentIndex))
         {
-            if (!forceRefresh)
-                return _slotData[currentIndex].tr;
+            int currentRing = _slotData[currentIndex].ring;
 
-            //forceRefresh: 더 좋은 슬롯이 있으면 교체(자연스러운 재포지셔닝)
-            int better = FindBestSlotIndex(monster, allowUsed: false);
+            //항상 더 안쪽 슬롯 탐색
+            int better = FindBestSlotIndex(monster, false, currentRing);
+
             if (better != -1 && better != currentIndex)
             {
                 //기존 슬롯 반납
@@ -224,7 +225,7 @@ public class PlayerCombatSlots : MonoBehaviour
         else
         {
             //신규 획득
-            int best = FindBestSlotIndex(monster, allowUsed: false);
+            int best = FindBestSlotIndex(monster, false, int.MaxValue);
             if (best == -1)
                 return null;
 
@@ -237,32 +238,49 @@ public class PlayerCombatSlots : MonoBehaviour
     }
 
     /// <summary>
-    /// Angle Bias + 거리 기반 점수로 최적 슬롯 선택
-    /// - allowUsed=false: 빈 슬롯만 선택
-    /// - 점수는 낮을수록 좋음
+    /// 최적 슬롯 선택
     /// </summary>
     /// <param name="monster"></param>
     /// <param name="allowUsed"></param>
+    /// <param name="currentRing"></param>
     /// <returns></returns>
-    private int FindBestSlotIndex(IMonster monster, bool allowUsed)
+    private int FindBestSlotIndex(IMonster monster, bool allowUsed, int currentRing)
     {
         Vector3 monsterPos = monster.Transform.position;
 
         int bestIndex = -1;
-        float bestScore = float.MaxValue;
+        float bestScore;
 
-        for (int i = 0; i < _slotData.Length; i++)
+        for (int ring = 0; ring < _slotsPerRingList.Length; ring++)
         {
-            if (_used[i])
+            //바깥으로 이동 금지
+            if (ring > currentRing)
                 continue;
 
-            float dist = (monsterPos - _slotData[i].tr.position).sqrMagnitude;
+            bestScore = float.MaxValue;
+            bestIndex = -1;
 
-            if (dist < bestScore)
+            //해당 링만 검사
+            for (int i = 0; i < _slotData.Length; i++)
             {
-                bestScore = dist;
-                bestIndex = i;
+                if (_slotData[i].ring != ring)
+                    continue;
+
+                if (!allowUsed && _used[i])
+                    continue;
+
+                float dist = (monsterPos - _slotData[i].tr.position).sqrMagnitude;
+
+                if (dist < bestScore)
+                {
+                    bestScore = dist;
+                    bestIndex = i;
+                }
             }
+
+            //이 링에서 하나라도 찾았으면 즉시 반환
+            if (bestIndex != -1)
+                return bestIndex;
         }
 
         return bestIndex;
@@ -277,10 +295,12 @@ public class PlayerCombatSlots : MonoBehaviour
         int total = _slotData.Length;
         int idx = 0;
 
-        for (int ring = 0; ring < _maxRings && idx < total; ring++)
+        //링별 구조 동일하게 유지
+        for (int ring = 0; ring < _slotsPerRingList.Length && idx < total; ring++)
         {
             float radius = _baseRadius + _ringSpacing * ring;
-            int ringSlots = Mathf.Min(_slotsPerRing, total - idx);
+
+            int ringSlots = Mathf.Min(_slotsPerRingList[ring], total - idx);
 
             for (int j = 0; j < ringSlots && idx < total; j++, idx++)
             {
