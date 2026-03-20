@@ -34,7 +34,7 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private float _rebuildInterval = 2.0f;         //목표 이동에 맞춰 슬롯 재배치 간격
     [SerializeField] private float _rebuildMoveThreshold = 1f;      //플레이어 이동량이 이 이상이면 재배치
 
-    private float _densityPenalty = 2.5f;
+    private Dictionary<IMonster, bool> _arrived = new();
 
     // 내부 캐시/풀
     private struct SlotData
@@ -317,7 +317,24 @@ public class PlayerCombatSlots : MonoBehaviour
         float distA = (a.Transform.position - slot.position).sqrMagnitude;
         float distB = (b.Transform.position - slot.position).sqrMagnitude;
 
+        bool aArrived = _arrived.ContainsKey(a) && _arrived[a];
+        bool bArrived = _arrived.ContainsKey(b) && _arrived[b];
+
+        //도착한 놈 vs 안한 놈 -> 무조건 도착한 놈 승
+        if (aArrived && !bArrived) return true;
+        if (!aArrived && bArrived) return false;
+
+        //둘 다 도착했으면 -> 거리 비교
+        if (aArrived && bArrived)
+            return false;
+
+        //둘 다 미도착 -> 더 가까운 놈
         return distA < distB;
+    }
+
+    public void NotifyArrived(IMonster monster, bool arrived)
+    {
+        _arrived[monster] = arrived;
     }
 
     private void UpdateSlotPositions()
@@ -375,6 +392,7 @@ public class PlayerCombatSlots : MonoBehaviour
             _occupied.Remove(monster);
             _used[index] = false;
             _slotData[index].used = false;
+            _arrived.Remove(monster);
         }
     }
 

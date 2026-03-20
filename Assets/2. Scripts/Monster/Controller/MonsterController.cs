@@ -420,8 +420,20 @@ public class MonsterController : MonoBehaviour, IMonster
     /// </summary>
     private void HandleMeleeChase()
     {
-        if (IsBoss) // 보스는 슬롯 제외
+        if (IsBoss)
         {
+            float distance = DistanceXZ(transform.position, _target.Transform.position);
+
+            //공격 진입 조건 추가
+            if (distance <= _stats.AttackRange)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+                ChangeState(MonsterState.Attack);
+                return;
+            }
+
+            _agent.isStopped = false;
             _agent.SetDestination(_target.Transform.position);
             return;
         }
@@ -440,7 +452,11 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
 
         //슬롯 항상 갱신
-        _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
+        if (Time.time >= _nextSlotRefreshTime)
+        {
+            _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
+            _nextSlotRefreshTime = Time.time + 0.3f;
+        }
 
         //슬롯 없으면 -> 플레이어 추적
         if (_mySlot == null)
@@ -452,7 +468,10 @@ public class MonsterController : MonoBehaviour, IMonster
 
         bool isInner = _slotSystem.IsInnerRing(_mySlot);
         float distToSlot = DistanceXZ(transform.position, _mySlot.position);
-        bool reachedSlot = distToSlot < 0.2f;
+
+        bool reachedSlot = distToSlot < 0.4f;
+
+        _slotSystem.NotifyArrived(this, reachedSlot);
 
         //바깥 링 -> 이동 유지
         if (!isInner)
@@ -670,7 +689,7 @@ public class MonsterController : MonoBehaviour, IMonster
 
         return _stuckTimer >= _stuckTimeToRefresh;
     }
-
+    
     public void ForceDespawn()
     {
         if (_slotSystem != null && _mySlot != null)
