@@ -124470,6 +124470,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a17924729be3f7642b9fcc5f6c7744d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCtrl
+  _audioClip:
+  - {fileID: 8300000, guid: afa7b44fd07738844b4f4461d3fdb6dc, type: 3}
+  - {fileID: 8300000, guid: a0596edfb58037a4d8ee643215850ff7, type: 3}
+  - {fileID: 8300000, guid: 293b3dc7cf368ec46b6000ea9cbab045, type: 3}
   joystickBase: {fileID: 0}
   joystickHandle: {fileID: 0}
   canvasRect: {fileID: 0}
@@ -124480,6 +124484,7 @@ MonoBehaviour:
   _dragDistance: 100
   _enemyFindRange: 20
   _attackRange: 2.5
+  _maxComboIndex: 3
   _hitBox: {fileID: 8253054611185254526}
   _hitBox3: {fileID: 5119971842434979068}
   _attackEffect1: {fileID: 2309554467014393350}
@@ -124501,7 +124506,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   _level: 0
-  _currentExp: 0
+  _currentLevel: 0
   _maxHp: 0
   _currentHp: 0
   _atk: 0
@@ -124514,7 +124519,6 @@ MonoBehaviour:
   _hp_regen: 0
   _agi: 5
   _upgrade_scrap_n: 0
-  _level_exp_n: 0
 --- !u!114 &6032601063345712281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154391,7 +154395,7 @@ Transform:
   m_GameObject: {fileID: 8528750453173157991}
   serializedVersion: 2
   m_LocalRotation: {x: -0.41159576, y: -0.00355594, z: 0.0016060116, w: -0.9113582}
-  m_LocalPosition: {x: -0.29666537, y: 8.198451, z: -7.2113466}
+  m_LocalPosition: {x: -0.29666537, y: 5.5, z: -5.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

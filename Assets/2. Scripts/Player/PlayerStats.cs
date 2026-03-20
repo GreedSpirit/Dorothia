@@ -80,13 +80,13 @@ public class PlayerStats : MonoBehaviour
 
     private void OnEnable()
     {
-        MonsterController.OnMonsterKilled += AddExp;
+        //MonsterController.OnMonsterKilled += AddExp;
         
     }
 
     private void OnDisable()
     {
-        MonsterController.OnMonsterKilled -= AddExp;
+        //MonsterController.OnMonsterKilled -= AddExp;
         EquipmentSlotManager.Instance.OnEquipChanged -= ChangeEquip;
     }
 
@@ -105,11 +105,9 @@ public class PlayerStats : MonoBehaviour
     }
 
     //경험치 변화 알림
-    public void AddExp(int mosterId, bool isBoss)
+    public void AddExp(BigInteger amount)
     {
-        Debug.LogError($"현재 경험치: {_currentExp}, 필요 경험치: {_level_exp_n}");
-        //경험치 증가
-        _currentExp += 4500;
+        _currentExp += amount;
 
         //현재경험치가 경험치통보다 많으면서 현재 레벨이 200 아니면 반복
         while (_currentExp >= _level_exp_n && _currentLevel < 200)

@@ -138,36 +138,38 @@ public class DungeonInfo : MonoBehaviour
     //소탕 버튼 클릭 로직
     public void OnDungeonClearBtcClick()
     {
-        int count = DungeonManager.Instance._currentCount;
+        int count = DataManager.Instance.GetUsedEntryCount(_currentDungeonId);
         //일일 입장 횟수 체크
-        if (count < 1)
+        if (count > 3)
         {
             _cantClearCountPanel.SetActive(true);
             return;
         }
 
-        //소탕 해금 여부 체크 (누적 클리어 1회 이상)
-        if (count >= 1)
+        //한번도 클리어안함
+        if (count < 1)
         {
-            _clearPanel.SetActive(true);
-            _cantClearPanel.SetActive(false);
+            _cantClearPanel.SetActive(true);
         }
         else
         {
-            _clearPanel.SetActive(false);
-            _cantClearPanel.SetActive(true);
+            _clearPanel.SetActive(true);
         }
     }
 
     //실제 소탕 실행
     public void DungeonClear()
     {
-        if (DungeonEntryTracker.TryConsumeEntry(_currentDungeonId, _maxCount, out int used, out int remain))
+        int count = DataManager.Instance.GetUsedEntryCount(_currentDungeonId);
+        Debug.LogError($"클리어횟수 = {count}");
+        if (count >= 3)
         {
-            // 소탕 기록도 누적 클리어에 반영 (자격 유지용)
-            DataManager.Instance.AddClearCount(_currentDungeonId);
-            int usedCount = DungeonEntryTracker.GetUsedCount(_currentDungeonId);
-            _clearCount.text = $"클리어 횟수 {usedCount}/{_maxCount}";
+            _cantClearCountPanel.SetActive(true);
+            return;
+        }
+        if (DataManager.Instance.TryConsumeEntry(_currentDungeonId, _maxCount, out int used))
+        {            
+            _clearCount.text = $"클리어 횟수 {used}/{_maxCount}";
             Debug.Log($"[소탕 성공] 오늘 {_currentDungeonId} 사용 횟수: {used}");
         }
         _clearPanel.SetActive(false);
@@ -176,7 +178,7 @@ public class DungeonInfo : MonoBehaviour
     // 입장 버튼 클릭
     public void OnDungeonEnterBtnClick()
     {
-        if (!DungeonEntryTracker.CanEnter(_currentDungeonId, _maxCount))
+        if (!DataManager.Instance.CanEnterDungeon(_currentDungeonId, _maxCount))
         {
             _cantClearCountPanel.SetActive(true);
             return;

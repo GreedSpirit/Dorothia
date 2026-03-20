@@ -61,7 +61,6 @@ public class InventoryPanel : BaseUI
     
     private InventoryEquipFunction _inventoryEquipFunction;
     private InventorySlot _currentSelectedSlot;
-
     private void Awake()
     {
         //인스펙터상의 실수 확인용
@@ -153,6 +152,11 @@ public class InventoryPanel : BaseUI
     public bool CheckLocked()
     {
         return _selectedEquipment.isLocked;
+    }
+
+    public bool CheckEquipped()
+    {
+        return _selectedEquipment.isEquipped;
     }
 
     /// <summary>

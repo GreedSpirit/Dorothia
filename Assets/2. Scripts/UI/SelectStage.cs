@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class SelectStage : BaseUI
 {
@@ -12,6 +13,7 @@ public class SelectStage : BaseUI
     [SerializeField] private Button _goToButton;                    // 바로가기 버튼
     [SerializeField] private TMP_Text _chapterTitleText;            // 챕터 제목
     [SerializeField] private TMP_Text _progressText;                // 진행도
+    [SerializeField] private ScrollRect _scrollRect;
 
     private readonly List<StageButtonItem> _spawnedButtons = new();
 
@@ -44,7 +46,13 @@ public class SelectStage : BaseUI
         _previewStageId = newStageId;
         _selectedSection = -1;
 
+        SyncChapterSelection();
+
         GenerateStageButtons();
+
+        HighlightCurrentSection();
+        StartCoroutine(CoScrollNextFrame());
+
         UpdateProgressText();
     }
 
@@ -53,8 +61,8 @@ public class SelectStage : BaseUI
         //현재 보고 있는 챕터면 갱신
         if (clearedStageId == _previewStageId)
         {
-            UpdateProgressText();
             GenerateStageButtons();
+            UpdateProgressText();
         }
     }
 
@@ -62,8 +70,12 @@ public class SelectStage : BaseUI
     {
         if (_previewStageId == _stageManager.CurrentStageId)
         {
-            UpdateProgressText();
             GenerateStageButtons();
+
+            HighlightCurrentSection();
+            StartCoroutine(CoScrollNextFrame());
+
+            UpdateProgressText();
         }
     }
 
@@ -89,9 +101,13 @@ public class SelectStage : BaseUI
         _previewStageId = _stageManager.CurrentStageId; // 현재 진행 챕터 기준
         _selectedSection = -1; // 초기화
 
+        SyncChapterSelection();
         SyncChapterHeaderWithCurrentStage();
 
         GenerateStageButtons();
+
+        HighlightCurrentSection();
+        StartCoroutine(CoScrollNextFrame());
 
         UpdateProgressText();
 
@@ -106,6 +122,14 @@ public class SelectStage : BaseUI
     protected override void OnClose()
     {
     }
+
+    #region Scroll 안정화 코루틴
+    private IEnumerator CoScrollNextFrame()
+    {
+        yield return null; // UI Layout 완료 대기
+        ScrollToCurrentSection();
+    }
+    #endregion
 
     #region 캐시
     /// <summary>
@@ -296,6 +320,55 @@ public class SelectStage : BaseUI
 
         Close();
     }
+
+    private void HighlightCurrentSection()
+    {
+        int currentSection = _stageManager.CurrentSection;
+
+        for (int i = 0; i < _spawnedButtons.Count; i++)
+        {
+            var btn = _spawnedButtons[i];
+
+            if (!btn.gameObject.activeSelf)
+                continue;
+
+            bool isCurrent = (btn.RealSectionNumber == currentSection);
+            btn.SetSelected(isCurrent);
+        }
+    }
+
+    private void ScrollToCurrentSection()
+    {
+        int currentSection = _stageManager.CurrentSection;
+
+        for (int i = 0; i < _spawnedButtons.Count; i++)
+        {
+            var btn = _spawnedButtons[i];
+
+            if (!btn.gameObject.activeSelf)
+                continue;
+
+            if (btn.RealSectionNumber == currentSection)
+            {
+                RectTransform content = _scrollRect.content;
+                RectTransform target = btn.GetComponent<RectTransform>();
+
+                Canvas.ForceUpdateCanvases();
+
+                float contentHeight = content.rect.height;
+                float viewportHeight = _scrollRect.viewport.rect.height;
+
+                float targetPosY = Mathf.Abs(target.anchoredPosition.y);
+
+                float normalized =
+                    Mathf.Clamp01(targetPosY / (contentHeight - viewportHeight));
+
+                _scrollRect.verticalNormalizedPosition = 1f - normalized;
+
+                break;
+            }
+        }
+    }
     #endregion
 
     #region 챕터
@@ -304,9 +377,15 @@ public class SelectStage : BaseUI
     {
         _previewStageId = stageId;
 
+        SyncChapterSelection();
+
         UpdateChapterHeader($"{chapterNumber} : {chapterName}");
 
         GenerateStageButtons();
+
+        HighlightCurrentSection();
+        StartCoroutine(CoScrollNextFrame());
+
         UpdateProgressText();
     }
 
@@ -344,6 +423,18 @@ public class SelectStage : BaseUI
         }
 
         UpdateChapterHeader(null); // 못 찾으면 비워둠
+    }
+
+    private void SyncChapterSelection()
+    {
+        if (_chapterButtons == null)
+            return;
+
+        for (int i = 0; i < _chapterButtons.Length; i++)
+        {
+            bool isSelected = (_chapterButtons[i].StageId == _previewStageId);
+            _chapterButtons[i].SetSelected(isSelected);
+        }
     }
     #endregion
 

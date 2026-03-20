@@ -155,8 +155,13 @@ public class StageManager : MonoBehaviour
     {
         if (!DungeonReturnContext.HasContext)
         {
-            Debug.LogWarning("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
+            Debug.Log("[StageManager] 저장된 던전 복귀 컨텍스트 없음");
             return;
+        }
+
+        if (_player is IResettable resettable)
+        {
+            resettable.ResetState();
         }
 
         StartStageFromSection(
@@ -172,6 +177,7 @@ public class StageManager : MonoBehaviour
         //기존 몬스터 완전 초기화
         if (_spawnManager != null)
         {
+            _spawnManager.ResetSpawnState();
             _spawnManager.StopNormalSpawn();   // 기존 스폰 루틴 중지
             _spawnManager.ForceClearAll();     // 필드 몬스터 전부 제거
         }
@@ -569,13 +575,16 @@ public class StageManager : MonoBehaviour
         Debug.Log("[Stage] Spawning 재시작");
 
         ChangeState(StageState.Spawning);
-    } 
+    }
 
     private void HandlePlayerDead()
     {
         //던전 진행 중 플레이어 사망은 DungeonManager가 처리하므로 StageManager는 무시
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
+        {
+            Debug.LogWarning("던전 진행중이라 StageManager 처리 스킵");
             return;
+        }
 
         if (_bossAlive)
         {
@@ -589,4 +598,51 @@ public class StageManager : MonoBehaviour
             ResetSectionAndRespawn();
         }
     }
+
+    #region 테스트용
+    public void JumpSection(int amount)
+    {
+        int targetSection = _currentSection + amount;
+
+        Debug.Log($"[Cheat] Section Jump: {_currentSection} -> {targetSection}");
+
+        //현재 Stage 기준으로 Section 재계산
+        var dict = DataManager.Instance.GetDict<Stage_SectionData>();
+
+        if (dict == null)
+        {
+            Debug.LogError("[StageManager] SectionData Dict 없음");
+            return;
+        }
+
+        //전체 Section 중 targetSection이 포함된 구간 찾기
+        var matched = dict.Values
+            .Where(x => targetSection >= x.Section_Start && targetSection <= x.Section_End)
+            .FirstOrDefault();
+
+        if (matched == null)
+        {
+            Debug.LogError($"[Cheat] 해당 Section 없음: {targetSection}");
+            return;
+        }
+
+        //Stage 변경 필요 여부 체크
+        if (_stage.Stage_Id != matched.Stage_Id)
+        {
+            Debug.Log($"[Cheat] Stage 변경 필요: {_stage.Stage_Id} -> {matched.Stage_Id}");
+
+            //Stage 자체를 다시 시작 (맵 포함 전체 리셋)
+            StartStageFromSection(matched.Stage_Id, targetSection);
+            return;
+        }
+
+        //같은 Stage면 내부 값만 변경
+        _currentSection = targetSection;
+        _sectionData = matched;
+
+        OnSectionChanged?.Invoke(_currentSection);
+
+        Debug.Log($"[Cheat] Section 이동 완료: {_currentSection} (SectionId:{_sectionData.Stage_Section_Id})");
+    }
+    #endregion
 }

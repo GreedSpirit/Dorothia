@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -16,10 +16,13 @@ public class SoundManager : MonoBehaviour
         }
 
         instance = this;
+
+        PlayBGM(audioClip);
     }
 
     [SerializeField] private AudioSource bgmSource;
-
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip audioClip;
     [SerializeField] private AudioMixer mainMixer;
     [SerializeField] private AudioMixerGroup bgmGroup;
     [SerializeField] private AudioMixerGroup sfxGroup;
@@ -40,4 +43,18 @@ public class SoundManager : MonoBehaviour
     public void SetMainVolume(float value) => SetVolume(MAIN_PARAM, value);
     public void SetBGMVolume(float value) => SetVolume(BGM_PARAM, value);
     public void SetSFXVolume(float value) => SetVolume(SFX_PARAM, value);
+
+    public void PlayBGM(AudioClip clip, bool loop = true)
+    {
+        if (bgmSource.clip == clip) return; // 이미 재생 중이면 무시
+
+        bgmSource.clip = clip;
+        bgmSource.loop = loop;
+        bgmSource.Play();
+    }
+
+    public void PlaySFX(AudioClip clip)
+    {
+        sfxSource.PlayOneShot(clip);
+    }
 }

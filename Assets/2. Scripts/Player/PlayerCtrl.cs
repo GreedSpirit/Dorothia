@@ -8,6 +8,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
+    [SerializeField] AudioClip[] _audioClip;
+
     [Header("조이스틱 & UI 설정")]
     [SerializeField] private RectTransform joystickBase;
     [SerializeField] private RectTransform joystickHandle;
@@ -404,7 +406,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
 
     public void EnableAttackEffect(int index)
-    {
+    {        
         ResetEffect3Transform();
 
         if (_odm.IsModeOn)
@@ -416,13 +418,14 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         switch (index)
         {
-            case 1: _attackEffect1.Play(); _attackHitEffect.Play(); break;
-            case 2: _attackEffect2.Play(); _attackHitEffect2.Play(); break;
+            case 1: _attackEffect1.Play(); _attackHitEffect.Play(); SoundManager.Instance.PlaySFX(_audioClip[0]); break;
+            case 2: _attackEffect2.Play(); _attackHitEffect2.Play(); SoundManager.Instance.PlaySFX(_audioClip[1]); break;
             case 3:
                 _attackEffect3.Play();
                 _attackHitEffect.Play();
                 _attackHitEffect2.Play();
                 _attackHitEffect3.Play();
+                SoundManager.Instance.PlaySFX(_audioClip[2]);
                 break;
         }
     }

@@ -1,14 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
+using TMPro;
+using System.Numerics;
 
 public class UIManager : MonoBehaviour
 {
     private static UIManager instance;
     public static UIManager Instance => instance;
-
 
     private void Awake()
     {
@@ -20,7 +21,7 @@ public class UIManager : MonoBehaviour
         instance = this;
     }
 
-
+    
     private Stack<BaseUI> uiStack = new Stack<BaseUI>();
 
     private void Update()

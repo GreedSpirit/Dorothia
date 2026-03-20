@@ -110,6 +110,7 @@ public class TestWeaponGenerator : MonoBehaviour
         int Rarity = ItemCalculator.RarityCalculator();
         Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
 
+
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
         Debug.Log("장비 획득 성공!");
@@ -121,12 +122,12 @@ public class TestWeaponGenerator : MonoBehaviour
     }
 
 
-    public void Test2(int equipLevel, int Rarity)
+    public Equipment Test2(int equipLevel, int Rarity)
     {
         if (equipmentInventory == null)
         {
             Debug.LogError("EquipmentInventory를 연결해주세요!");
-            return;
+            return null;
         }
 
         EquipData _equipData = GetEquipmentData(GetNumber());
@@ -136,6 +137,7 @@ public class TestWeaponGenerator : MonoBehaviour
         }
         Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
 
+
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
         Debug.Log("장비 획득 성공!");
@@ -144,5 +146,7 @@ public class TestWeaponGenerator : MonoBehaviour
         {
             inventoryPanel.Refresh();
         }
+
+        return testWeapon;
     }
 }
