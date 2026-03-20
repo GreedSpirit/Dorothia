@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
@@ -566,5 +567,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         Gizmos.DrawWireSphere(transform.position, _enemyFindRange);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, _attackRange);
+
+        Gizmos.color = Color.red;
+        Vector3 endDistance = new Vector3(transform.position.x, transform.position.y, transform.position.z + AttackRange);
+        Gizmos.DrawLine(transform.position,  endDistance);
     }
 }
