@@ -52,10 +52,6 @@ public class MonsterController : MonoBehaviour, IMonster
     private PlayerCombatSlots _slotSystem;          // 슬롯시스템
     private Transform _mySlot;
 
-    private Vector3 _lockedSlotPosition;
-    private float _slotLockTime;
-    private float _slotLockDuration = 0.6f;
-
     private int _hp;                                // 체력
 
     private bool _isAttacking;                      // 실제 공격 여부
@@ -63,6 +59,10 @@ public class MonsterController : MonoBehaviour, IMonster
     private float _currentAttackDuration;           // 계산된 공격 지속시간
 
     private float _spawnTime;                       // 생존시간 계산
+
+    private float _attackEnterRange;                // 진입
+    private float _attackExitRange;                 // 이탈
+    private float _nextRepathTime;
 
     //어떤 프리펩풀로 반환할지 식별용 키
     private MonsterController _poolKeyPrefab;
@@ -183,6 +183,10 @@ public class MonsterController : MonoBehaviour, IMonster
 
         ApplyNavMeshSettings();
 
+        //히스테리시스
+        _attackEnterRange = _stats.AttackRange * 0.9f;
+        _attackExitRange = _stats.AttackRange * 1.2f;
+
         if (_attack != null) // 공격타입 바인딩
             _attack.Bind(this);
 
@@ -234,8 +238,8 @@ public class MonsterController : MonoBehaviour, IMonster
         _agent.speed = _stats.MoveSpeed;
         _agent.radius = _stats.AgentRadius;
 
-        _agent.stoppingDistance = 0.25f;
-        
+        _agent.stoppingDistance = _stats.AttackRange * 0.8f;
+
         //RVO 충돌 우선순위 랜덤화 -> 군집 이동할때 자연스러움 증가
         _agent.avoidancePriority = 
             Random.Range(_stats.AvoidancePriorityMin, _stats.AvoidancePriorityMax + 1);
@@ -286,6 +290,10 @@ public class MonsterController : MonoBehaviour, IMonster
                 UpdateChase();
                 break;
 
+            case MonsterState.Idle:
+                UpdateIdle();
+                break;
+
             case MonsterState.Attack:
                 UpdateAttack();
                 break;
@@ -308,7 +316,13 @@ public class MonsterController : MonoBehaviour, IMonster
 
             case MonsterState.Chase:
                 _agent.isStopped = false;
-                _animator.SetBool("IsMoving", true);    // 애니
+                _animator.SetBool("IsMoving", true);
+                break;
+
+            case MonsterState.Idle:
+                _agent.isStopped = true;
+                _agent.ResetPath();
+                _animator.SetBool("IsMoving", false);
                 break;
 
             case MonsterState.Attack:
@@ -332,111 +346,73 @@ public class MonsterController : MonoBehaviour, IMonster
 
     private void UpdateChase()
     {
-        //슬롯 시스템 가져오기
-        if (_slotSystem == null && _target is MonoBehaviour mono)
+        if (_stats.Archetype == Monster_Kind.Ranged)
         {
-            _slotSystem = mono.GetComponent<PlayerCombatSlots>();
-
-            if (_slotSystem == null)
-                Debug.LogError("SlotSystem NULL");
+            HandleRangedChase(); // 원거리
+            return;
         }
 
-        if (_stats.Archetype == Monster_Kind.Melee)
+        HandleMeleeChase(); // 근접
+    }
+
+    private void UpdateIdle()
+    {
+        if (_slotSystem == null || _mySlot == null)
         {
-            HandleMeleeChase();
+            ChangeState(MonsterState.Chase);
+            return;
         }
-        else
+
+        _agent.isStopped = true;
+
+        RotateToTarget(_target.Transform.position);
+
+        //항상 더 좋은 슬롯 체크
+        if (Time.time >= _nextRepathTime)
         {
-            HandleRangedChase();
+            _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
+            _nextRepathTime = Time.time + 0.3f;
         }
 
-        //Vector3 destination;
+        //안쪽 링이면 다시 진입
+        if (_slotSystem.IsInnerRing(_mySlot))
+        {
+            ChangeState(MonsterState.Chase);
+        }
+    }
 
-        //if (_stats.Archetype == Monster_Kind.Melee)
-        //{
-        //    //Melee는 "Adaptive Slot + Refresh + Angle Bias" 사용
-        //    // - 슬롯이 없으면 즉시 요청
-        //    // - 일정 주기/정체 시 재요청 (Refresh)
-        //    if (_slotSystem != null)
-        //    {
-        //        if (_mySlot == null)
-        //        {
-        //            _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: false);
-        //        }
-        //        else
-        //        {
-        //            bool stuck = UpdateStuckAndCheck();
+    /// <summary>
+    /// 공격 상태
+    /// 사거리 안이면 공격 지속
+    /// 사거리 밖이면 추격으로
+    /// </summary>
+    private void UpdateAttack()
+    {
+        RotateToTarget(_target.Transform.position);
 
-        //            if (stuck)
-        //            {
-        //                _mySlot = _slotSystem.AcquireOrRefreshSlot(this, forceRefresh: true);
-        //                _stuckTimer = 0f;
-        //            }
-        //        }
-        //    }
+        float distance = DistanceXZ(transform.position, _target.Transform.position);
 
-        //    if (_mySlot != null)
-        //        destination = _mySlot.position;
-        //    else
-        //        destination = _target.Transform.position; // 슬롯 없다면 플레이어로 fallback
-        //}
-        //else
-        //{
-        //    //원거리 몬스터 -> 플레이어 거리 유지
-        //    float distance =
-        //        DistanceXZ(transform.position, _target.Transform.position);
+        if (distance > _stats.AttackRange)
+        {
+            _agent.isStopped = false;
+            ChangeState(MonsterState.Chase);
+            return;
+        }
 
-        //    if (distance > _stats.PreferredRange)
-        //    {
-        //        //사거리 보다 멀면 접근
-        //        destination = _target.Transform.position;
-        //    }
-        //    else
-        //    {
-        //        //적정 거리 유지 -> 이동 정지 후 공격
-        //        _agent.ResetPath();
-        //        RotateToTarget(_target.Transform.position);
-        //        return;
-        //    }
-        //}
+        // 공격 루프
+        if (!_isAttacking)
+        {
+            StartAttack();
+            return;
+        }
 
-        ////슬롯 목표는 "움직일 수 있음"
-        //// - 슬롯이 리프레시되면 destination이 조금씩 변함
-        //// - hasPath + destination delta 체크로 갱신
-        //if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 
-        //    _slotRepathThreshold * _slotRepathThreshold)
-        //{
-        //    _agent.SetDestination(destination);
-        //}
+        _attackTimer += Time.deltaTime;
 
-        //RotateToTarget(_target.Transform.position); // 항상 플레이어 방향 보게
-
-        ////공격 가능 여부 판단
-        ////근접 몬스터는 슬롯 도착 여부로 공격 판단
-        //if (_stats.Archetype == Monster_Kind.Melee && _mySlot != null)
-        //{
-        //    float slotDistance =
-        //        DistanceXZ(transform.position, _mySlot.position);
-
-        //    if (slotDistance < 0.8f) // 슬롯 거의 도착
-        //    {
-        //        ChangeState(MonsterState.Attack);
-        //        return;
-        //    }
-        //}
-        //else
-        //{
-        //    //원거리 몬스터는 기존 거리 판단 유지
-        //    float attackDistance =
-        //        DistanceXZ(transform.position, _target.Transform.position);
-
-        //    if (attackDistance <= _stats.AttackRange)
-        //    {
-        //        _agent.ResetPath();
-        //        ChangeState(MonsterState.Attack);
-        //        return;
-        //    }
-        //}
+        if (_attackTimer >= _currentAttackDuration)
+        {
+            _isAttacking = false;
+            _animator.speed = 1f;
+        }
     }
 
     /// <summary>
@@ -444,6 +420,12 @@ public class MonsterController : MonoBehaviour, IMonster
     /// </summary>
     private void HandleMeleeChase()
     {
+        if (IsBoss) // 보스는 슬롯 제외
+        {
+            _agent.SetDestination(_target.Transform.position);
+            return;
+        }
+
         //플레이어가 공격 가서리 안이면 슬롯 무시하고 즉시 공격
         float playerDistance = DistanceXZ(transform.position, _target.Transform.position);
         if (playerDistance <= _stats.AttackRange * 1.1f) // 여유 조금 추가
@@ -454,83 +436,52 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
         }
 
-        Vector3 destination;
+        if (_slotSystem == null)
+            return;
 
-        //슬롯 확보
-        if (_slotSystem != null)
+        //슬롯 항상 갱신
+        _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
+
+        //슬롯 없으면 -> 플레이어 추적
+        if (_mySlot == null)
         {
-            if (_mySlot == null)
-            {
-                _mySlot = _slotSystem.AcquireOrRefreshSlot(this, false);
-            }
-            else
-            {
-                bool stuck = UpdateStuckAndCheck();
-
-                if (stuck && Time.time >= _nextSlotRefreshTime)
-                {
-                    _mySlot = _slotSystem.AcquireOrRefreshSlot(this, true);
-                    _stuckTimer = 0f;
-
-                    _nextSlotRefreshTime = Time.time + _slotRefreshInterval;
-                }
-            }
+            _agent.isStopped = false;
+            _agent.SetDestination(_target.Transform.position);
+            return;
         }
 
-        //목적지 결정
-        if (_mySlot != null)
+        bool isInner = _slotSystem.IsInnerRing(_mySlot);
+        float distToSlot = DistanceXZ(transform.position, _mySlot.position);
+        bool reachedSlot = distToSlot < 0.2f;
+
+        //바깥 링 -> 이동 유지
+        if (!isInner)
         {
-            //일정 시간마다만 슬롯 위치 갱신
-            if (Time.time >= _slotLockTime)
+            if (Time.time >= _nextRepathTime)
             {
-                _lockedSlotPosition = _mySlot.position;
-                _slotLockTime = Time.time + _slotLockDuration;
+                _agent.isStopped = false;
+                _agent.SetDestination(_mySlot.position);
+                _nextRepathTime = Time.time + 0.2f;
             }
 
-            destination = _lockedSlotPosition;
-        }
-        else
-        {
-            destination = _target.Transform.position; // fallback
+            RotateToTarget(_target.Transform.position);
+            return;
         }
 
-        // 이동
-        if (!_agent.hasPath || (_agent.destination - destination).sqrMagnitude > 
-            _slotRepathThreshold * _slotRepathThreshold)
+        //내부 링 -> 공격 가능
+        if (Time.time >= _nextRepathTime)
         {
-            if (Time.time >= _nextSlotRefreshTime)
-            {
-                _agent.SetDestination(destination);
-            }
+            _agent.isStopped = false;
+            _agent.SetDestination(_mySlot.position);
+            _nextRepathTime = Time.time + 0.2f;
         }
 
         RotateToTarget(_target.Transform.position);
 
-        //공격 진입 조건
-        if (_slotSystem != null && _mySlot != null)
+        if (isInner && reachedSlot && distToSlot <= _attackEnterRange)
         {
-            if (!_slotSystem.IsInnerRing(_mySlot))
-                return;
-
-            if (!_agent.pathPending &&
-                _agent.remainingDistance <= _agent.stoppingDistance + 0.15f)
-            {
-                _agent.isStopped = true;
-                ChangeState(MonsterState.Attack);
-                return;
-            }
+            ChangeState(MonsterState.Attack);
         }
-
-        // 슬롯 시스템 자체가 없을 때만 fallback
-        //if (_slotSystem == null)
-        //{
-        //    float dist = DistanceXZ(transform.position, _target.Transform.position);
-
-        //    if (dist <= _stats.AttackRange)
-        //    {
-        //        ChangeState(MonsterState.Attack);
-        //    }
-        //}
     }
 
     /// <summary>
@@ -554,71 +505,6 @@ public class MonsterController : MonoBehaviour, IMonster
         }
 
         RotateToTarget(_target.Transform.position);
-    }
-
-    /// <summary>
-    /// 공격 상태
-    /// 사거리 안이면 공격 지속
-    /// 사거리 밖이면 추격으로
-    /// </summary>
-    private void UpdateAttack()
-    {
-        RotateToTarget(_target.Transform.position);
-
-        float distance = DistanceXZ(transform.position, _target.Transform.position);
-
-        if (distance > _stats.AttackRange)
-        {
-            _agent.isStopped = false;
-            ChangeState(MonsterState.Chase);
-            return;
-        }
-        ////Melee는 슬롯 기준
-        //if (_stats.Archetype == Monster_Kind.Melee)
-        //{
-        //    if (_mySlot == null)
-        //    {
-        //        ChangeState(MonsterState.Chase);
-        //        return;
-        //    }
-
-        //    float slotDistance = DistanceXZ(transform.position, _mySlot.position);
-
-        //    //슬롯에서 벗어나면 다시 Chase
-        //    if (slotDistance > 1.0f)
-        //    {
-        //        _agent.isStopped = false;
-        //        ChangeState(MonsterState.Chase);
-        //        return;
-        //    }
-        //}
-        //else
-        //{
-        //    //원거리 기존 유지
-        //    float distance = DistanceXZ(transform.position, _target.Transform.position);
-
-        //    if (distance > _stats.AttackRange)
-        //    {
-        //        _agent.isStopped = false;
-        //        ChangeState(MonsterState.Chase);
-        //        return;
-        //    }
-        //}
-
-        // 공격 루프
-        if (!_isAttacking)
-        {
-            StartAttack();
-            return;
-        }
-
-        _attackTimer += Time.deltaTime;
-
-        if (_attackTimer >= _currentAttackDuration)
-        {
-            _isAttacking = false;
-            _animator.speed = 1f;
-        }
     }
 
     private void EnterDead()

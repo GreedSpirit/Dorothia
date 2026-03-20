@@ -10,6 +10,7 @@ public class RuntimeRootManager : MonoBehaviour
     public static Transform Projectiles { get; private set; }
     public static Transform Orbs { get; private set; }
     public static Transform Maps { get; private set; }
+    public static Transform Slots { get; private set; }
 
     private void Awake()
     {
@@ -22,6 +23,9 @@ public class RuntimeRootManager : MonoBehaviour
 
         if (Orbs == null)
             Orbs = CreateRoot("Orbs");                  // 오버드라이브 오브
+
+        if (Slots == null)                              // 전투슬롯
+            Slots = CreateRoot("Slots");
     }
 
     private Transform CreateRoot(string name)

@@ -4,6 +4,7 @@ public interface IMonster
 {
     Transform Transform { get; }
     bool IsAlive { get; }
+    IMonsterStats Stats { get; }
 
     void Initialize(
         MonsterSpawnManager owner,

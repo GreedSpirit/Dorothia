@@ -16,6 +16,7 @@ public enum MonsterState
 {
     Spawn,
     Chase,
+    Idle,
     Attack,
     Dead
 }

@@ -34,6 +34,8 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private float _rebuildInterval = 2.0f;         //목표 이동에 맞춰 슬롯 재배치 간격
     [SerializeField] private float _rebuildMoveThreshold = 1f;      //플레이어 이동량이 이 이상이면 재배치
 
+    private float _densityPenalty = 2.5f;
+
     // 내부 캐시/풀
     private struct SlotData
     {
@@ -116,7 +118,7 @@ public class PlayerCombatSlots : MonoBehaviour
             for (int i = 0; i < desiredSlots; i++)
             {
                 var go = new GameObject($"Slot_{i}");
-                go.transform.SetParent(null); // 월드좌표 기준
+                go.transform.SetParent(RuntimeRootManager.Slots); // 월드좌표 기준
 
                 _slotData[i] = new SlotData
                 {
@@ -198,6 +200,9 @@ public class PlayerCombatSlots : MonoBehaviour
     /// <returns></returns>
     public Transform AcquireOrRefreshSlot(IMonster monster, bool forceRefresh)
     {
+        if (monster.Stats.Rank == Monster_Type.Boss) // 보스제외
+            return null;
+
         //이미 점유 중이면 반환 (forceRefresh가 true면 더 좋은 슬롯으로 교체 가능)
         if (_occupied.TryGetValue(monster, out int currentIndex))
         {
@@ -254,7 +259,7 @@ public class PlayerCombatSlots : MonoBehaviour
         for (int ring = 0; ring < _slotsPerRingList.Length; ring++)
         {
             //바깥으로 이동 금지
-            if (ring > currentRing)
+            if (currentRing != int.MaxValue && ring > currentRing)
                 continue;
 
             bestScore = float.MaxValue;
@@ -266,15 +271,26 @@ public class PlayerCombatSlots : MonoBehaviour
                 if (_slotData[i].ring != ring)
                     continue;
 
-                if (!allowUsed && _used[i])
-                    continue;
-
-                float dist = (monsterPos - _slotData[i].tr.position).sqrMagnitude;
-
-                if (dist < bestScore)
+                //빈 슬롯 우선
+                if (!_used[i])
                 {
-                    bestScore = dist;
-                    bestIndex = i;
+                    float dist = (monsterPos - _slotData[i].tr.position).sqrMagnitude;
+
+                    if (dist < bestScore)
+                    {
+                        bestScore = dist;
+                        bestIndex = i;
+                    }
+                    continue;
+                }
+
+                //사용중 슬롯 → 더 가까우면 뺏기
+                var owner = GetMonsterBySlot(i);
+
+                if (owner != null && IsBetterCandidate(monster, owner, _slotData[i].tr))
+                {
+                    ReleaseSlot(owner);
+                    return i;
                 }
             }
 
@@ -284,6 +300,24 @@ public class PlayerCombatSlots : MonoBehaviour
         }
 
         return bestIndex;
+    }
+
+    private IMonster GetMonsterBySlot(int index)
+    {
+        foreach (var kv in _occupied)
+        {
+            if (kv.Value == index)
+                return kv.Key;
+        }
+        return null;
+    }
+
+    private bool IsBetterCandidate(IMonster a, IMonster b, Transform slot)
+    {
+        float distA = (a.Transform.position - slot.position).sqrMagnitude;
+        float distB = (b.Transform.position - slot.position).sqrMagnitude;
+
+        return distA < distB;
     }
 
     private void UpdateSlotPositions()
