@@ -332,26 +332,6 @@ public class HideAppearModule : BaseSkillModule
         ctx.IsCharacterHidden = false;
         PlayMyEffect(player);
     }
-    //public override void OnHide(PlayerCtrl player, SkillContext ctx)
-    //    => player.StartCoroutine(RepeatRoutine(player, ctx, 0, HideOnce));
-    //public override void OnAppear(PlayerCtrl player, SkillContext ctx)
-    //    => player.StartCoroutine(RepeatRoutine(player, ctx, 0, AppearOnce));
-
-    //private void HideOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
-    //{
-    //    PlayMyEffect(player);
-    //    player.SetRenderersEnabled(false);
-    //    player.PauseAnimation();
-    //    ctx.IsCharacterHidden = true;
-    //}
-
-    //private void AppearOnce(PlayerCtrl player, SkillContext ctx, int hitIndex)
-    //{
-    //    player.SetRenderersEnabled(true);
-    //    player.ResumeAnimation();
-    //    ctx.IsCharacterHidden = false;
-    //    PlayMyEffect(player);
-    //}
 }
 
 // ═══════════════════════════════════════════════════════

@@ -93,5 +93,6 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
         _skillAnimStarted = false;
         _waitingForClip = false;
 
+        player.SetRenderersEnabled(true);
     }
 }
