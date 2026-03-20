@@ -277,9 +277,9 @@ public class DashModule : BaseSkillModule
             destination = hit.position;
 
         // 돌진 이펙트를 플레이어와 같이 이동할건지
-        //PlayMyEffect(player.gameObject, player.transform);
+        PlayMyEffect(player.gameObject, player.transform);
         // 돌진 이펙트를 플레이어와 따로 생성할건지
-        PlayMyEffect(player);
+        //PlayMyEffect(player);
 
         while (elapsed < DashDuration)
         {
