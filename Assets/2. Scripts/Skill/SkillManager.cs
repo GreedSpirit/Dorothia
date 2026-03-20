@@ -108,7 +108,7 @@ public class SkillManager : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        if (Keyboard.current.oKey.wasPressedThisFrame)
         {
             for (int i = 0; i < 3000; i++) GetRandomScroll();
         }
