@@ -9,7 +9,7 @@ public class EffectManager : MonoBehaviour
 {
     public static EffectManager Instance;
 
-    private Dictionary<string, ObjectPool<GameObject>> _effectPools = new();
+    private Dictionary<string, ObjectPool<GameObject>>           _effectPools  = new();
     private Dictionary<string, AsyncOperationHandle<GameObject>> _assetHandles = new();
 
     void Awake()
@@ -47,14 +47,13 @@ public class EffectManager : MonoBehaviour
             }
 
             GameObject prefab = op.Result;
-
             _effectPools[effectName] = new ObjectPool<GameObject>(
-                createFunc: () => Instantiate(prefab),
-                actionOnGet: OnGetFromPool,
+                createFunc:      () => Instantiate(prefab),
+                actionOnGet:     OnGetFromPool,
                 actionOnRelease: (obj) => obj.SetActive(false),
                 actionOnDestroy: (obj) => Destroy(obj),
                 defaultCapacity: 5,
-                maxSize: 15
+                maxSize:         15
             );
 
             Spawn(_effectPools[effectName], effectName, duration, pos, rot, parent);
@@ -63,19 +62,17 @@ public class EffectManager : MonoBehaviour
 
     // ── 풀에서 꺼낼 때 공통 초기화 ──────────────────────────────────
 
-    /// <summary>
-    /// IResettableEffect와 ParticleSystem을 모두 지원하는 통합 OnGet 핸들러.
-    /// </summary>
     private void OnGetFromPool(GameObject obj)
     {
         obj.SetActive(true);
 
-        // IResettableEffect 구현체 초기화 (MultipleObjectsMake 등)
-        foreach (var resettable in obj.GetComponentsInChildren<IResettableEffect>())
+        // 계층 전체에 있는 IResettableEffect 모두 초기화
+        // (EternalSlashStart, Mid, Finish 각각의 MultipleObjectsMake 전부 처리)
+        foreach (var resettable in obj.GetComponentsInChildren<IResettableEffect>(true))
             resettable.ResetEffect();
 
-        // ParticleSystem 초기화 (잔상 제거 후 재생)
-        foreach (var ps in obj.GetComponentsInChildren<ParticleSystem>())
+        // ParticleSystem도 함께 초기화
+        foreach (var ps in obj.GetComponentsInChildren<ParticleSystem>(true))
         {
             ps.Clear();
             ps.Play();
@@ -107,23 +104,32 @@ public class EffectManager : MonoBehaviour
     // ── 지속 시간 계산 ───────────────────────────────────────────────
 
     /// <summary>
-    /// IResettableEffect → ParticleSystem → 기본값 순으로 지속 시간을 결정한다.
+    /// 계층 내 모든 IResettableEffect 중 가장 긴 Duration을 사용.
+    /// EternalSlashDance처럼 Start/Mid/Finish가 분리된 구조에서
+    /// Finish가 가장 늦게 끝나더라도 정확히 반환된다.
     /// </summary>
     private float GetEffectDuration(GameObject fx)
     {
-        // 1순위: IResettableEffect (MultipleObjectsMake 등 커스텀 이펙트)
-        var resettable = fx.GetComponentInChildren<IResettableEffect>();
-        if (resettable != null)
-            return resettable.GetEffectDuration();
+        float maxDuration = 0f;
 
-        // 2순위: ParticleSystem
-        float maxDuration = 2f; // 컴포넌트가 없을 때 기본값
-        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>())
+        // 1순위: IResettableEffect 전체 탐색 → 최댓값
+        foreach (var resettable in fx.GetComponentsInChildren<IResettableEffect>(true))
         {
-            var main = ps.main;
+            float d = resettable.GetEffectDuration();
+            if (d > maxDuration) maxDuration = d;
+        }
+
+        if (maxDuration > 0f) return maxDuration;
+
+        // 2순위: ParticleSystem 전체 탐색 → 최댓값
+        maxDuration = 2f; // 기본값
+        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var   main     = ps.main;
             float lifetime = main.duration + main.startLifetime.constantMax;
             if (lifetime > maxDuration) maxDuration = lifetime;
         }
+
         return maxDuration;
     }
 
@@ -141,7 +147,7 @@ public class EffectManager : MonoBehaviour
 
     public void ClearAllPools()
     {
-        foreach (var pool in _effectPools.Values) pool.Clear();
+        foreach (var pool in _effectPools.Values)    pool.Clear();
         _effectPools.Clear();
 
         foreach (var handle in _assetHandles.Values) Addressables.Release(handle);

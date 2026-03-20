@@ -56,7 +56,7 @@ public abstract class BaseSkill
             Skill_Module.TargetLock => new TargetLockModule(),
             Skill_Module.Melee => new MeleeModule(),
             Skill_Module.MeleeAoe => new MeleeAoeModule(),
-            //Skill_Module.Projectile => new ProjectileModule(),
+            Skill_Module.Projectile => new ProjectileModule(),
             Skill_Module.Teleport => new TeleportModule(),
             Skill_Module.Dash => new DashModule(),
             Skill_Module.HideAppear => new HideAppearModule(),

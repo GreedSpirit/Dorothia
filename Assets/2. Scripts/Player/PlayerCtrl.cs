@@ -41,7 +41,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public bool IsAlive => !_isDead;
     public int ComboIndex { get; set; } = 0;
     public bool IsAttack { get; set; } = false;
-    public bool IsInvincible{ get; set; }
+    public bool IsInvincible { get; set; }
 
     // 캐싱
     private PlayerStats _playerStats;
@@ -104,21 +104,49 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     private void OnEnable() => _playerStats.OnDead += ChangeDead;
     private void OnDisable() => _playerStats.OnDead -= ChangeDead;
 
+    // 클래스 상단에 필드 선언
+    private Dictionary<Key, int> _skillMappings = new Dictionary<Key, int>
+    {
+        { Key.Q, 10001 }, // 난무 그대로
+        { Key.W, 10002 }, // 폭풍 난무 그대로
+        { Key.E, 10003 }, // 순보 베기 그대로
+        { Key.R, 10004 }, // 암살자의 발걸음 제자리 o11
+        { Key.T, 10005 }, // 스피어 제자리 o11
+        { Key.Y, 10006 }, // 파이어 피어스 그대로
+        { Key.U, 10007 }, // 입체 기동 블레이드 그대로
+        { Key.I, 10008 }, // 파이어 샷 제자리 o
+        { Key.O, 10009 }, // 연쇄 참격 그대로
+        { Key.P, 10010 }, // 콤보 슬래시 제자리 o
+        { Key.A, 10011 }, // 크로스 슬래시 그대로
+        { Key.S, 10012 }, // 피어스 슬래시 그대로
+        { Key.D, 10013 }, // 필살 제자리 o11
+        { Key.F, 10014 }, // 히트 쉐이커 그대로
+        { Key.G, 10015 }, // 탈론 스크래치 그대로
+        { Key.H, 18001 }, // 대지의 분노 그대로
+        { Key.J, 18002 }, // 차원 난무 그대로 사용하는데 걷는게 더 길어야할듯 o
+        { Key.K, 18003 }  // 제노사이드 그대로
+    };
+ 
+
     private void Update()
     {
         if (_isDead) return;
 
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-            TryUseSkillById(10001);
-        if (Keyboard.current.wKey.wasPressedThisFrame)
-            TryUseSkillById(10003);
-        if (Keyboard.current.eKey.wasPressedThisFrame)
-            TryUseSkillById(10012);
-        //if (Keyboard.current.rKey.wasPressedThisFrame)
-        //    TryUseSkillById(18003);
+        // 모든 매핑을 순회하며 입력 확인
+        foreach (var mapping in _skillMappings)
+        {
+            if (Keyboard.current[mapping.Key].wasPressedThisFrame)
+            {
+                TryUseSkillById(mapping.Value);
+                break;
+            }
+        }
 
         UpdateGlobalState();
-        _currentState.Execute(this);
+        if (_currentState != null)
+        {
+            _currentState.Execute(this);
+        }
     }
 
     #endregion
@@ -217,6 +245,24 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public void OnSkillTeleport(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyTeleport(this, moduleIndex);
     public void OnSkillHide(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyHide(this, moduleIndex);
     public void OnSkillAppear(int moduleIndex) => GetModularSkill(SkillState.TargetSkill)?.NotifyAppear(this, moduleIndex);
+    public void EnableRootMotion() => _anima.applyRootMotion = true;
+    public void DisableRootMotion() => _anima.applyRootMotion = false;
+
+    // applyRootMotion = true 일 때 Unity가 자동 적용을 포기하고 여기로 제어권을 넘김
+    private void OnAnimatorMove()
+    {
+        // 스킬 상태가 아니면 루트모션 무시
+        if (_currentState != SkillState) return;
+
+        Vector3 nextPos = transform.position + _anima.deltaPosition;
+
+        // NavMesh 위의 유효한 위치로 스냅 후 Warp (transform 직접 수정 시 Agent가 되돌림)
+        if (UnityEngine.AI.NavMesh.SamplePosition(nextPos, out var hit, 0.5f, UnityEngine.AI.NavMesh.AllAreas))
+            _navMesh.Warp(hit.position);
+
+        // 루트모션 회전도 반영이 필요하면 아래 주석 해제
+        // transform.rotation *= _anima.deltaRotation;
+    }
 
     #endregion
 
@@ -262,6 +308,25 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
                 if (monster != null && monster.IsAlive)
                     monster.TakeDamage((int)1);
                 //monster.TakeDamage((int)dmgPerHit);
+            }
+
+            yield return new WaitForSeconds(0.08f);
+        }
+    }
+
+    // 돌진 다수 타겟 연타 
+    internal IEnumerator MultiHitRoutine(HashSet<IMonster> targets, int hitCount, float totalDamage)
+    {
+        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            foreach (var target in targets)
+            {
+                if (target == null || !target.IsAlive) continue;
+
+                //target.TakeDamage((int)dmgPerHit);
+                target.TakeDamage((int)1);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -375,11 +440,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // ══════════════════════════════════════════════════════
     #region Utility
 
-    public IMonster FindEnemy(float skillCast_Range=0)
+    public IMonster FindEnemy(float skillCast_Range = 0)
     {
-        float find_Range = skillCast_Range > 0 ? skillCast_Range : _enemyFindRange; 
+        float find_Range = skillCast_Range > 0 ? skillCast_Range : _enemyFindRange;
 
-            Collider[] colliders = Physics.OverlapSphere(transform.position, find_Range, _enemyLayer);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, find_Range, _enemyLayer);
         IMonster nearest = null;
         float minSqrDistance = find_Range * find_Range;
 

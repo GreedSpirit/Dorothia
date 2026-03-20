@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class SkillContext
     public Vector3 DashDirection;
     public Vector3 TeleportPosition;
     public bool IsCharacterHidden;
+    public Vector3 PreTeleportPosition;   // 텔레포트 직전 위치
+    public Vector3 OverrideEffectPosition; // 이펙트 생성 위치 (0이면 기본값 사용)
 }
 
 public interface ISkillModule
@@ -26,6 +29,8 @@ public abstract class BaseSkillModule : ISkillModule
 {
     public int ModuleIndex { get; set; }
 
+    protected HashSet<IMonster> HitTargets = new();
+
     protected string EffectName { get; private set; } = string.Empty;
     protected float EffectDuration { get; private set; } = 0f;
     protected int[] HitCounts { get; private set; } = { 1 };
@@ -38,14 +43,16 @@ public abstract class BaseSkillModule : ISkillModule
     protected string ProjectileName { get; private set; } = string.Empty;
     protected float ProjectileSpeed { get; private set; } = 15f;
     protected float CastRange { get; private set; } = 0f;
-
+    protected float Delay { get; private set; } = 0f;
+    protected Skill_Target TargetType { get; private set; } = Skill_Target.MySelf;
+ 
     protected int GetHitCount(int i) => HitCounts[Mathf.Clamp(i, 0, HitCounts.Length - 1)];
     protected int GetRepeatCount(int i) => RepeatCount;
     protected float GetRepeatInterval(int i) => RepeatIntervals[Mathf.Clamp(i, 0, RepeatIntervals.Length - 1)];
     protected float GetAoeRadius(int i) => AoeRadius[Mathf.Clamp(i, 0, AoeRadius.Length - 1)];
     public void SetParamData(ModuleParamData p)
     {
-        if (p == null) return;
+        if (p == null || p.Module_Param_Id == 0) return;
         EffectName = p.Skill_Effect_Name ?? null;
         EffectDuration = p.Skill_Effect_Time;
         HitCounts = p.Hit_Count_Array;
@@ -58,33 +65,128 @@ public abstract class BaseSkillModule : ISkillModule
         ProjectileName = p.Projectile_Name ?? string.Empty;
         ProjectileSpeed = p.Projectile_Speed > 0 ? p.Projectile_Speed : 15f;
         CastRange = p.SkillCast_Range;
+        Delay = p.First_Delay > 0 ? p.First_Delay : 0f;
+        TargetType = p.Skill_Target;
     }
+
+    protected void PlayMyEffect(GameObject target, Transform parent = null)
+    {
+        if (string.IsNullOrEmpty(EffectName))
+        {
+            return;
+        }
+
+        EffectManager.Instance.PlayEffect(
+            EffectName, EffectDuration,
+            target.transform.position,
+            target.transform.rotation,
+            parent);
+    }
+
+    protected void PlayMyEffect(GameObject target, Quaternion rot = default)
+    {
+        if (string.IsNullOrEmpty(EffectName))
+        {
+            return;
+        }
+
+        EffectManager.Instance.PlayEffect(
+            EffectName, EffectDuration,
+            target.transform.position,
+            rot);
+    }
+
+
     protected void PlayMyEffect(PlayerCtrl player, Vector3 centerPoint = default)
     {
-        if (string.IsNullOrEmpty(EffectName)) {
-            Debug.Log($"{EffectName}======================");
-        return;
+        if (string.IsNullOrEmpty(EffectName))
+        {
+            return;
         }
 
         Debug.Log($"{EffectName},{ModuleIndex},{centerPoint}");
 
         Vector3 effectPoint = centerPoint == default ? player.transform.position : centerPoint;
+        Quaternion targetRot =
+                                centerPoint != Vector3.zero ?
+                                Quaternion.LookRotation(centerPoint - player.transform.position)
+                                : player.transform.rotation;
 
         EffectManager.Instance.PlayEffect(
             EffectName, EffectDuration,
             effectPoint,
-            player.transform.rotation);
+            targetRot);
     }
-    protected IEnumerator RepeatRoutine(PlayerCtrl player, SkillContext ctx, int hitIndex,
+    protected void HitEnemiesInRadius(PlayerCtrl player, float hitRadius, HashSet<IMonster> hitTargets)
+    {
+        Collider[] cols = Physics.OverlapSphere(
+            player.transform.position,
+            hitRadius,
+            LayerMask.GetMask("Monster") 
+        );
+
+        foreach (var col in cols)
+        {
+            if (!col.TryGetComponent<IMonster>(out var damageable)) continue;
+            if (hitTargets.Contains(damageable)) continue; // 이미 맞은 적 스킵
+
+            hitTargets.Add(damageable);
+        }
+    }
+    protected IMonster FindFarthestUnhit(PlayerCtrl player)
+    {
+        IMonster best = null;
+        float maxDist = -1f;
+        float range = CastRange > 0 ? CastRange : player.EnemyFindRange;
+        Collider[] cols = Physics.OverlapSphere(
+            player.transform.position, range, LayerMask.GetMask("Monster"));
+
+        foreach (var col in cols)
+        {
+            if (!col.TryGetComponent<IMonster>(out var m)) continue;
+            if (HitTargets.Contains(m)) continue;
+
+            float dist = Vector3.Distance(player.transform.position, col.transform.position);
+            if (dist > maxDist)
+            {
+                maxDist = dist;
+                best = m;
+            }
+        }
+        return best;
+    }
+
+    protected IEnumerator RepeatRoutine(PlayerCtrl player, SkillContext ctx, int startHitIndex,
         Action<PlayerCtrl, SkillContext, int> action)
     {
         for (int i = 0; i < RepeatCount; i++)
         {
-            action(player, ctx, hitIndex);
+            int currentHitIndex = startHitIndex + i;
+
+            action?.Invoke(player, ctx, currentHitIndex);
 
             if (i < RepeatCount - 1)
-                yield return new WaitForSeconds(GetRepeatInterval(hitIndex));
+            {
+                float interval = GetRepeatInterval(currentHitIndex);
+                Debug.Log($"<color=#ff0000>{currentHitIndex},{interval}</color>");
+                yield return new WaitForSeconds(interval);
+            }
         }
+    }
+    protected IEnumerator DelayedHit(PlayerCtrl player, int hitIndex, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // 지연 시간 후 데이터 참조
+        int count = GetHitCount(hitIndex);
+        float radius = GetAoeRadius(hitIndex);
+        float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+
+        Collider[] hits = Physics.OverlapSphere(
+            player.transform.position, radius, LayerMask.GetMask("Monster"));
+
+        if (hits.Length > 0)
+            player.StartCoroutine(player.MultiHitRoutine(hits, count, dmg));
     }
 
     public virtual void OnExecute(PlayerCtrl player, SkillContext ctx) { }

@@ -37,8 +37,8 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
         {
             AddressableManager.Instance.LoadAsset<AnimationClip>(animAddr, clip =>
             {
-                // 애니메이터 컨트롤러의 "attack3" 슬롯에 교체
-                player.OverrideController["attack3"] = clip;
+                // 애니메이터 컨트롤러의 "DanceOfBlade" 슬롯에 교체
+                player.OverrideController["DanceOfBlade"] = clip;
                 OnClipReady(player);
             });
         }
