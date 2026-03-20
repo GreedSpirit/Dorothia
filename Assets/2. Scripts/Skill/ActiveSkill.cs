@@ -11,8 +11,4 @@ public class ActiveSkill : BaseSkill
         StartCooldown();
     }
 
-    public override void Undo()
-    {
-        throw new System.NotImplementedException();
-    }
 }

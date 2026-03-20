@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -54,10 +54,12 @@ public class DataManager : MonoBehaviour
         
         //Skill 테이블
         LoadData<SkillData>("Skill");
+        LoadData<ModuleParamData>("Module_Param");
         LoadData<Skill_RankData>("Skill_Rank");
         LoadData<Skill_StatusData>("Skill_Status");
         LoadData<Skill_UpgradeData>("Skill_Upgrade");
         LoadData<Skill_Upgrade_GoldData>("Skill_Upgrade_Gold");
+        LoadListData<SkillModuleData>("Skill_Module");
 
         //Equip 테이블
         LoadData<EquipData>("Equip");

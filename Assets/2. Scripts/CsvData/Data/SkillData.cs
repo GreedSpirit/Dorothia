@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 [System.Serializable]
@@ -8,12 +8,10 @@ public class SkillData : ICSVLoad, ITableKey
     public string Skill_Name { get; set; }
     public Skill_Type Skill_Type { get; set; }
     public float Skill_Cooltime { get; set; }
-    public Skill_Target Skill_Target { get; set; }
-    public int Skill_Status_Id { get; set; }
-    public string Skill_Icon { get; set; }
-    public string Skill_Sfx_Patch { get; set; }
-    public string Skill_Effect_Patch { get; set; }
+    public Status Affection_Skill { get; set; }
+    public float Affection_Skill_Value { get; set; }
     public string Skill_Animation_Patch { get; set; }
+    public string Skill_Icon { get; set; }
 
     int ITableKey.Id => Job_Skill_Id;
     string ITableKey.Key => Skill_Name;
@@ -28,17 +26,13 @@ public class SkillData : ICSVLoad, ITableKey
         if (values.Length > 2 && Enum.TryParse(values[2], out Skill_Type v2)) Skill_Type = v2;
         // 3: skill_cooltime (float)
         if (values.Length > 3 && float.TryParse(values[3], out float v3)) Skill_Cooltime = v3;
-        // 4: skill_target (Skill_Target)
-        if (values.Length > 4 && Enum.TryParse(values[4], out Skill_Target v4)) Skill_Target = v4;
-        // 5: skill_status_id (int)
-        if (values.Length > 5 && int.TryParse(values[5], out int v5)) Skill_Status_Id = v5;
-        // 6: skill_icon (string)
-        if (values.Length > 6) Skill_Icon = values[6];
-        // 7: SFX_patch (string)
-        if (values.Length > 7) Skill_Sfx_Patch = values[7];
-        // 8: effect_patch (string)
-        if (values.Length > 8) Skill_Effect_Patch = values[8];
-        // 9: animation_patch (string)
-        if (values.Length > 9) Skill_Animation_Patch = values[9];
+        // 4: Affection_Skill (Status)
+        if (values.Length > 4 && Enum.TryParse(values[4], out Status v4)) Affection_Skill = v4;
+        // 5: Affection_Skill_Value (float)
+        if (values.Length > 5 && float.TryParse(values[5], out float v5)) Affection_Skill_Value = v5;
+        // 6: Skill_Animation_Patch (string)
+        if (values.Length > 6) Skill_Animation_Patch = values[6];
+        // 7: Skill_Icon (string)
+        if (values.Length > 7) Skill_Icon = values[7];
     }
 }

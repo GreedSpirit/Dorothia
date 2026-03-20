@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -106,29 +106,29 @@ public class SkillManager : MonoBehaviour
         Instance = this;
     }
 
-    //private void Update()
-    //{
-    //    //if (Keyboard.current.rKey.wasPressedThisFrame)
-    //    //{
-    //    //    for (int i = 0; i < 3000; i++) GetRandomScroll();
-    //    //}
-    //
-    //    // 신비게이지 테스트
-    //    //if (Keyboard.current.sKey.wasPressedThisFrame)
-    //    //{
-    //    //    MysteryGauge += 1000;
-    //    //}
-    //
-    //    //float dt = Time.deltaTime;
-    //    //// 액티브 슬롯 쿨다운 업데이트
-    //    //for (int i = 0; i < ActiveSlots.Length; i++)
-    //    //{
-    //    //    ActiveSlots[i]?.UpdateCooldown(dt);
-    //    //}
-    //    //
-    //    //// 궁극기 쿨다운 업데이트
-    //    //UltimateSlot?.UpdateCooldown(dt);
-    //}
+    private void Update()
+    {
+        if (Keyboard.current.oKey.wasPressedThisFrame)
+        {
+            for (int i = 0; i < 3000; i++) GetRandomScroll();
+        }
+
+        // 신비게이지 테스트
+        //if (Keyboard.current.sKey.wasPressedThisFrame)
+        //{
+        //    MysteryGauge += 1000;
+        //}
+
+        float dt = Time.deltaTime;
+        // 액티브 슬롯 쿨다운 업데이트
+        for (int i = 0; i < ActiveSlots.Length; i++)
+        {
+            ActiveSlots[i]?.UpdateCooldown(dt);
+        }
+
+        // 궁극기 쿨다운 업데이트
+        UltimateSlot?.UpdateCooldown(dt);
+    }
 
     public void GetRandomScroll()
     {
@@ -291,9 +291,9 @@ public class SkillManager : MonoBehaviour
         if (!_unlockedSkills.ContainsKey(skillKey))
         {
             var sData = DataManager.Instance.GetData<SkillData>(skillKey.sid);
-            var stData = DataManager.Instance.GetData<Skill_StatusData>(sData.Skill_Status_Id);
+            //var stData = DataManager.Instance.GetData<Skill_StatusData>(sData.Skill_Status_Id);
 
-            BaseSkill newSkill = BaseSkill.Create(sData, stData);
+            BaseSkill newSkill = BaseSkill.Create(sData);
             newSkill.Rarity = skillKey.rarity; // 스킬 객체에도 등급 설정
             _unlockedSkills[skillKey] = newSkill;
         }
@@ -430,7 +430,11 @@ public class SkillManager : MonoBehaviour
             PassiveSlots[index] = skill;
 
             // 3. 패시브 효과 적용 (PlayerCtrl 등에 스탯 반영 알림)
-            StatManager.Instance.RefreshStats();
+            if (skill is PassiveSkill passive)
+                passive.Apply();
+
+            // 3. 패시브 효과 적용 (PlayerCtrl 등에 스탯 반영 알림)
+            //StatManager.Instance.RefreshStats();
 
             AddressableManager.Instance.LoadAsset<Sprite>(skill.Data.Skill_Icon);
             // 패시브는 인게임 퀵슬롯(ingameSlots)에 들어가지 않으므로 UpdateInGameSlots 생략 가능
