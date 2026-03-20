@@ -16,7 +16,7 @@ public class PlayerCombatSlots : MonoBehaviour
 
     [Header("Base Slot Layout")]
     [SerializeField] private int _baseSlotCount = 12;               // 플레이어 주변 슬롯 수
-    [SerializeField] private float _baseRadius = 1f;              // 플레이어 중심에서 슬롯까지 거리
+    [SerializeField] private float _baseRadius = 1f;                // 플레이어 중심에서 슬롯까지 거리
     [SerializeField] private float _randomOffset = 0.35f;           // 슬롯 퍼짐 정도
 
     [Header("Adaptive Slot (Rings)")]
@@ -27,33 +27,22 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private int _maxSlots = 48;                    //총 슬롯 최대(예: 12 * 4 = 48) / 근접 공격 가능 수 제한
 
     [Header("Angle Bias")]
-    [SerializeField] private bool _useAngleBias = true;
-    [SerializeField] private float _forwardBias = 0.65f;            //플레이어 전방 선호(0~1)
-    [SerializeField] private float _sideBias = 0.20f;               //측면 선호
-    [SerializeField] private float _backBias = 0.15f;               //후방 선호
-    [SerializeField] private float _biasSharpness = 2.0f;           //가중치 곡선(클수록 특정 방향에 더 몰림)
+    [SerializeField] private bool _useAngleBias = false;
 
     [Header("Slot Refresh")]
-    [SerializeField] private float _rebuildInterval = 2.0f;        //목표 이동에 맞춰 슬롯 재배치 간격
-    [SerializeField] private float _rebuildMoveThreshold = 1f;   //플레이어 이동량이 이 이상이면 재배치
-    [SerializeField] private bool _rotateSlotsWithFacing = false;    //플레이어 진행방향에 따라 슬롯 원형을 회전
+    [SerializeField] private float _rebuildInterval = 2.0f;         //목표 이동에 맞춰 슬롯 재배치 간격
+    [SerializeField] private float _rebuildMoveThreshold = 1f;      //플레이어 이동량이 이 이상이면 재배치
 
     // 내부 캐시/풀
     private struct SlotData
     {
         public Transform tr;
-        public Vector3 baseLocalPos;      // 오프셋 전 기본 위치
-        public Vector3 currentLocalPos;   // 랜덤 오프셋 포함 최종 위치
         public bool used;
         public int ring;
-        public float angleRad;
     }
 
     private SlotData[] _slotData;
-
-    //어떤 몬스터가 어떤 슬롯을 점유하는지
-    private readonly Dictionary<IMonster, int> _occupied = new(128); // 최대 120 기준 pre-alloc
-
+    private readonly Dictionary<IMonster, int> _occupied = new(128); //어떤 몬스터가 어떤 슬롯을 점유하는지
     private bool[] _used;
 
     //플레이어 이동/방향 기반 슬롯 재빌드
@@ -74,16 +63,19 @@ public class PlayerCombatSlots : MonoBehaviour
         //Slot Refresh (Rebuild)
         // - 플레이어가 일정 거리 이상 이동하면 슬롯 원형을 재정렬
         // - 너무 자주 하면 몬스터 목표가 계속 흔들림 -> interval로 제한
+        transform.position = _targetPlayer.position;
+        transform.rotation = Quaternion.identity;
+
+        UpdateSlotPositions();
+
         if (Time.time < _nextRebuildTime)
             return;
 
-        if (_targetPlayer != null)
-            transform.position = _targetPlayer.position;
-
         float sqrMove = (transform.position - _lastRebuildWorldPos).sqrMagnitude;
+
         if (sqrMove >= _rebuildMoveThreshold * _rebuildMoveThreshold)
         {
-            BuildSlots(initial: false);
+            BuildSlots(false);
             _nextRebuildTime = Time.time + _rebuildInterval;
         }
     }
@@ -97,8 +89,11 @@ public class PlayerCombatSlots : MonoBehaviour
         //플레이어 이동/회전 기반 오프셋을 재계산
         _lastRebuildWorldPos = transform.position;
 
-        //총 슬롯 개수 결정 (Adaptive)
-        int desiredSlots = _useAdaptive ? Mathf.Min(_maxSlots, _slotsPerRing * _maxRings) : _baseSlotCount;
+        //총 슬롯 개수 결정
+        int desiredSlots = _useAdaptive
+            ? Mathf.Min(_maxSlots, _slotsPerRing * _maxRings)
+            : _baseSlotCount;
+
         if (desiredSlots <= 0) desiredSlots = 1;
 
         //초기 1회: 배열/Transform 풀 구성
@@ -121,16 +116,13 @@ public class PlayerCombatSlots : MonoBehaviour
             for (int i = 0; i < desiredSlots; i++)
             {
                 var go = new GameObject($"Slot_{i}");
-                go.transform.SetParent(transform, false);
+                go.transform.SetParent(null); // 월드좌표 기준
 
                 _slotData[i] = new SlotData
                 {
                     tr = go.transform,
                     used = false,
-                    ring = 0,
-                    angleRad = 0f,
-                    baseLocalPos = Vector3.zero,
-                    currentLocalPos = Vector3.zero,
+                    ring = 0
                 };
 
                 // 슬롯마다 고정 랜덤 시드(오프셋)
@@ -147,80 +139,39 @@ public class PlayerCombatSlots : MonoBehaviour
         for (int i = 0; i < _used.Length; i++)
             _used[i] = _slotData[i].used; // 안전 동기화
 
-        //플레이어 진행 방향(또는 이동 방향) 기반 회전 각
-        float yawOffsetRad = 0f;
+        Vector3 playerPos = _targetPlayer.position; // 기준을 항상 targetPlayer로
 
-        //각 슬롯 위치 계산
         int total = _slotData.Length;
+        int idx = 0;
 
-        if (!_useAdaptive)
+        for (int ring = 0; ring < _maxRings && idx < total; ring++)
         {
-            //고정 슬롯(기존 방식 확장)
-            for (int i = 0; i < total; i++)
+            float radius = _baseRadius + _ringSpacing * ring;
+            int ringSlots = Mathf.Min(_slotsPerRing, total - idx);
+
+            for (int j = 0; j < ringSlots && idx < total; j++, idx++)
             {
-                float angleDeg = (360f / total) * i;
-                float angleRad = angleDeg * Mathf.Deg2Rad;
+                float t = (float)j / ringSlots;
+                float angle = t * Mathf.PI * 2f;
 
-                Vector3 dir = new Vector3(Mathf.Cos(angleRad), 0, Mathf.Sin(angleRad));
-                Vector3 basePos = dir * _baseRadius;
+                Vector3 dir = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+                Vector3 basePos = dir * radius;
 
-                Vector3 offset = ComputeStableOffset(i, dir, _randomOffset);
+                Vector3 offset = ComputeStableOffset(idx, dir, _randomOffset);
 
-                _slotData[i].ring = 0;
-                _slotData[i].angleRad = angleRad;
-                _slotData[i].baseLocalPos = basePos;
-                _slotData[i].currentLocalPos = basePos + offset;
+                //월드 좌표 직접 계산
+                Vector3 worldPos = playerPos + basePos + offset;
 
-                _slotData[i].tr.localPosition = _slotData[i].currentLocalPos;
-            }
-        }
-        else
-        {
-            //Adaptive Rings
-            //링 0: 가장 가까운 링 (선호)
-            //링 1,2...: 외곽 링
-            //각 링마다 _slotsPerRing 개 배치
-            int idx = 0;
-            for (int ring = 0; ring < _maxRings && idx < total; ring++)
-            {
-                float radius = _baseRadius + _ringSpacing * ring;
-                int ringSlots = Mathf.Min(_slotsPerRing, total - idx);
-
-                for (int j = 0; j < ringSlots && idx < total; j++, idx++)
-                {
-                    //링마다 슬롯 개수로 원형 배치
-                    float t = (float)j / ringSlots;
-                    float angleRad = (t * Mathf.PI * 2f) + yawOffsetRad;
-
-                    Vector3 dir = new Vector3(Mathf.Cos(angleRad), 0, Mathf.Sin(angleRad));
-                    Vector3 basePos = dir * radius;
-
-                    Vector3 offset = ComputeStableOffset(idx, dir, _randomOffset * (1f + ring * 0.15f));
-
-                    _slotData[idx].ring = ring;
-                    _slotData[idx].angleRad = angleRad;
-                    _slotData[idx].baseLocalPos = basePos;
-                    _slotData[idx].currentLocalPos = basePos + offset;
-
-                    _slotData[idx].tr.localPosition = _slotData[idx].currentLocalPos;
-                }
+                _slotData[idx].ring = ring;
+                _slotData[idx].tr.position = worldPos;
             }
         }
 
-        //used 상태 동기화
         for (int i = 0; i < _slotData.Length; i++)
             _slotData[i].used = _used[i];
     }
 
-    /// <summary>
-    /// "고정 랜덤 오프셋" 계산
-    /// - 슬롯 점유/해제 때마다 랜덤이 튀지 않도록
-    /// - dir 기반으로 살짝 뒤/옆으로 분산해 겹침 감소
-    /// </summary>
-    /// <param name="slotIndex"></param>
-    /// <param name="dir"></param>
-    /// <param name="magnitude"></param>
-    /// <returns></returns>
+    
     private Vector3 ComputeStableOffset(int slotIndex, Vector3 dir, float magnitude)
     {
         //슬롯별 고정 시드
@@ -297,72 +248,55 @@ public class PlayerCombatSlots : MonoBehaviour
     {
         Vector3 monsterPos = monster.Transform.position;
 
-        //플레이어 "진행 방향" (혹은 facing)
-        Vector3 forward = _targetPlayer.forward;
-        forward.y = 0f;
-        if (forward.sqrMagnitude < 0.001f)
-            forward = Vector3.forward;
-        else
-            forward.Normalize();
-
-        //플레이어 위치
-        Vector3 playerPos = transform.position;
-
         int bestIndex = -1;
         float bestScore = float.MaxValue;
 
         for (int i = 0; i < _slotData.Length; i++)
         {
-            if (!allowUsed && _used[i])
+            if (_used[i])
                 continue;
 
-            Vector3 slotWorld = _slotData[i].tr.position;
+            float dist = (monsterPos - _slotData[i].tr.position).sqrMagnitude;
 
-            //거리 점수(가까운 슬롯 선호)
-            float distScore = (monsterPos - slotWorld).sqrMagnitude;
-
-            //링 패널티(내측 링 선호)
-            float ringPenalty = _slotData[i].ring * 1.15f; // 링이 바깥일수록 더 큰 패널티
-
-            //Angle Bias: 슬롯 방향이 플레이어 forward 기준 어디냐에 따라 가중치
-            float bias = 1f;
-            if (_useAngleBias)
+            if (dist < bestScore)
             {
-                Vector3 dirToSlot = slotWorld - playerPos;
-                dirToSlot.y = 0f;
-                if (dirToSlot.sqrMagnitude > 0.0001f)
-                    dirToSlot.Normalize();
-                else
-                    dirToSlot = forward;
-
-                //forward와의 내적: 1(정면) ~ -1(후면)
-                float dot = Vector3.Dot(forward, dirToSlot);
-
-                //dot을 0~1 구간으로 맵핑(정면=1, 후면=0)
-                float front01 = Mathf.Clamp01((dot + 1f) * 0.5f);
-
-                //측면 성분: dot이 0 근처일수록 측면
-                float side01 = 1f - Mathf.Abs(dot);
-
-                //가중치 조합(유저 설정 값)
-                float w = (_forwardBias * Mathf.Pow(front01, _biasSharpness)) +
-                          (_sideBias * Mathf.Pow(side01, _biasSharpness)) +
-                          (_backBias * Mathf.Pow(1f - front01, _biasSharpness));
-
-                //w가 클수록 "선호" -> score는 낮을수록 좋으니 bias는 1/w 형태로
-                bias = 1f / Mathf.Max(0.001f, w);
-            }
-
-            float score = distScore * bias + ringPenalty;
-
-            if (score < bestScore)
-            {
-                bestScore = score;
+                bestScore = dist;
                 bestIndex = i;
             }
         }
 
         return bestIndex;
+    }
+
+    private void UpdateSlotPositions()
+    {
+        if (_slotData == null) return;
+
+        Vector3 playerPos = _targetPlayer.position;
+
+        int total = _slotData.Length;
+        int idx = 0;
+
+        for (int ring = 0; ring < _maxRings && idx < total; ring++)
+        {
+            float radius = _baseRadius + _ringSpacing * ring;
+            int ringSlots = Mathf.Min(_slotsPerRing, total - idx);
+
+            for (int j = 0; j < ringSlots && idx < total; j++, idx++)
+            {
+                float t = (float)j / ringSlots;
+                float angle = t * Mathf.PI * 2f;
+
+                Vector3 dir = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+                Vector3 basePos = dir * radius;
+
+                Vector3 offset = ComputeStableOffset(idx, dir, _randomOffset);
+
+                Vector3 worldPos = playerPos + basePos + offset;
+
+                _slotData[idx].tr.position = worldPos;
+            }
+        }
     }
 
     public Transform RequestSlot(IMonster monster)
@@ -385,7 +319,6 @@ public class PlayerCombatSlots : MonoBehaviour
         if (_occupied.TryGetValue(monster, out int index))
         {
             _occupied.Remove(monster);
-
             _used[index] = false;
             _slotData[index].used = false;
         }
