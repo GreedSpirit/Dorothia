@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor.AddressableAssets.Build;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.AI;
@@ -265,25 +266,6 @@ public class DashModule : BaseSkillModule
 
     private IEnumerator DashRoutine(PlayerCtrl player, SkillContext ctx, int hitIndex)
     {
-        //
-        // 타겟 존재 여부 확인 후 중앙 위치 계산
-        Vector3 centerPoint = player.transform.position; // 기본값은 플레이어 위치
-
-        if (ctx.LockedTarget != null)
-        {
-            // 산술 평균 방식: (A + B) / 2
-            centerPoint = (player.transform.position + ctx.LockedTarget.Transform.position) * 0.5f;
-
-            // 또는 Lerp 방식 (위와 동일한 결과)
-            // centerPoint = Vector3.Lerp(player.transform.position, ctx.LockedTarget.transform.position, 0.5f);
-        }
-
-        //todo : 1. 돌진 시, 힛박스를 켜서 스킬데미지를 넘겨주던가
-        //todo : 2. 돌진 시, 돌진하는동안 피직스오버랩으로 적찾고 주변 적 데미지 주던가
-
-        player.EnableAttackCollider();
-
-
         float elapsed = 0f;
         Vector3 startPos = player.transform.position;
         Vector3 destination = startPos + ctx.DashDirection * DashDistance;
@@ -294,25 +276,33 @@ public class DashModule : BaseSkillModule
         if (NavMesh.SamplePosition(destination, out var hit, 3f, NavMesh.AllAreas))
             destination = hit.position;
 
-        //PlayMyEffect(player, centerPoint);
-        PlayMyEffect(player.gameObject, player.transform);
+        // 돌진 이펙트를 플레이어와 같이 이동할건지
+        //PlayMyEffect(player.gameObject, player.transform);
+        // 돌진 이펙트를 플레이어와 따로 생성할건지
+        PlayMyEffect(player);
 
         while (elapsed < DashDuration)
         {
             elapsed += Time.deltaTime;
             float easedT = 1f - Mathf.Pow(1f - elapsed / DashDuration, 3f);
             player.NavMesh.Warp(Vector3.Lerp(startPos, destination, easedT));
-
-            HitEnemiesInRadius(player, radius, HitTargets);
             yield return null;
         }
 
         player.NavMesh.Warp(destination);
 
-        // 공격용 돌진기라면
+        // 돌진 완료 후 경로 캡슐로 처리
         if (hitCount > 0)
         {
             float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
+
+            Collider[] cols = Physics.OverlapCapsule(
+                startPos, destination, radius,
+                LayerMask.GetMask("Monster"));
+
+            foreach (var col in cols)
+                if (col.TryGetComponent<IMonster>(out var m) && m.IsAlive)
+                    HitTargets.Add(m);
 
             if (HitTargets.Count > 0)
                 player.StartCoroutine(player.MultiHitRoutine(HitTargets, hitCount, dmg));

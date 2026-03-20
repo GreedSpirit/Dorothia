@@ -117,22 +117,6 @@ public abstract class BaseSkillModule : ISkillModule
             effectPoint,
             targetRot);
     }
-    protected void HitEnemiesInRadius(PlayerCtrl player, float hitRadius, HashSet<IMonster> hitTargets)
-    {
-        Collider[] cols = Physics.OverlapSphere(
-            player.transform.position,
-            hitRadius,
-            LayerMask.GetMask("Monster") 
-        );
-
-        foreach (var col in cols)
-        {
-            if (!col.TryGetComponent<IMonster>(out var damageable)) continue;
-            if (hitTargets.Contains(damageable)) continue; // 이미 맞은 적 스킵
-
-            hitTargets.Add(damageable);
-        }
-    }
     protected IMonster FindFarthestUnhit(PlayerCtrl player)
     {
         IMonster best = null;
