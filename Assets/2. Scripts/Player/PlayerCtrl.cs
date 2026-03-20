@@ -9,6 +9,9 @@ using UnityEngine.InputSystem;
 
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
+    [Header("키 매핑 스킬 사용 유무(테스트)")]
+    [SerializeField] private bool IsTestSkill = false;
+
     [SerializeField] AudioClip[] _audioClip;
 
     [Header("조이스틱 & UI 설정")]
@@ -129,19 +132,21 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         { Key.J, 18002 }, // 차원 난무 그대로 사용하는데 걷는게 더 길어야할듯 o
         { Key.K, 18003 }  // 제노사이드 그대로
     };
- 
+
 
     private void Update()
     {
         if (_isDead) return;
 
-        // 모든 매핑을 순회하며 입력 확인
-        foreach (var mapping in _skillMappings)
+        if (IsTestSkill)
         {
-            if (Keyboard.current[mapping.Key].wasPressedThisFrame)
+            foreach (var mapping in _skillMappings)
             {
-                TryUseSkillById(mapping.Value);
-                break;
+                if (Keyboard.current[mapping.Key].wasPressedThisFrame)
+                {
+                    TryUseSkillById(mapping.Value);
+                    break;
+                }
             }
         }
 
@@ -407,7 +412,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
 
     public void EnableAttackEffect(int index)
-    {        
+    {
         ResetEffect3Transform();
 
         if (_odm.IsModeOn)
@@ -570,6 +575,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         Gizmos.color = Color.red;
         Vector3 endDistance = new Vector3(transform.position.x, transform.position.y, transform.position.z + AttackRange);
-        Gizmos.DrawLine(transform.position,  endDistance);
+        Gizmos.DrawLine(transform.position, endDistance);
     }
 }
