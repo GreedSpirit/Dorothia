@@ -14,6 +14,25 @@ public class DungeonUIMgr : MonoBehaviour
     [SerializeField] Button _dungeonClear;
     [SerializeField] Button _nextDungeon;
 
+    [SerializeField] GameObject _dungeonInfoPanel;
+    [SerializeField] TextMeshProUGUI _dungeonName;
+    [SerializeField] TextMeshProUGUI _dungeonTime;
+    bool _isEnterDungeon;
+    float _timer;
+
+    private void Update()
+    {
+        if (_isEnterDungeon == false) return;
+
+        _timer += Time.deltaTime;
+
+        int minutes = (int)(_timer / 60);
+        int seconds = (int)(_timer % 60);
+
+        //00:00 표시
+        _dungeonTime.text = ($"{minutes:00} : {seconds:00}");
+    }
+
     private void OnEnable()
     {
         DungeonManager.OnDungeonEQReward += UpdateEQRewardUI;
@@ -21,7 +40,11 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
         DungeonManager.OnDungeonReward += UpdateRewardUI;
         DungeonManager.OnDungeonCleared += UpdateDungeonInfo;
+        DungeonManager.OnDungeonCleared += CloseDungeonInfo;
         DungeonManager.OnDungeonFailed += UpdateDungeonFail;
+        DungeonManager.OnDungeonFailed += CloseDungeonInfo;
+
+        DungeonManager.OnDungeonStarted += UpdateDungeonInfo;
     }
 
     private void OnDisable()
@@ -31,7 +54,33 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
         DungeonManager.OnDungeonReward -= UpdateRewardUI;
         DungeonManager.OnDungeonCleared -= UpdateDungeonInfo;
+        DungeonManager.OnDungeonCleared -= CloseDungeonInfo;
         DungeonManager.OnDungeonFailed -= UpdateDungeonFail;
+        DungeonManager.OnDungeonFailed -= CloseDungeonInfo;
+
+        DungeonManager.OnDungeonStarted -= UpdateDungeonInfo;
+    }
+
+    public void UpdateDungeonInfo(int currentDungeonId)
+    {
+        var DungeonName = DataManager.Instance.GetData<DungeonData>(currentDungeonId);
+
+        _dungeonInfoPanel.SetActive(true);
+
+        _dungeonName.text = "";
+        _dungeonTime.text = "";
+
+        _isEnterDungeon = true;
+
+        _dungeonName.text = ($"{DungeonName.Dungeon_Name}");
+    }
+
+    public void CloseDungeonInfo(string dungeonName, int stepId, float clearTime)
+    {
+        _dungeonInfoPanel.SetActive(false);
+
+        _isEnterDungeon = false;
+        _timer = 0;
     }
 
 
