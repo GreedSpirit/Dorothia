@@ -24,6 +24,7 @@ public class GremlinUIPanel : BaseUI
 
     [SerializeField] private GremlinInventory _gremlinList;
     [SerializeField] private NoticeUIPanel _noticeUIPanel;
+    [SerializeField] private GremlinUpgradePanel _mergePanel;
 
     private Gremlin _selectedGremlinData;               // 선택한 그렘린의 데이터
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
@@ -35,7 +36,15 @@ public class GremlinUIPanel : BaseUI
     {
         _btnEquip.onClick.AddListener(OnClickEquip);
         _btnGoEnhance.onClick.AddListener(OnClickGoEnhance);
-        _btnGoMerge.onClick.AddListener(OnClickGoMerge);
+        _btnGoMerge.onClick.AddListener(() =>
+        {
+            StartCoroutine(_mergePanel.GetFuseTarget(_selectedGremlinData));
+        });
+    }
+
+    private void Start()
+    {
+        Close();
     }
 
     //TODO 패널이 열릴 때 호출할 함수 (보유한 그렘린 리스트를 넘겨받아야 함)

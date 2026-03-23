@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5993744633509773913}
   - component: {fileID: 5034443534661538855}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Normal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,9 +33,9 @@ RectTransform:
   - {fileID: 1816578308419435188}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 222.5, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5993744633509773913
@@ -486,13 +486,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4670488309149365816}
+  - component: {fileID: 9088687287917177529}
   m_Layer: 5
   m_Name: '[Panel]FusePanel'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4670488309149365816
 RectTransform:
   m_ObjectHideFlags: 0
@@ -506,7 +507,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3489259289610437492}
-  - {fileID: 8014115465144805742}
   m_Father: {fileID: 6640902433527146330}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -514,6 +514,35 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &9088687287917177529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382623607742985091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 585072d3c589c1a468837612f21ac3aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GremlinUpgradePanel
+  close: {fileID: 0}
+  inventory: {fileID: 0}
+  _currentGremlinImage: {fileID: 2053244510097401192}
+  _gremlinShardImage: {fileID: 9214010918331872988}
+  _gremlinRarityImage:
+  - {fileID: 5034443534661538855}
+  - {fileID: 2848521654314234236}
+  - {fileID: 565538160686953363}
+  - {fileID: 7378318739745839528}
+  - {fileID: 2509169682331177007}
+  _gremlinShardText: {fileID: 9119023995483875781}
+  _gremlinNormalText: {fileID: 4393271569834398854}
+  _gremlinUncommonText: {fileID: 8030414274171784647}
+  _gremlinRareText: {fileID: 1881725845866114386}
+  _gremlinLegendaryText: {fileID: 2805282264641462049}
+  _gremlinMythticText: {fileID: 5520787052941802590}
+  _fuseButton: {fileID: 8199945144616418482}
 --- !u!1 &580279239849146765
 GameObject:
   m_ObjectHideFlags: 0
@@ -682,7 +711,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4670488309149365816}
+  m_Father: {fileID: 3489259289610437492}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -770,19 +799,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 925617987274480779}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6760081032591907344}
-        m_TargetAssemblyTypeName: GremlinUIPanel, Assembly-CSharp
-        m_MethodName: Close
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &870098903006359920
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,6 +1032,7 @@ MonoBehaviour:
   _btnGoMerge: {fileID: 7670086117551159856}
   _gremlinList: {fileID: 0}
   _noticeUIPanel: {fileID: 4436769145969947624}
+  _mergePanel: {fileID: 9088687287917177529}
 --- !u!1 &1004064151001521717
 GameObject:
   m_ObjectHideFlags: 0
@@ -2583,6 +2601,7 @@ GameObject:
   - component: {fileID: 6770513622888909208}
   - component: {fileID: 793131693084407861}
   - component: {fileID: 7670086117551159856}
+  - component: {fileID: 4775144715569414381}
   m_Layer: 5
   m_Name: MergeGremlinBtn
   m_TagString: Untagged
@@ -2692,6 +2711,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4775144715569414381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2736801811450319865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ae1e2c39ad7e624383a485b53f6cf57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIOpener
+  targetPanel: {fileID: 9088687287917177529}
 --- !u!1 &2900877675771284754
 GameObject:
   m_ObjectHideFlags: 0
@@ -2841,7 +2873,7 @@ GameObject:
   - component: {fileID: 3907587067079443303}
   - component: {fileID: 9214010918331872988}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Shard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2862,9 +2894,9 @@ RectTransform:
   - {fileID: 2976582995976029314}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 70.833336, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3907587067079443303
@@ -4593,7 +4625,7 @@ GameObject:
   - component: {fileID: 2769882902283539234}
   - component: {fileID: 2848521654314234236}
   m_Layer: 5
-  m_Name: Image (2)
+  m_Name: Uncommon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4614,9 +4646,9 @@ RectTransform:
   - {fileID: 1406264060033518183}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 374.1667, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2769882902283539234
@@ -4981,6 +5013,7 @@ RectTransform:
   - {fileID: 3242037683991222098}
   - {fileID: 6535721717083522796}
   - {fileID: 5299084117541283379}
+  - {fileID: 8014115465144805742}
   m_Father: {fileID: 4670488309149365816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5465,7 +5498,7 @@ GameObject:
   - component: {fileID: 7946678375062812274}
   - component: {fileID: 7378318739745839528}
   m_Layer: 5
-  m_Name: Image (4)
+  m_Name: Legendary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5486,9 +5519,9 @@ RectTransform:
   - {fileID: 254437248033509519}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 677.5, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7946678375062812274
@@ -6400,7 +6433,7 @@ GameObject:
   - component: {fileID: 2271352101485532592}
   - component: {fileID: 2509169682331177007}
   m_Layer: 5
-  m_Name: Image (5)
+  m_Name: Mythtic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6421,9 +6454,9 @@ RectTransform:
   - {fileID: 7983699121266322068}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 829.1667, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2271352101485532592
@@ -6476,7 +6509,7 @@ GameObject:
   - component: {fileID: 2073467830323582060}
   - component: {fileID: 565538160686953363}
   m_Layer: 5
-  m_Name: Image (3)
+  m_Name: Rare
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6497,9 +6530,9 @@ RectTransform:
   - {fileID: 2722187198733264934}
   m_Father: {fileID: 3242037683991222098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 525.8334, y: -63}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 126, y: 126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2073467830323582060
