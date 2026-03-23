@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum MoneyType
@@ -12,6 +13,9 @@ public class MoneyManager : MonoBehaviour
 
     //저장해둘 재화
     Dictionary<MoneyType, int> _money = new();
+
+    public Action onShardValueChanged;
+    int currentGremlinShard;
 
     private void Awake()
     {
@@ -135,6 +139,21 @@ public class MoneyManager : MonoBehaviour
     public void AddGremlinPiece(int id, int amount)
     {
         _money[GetShardTargetGremlin(id)] += amount;
+        if (_money[GetShardTargetGremlin(id)] > 2)
+        {
+            currentGremlinShard = id;
+        }
+        onShardValueChanged?.Invoke();
+    }
+
+    public int GetCurrentShardID()
+    {
+        return currentGremlinShard;
+    }
+
+    public void GetCoreGremlinShard(int amount)
+    {
+        AddGremlinPiece(210003, amount);
     }
 
     /// <summary>

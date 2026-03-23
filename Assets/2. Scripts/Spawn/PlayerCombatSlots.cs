@@ -16,8 +16,8 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private Transform _targetPlayer;
 
     [Header("Base Slot Layout")]
-    [SerializeField] private int _baseSlotCount = 12;               // 플레이어 주변 슬롯 수
-    [SerializeField] private float _baseRadius = 1f;                // 플레이어 중심에서 슬롯까지 거리
+    [SerializeField] private int _baseSlotCount = 16;               // 플레이어 주변 슬롯 수
+    [SerializeField] private float _baseRadius = 0.7f;                // 플레이어 중심에서 슬롯까지 거리
     [SerializeField] private float _randomOffset = 0f;              // 슬롯 퍼짐 정도
 
     [Header("Adaptive Slot (Rings)")]
@@ -25,13 +25,17 @@ public class PlayerCombatSlots : MonoBehaviour
     [SerializeField] private int _maxRings = 4;                     //링 최대 개수(120마리 대비)
     [SerializeField] private int[] _slotsPerRingList = new int[] { 16, 24, 32, 40 };
     [SerializeField] private float _ringSpacing = 0.6f;             //링 간 거리
-    [SerializeField] private int _maxSlots = 120;                   
+    [SerializeField] private int _maxSlots = 120;
+
+    [Header("Inner Ring Limit")]
+    [SerializeField]
+    private int _innerRingLimit = 16;
 
     [Header("Angle Bias")]
     [SerializeField] private bool _useAngleBias = false;
 
     [Header("Slot Refresh")]
-    [SerializeField] private float _rebuildInterval = 2.0f;         //목표 이동에 맞춰 슬롯 재배치 간격
+    [SerializeField] private float _rebuildInterval = 1.2f;         //목표 이동에 맞춰 슬롯 재배치 간격
     [SerializeField] private float _rebuildMoveThreshold = 1f;      //플레이어 이동량이 이 이상이면 재배치
 
     private Dictionary<IMonster, bool> _arrived = new();
@@ -262,6 +266,20 @@ public class PlayerCombatSlots : MonoBehaviour
             if (currentRing != int.MaxValue && ring > currentRing)
                 continue;
 
+            if (ring == 0)
+            {
+                int count = 0;
+
+                for (int i = 0; i < _slotData.Length; i++)
+                {
+                    if (_slotData[i].ring == 0 && _used[i])
+                        count++;
+                }
+
+                if (count >= _innerRingLimit)
+                    continue;
+            }
+
             bestScore = float.MaxValue;
             bestIndex = -1;
 
@@ -284,7 +302,7 @@ public class PlayerCombatSlots : MonoBehaviour
                     continue;
                 }
 
-                //사용중 슬롯 → 더 가까우면 뺏기
+                //사용중 슬롯 -> 더 가까우면 뺏기
                 var owner = GetMonsterBySlot(i);
 
                 if (owner != null && IsBetterCandidate(monster, owner, _slotData[i].tr))
@@ -326,7 +344,7 @@ public class PlayerCombatSlots : MonoBehaviour
 
         //둘 다 도착했으면 -> 거리 비교
         if (aArrived && bArrived)
-            return false;
+            return distA < distB;
 
         //둘 다 미도착 -> 더 가까운 놈
         return distA < distB;
@@ -394,6 +412,45 @@ public class PlayerCombatSlots : MonoBehaviour
             _slotData[index].used = false;
             _arrived.Remove(monster);
         }
+    }
+
+    /// <summary>
+    /// 가장 가까운 슬롯만 최초 점유
+    /// </summary>
+    /// <param name="monster"></param>
+    /// <returns></returns>
+    public Transform AcquireNearestSlot(IMonster monster)
+    {
+        int bestIndex = -1;
+        float bestScore = float.MaxValue;
+
+        for (int i = 0; i < _slotData.Length; i++)
+        {
+            if (_used[i]) continue;
+
+            float dist = (monster.Transform.position - _slotData[i].tr.position).sqrMagnitude;
+
+            if (dist < bestScore)
+            {
+                bestScore = dist;
+                bestIndex = i;
+            }
+        }
+
+        if (bestIndex == -1)
+            return null;
+
+        _occupied[monster] = bestIndex;
+        _used[bestIndex] = true;
+        _slotData[bestIndex].used = true;
+
+        return _slotData[bestIndex].tr;
+    }
+
+    public bool IsInsideSlotArea(Vector3 pos)
+    {
+        float maxRadius = _baseRadius + _ringSpacing * (_slotsPerRingList.Length - 1);
+        return (pos - _targetPlayer.position).sqrMagnitude <= maxRadius * maxRadius;
     }
 
 #if UNITY_EDITOR
