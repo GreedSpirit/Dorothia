@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using System.Threading.Tasks;
+using System;
 
 public class GremlinUIPanel : BaseUI
 {
@@ -32,6 +33,8 @@ public class GremlinUIPanel : BaseUI
     private List<GremlinUIItem> _createdItems = new List<GremlinUIItem>(); // 생성된 아이템 리스트
     private bool isAccepted = false;
 
+    public Action onChangedInventory;
+
     private void Awake()
     {
         _btnEquip.onClick.AddListener(OnClickEquip);
@@ -40,6 +43,12 @@ public class GremlinUIPanel : BaseUI
         {
             StartCoroutine(_mergePanel.GetFuseTarget(_selectedGremlinData));
         });
+        onChangedInventory += Refresh;
+    }
+
+    private void OnDestroy()
+    {
+        onChangedInventory -= Refresh;
     }
 
     private void Start()
@@ -47,11 +56,16 @@ public class GremlinUIPanel : BaseUI
         Close();
     }
 
+    public void Refresh()
+    {
+        OpenPanel(_gremlinList._gremlinInventory);
+    }
+
     //TODO 패널이 열릴 때 호출할 함수 (보유한 그렘린 리스트를 넘겨받아야 함)
     public void OpenPanel(List<Gremlin> ownedGremlins)
     {
-        gameObject.SetActive(true);                // 일단 패널 오픈
         ClearScrollContent();                      // 스크롤 초기화
+
 
         //보유 그렘린들 속 데이터들 대상으로
         foreach (var data in ownedGremlins)
@@ -119,10 +133,11 @@ public class GremlinUIPanel : BaseUI
         if (_txtName != null)
         {
             Debug.Log(data._gremlinData.PetID);
+            _txtName.color = RarityColor.GetColor(data._rarity);
             _txtName.text = DataManager.Instance.GetData<GremlinData>(data._gremlinData.PetID).Gremlin_Name;
         }
         //레벨이 존재하는 경우, 레벨 텍스트는 아래 형식.
-        if (_txtLevel != null) _txtLevel.text = $"Lv. {data._currentLevel}";
+        if (_txtLevel != null) _txtLevel.text = $"강화 : {data._currentLevel}";
         
         // TODO 공격력인지 버프 수치인지 표시 포맷은 추후 수정 가능
         //if (_txtStat != null) _txtStat.text = $"능력치: {data.currentStat}"; 
@@ -136,6 +151,7 @@ public class GremlinUIPanel : BaseUI
         // 이미 장착된 녀석이라면 무시
         if (_selectedUIItem == _equippedUIItem)
         {
+            _noticeUIPanel.ChangeNoticeTitle("오류");
             _noticeUIPanel.ChangeNoticeDescription("이미 장착된 그렘린입니다.");
             _noticeUIPanel.ChangeNoticePanelLogic(true);
             _noticeUIPanel.Open();
@@ -144,7 +160,8 @@ public class GremlinUIPanel : BaseUI
 
         if(isAccepted == false && _selectedUIItem.GetGremlin()._rarity < _equippedUIItem.GetGremlin()._rarity)
         {
-            _noticeUIPanel.ChangeNoticeDescription("장착 중인 그렘린보다 약합니다. 정말 교체하시겠습니까?");
+            _noticeUIPanel.ChangeNoticeTitle("오류");
+            _noticeUIPanel.ChangeNoticeDescription("장착 중인 그렘린보다 약합니다.\n정말 교체하시겠습니까?");
             _noticeUIPanel.ChangeNoticePanelLogic(false);
             _noticeUIPanel.Open();
 
@@ -209,6 +226,7 @@ public class GremlinUIPanel : BaseUI
 
     protected override void OnOpen()
     {
+        _gremlinList.SortInventory();
         OpenPanel(_gremlinList._gremlinInventory);
     }
 

@@ -12,7 +12,7 @@ public class Gremlin
     public void Init(string GUID, GremlinSOData data, Rarity rarity)
     {
         InstanceGUID = GUID;
-        _currentLevel = _currentLevel == 0? 1: _currentLevel;
+        _currentLevel = _currentLevel == 0? 0: _currentLevel;
         _gremlinData = data;
         _rarity = rarity;
     }

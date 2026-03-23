@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -9,19 +10,23 @@ public class GremlinUpgradePanel : BaseUI
 {
     [SerializeField] Gremlin targetGremlin;
     [SerializeField] GremlinInventory inventory;
+    [SerializeField] GremlinUIPanel panel;
     //현재 그렘린이 들어갈 이미지
     [SerializeField] Image _currentGremlinImage;
-    //그 그렘린과 일치하는 조각
-    [SerializeField] Image _gremlinShardImage;
     //그 그렘린과 일치하는 각각 등급의 이미지
     [SerializeField] Image[] _gremlinRarityImage;
-    //조각 및 각 등급별 소지 개수 표기용 텍스트
-    [SerializeField] TextMeshProUGUI _gremlinShardText;
+    //조각 및 각 등급별 소지 개수 표기용 텍스트 및 버튼
+    [SerializeField] Button _normalButton;
     [SerializeField] TextMeshProUGUI _gremlinNormalText;
+    [SerializeField] Button _uncommonButton;
     [SerializeField] TextMeshProUGUI _gremlinUncommonText;
+    [SerializeField] Button _rareButton;
     [SerializeField] TextMeshProUGUI _gremlinRareText;
+    [SerializeField] Button _legendaryButton;
     [SerializeField] TextMeshProUGUI _gremlinLegendaryText;
     [SerializeField] TextMeshProUGUI _gremlinMythticText;
+    //선택용 사각형 이미지
+    [SerializeField] GameObject _raritySquareImage;
     //합성 버튼
     [SerializeField] Button _fuseButton;
 
@@ -32,11 +37,18 @@ public class GremlinUpgradePanel : BaseUI
     //열었을 때
     private void Awake()
     {
-        
-    }
-
-    private void Start()
-    {
+        _normalButton.onClick.AddListener(() => { 
+            OnSelectRarity(-304, Rarity.Normal);
+        });
+        _uncommonButton.onClick.AddListener(() => {
+            OnSelectRarity(-152, Rarity.Uncommon);
+        });
+        _rareButton.onClick.AddListener(() => { 
+            OnSelectRarity(0, Rarity.Rare);
+        });
+        _legendaryButton.onClick.AddListener(() => {
+            OnSelectRarity(152, Rarity.Legendary);
+        });
         Close();
     }
 
@@ -48,9 +60,7 @@ public class GremlinUpgradePanel : BaseUI
         currentGremlinRarity = gremlin._rarity;
         //그렘린 데이터에서 어드레서블의 스프라이트를 가져옵니다.
         var gSprite = Addressables.LoadAssetAsync<Sprite>($"{gremlin._gremlinData.PrefabName}_Icon");
-        var gShardSprite = Addressables.LoadAssetAsync<Sprite>($"{gremlin._gremlinData.PrefabName}_Piece_Icon");
         yield return gSprite.Task;
-        yield return gShardSprite.Task;
 
         //현재 그렘린의 이미지 스프라이트를 변경합니다.
         _currentGremlinImage.sprite = gSprite.Result;
@@ -62,9 +72,6 @@ public class GremlinUpgradePanel : BaseUI
         }
 
 
-        //그렘린 조각의 이미지 스프라이트를 변경합니다.
-        _gremlinShardImage.sprite = gShardSprite.Result;
-
         Refresh();
     }
     //메서드 - 합성
@@ -72,9 +79,47 @@ public class GremlinUpgradePanel : BaseUI
     {
         //대상이 될 그렘린이 없으면 반환합니다.
         if (targetGremlin == null) return;
-        
-        
-        
+
+        if (gremlinInv[currentGremlinRarity] < 3) return;
+        var selectedPets = inventory.GetSpecificItem(targetGremlin._gremlinData.PetID,currentGremlinRarity);
+
+        var mainPet = selectedPets[0];
+
+        foreach(var pet in selectedPets.Skip(1))
+        {
+            inventory._gremlinInventory.Remove(pet);
+        }
+
+        mainPet._rarity++;
+        mainPet._currentLevel = 0;
+
+        Refresh();
+    }
+
+    public void OnSelectRarity(float x, Rarity rarity)
+    {
+        _raritySquareImage.gameObject.transform.position = new Vector3(540+x, 960, 0);
+        currentGremlinRarity = rarity;
+        Refresh();
+        if (!gremlinInv.ContainsKey(rarity)) return;
+        CheckRarityText(rarity).text = gremlinInv[rarity] >= 3? $"{gremlinInv[rarity]}/3": $"<color=red>{gremlinInv[rarity]}</color>/3";
+    }
+
+    private TextMeshProUGUI CheckRarityText(Rarity rarity)
+    {
+        switch(rarity)
+        {
+            case Rarity.Normal:
+                return _gremlinNormalText;
+            case Rarity.Uncommon:
+                return _gremlinUncommonText;
+            case Rarity.Rare:
+                return _gremlinRareText;
+            case Rarity.Legendary:
+                return _gremlinLegendaryText;
+            default:
+                return _gremlinNormalText; 
+        }
     }
 
     //메서드 - 리프레시
@@ -82,7 +127,6 @@ public class GremlinUpgradePanel : BaseUI
     {
         RefreshInventory();
         //하드코딩 상태 : ID값 관련으로 기획팀과 이야기 필요
-        _gremlinShardText.text = $"{MoneyManager.Instance.GetMoneyAmount(MoneyManager.Instance.GetShardTargetGremlin(targetGremlin._gremlinData.PetShardID))}";
         _gremlinNormalText.text = gremlinInv.ContainsKey(Rarity.Normal)? $"{gremlinInv[Rarity.Normal]}": "0";
         _gremlinUncommonText.text = gremlinInv.ContainsKey(Rarity.Uncommon)? $"{gremlinInv[Rarity.Uncommon]}": "0";
         _gremlinRareText.text = gremlinInv.ContainsKey(Rarity.Rare)? $"{gremlinInv[Rarity.Rare]}": "0";
@@ -95,6 +139,11 @@ public class GremlinUpgradePanel : BaseUI
         gremlinInv.Clear();
         foreach(var gremlin in inventory._gremlinInventory)
         {
+            if(gremlin._gremlinData.PetID != targetGremlin._gremlinData.PetID)
+            {
+                continue;
+            }
+
             if(!gremlinInv.ContainsKey(gremlin._rarity))
             {
                 gremlinInv[gremlin._rarity] = 0;
@@ -106,11 +155,11 @@ public class GremlinUpgradePanel : BaseUI
     //메서드 - 초기화
     protected override void OnClose()
     {
-        
+        panel.onChangedInventory?.Invoke();
     }
 
     protected override void OnOpen()
     {
-        RefreshInventory();
+        
     }
 }

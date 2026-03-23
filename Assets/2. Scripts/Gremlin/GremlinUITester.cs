@@ -28,6 +28,50 @@ public class GremlinUITester : MonoBehaviour
         {
             Debug.LogError("[GremlinUITester] _gremlinUIPanel 필요");
         }
+
+        MoneyManager.Instance.onShardValueChanged += MergeShard;
+    }
+
+    public void MergeShard()
+    {
+        int id = MoneyManager.Instance.GetCurrentShardID();
+        GenerateGremlin(id);
+    }
+
+    public async void GenerateGremlin(int id)
+    {
+        {
+            string name = DataManager.Instance.GetData<G_StoneData>(id).G_Stone_Name;
+            Gremlin target = new Gremlin();
+            switch (name)
+            {
+                case "플린트":
+                    var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
+                    await so.Task;
+                    GremlinSOData data = so.Result;
+                    target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+                    break;
+                case "피니언":
+                    so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Pinion");
+                    await so.Task;
+                    data = so.Result;
+                    target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+                    break;
+                case "코어":
+                    so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Core");
+                    await so.Task;
+                    data = so.Result;
+                    target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+                    break;
+                case "징크":
+                    so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
+                    await so.Task;
+                    data = so.Result;
+                    target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+                    break;
+            }
+            _gremlinList.AddGremlin(target);
+        }
     }
 
     //더미데이터 생성
@@ -60,6 +104,12 @@ public class GremlinUITester : MonoBehaviour
         await so.Task;
         data = so.Result;
         TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
+        _gremlinList.AddGremlin(TestGremlin3);
+
+        _gremlinList.AddGremlin(TestGremlin2);
+        _gremlinList.AddGremlin(TestGremlin2);
+        _gremlinList.AddGremlin(TestGremlin3);
+        _gremlinList.AddGremlin(TestGremlin2);
         _gremlinList.AddGremlin(TestGremlin3);
         //
         //_gremlinList.AddGremlin(new GremlinItemData
