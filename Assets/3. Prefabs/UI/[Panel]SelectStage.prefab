@@ -268,12 +268,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee3e0c044446644cb7072eb86899907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UISelectStage
-  background: {fileID: 7833100962627414880}
+  close: {fileID: 0}
   _stageManager: {fileID: 0}
   _stageGridRoot: {fileID: 2727444461583909011}
   _stageButtonPrefab: {fileID: -5988391241822084810, guid: c9ae81bdeb7c5dc49a464b0ea64bc4e0, type: 3}
   _goToButton: {fileID: 1916756152697790521}
   _chapterTitleText: {fileID: 8332677207342149140}
+  _progressText: {fileID: 0}
+  _scrollRect: {fileID: 6339609275655742264}
 --- !u!222 &1577149678274491735
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2381,4 +2383,5 @@ MonoBehaviour:
   _chapterNumberText: {fileID: 0}
   _chapterNameText: {fileID: 0}
   _button: {fileID: 0}
+  _selectedHighlight: {fileID: 0}
   _stageId: 0

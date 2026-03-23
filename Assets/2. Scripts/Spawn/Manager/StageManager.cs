@@ -32,6 +32,7 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int> OnBossSpawned;
     public static event System.Action<int> OnStageCleared;
     public static event System.Action<int> OnSectionChanged;
+    public static event System.Action<int, int> OnScenarioTrigger;
 
     private bool _eventsRegistered;
 
@@ -360,17 +361,19 @@ public class StageManager : MonoBehaviour
     {
         _state = newState;
         OnStageStateChanged?.Invoke(_state);
-
+        Debug.LogError($"현재상태{_state}");
         switch (_state)
         {
             case StageState.Enter:
                 //진입 연출이 생기면 여기서
+                OnScenarioTrigger?.Invoke(CurrentSection, 1);
                 ChangeState(StageState.Spawning);
                 break;
 
             case StageState.Spawning:
                 //일반 및 앨리트 몬스터 스폰 시작
                 _spawnManager.StartNormalSpawn();
+                
                 break;
 
             case StageState.BossFight:
@@ -411,6 +414,8 @@ public class StageManager : MonoBehaviour
 
         if (isBoss)
         {
+            OnScenarioTrigger?.Invoke(CurrentSection, 3);
+
             _bossAlive = false;
             _bossTimerRunning = false;
 
@@ -454,7 +459,7 @@ public class StageManager : MonoBehaviour
             //다음 섹션 시작
             _killCount = 0;
             _spawnManager.EndBossFight();
-            ChangeState(StageState.Spawning);
+            ChangeState(StageState.Enter);
             return;
         }
 
@@ -503,6 +508,7 @@ public class StageManager : MonoBehaviour
         _bossTimerRunning = true;
 
         OnBossSpawned?.Invoke(_bossMonsterId);
+        OnScenarioTrigger?.Invoke(CurrentSection, 2);
     }
 
     private void HandleBossFail()
