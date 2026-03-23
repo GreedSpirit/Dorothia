@@ -2908,7 +2908,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &941455252
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3151,6 +3151,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3025841115585011528, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
   m_PrefabInstance: {fileID: 1501011581}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1102456077 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+  m_PrefabInstance: {fileID: 1501011581}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1001 &1119621620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3296,6 +3307,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2455852175529820528, guid: 70a5dc4f2576a1247b49695c711b1a53, type: 3}
+      propertyPath: m_text
+      value: +49 Section
+      objectReference: {fileID: 0}
     - target: {fileID: 6444690247874552071, guid: 70a5dc4f2576a1247b49695c711b1a53, type: 3}
       propertyPath: _playerStats
       value: 
@@ -3303,6 +3318,10 @@ PrefabInstance:
     - target: {fileID: 8631562694241031000, guid: 70a5dc4f2576a1247b49695c711b1a53, type: 3}
       propertyPath: m_Name
       value: CheatManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8631562694241031000, guid: 70a5dc4f2576a1247b49695c711b1a53, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5269,6 +5288,22 @@ PrefabInstance:
       propertyPath: _equipmentInventory
       value: 
       objectReference: {fileID: 1941664641}
+    - target: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_text
+      value: "\uC2A4\uD14C\uC774\uC9C0 \uBCC0\uACBD\nX - X"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_fontSize
+      value: 72
+      objectReference: {fileID: 0}
+    - target: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 72
+      objectReference: {fileID: 0}
+    - target: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2465526988069497351, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       propertyPath: _playerStats
       value: 
@@ -9142,6 +9177,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 175893268}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 379506983860355287, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 1844807010}
     - targetCorrespondingSourceObject: {fileID: 2193643135240777031, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1709468955}
@@ -9832,6 +9870,24 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8290387604065205961, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
   m_PrefabInstance: {fileID: 1501011581}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1844807004 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 379506983860355287, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+  m_PrefabInstance: {fileID: 1501011581}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1844807010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844807004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9c1625f6a9b7344595e81c56dcd9e0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageBtnLabelUpdater
+  _text: {fileID: 1102456077}
 --- !u!114 &1855346395 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1135681355187939325, guid: b22b730fcbe0d8747b6279e2110ef5eb, type: 3}
