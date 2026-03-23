@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -106,6 +106,9 @@ public class DataManager : MonoBehaviour
         
         // 1:N 데이터 로드 => LoadListData 사용
         LoadListData<Equip_SetData>("Equip_Set");
+
+        //대사 테이블
+        LoadData<Talk_TableData>("Talk_Table");
     }
 
     private void LoadData<T>(string fileName) where T : ICSVLoad, ITableKey, new()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,6 +29,7 @@ public class OverDriveMode : MonoBehaviour
     }
 
     public event Action<float, float> OnOverdriveGaugeChanged;
+    public event Action OnClickOverdrive;
 
     [Header("무기 오브젝트")]
     [SerializeField] private GameObject leftWeapon;
@@ -53,6 +54,7 @@ public class OverDriveMode : MonoBehaviour
 
         button.interactable = false;
         overdriveRoutine = StartCoroutine(OverdriveTimer(overdriveTime));
+        OnClickOverdrive?.Invoke();
     }
 
     private IEnumerator OverdriveTimer(float duration)
