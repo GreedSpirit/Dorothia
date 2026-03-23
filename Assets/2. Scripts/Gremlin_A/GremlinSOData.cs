@@ -5,6 +5,7 @@ using UnityEngine.AddressableAssets;
 public class GremlinSOData : ScriptableObject
 {
     public int PetID;
+    public int PetShardID;
     public AssetReferenceGameObject Prefab;
     public string PrefabName;
     public Gremlin_Type Type;

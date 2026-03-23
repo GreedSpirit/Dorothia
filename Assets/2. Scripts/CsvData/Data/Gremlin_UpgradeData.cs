@@ -9,6 +9,7 @@ public class Gremlin_UpgradeData : ICSVLoad, ITableKey
     public float Gremlin_Upgrade_Prob { get; set; }
     public float Up_Cost_Value { get; set; }
     public float Up_Prob_Value { get; set; }
+    public float Up_Prob_Bonus { get; set; }
 
     int ITableKey.Id => (int)Gremlin_Tier;
     string ITableKey.Key => Gremlin_Tier.ToString();
@@ -25,5 +26,7 @@ public class Gremlin_UpgradeData : ICSVLoad, ITableKey
         if (values.Length > 3 && float.TryParse(values[3], out float v3)) Up_Cost_Value = v3;
         // 4: Up_Prob_Value (float)
         if (values.Length > 4 && float.TryParse(values[4], out float v4)) Up_Prob_Value = v4;
+        // 5: Up_Prob_Bonus (float)
+        if (values.Length > 5 && float.TryParse(values[5], out float v5)) Up_Prob_Bonus = v5;
     }
 }
