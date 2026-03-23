@@ -19,6 +19,6 @@ public class CheatManager : MonoBehaviour
         if (StageManager.Instance == null)
             return;
 
-        StageManager.Instance.JumpSection(1);
+        StageManager.Instance.JumpSection(49);
     }
 }
