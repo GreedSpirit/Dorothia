@@ -19,6 +19,7 @@ public class PassiveSkill : BaseSkill
         StatManager.Instance.stats[Data.Affection_Skill].AddMultiModifier(Data.Affection_Skill_Value);
 
         _isApplied = true;
+        StatManager.Instance.RefreshStats();
         Debug.Log($"[PassiveSkill] {Data.Skill_Name} 적용 완료");
     }
 
