@@ -174,8 +174,22 @@ public class PlayerCombatSlots : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < _slotData.Length; i++)
-            _slotData[i].used = _used[i];
+        //for (int i = 0; i < _slotData.Length; i++)
+        //    _slotData[i].used = _used[i];
+
+        //실제 점유 기반으로 used 재구성
+        System.Array.Clear(_used, 0, _used.Length);
+
+        foreach (var kv in _occupied)
+        {
+            int index = kv.Value;
+
+            if (index >= 0 && index < _used.Length)
+            {
+                _used[index] = true;
+                _slotData[index].used = true;
+            }
+        }
     }
 
     
@@ -412,6 +426,32 @@ public class PlayerCombatSlots : MonoBehaviour
             _slotData[index].used = false;
             _arrived.Remove(monster);
         }
+    }
+
+    public bool IsValidSlot(Transform slot)
+    {
+        for (int i = 0; i < _slotData.Length; i++)
+        {
+            if (_slotData[i].tr == slot)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 슬롯 전체 초기화
+    /// </summary>
+    public void ClearAllSlots()
+    {
+        _occupied.Clear();
+
+        for (int i = 0; i < _used.Length; i++)
+        {
+            _used[i] = false;
+            _slotData[i].used = false;
+        }
+
+        _arrived.Clear();
     }
 
     /// <summary>
