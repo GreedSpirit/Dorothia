@@ -71,6 +71,7 @@ public class GremlinUITester : MonoBehaviour
                     break;
             }
             _gremlinList.AddGremlin(target);
+            
         }
     }
 
@@ -90,27 +91,27 @@ public class GremlinUITester : MonoBehaviour
         TestGremlin1._isEquipped = true;
         _gremlinList.AddGremlin(TestGremlin1);
 
-        Gremlin TestGremlin2 = new Gremlin();
 
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Core");
         await so.Task;
         data = so.Result;
-        TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-        _gremlinList.AddGremlin(TestGremlin2);
+        for(int i = 0; i< 4; i++)
+        {
+            Gremlin TestGremlin2 = new Gremlin();
+            TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+            _gremlinList.AddGremlin(TestGremlin2);
+        }
 
-        Gremlin TestGremlin3 = new Gremlin();
 
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
         await so.Task;
         data = so.Result;
-        TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
-        _gremlinList.AddGremlin(TestGremlin3);
-
-        _gremlinList.AddGremlin(TestGremlin2);
-        _gremlinList.AddGremlin(TestGremlin2);
-        _gremlinList.AddGremlin(TestGremlin3);
-        _gremlinList.AddGremlin(TestGremlin2);
-        _gremlinList.AddGremlin(TestGremlin3);
+        for(int i =0; i< 9; i++)
+        {
+            Gremlin TestGremlin3 = new Gremlin();
+            TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
+            _gremlinList.AddGremlin(TestGremlin3);
+        }
         //
         //_gremlinList.AddGremlin(new GremlinItemData
         //{

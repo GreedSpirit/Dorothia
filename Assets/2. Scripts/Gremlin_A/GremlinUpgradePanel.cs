@@ -34,6 +34,9 @@ public class GremlinUpgradePanel : BaseUI
 
     private Rarity currentGremlinRarity;
 
+    private bool isMerging = false;
+    int combineCallCount = 0;
+
     //열었을 때
     private void Awake()
     {
@@ -49,6 +52,10 @@ public class GremlinUpgradePanel : BaseUI
         _legendaryButton.onClick.AddListener(() => {
             OnSelectRarity(152, Rarity.Legendary);
         });
+        _fuseButton.onClick.RemoveAllListeners();
+        _fuseButton.onClick.AddListener(() => {
+            FuseGremlin();
+            });
         Close();
     }
 
@@ -77,23 +84,45 @@ public class GremlinUpgradePanel : BaseUI
     //메서드 - 합성
     public void FuseGremlin()
     {
+        combineCallCount++;
+
+        Debug.Log($"[Combine 호출 #{combineCallCount}] frame: {Time.frameCount}");
+
+        System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace();
+        Debug.Log(stackTrace);
         //대상이 될 그렘린이 없으면 반환합니다.
         if (targetGremlin == null) return;
 
         if (gremlinInv[currentGremlinRarity] < 3) return;
+
         var selectedPets = inventory.GetSpecificItem(targetGremlin._gremlinData.PetID,currentGremlinRarity);
+        Debug.Log($"선택된 펫 수 : {selectedPets.Count}");
+        if (selectedPets.Count < 3) return;
 
-        var mainPet = selectedPets[0];
+        if (isMerging == true) return;
+        isMerging = true;
 
-        foreach(var pet in selectedPets.Skip(1))
+        try
         {
-            inventory._gremlinInventory.Remove(pet);
+            var mainPet = selectedPets[0];
+
+            Debug.Log($"제거 전: {inventory._gremlinInventory.Count}");
+            foreach (var pet in selectedPets.Skip(1))
+            {
+                Debug.Log($"제거 대상: {pet.InstanceGUID}");
+                inventory._gremlinInventory.Remove(pet);
+            }
+            Debug.Log($"제거 후: {inventory._gremlinInventory.Count}");
+
+            mainPet._rarity++;
+            mainPet._currentLevel = 0;
         }
 
-        mainPet._rarity++;
-        mainPet._currentLevel = 0;
-
-        Refresh();
+        finally
+        {
+            Refresh();
+            isMerging = false;
+        }
     }
 
     public void OnSelectRarity(float x, Rarity rarity)

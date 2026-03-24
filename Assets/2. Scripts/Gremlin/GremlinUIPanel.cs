@@ -26,6 +26,7 @@ public class GremlinUIPanel : BaseUI
     [SerializeField] private GremlinInventory _gremlinList;
     [SerializeField] private NoticeUIPanel _noticeUIPanel;
     [SerializeField] private GremlinUpgradePanel _mergePanel;
+    [SerializeField] private GremlinEnchantPanel _enchantPanel;
 
     private Gremlin _selectedGremlinData;               // 선택한 그렘린의 데이터
     private GremlinUIItem _selectedUIItem;              // 선택된 오브젝트 보여줄 UI
@@ -38,7 +39,9 @@ public class GremlinUIPanel : BaseUI
     private void Awake()
     {
         _btnEquip.onClick.AddListener(OnClickEquip);
-        _btnGoEnhance.onClick.AddListener(OnClickGoEnhance);
+        _btnGoEnhance.onClick.AddListener(() => {
+            _enchantPanel.Init(_selectedGremlinData);
+            });
         _btnGoMerge.onClick.AddListener(() =>
         {
             StartCoroutine(_mergePanel.GetFuseTarget(_selectedGremlinData));
