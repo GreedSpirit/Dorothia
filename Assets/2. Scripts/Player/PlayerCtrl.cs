@@ -64,6 +64,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public PlayerSkillState SkillState { get; private set; }
     public PlayerAutoState AutoState { get; private set; }
     public PlayerDeadState DeadState { get; private set; }
+    public IPlayerState<PlayerCtrl> CurrentState { get => _currentState; set => _currentState = value; }
 
     private IPlayerState<PlayerCtrl> _currentState;
 
@@ -98,8 +99,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         AutoState = new PlayerAutoState();
         DeadState = new PlayerDeadState();
 
-        _currentState = IdleState;
-        _currentState.Enter(this);
+        CurrentState = IdleState;
+        CurrentState.Enter(this);
 
         _originPos3 = _attackEffect3.transform.localPosition;
         _originRot3 = _attackEffect3.transform.localRotation;
@@ -151,9 +152,9 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         }
 
         UpdateGlobalState();
-        if (_currentState != null)
+        if (CurrentState != null)
         {
-            _currentState.Execute(this);
+            CurrentState.Execute(this);
         }
     }
 
@@ -164,24 +165,24 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     private void UpdateGlobalState()
     {
-        if (_currentState == SkillState) return;
+        if (CurrentState == SkillState) return;
 
         bool hasMoveInput = _moveInput.sqrMagnitude > 0.001f;
         if (IsAttack) return;
 
         if (hasMoveInput) ChangeState(MoveState);
         else if (_isAutoMode) ChangeState(AutoState);
-        else if (_currentState != IdleState) ChangeState(IdleState);
+        else if (CurrentState != IdleState) ChangeState(IdleState);
     }
 
     public void ChangeState(IPlayerState<PlayerCtrl> newState)
     {
-        if (_currentState == newState || _isDead) return;
+        if (CurrentState == newState || _isDead) return;
 
-        _currentState.Exit(this);
-        _currentState = newState;
+        CurrentState.Exit(this);
+        CurrentState = newState;
         SetupNavMesh(_isAutoMode);
-        _currentState.Enter(this);
+        CurrentState.Enter(this);
     }
 
     private void OnTouchReleased()
@@ -189,7 +190,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (_navMesh.isOnNavMesh) _navMesh.ResetPath();
         _moveInput = Vector2.zero;
 
-        if (!_isAutoMode && !IsAttack && _currentState != SkillState)
+        if (!_isAutoMode && !IsAttack && CurrentState != SkillState)
             ChangeState(IdleState);
     }
 
@@ -201,7 +202,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // ID로 스킬 생성 후 사용 (테스트 / 퀵슬롯 연동용)
     public void TryUseSkillById(int skillId)
     {
-        if (_currentState == SkillState || _isDead) return;
+        if (CurrentState == SkillState || _isDead) return;
 
         SkillData data = DataManager.Instance.GetData<SkillData>(skillId);
         BaseSkill skill = BaseSkill.Create(data);
@@ -212,7 +213,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // 이미 생성된 스킬 인스턴스로 사용 (SkillManager 슬롯 연동용)
     public void TryUseSkill(BaseSkill skill)
     {
-        if (_currentState == SkillState || _isDead) return;
+        if (CurrentState == SkillState || _isDead) return;
         if (skill == null || !skill.IsReady) return;
 
         SkillState.SetSkill(skill);
@@ -260,7 +261,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     private void OnAnimatorMove()
     {
         // 스킬 상태가 아니면 루트모션 무시
-        if (_currentState != SkillState) return;
+        if (CurrentState != SkillState) return;
 
         Vector3 nextPos = transform.position + _anima.deltaPosition;
 
@@ -391,7 +392,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _anima.SetBool("Attack", false);
         DisableAllAttackColliders();
 
-        if (!_isDead && _currentState != SkillState)
+        if (!_isDead && CurrentState != SkillState)
             ChangeState(IdleState);
     }
 
