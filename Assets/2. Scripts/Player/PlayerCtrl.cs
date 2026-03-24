@@ -315,8 +315,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
                 IMonster monster = col.GetComponentInParent<IMonster>();
                 if (monster != null && monster.IsAlive)
-                    monster.TakeDamage((int)1);
-                //monster.TakeDamage((int)dmgPerHit);
+                    //monster.TakeDamage((int)1);
+                    monster.TakeDamage((int)dmgPerHit);
             }
 
             yield return new WaitForSeconds(0.08f);
