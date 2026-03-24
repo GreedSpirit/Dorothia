@@ -21,11 +21,11 @@ public class TestGoldAndScrapManager : MonoBehaviour
 
     public void GoldCheat()
     {
-        testGold = 9999999;
+        ExchangeManager.Instance.GetMoney(MoneyType.Gold, 9999999);
     }
 
     public void ScrapCheat()
     {
-        testScrap = 999999;
+        ExchangeManager.Instance.GetMoney(MoneyType.Scrap, 999999);
     }
 }

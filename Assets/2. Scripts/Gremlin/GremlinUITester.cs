@@ -64,7 +64,7 @@ public class GremlinUITester : MonoBehaviour
                     target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
                     break;
                 case "징크":
-                    so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
+                    so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
                     await so.Task;
                     data = so.Result;
                     target.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
@@ -84,7 +84,7 @@ public class GremlinUITester : MonoBehaviour
         // 장착 중인 그렘린 (빨간 테두리 테스트용)
         Gremlin TestGremlin1 = new Gremlin();
 
-        var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
+        var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
         await so.Task;
         GremlinSOData data = so.Result;
         TestGremlin1.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
@@ -103,7 +103,7 @@ public class GremlinUITester : MonoBehaviour
         }
 
 
-        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Jink");
+        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
         await so.Task;
         data = so.Result;
         for(int i =0; i< 9; i++)
@@ -112,6 +112,20 @@ public class GremlinUITester : MonoBehaviour
             TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
             _gremlinList.AddGremlin(TestGremlin3);
         }
+
+        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
+        await so.Task;
+        data = so.Result;
+        Gremlin TestGremlin4 = new Gremlin();
+        TestGremlin4.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin4);
+
+        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Pinion");
+        await so.Task;
+        data = so.Result;
+        Gremlin TestGremlin5 = new Gremlin();
+        TestGremlin5.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin5);
         //
         //_gremlinList.AddGremlin(new GremlinItemData
         //{

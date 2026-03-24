@@ -25,6 +25,7 @@ public class GremlinUpgradePanel : BaseUI
     [SerializeField] Button _legendaryButton;
     [SerializeField] TextMeshProUGUI _gremlinLegendaryText;
     [SerializeField] TextMeshProUGUI _gremlinMythticText;
+    [SerializeField] TextMeshProUGUI _StatChangeText;
     //선택용 사각형 이미지
     [SerializeField] GameObject _raritySquareImage;
     //합성 버튼
@@ -161,6 +162,17 @@ public class GremlinUpgradePanel : BaseUI
         _gremlinRareText.text = gremlinInv.ContainsKey(Rarity.Rare)? $"{gremlinInv[Rarity.Rare]}": "0";
         _gremlinLegendaryText.text = gremlinInv.ContainsKey(Rarity.Legendary)? $"{gremlinInv[Rarity.Legendary]}": "0";
         _gremlinMythticText.text = gremlinInv.ContainsKey(Rarity.Mythtic)? $"{gremlinInv[Rarity.Mythtic]}": "0";
+
+        if (targetGremlin._rarity == Rarity.Mythtic) return;
+        Gremlin_TierData tierData = DataManager.Instance.GetData<Gremlin_TierData>((int)currentGremlinRarity);
+        Gremlin_TierData nextTierData = DataManager.Instance.GetData<Gremlin_TierData>((int)currentGremlinRarity + 1);
+        if(targetGremlin._gremlinData.Type == Gremlin_Type.지원형)
+        {
+            Gremlin_BufferData bufferData = DataManager.Instance.GetData<Gremlin_BufferData>((int)currentGremlinRarity);
+            Gremlin_BufferData nextBufferData = DataManager.Instance.GetData<Gremlin_BufferData>((int)currentGremlinRarity + 1);
+            _StatChangeText.text = 
+                $"스텟 배율 : {tierData.Gremlin_Tier_Multiplier * 100}% -> {nextTierData.Gremlin_Tier_Multiplier * 100}%\n쿨타임 : {bufferData.Gremlin_Tier_Cooltime}초 -> {nextBufferData.Gremlin_Tier_Cooltime}초";
+        }
     }
 
     public void RefreshInventory()

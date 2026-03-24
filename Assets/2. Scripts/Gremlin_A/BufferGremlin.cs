@@ -62,6 +62,7 @@ public class BufferGremlin : GremlinBehaviour
         {
             if (_player != null)
             {
+                OnTick?.Invoke();
                 onActing?.Invoke();
                 _timer = 0f;
             }
