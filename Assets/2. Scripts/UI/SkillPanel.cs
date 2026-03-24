@@ -18,4 +18,8 @@ public class SkillPanel : BaseUI
         skillInfo.Setup(key,targetIdx);
         UIManager.Instance.OpenPanel(skillInfo);
     }
+
+    public void AutoEquip(){
+        SkillManager.Instance.AutoEquip();
+    }
 }

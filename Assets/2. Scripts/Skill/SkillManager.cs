@@ -146,27 +146,33 @@ public class SkillManager : MonoBehaviour
         return new SkillKey(seed[id].Key, seed[id].Value.Skill_Type, Rarity.Normal, true);
     }
 
-   
+
 
     #region Skill Cycle
-    public BaseSkill GetReadySkill()
+
+    // 현재 준비된 스킬만 확인
+    public BaseSkill PeekReadySkill()
     {
         for (int i = 0; i < TOTAL_CYCLE_STEPS; i++)
         {
-            // 현재 가리키는 순서의 스킬 확인
-            BaseSkill target = GetSkillByCycleIndex(_currentCycleIndex);
-
-            // 해당 단계의 스킬이 존재하고 준비되었다면
+            int checkIndex = (_currentCycleIndex + i) % TOTAL_CYCLE_STEPS;
+            BaseSkill target = GetSkillByCycleIndex(checkIndex);
             if (target != null && target.IsReady)
-            {
-                _currentCycleIndex = (_currentCycleIndex + 1) % TOTAL_CYCLE_STEPS;
                 return target;
-            }
-
-            _currentCycleIndex = (_currentCycleIndex + 1) % TOTAL_CYCLE_STEPS;
         }
-
         return null;
+    }
+
+    // 사용 확정 시에만
+    public void ConsumeReadySkill()
+    {
+        for (int i = 0; i < TOTAL_CYCLE_STEPS; i++)
+        {
+            BaseSkill target = GetSkillByCycleIndex(_currentCycleIndex);
+            _currentCycleIndex = (_currentCycleIndex + 1) % TOTAL_CYCLE_STEPS;
+            if (target != null && target.IsReady)
+                return;
+        }
     }
 
     private BaseSkill GetSkillByCycleIndex(int index)
@@ -376,7 +382,53 @@ public class SkillManager : MonoBehaviour
     }
     public void AutoEquip()
     {
+        // 이미 장착된 sid 수집 (등급 무관하게 같은 sid는 중복 장착 불가)
+        var equippedSids = new HashSet<int>();
 
+        foreach (var s in ActiveSlots) if (s != null) equippedSids.Add(s.Data.Job_Skill_Id);
+        foreach (var s in PassiveSlots) if (s != null) equippedSids.Add(s.Data.Job_Skill_Id);
+        if (UltimateSlot != null) equippedSids.Add(UltimateSlot.Data.Job_Skill_Id);
+
+        var candidates = _unlockedSkills
+            .Where(pair => !pair.Key.isScroll
+                        && GetItemCount(pair.Key) > 0
+                        && !IsEquipped(pair.Key)
+                        && !equippedSids.Contains(pair.Key.sid))
+            .OrderByDescending(pair => (int)pair.Key.rarity)
+            .ThenByDescending(pair => DataManager.Instance.GetData<Skill_RankData>((int)pair.Value.Rarity).Skill_Value)
+            .ToList();
+
+        foreach (var (key, skill) in candidates)
+        {
+            if (equippedSids.Contains(key.sid)) continue;
+
+            switch (skill.Data.Skill_Type)
+            {
+                case Skill_Type.Active:
+                    {
+                        int emptyIdx = Array.FindIndex(ActiveSlots, s => s == null);
+                        if (emptyIdx < 0) break;
+                        EquipSkill(key, emptyIdx);
+                        equippedSids.Add(key.sid);
+                        break;
+                    }
+                case Skill_Type.Passive:
+                    {
+                        int emptyIdx = Array.FindIndex(PassiveSlots, s => s == null);
+                        if (emptyIdx < 0) break;
+                        EquipSkill(key, emptyIdx);
+                        equippedSids.Add(key.sid);
+                        break;
+                    }
+                case Skill_Type.Ultimate:
+                    {
+                        if (UltimateSlot != null) break;
+                        EquipSkill(key,0);
+                        equippedSids.Add(key.sid);
+                        break;
+                    }
+            }
+        }
     }
 
     public void EquipSkill(SkillKey key, int targetIndex = -1)

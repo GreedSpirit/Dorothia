@@ -7,7 +7,6 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
     public void Execute(PlayerCtrl player)
     {
         player.FindEnemy();
-
         if (player.CurrentTarget == null || !player.CurrentTarget.IsAlive)
         {
             player.Anima.SetBool("Run", false);
@@ -23,10 +22,20 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
             if (player.NavMesh.isOnNavMesh) player.NavMesh.ResetPath();
             LookAtTarget(player, targetPos);
 
-            // 스킬 우선, 없으면 평타
-            BaseSkill readySkill = SkillManager.Instance.GetReadySkill();
-            if (player.CurrentState != player.SkillState && readySkill != null) player.PerformSkill(readySkill);
-            else player.ChangeState(player.AttackState);
+            // 스킬 사용 가능 상태일 때만 Peek + Consume
+            if (player.CurrentState != player.SkillState)
+            {
+                BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
+                if (readySkill != null)
+                {
+                    SkillManager.Instance.ConsumeReadySkill(); // 사용 확정 후 인덱스 전진
+                    player.PerformSkill(readySkill);
+                }
+                else
+                {
+                    player.ChangeState(player.AttackState);
+                }
+            }
         }
         else
         {
