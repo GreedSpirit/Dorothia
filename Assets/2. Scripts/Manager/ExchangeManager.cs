@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 public enum MoneyType
 {
     Scrap, Gold, CorePiece, FlintPiece, PinionPiece, ZincPiece
 }
-public class MoneyManager : MonoBehaviour
+public class ExchangeManager : MonoBehaviour
 {
     //싱글톤
-    public static MoneyManager Instance { get; private set; }
+    public static ExchangeManager Instance { get; private set; }
 
     //저장해둘 재화
-    Dictionary<MoneyType, int> _money = new();
+    Dictionary<MoneyType, BigInteger> _money = new();
 
     public Action onShardValueChanged;
     int currentGremlinShard;
@@ -34,21 +35,21 @@ public class MoneyManager : MonoBehaviour
     }
 
     //잔고 조회
-    public int GetMoneyAmount(MoneyType type)
+    public BigInteger GetMoneyAmount(MoneyType type)
     {
         CheckDictionary(type);
         return _money[type];
     }
 
     //재화획득시 호출할 함수
-    public void GetMoney(MoneyType type, int amount)
+    public void GetMoney(MoneyType type, BigInteger amount)
     {
         CheckDictionary(type);
         _money[type] += amount;
     }
 
     //살수있는지 없는지 불값반환
-    public bool UseMoney(MoneyType type, int amount)
+    public bool UseMoney(MoneyType type, BigInteger amount)
     {
         //가진돈이 적다면 거짓반환
         if (_money[type] < amount)
@@ -68,9 +69,9 @@ public class MoneyManager : MonoBehaviour
     //싱글플레이 기준 저장
     void SaveMoney()
     {
-        PlayerPrefs.SetInt("Gold", _money[MoneyType.Gold]);
-        PlayerPrefs.SetInt("Scrap", _money[MoneyType.Scrap]);
-        PlayerPrefs.SetInt("CorePiece", _money[MoneyType.CorePiece]);
+        PlayerPrefs.SetString("Gold", _money[MoneyType.Gold].ToString());
+        PlayerPrefs.SetString("Scrap", _money[MoneyType.Scrap].ToString());
+        PlayerPrefs.SetString("CorePiece", _money[MoneyType.CorePiece].ToString());
 
         PlayerPrefs.Save();
     }
@@ -98,7 +99,7 @@ public class MoneyManager : MonoBehaviour
     {
         if(!_money.ContainsKey(type))
         {
-            _money.Add(type, 0);
+            _money.Add(type, BigInteger.Zero);
         }
     }
 
@@ -136,7 +137,7 @@ public class MoneyManager : MonoBehaviour
     /// </summary>
     /// <param name="id">그렘린 조각 id값</param>
     /// <param name="amount">획득 수량</param>
-    public void AddGremlinPiece(int id, int amount)
+    public void AddGremlinPiece(int id, BigInteger amount)
     {
         _money[GetShardTargetGremlin(id)] += amount;
         if (_money[GetShardTargetGremlin(id)] > 2)
@@ -151,7 +152,7 @@ public class MoneyManager : MonoBehaviour
         return currentGremlinShard;
     }
 
-    public void GetCoreGremlinShard(int amount)
+    public void GetCoreGremlinShard(BigInteger amount)
     {
         AddGremlinPiece(210003, amount);
     }
@@ -161,7 +162,7 @@ public class MoneyManager : MonoBehaviour
     /// </summary>
     /// <param name="id">그렘린 조각 id값</param>
     /// <param name="amount">사용 수량</param>
-    public bool RemoveGremlinPiece(int id, int amount)
+    public bool RemoveGremlinPiece(int id, BigInteger amount)
     {
         bool success = UseMoney(GetShardTargetGremlin(id), amount);
         return success;

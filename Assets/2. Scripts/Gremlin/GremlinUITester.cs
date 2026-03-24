@@ -29,12 +29,12 @@ public class GremlinUITester : MonoBehaviour
             Debug.LogError("[GremlinUITester] _gremlinUIPanel 필요");
         }
 
-        MoneyManager.Instance.onShardValueChanged += MergeShard;
+        ExchangeManager.Instance.onShardValueChanged += MergeShard;
     }
 
     public void MergeShard()
     {
-        int id = MoneyManager.Instance.GetCurrentShardID();
+        int id = ExchangeManager.Instance.GetCurrentShardID();
         GenerateGremlin(id);
     }
 

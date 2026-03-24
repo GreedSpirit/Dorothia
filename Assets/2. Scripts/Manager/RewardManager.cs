@@ -23,11 +23,43 @@ public class RewardManager : MonoBehaviour
         GiveExp(isBoss);
 
         //골드
+        GiveGold(isBoss);
 
         //장비
         GetEquipment(monsterId, isBoss);
     }
 
+    #region 공통 계산 함수
+    /// <summary>
+    /// 총 보상을 몬스터 / 보스로 분배 (7:3 비율 + remainder 보스 보정)
+    /// </summary>
+    /// <param name="total"></param>
+    /// <returns></returns>
+    private (BigInteger mob, BigInteger boss) CalculateReward(BigInteger total)
+    {
+        // 몬스터 1마리당
+        BigInteger mob = (total * 7) / (10 * 120);
+
+        // 보스 기본
+        BigInteger bossBase = (total * 3) / 10;
+
+        // 몬스터 총합
+        BigInteger totalMob = mob * 120;
+
+        // 현재 합계
+        BigInteger current = totalMob + bossBase;
+
+        // 오차
+        BigInteger remainder = total - current;
+
+        // 보스 보정
+        BigInteger boss = bossBase + remainder;
+
+        return (mob, boss);
+    }
+    #endregion
+
+    #region 장비
     private void GetEquipment(int monsterId, bool isBoss)
     {
         //현재 섹션 번호(1, 2, --- 50, 51)
@@ -49,43 +81,58 @@ public class RewardManager : MonoBehaviour
             TestWeaponGenerator.Instance.Test(DropData.Equip_Drop_Level);
         }
     }
+    #endregion
 
+    #region 경험치
     private void GiveExp(bool isBoss)
     {
-        int sectionId = _stageManager.CurrentSection;
+        int currentSection = _stageManager.CurrentSection;
 
-        var rewardData = DataManager.Instance.GetData<Stage_RewardData>(sectionId);
+        var rewardData = DataManager.Instance.GetData<Stage_RewardData>(currentSection);
 
         if (rewardData == null)
         {
-            Debug.LogWarning($"Stage_RewardData 없음: {sectionId}");
+            Debug.LogWarning($"Stage_RewardData 없음: {currentSection}");
             return;
         }
 
-        //테이블의 총 경험치
         BigInteger totalExp = rewardData.Section_Exp;
 
-        //기본 분배
-        BigInteger mobExp = (totalExp * 7) / (10 * 120); // 몬스터 1마리당
-        BigInteger bossBaseExp = (totalExp * 3) / 10;    // 보스 기본
+        var (mobExp, bossExp) = CalculateReward(totalExp);
 
-        //몬스터 총합
-        BigInteger totalMobExp = mobExp * 120;
-
-        //현재 합계
-        BigInteger currentTotal = totalMobExp + bossBaseExp;
-
-        //오차 계산
-        BigInteger remainder = totalExp - currentTotal;
-
-        //보스에 오차 추가
-        BigInteger bossExp = bossBaseExp + remainder;
-
-        //지급
         BigInteger exp = isBoss ? bossExp : mobExp;
-
-        //Debug.Log($"[RewardManager] Exp 지급 - Section:{sectionId}, IsBoss:{isBoss}, Exp:{exp}");
 
         _playerStats.AddExp(exp);
     }
+    #endregion
+
+    #region 골드
+    private void GiveGold(bool isBoss)
+    {
+        int currentSection = _stageManager.CurrentSection;
+
+        var rewardData = DataManager.Instance.GetData<Stage_RewardData>(currentSection);
+
+        if (rewardData == null)
+        {
+            Debug.LogWarning($"Stage_RewardData 없음: {currentSection}");
+            return;
+        }
+
+        BigInteger totalGold = rewardData.Section_Gold;
+
+        var (mobGold, bossGold) = CalculateReward(totalGold);
+
+        BigInteger gold = isBoss ? bossGold : mobGold;
+
+        if (ExchangeManager.Instance != null)
+        {
+            ExchangeManager.Instance.GetMoney(MoneyType.Gold, gold);
+        }
+        else
+        {
+            Debug.LogError("ExchangeManager 없음");
+        }
+    }
+    #endregion
 }

@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Numerics;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
@@ -42,8 +43,8 @@ public class GremlinEnchantPanel : BaseUI
         Gremlin_UpgradeData upgradeData = DataManager.Instance.GetData<Gremlin_UpgradeData>((int)gremlin._rarity);
         float costGold = upgradeData.Gremlin_Upgrade_Cost * (1 + upgradeData.Up_Cost_Value);
         _costGold.text = $"{costGold}G";
-        _currentGold.text = MoneyManager.Instance.GetMoneyAmount(MoneyType.Gold) > costGold?$"{MoneyManager.Instance.GetMoneyAmount(MoneyType.Gold)}G":
-            $"<color=red>{MoneyManager.Instance.GetMoneyAmount(MoneyType.Gold)}G</color>";
+        _currentGold.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) > (BigInteger)costGold?$"{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}G":
+            $"<color=red>{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}G</color>";
 
         successRate = upgradeData.Gremlin_Upgrade_Prob / 100;
     }
