@@ -75,7 +75,7 @@ public class SkillManager : MonoBehaviour
     private Dictionary<SkillKey, SkillItem> _uiCache = new Dictionary<SkillKey, SkillItem>();
 
     // 신비 게이지 현황
-    public const float MYSTERY_LIMIT = 100000;
+    public const float MYSTERY_LIMIT = 10000;
     private float _mysteryGauge;
     public float MysteryGauge
     {
@@ -113,7 +113,7 @@ public class SkillManager : MonoBehaviour
             for (int i = 0; i < 3000; i++) GetRandomScroll();
         }
 
-        // 신비게이지 테스트
+        //신비게이지 테스트
         //if (Keyboard.current.sKey.wasPressedThisFrame)
         //{
         //    MysteryGauge += 1000;
@@ -239,55 +239,55 @@ public class SkillManager : MonoBehaviour
     // 같은 등급 스킬 3개 -> 다음 등급 스킬 1개
     public bool MergeSkill(SkillKey skillKey, bool isMysteryOn = false)
     {
-        // 기본 조건 체크
+        // 기본 조건 체크 (전설 등급이나 스크롤은 합성 불가)
         if (skillKey.isScroll || skillKey.rarity == Rarity.Legendary) return false;
 
         int currentAmount = GetItemCount(skillKey);
         if (currentAmount < 3) return false;
-
-        // 데이터 및 확률 로드
+        // 2. 데이터 및 확률 로드
         Skill_RankData rankData = DataManager.Instance.GetData<Skill_RankData>((int)skillKey.rarity);
+        if (rankData == null) return false;
+
         float successProb = rankData.Skill_Success_Prob;
+        if (isMysteryOn) successProb = Mathf.Min(successProb * 2, 1.0f); // 확률 상한선 제한
 
-        if (isMysteryOn) successProb *= 2;
-
-        // 합성 시도 횟수 계산
+        // 합성 시도 횟수 계산 및 재료 선소모
         int attemptCount = currentAmount / 3;
-        int successCount = 0;
-
-        // 재료 선소모 (3의 배수만큼 모두 소모)
         _inventory[skillKey] -= (attemptCount * 3);
 
-        // 각 횟수마다 개별 확률 계산
+        // UI에 재료 감소 즉시 반영
+        OnInventoryChanged?.Invoke(skillKey);
+
+        // 확률 계산
+        int successCount = 0;
         for (int i = 0; i < attemptCount; i++)
         {
-            float randomValue = UnityEngine.Random.value;
-            if (randomValue <= successProb)
+            if (UnityEngine.Random.value <= successProb)
             {
                 successCount++;
             }
         }
 
-        // 인벤토리 UI 갱신 (재료 감소 반영)
-        OnInventoryChanged?.Invoke(skillKey);
+        int failCount = attemptCount - successCount;
 
-        // 성공 결과 지급
+        if (failCount > 0)
+        {
+            MysteryGauge += rankData.Skill_Rank_Failure * failCount;
+        }
+
         if (successCount > 0)
         {
             Rarity nextRarity = (Rarity)((int)skillKey.rarity + 1);
             SkillKey upgradedKey = new SkillKey(skillKey.sid, skillKey.type, nextRarity, false);
 
-            Debug.Log($"{skillKey.sid} 합성 시도: {attemptCount}회 | 성공: {successCount}회!");
+            Debug.Log($"{skillKey.sid} 합성: {attemptCount}회 시도 중 {successCount}회 성공!");
             UnlockAndAddItem(upgradedKey, successCount);
             return true;
         }
         else
         {
-            int failCount = attemptCount - successCount;
-            MysteryGauge += rankData.Skill_Rank_Failure;
-
-            Debug.Log($"{skillKey.sid} 합성 {attemptCount}회 모두 실패...");
-            return false;
+            Debug.Log($"{skillKey.sid} 합성 {attemptCount}회 시도했으나 모두 실패...");
+            return false; // 시도는 했으나 결과물이 없음
         }
     }
 
@@ -423,7 +423,7 @@ public class SkillManager : MonoBehaviour
                 case Skill_Type.Ultimate:
                     {
                         if (UltimateSlot != null) break;
-                        EquipSkill(key,0);
+                        EquipSkill(key, 0);
                         equippedSids.Add(key.sid);
                         break;
                     }
