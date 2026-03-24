@@ -25,7 +25,7 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
 
             // 스킬 우선, 없으면 평타
             BaseSkill readySkill = SkillManager.Instance.GetReadySkill();
-            if (readySkill != null) player.PerformSkill(readySkill);
+            if (player.CurrentState != player.SkillState && readySkill != null) player.PerformSkill(readySkill);
             else player.ChangeState(player.AttackState);
         }
         else
