@@ -171,15 +171,17 @@ public class StatManager : MonoBehaviour
     private void ApplyPassiveEffects()
     {
         // 패시브 스킬 적용
-        //if (SkillManager.Instance != null)
-        //{
-        //    foreach (var skill in SkillManager.Instance.PassiveSkillSlots)
-        //    {
-        //        Status type = skill.Status.Affection_Skill;
-        //        float value = skill.Status.Affection_Skill_Value;
-        //        stats[type].AddMultiModifier(value);
-        //    }
-        //}
+        if (SkillManager.Instance != null)
+        {
+            foreach (var skill in SkillManager.Instance.PassiveSlots)
+            {
+                if (skill == null) continue;
+
+                Status type = skill.Data.Affection_Skill;
+                float value = skill.Data.Affection_Skill_Value;
+                stats[type].AddMultiModifier(value);
+            }
+        }
         //그렘린 패시브 적용
         if (GremlinManager.Instance != null && GremlinManager.Instance.gremlinInstance != null)
         {

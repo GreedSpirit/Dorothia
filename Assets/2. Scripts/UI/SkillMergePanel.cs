@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 //using UnityEditor.EventSystems;
@@ -79,7 +79,7 @@ public class SkillMergePanel : BaseUI
         if (currentItem == item)
         {
             upgradeButton.interactable = false;
-            currentItem.gradeOutlineImage.sprite = SkillManager.Instance.GetSpriteByGrade(key.rarity);
+            currentItem.OutLine_Grade.sprite = SkillManager.Instance.GetSpriteByGrade(key.rarity);
             currentItem = null;
             return;
         }
@@ -88,7 +88,7 @@ public class SkillMergePanel : BaseUI
         if (currentItem != null)
         {
             // 원래 등급에 맞는 스프라이트로 되돌림
-            currentItem.gradeOutlineImage.sprite = SkillManager.Instance.GetSpriteByGrade(currentKey.rarity);
+            currentItem.OutLine_Grade.sprite = SkillManager.Instance.GetSpriteByGrade(currentKey.rarity);
         }
 
         // 새로운 아이템 선택 적용
@@ -96,7 +96,7 @@ public class SkillMergePanel : BaseUI
         currentItem = item;
 
         // 새 선택 UI 연출
-        currentItem.gradeOutlineImage.sprite = SkillManager.Instance.pickSprite;
+        currentItem.OutLine_Grade.sprite = SkillManager.Instance.pickSprite;
         upgradeButton.interactable = true;
     }
 

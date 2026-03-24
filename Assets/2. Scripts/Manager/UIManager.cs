@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
@@ -41,12 +41,12 @@ public class UIManager : MonoBehaviour
 
         baseUI.Open();
         uiStack.Push(baseUI);
-        Debug.Log(uiStack.Count);
+        //Debug.Log(uiStack.Count);
     }
 
     public void CloseTopPanel()
     {
-        Debug.Log(uiStack.Count);
+        //Debug.Log(uiStack.Count);
         if (uiStack.Count > 0)
         {
             var top = uiStack.Pop();
