@@ -10,11 +10,13 @@ public static class DungeonReturnContext
 
     public static int ReturnStageId { get; private set; }
     public static int ReturnSection { get; private set; }
+    public static int ReturnEqsection { get; private set; }
 
-    public static void Save(int stageId, int section)
+    public static void Save(int stageId, int section, int eqSection)
     {
         ReturnStageId = stageId;
         ReturnSection = section;
+        ReturnEqsection = eqSection;
         HasContext = true;
 
         Debug.Log($"[DungeonReturnContext] Save stageId={stageId}, section={section}");
@@ -25,5 +27,6 @@ public static class DungeonReturnContext
         HasContext = false;
         ReturnStageId = 0;
         ReturnSection = 0;
+        ReturnEqsection = 0;
     }
 }
