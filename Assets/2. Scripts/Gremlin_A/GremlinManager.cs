@@ -11,48 +11,65 @@ public class GremlinManager : MonoBehaviour
 
     public Transform PlayerTransform { get {  return playerTransform; } }
 
-    [SerializeField] private GremlinInventory _inventory;
-    [SerializeField] private Transform playerTransform; // 플레이어의 위치
-    [SerializeField] private Transform GremlinSpawnPoint;
+    [SerializeField] private GremlinInventory _inventory;     // 그렘린 보관 전용 인벤토리
+    [SerializeField] private Transform playerTransform;       // 플레이어의 위치
+    [SerializeField] private Transform GremlinSpawnPoint;     // 그렘린을 소환할 위치
 
-    [SerializeField] private GameObject spawnEffectPrefab; // 소환 시 재생될 이펙트, 파티클
-    [SerializeField] private GameObject despawnEffectPrefab; // 해제/교체 시 재생될 이펙트, 파티클
-    [SerializeField] private GameObject _gremlinPrefab;
+    [SerializeField] private GameObject spawnEffectPrefab;    // 소환 시 재생될 이펙트, 파티클
+    [SerializeField] private GameObject despawnEffectPrefab;  // 해제/교체 시 재생될 이펙트, 파티클
+    [SerializeField] private GameObject _gremlinPrefab;       // 소환할 그렘린 프리팹
 
-    public GremlinInstance currentGremlin { get; private set; }
-    public Gremlin gremlinInstance { get; private set; }
+    public GremlinInstance currentGremlin { get; private set; }  // 현재 소환한 그렘린
+    public Gremlin gremlinInstance { get; private set; }         // 그 그렘린의 정보값
+    private Rarity rarity;                                       // 현재 소환된 그렘린의 등급
 
     private void Awake()
     {
+        //싱글톤 패턴 - 이미 있을 경우 파괴
         if(Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
+        //인스턴스화
         Instance = this;
     }
 
-    //그렘린 생성
+    /// <summary>
+    /// 그렘린 생성
+    /// </summary>
+    /// <param name="address">생성할 그렘린의 주소</param>
     public async void CreateGremlin(string address)
     {
+        //어드레서블 활용, 그렘린 스크립터블오브젝트 데이터를 받아옴
         var handle = Addressables.LoadAssetAsync<GremlinSOData>(address);
         await handle.Task;
 
+        //그 결과물을 받아옴
         GremlinSOData so = handle.Result;
 
+        //새로운 그렘린 생성
         var gremlin = new Gremlin();
+
+        //새로운 GUID 부여, 등급은 Normal, 받아온 스크립터블 오브젝트를 사용해 초기화
         gremlin.Init(Guid.NewGuid().ToString(), so, Rarity.Normal);
 
+        //인벤토리에 초기화 진행된 그렘린 추가
         _inventory.AddGremlin(gremlin);
     }
 
-    //그렘린 교체
+    /// <summary>
+    /// 그렘린 교체
+    /// </summary>
+    /// <param name="toChange">바꾸려는 그렘린</param>
+    /// <returns></returns>
     public IEnumerator ChangeGremlin(Gremlin toChange)
     {
         //소멸 파티클의 생성 위치는 펫의 위치입니다.
         Vector3 spawnPos = _gremlinPrefab != null? _gremlinPrefab.transform.position : GremlinSpawnPoint.position;
 
+        //그렘린의 프리팹이 존재하지 않는다면, 스폰 포인트를 가져옵니다.
         if(_gremlinPrefab == null)
         {
             spawnPos = GremlinSpawnPoint.position;
@@ -81,14 +98,26 @@ public class GremlinManager : MonoBehaviour
 
             else
             {
+                //소환된 것이 있다는 뜻이므로 그 그렘린부터 해제합니다.
                 Addressables.ReleaseInstance(_gremlinPrefab);
+                Destroy(removeParticle);
             }
         }
-        if(toChange == gremlinInstance)
+
+        //그렘린이 존재하고, 바꾸려는 그렘린의 GUID가 소환한 것과 일치하며 등급이 다른 경우
+        if(gremlinInstance != null && toChange.InstanceGUID == gremlinInstance.InstanceGUID && toChange._rarity !=  Instance.rarity)
         {
-            Debug.Log("기존과 같아 생성불가");
+            //등급 변화시의 모델 변화
+            currentGremlin.ChangeModeling(toChange._rarity);
             yield break;
         }
+        //그냥 완전히 동일한 경우 스킵
+        else if(toChange == gremlinInstance)
+        {
+            yield break;
+        }
+
+        //스폰포인트를 다시 받아옵니다.
         spawnPos = GremlinSpawnPoint.position;
 
         //생성 파티클을 생성합니다.
@@ -114,10 +143,13 @@ public class GremlinManager : MonoBehaviour
         //그렘린의 정보는 현재 바꾸려는 그렘린의 정보로 덮어씌웁니다.
         gremlinInstance = toChange;
 
+        rarity = toChange._rarity;
         //행동의 경우, Instance 내에서 해당 그렘린의 정보를 바탕으로
         //정해진 행동의 자식 클래스를 받아오는 메서드를 시행하여 받아옵니다.
         currentGremlin.Init(gremlinInstance);
+        currentGremlin.ChangeModeling(toChange._rarity);
 
+        //소환 파티클을 제거합니다.
         Destroy(spawnParticle);
         yield return null;
     }

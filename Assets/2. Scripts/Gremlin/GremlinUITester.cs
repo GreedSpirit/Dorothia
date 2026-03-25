@@ -95,7 +95,7 @@ public class GremlinUITester : MonoBehaviour
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Core");
         await so.Task;
         data = so.Result;
-        for(int i = 0; i< 4; i++)
+        for(int i = 0; i< 3; i++)
         {
             Gremlin TestGremlin2 = new Gremlin();
             TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
@@ -106,7 +106,7 @@ public class GremlinUITester : MonoBehaviour
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
         await so.Task;
         data = so.Result;
-        for(int i =0; i< 9; i++)
+        for(int i =0; i< 3; i++)
         {
             Gremlin TestGremlin3 = new Gremlin();
             TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
@@ -123,35 +123,11 @@ public class GremlinUITester : MonoBehaviour
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Pinion");
         await so.Task;
         data = so.Result;
-        Gremlin TestGremlin5 = new Gremlin();
-        TestGremlin5.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-        _gremlinList.AddGremlin(TestGremlin5);
-        //
-        //_gremlinList.AddGremlin(new GremlinItemData
-        //{
-        //    id = 2,
-        //    gremlinName = "황금 렌치 포드",
-        //    currentLevel = 25,
-        //    currentStat = 350.0f,
-        //    tier = Rarity.Rare,
-        //    iconSprite = dummyIconRare,
-        //    isEquipped = false
-        //});
-        //
-        //for (int i = 3; i <= 14; i++)
-        //{
-        //    _gremlinList.AddGremlin(new GremlinItemData
-        //    {
-        //        id = i,
-        //        gremlinName = $"실험용 그렘린 MK-{i}",
-        //        currentLevel = Random.Range(1, 50),
-        //        currentStat = Random.Range(10f, 1000f),
-        //        tier = (Rarity)Random.Range(1, 4), // Enum 인덱스 랜덤
-        //        iconSprite = dummyIconLegendary, // 테스트용 통일
-        //        isEquipped = false
-        //    });
-        //}
-        //
-        Debug.Log($"[GremlinUITester] 총 {_gremlinList._gremlinInventory.Count}개의 더미 데이터가 생성되었습니다.");
+        for(int i = 0; i<81; i++)
+        {
+            Gremlin TestGremlin5 = new Gremlin();
+            TestGremlin5.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+            _gremlinList.AddGremlin(TestGremlin5);
+        }
     }
 }
