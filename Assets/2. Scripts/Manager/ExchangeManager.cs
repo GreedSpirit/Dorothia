@@ -69,9 +69,10 @@ public class ExchangeManager : MonoBehaviour
     //싱글플레이 기준 저장
     void SaveMoney()
     {
-        PlayerPrefs.SetString("Gold", _money[MoneyType.Gold].ToString());
-        PlayerPrefs.SetString("Scrap", _money[MoneyType.Scrap].ToString());
-        PlayerPrefs.SetString("CorePiece", _money[MoneyType.CorePiece].ToString());
+        foreach (var type in _money)
+        {
+            PlayerPrefs.SetString(type.Key.ToString(), type.Value.ToString());
+        }
 
         PlayerPrefs.Save();
     }

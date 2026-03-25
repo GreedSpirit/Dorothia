@@ -66,13 +66,17 @@ public class ScenarioManager : MonoBehaviour
     private void StartDialogue()
     {
         Time.timeScale = 0f;
+
+        _dialoguePanel.SetActive(true);
+        DisplayNextSentence();
+        /*
         //페이드인 완료 콜백받으면 대사창활성화
         StartCoroutine(FadeInBackground(() =>
         {
             _dialoguePanel.SetActive(true);
             DisplayNextSentence(); 
         }));
-        
+        */
     }
 
     //버튼클릭함수 (대사패널을 버튼으로 화면덮음)

@@ -32,6 +32,7 @@ public class StageManager : MonoBehaviour
     public static event System.Action<int> OnBossSpawned;
     public static event System.Action<int> OnStageCleared;
     public static event System.Action<int> OnSectionChanged;
+    public static event System.Action<int> OnSectionCleard;
     public static event System.Action<int, int> OnScenarioTrigger;
 
     private bool _eventsRegistered;
@@ -384,7 +385,6 @@ public class StageManager : MonoBehaviour
             case StageState.Clear:
                 //스테이지 클리어 처리
                 _spawnManager.StopNormalSpawn();
-                OnStageCleared?.Invoke(_stage.Stage_Id);
                 break;
 
             case StageState.Failed:
@@ -415,6 +415,7 @@ public class StageManager : MonoBehaviour
         if (isBoss)
         {
             OnScenarioTrigger?.Invoke(CurrentSection, 3);
+            OnSectionCleard?.Invoke(_currentSection);
 
             _bossAlive = false;
             _bossTimerRunning = false;

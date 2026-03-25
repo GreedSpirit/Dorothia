@@ -8,7 +8,7 @@ public class CheatManager : MonoBehaviour
     //버튼에서 호출
     public void AddExpCheat()
     {
-        BigInteger cheatExp = new BigInteger(1000000); // 100만 exp
+        BigInteger cheatExp = new BigInteger(10000); // 100만 exp
         _playerStats.AddExp(cheatExp);
 
         Debug.Log($"[Cheat] Exp 지급: {cheatExp}");
