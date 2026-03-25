@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
+using TMPro;
 using UnityEngine;
 
 public enum MoneyType
@@ -15,8 +16,14 @@ public class ExchangeManager : MonoBehaviour
     //저장해둘 재화
     Dictionary<MoneyType, BigInteger> _money = new();
 
+    // 골드
+    [SerializeField] private TextMeshProUGUI _gold;
+
     public Action onShardValueChanged;
     int currentGremlinShard;
+
+    // 골드 재회 획득 시, 이벤트 연결
+    public event Action<BigInteger> OnGoldChanged;
 
     private void Awake()
     {
@@ -46,6 +53,8 @@ public class ExchangeManager : MonoBehaviour
     {
         CheckDictionary(type);
         _money[type] += amount;
+
+        UpdateGoods(_money, type);
     }
 
     //살수있는지 없는지 불값반환
@@ -61,9 +70,34 @@ public class ExchangeManager : MonoBehaviour
         {
             //계산하고 참반환
             _money[type] -= amount;
+            UpdateGoods(_money, type);
             return true;
         }
-        
+
+    }
+
+    // 재화 변동 시
+    private void UpdateGoods(Dictionary<MoneyType, BigInteger> goods, MoneyType type)
+    {
+        switch (type)
+        {
+            case MoneyType.Scrap:
+                break;
+            case MoneyType.Gold:
+                _gold.text = goods[type].ToString("N0");
+                OnGoldChanged?.Invoke(goods[type]);
+                break;
+            case MoneyType.CorePiece:
+                break;
+            case MoneyType.FlintPiece:
+                break;
+            case MoneyType.PinionPiece:
+                break;
+            case MoneyType.ZincPiece:
+                break;
+            default:
+                break;
+        }
     }
 
     //싱글플레이 기준 저장
@@ -91,14 +125,14 @@ public class ExchangeManager : MonoBehaviour
       _money[MoneyType.GremlinPiece] = data.GremlinPiece;
     }
     */
-    
+
     /// <summary>
     /// Dictionary에 해당 MoneyType Key가 있는지 체크하고, 없을 경우 Dictionary에 해당 Key를 추가합니다.
     /// </summary>
     /// <param name="type">Dictionary 내에서 확인해야 하는 재화 종류</param>
     public void CheckDictionary(MoneyType type)
     {
-        if(!_money.ContainsKey(type))
+        if (!_money.ContainsKey(type))
         {
             _money.Add(type, BigInteger.Zero);
         }

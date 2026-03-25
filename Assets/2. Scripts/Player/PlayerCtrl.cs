@@ -297,9 +297,14 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // MeleeAttackModule, JumpAttackModule 에서 접근
     internal float CalculateSkillDamage(BaseSkill skill)
     {
+        //스킬 데미지 = (캐릭터 공격력 + 장비 공격력) x 스킬 계수 x 등급 배율 x 강화 배율
         if (skill?.Data == null) return 0f;
-        return (float)StatManager.Instance.stats[skill.Data.Affection_Skill].FinalValue
-               * skill.Data.Affection_Skill_Value;
+
+        float finalDmg = (float)StatManager.Instance.stats[skill.Data.Affection_Skill].FinalValue;
+        Skill_RankData rankData = DataManager.Instance.GetData<Skill_RankData>((int)skill.Rarity);
+        Skill_UpgradeData upgradeData = DataManager.Instance.GetData<Skill_UpgradeData>((int)skill.Level);
+
+        return finalDmg * skill.Data.Affection_Skill_Value * rankData.Skill_Rank_Multiplier * upgradeData.Skill_Upgrade_Multiplier;
     }
 
     // 단일 타겟 연타 (MeleeAttackModule 단일 모드)
@@ -331,7 +336,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
                 IMonster monster = col.GetComponentInParent<IMonster>();
                 if (monster != null && monster.IsAlive)
-                    //monster.TakeDamage((int)1);
                     monster.TakeDamage((int)dmgPerHit);
             }
 
@@ -350,8 +354,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             {
                 if (target == null || !target.IsAlive) continue;
 
-                //target.TakeDamage((int)dmgPerHit);
-                target.TakeDamage((int)1);
+                target.TakeDamage((int)dmgPerHit);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -545,7 +548,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         OnDead?.Invoke();
     }
 
-    public void ApplyDamage(int amount) { if (!_isDead || !IsInvincible) _playerStats.TakeDamage(amount); }
+    public void ApplyDamage(int amount) { if (!_isDead) _playerStats.TakeDamage(amount); }
 
     public void ResetState()
     {

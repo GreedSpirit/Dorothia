@@ -73,6 +73,8 @@ public abstract class BaseSkill
     public void UpdateCooldown(float dt)
         => CurrentCooldown = Mathf.Max(0f, CurrentCooldown - dt);
 
+    public void ResetCoolDown() => CurrentCooldown = 0;
+
     public void StartCooldown()
     {
         if (Data != null) CurrentCooldown = Data.Skill_Cooltime;
