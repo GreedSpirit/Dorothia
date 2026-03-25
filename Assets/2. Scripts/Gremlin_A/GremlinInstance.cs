@@ -6,6 +6,7 @@ public class GremlinInstance : MonoBehaviour
     [SerializeField] private GremlinMovement _movement;            // 움직임 제어
     [SerializeField] private GremlinVisual _visual;                // 시각적 제어
     public GremlinBehaviour _behaviour { get; private set; }          // 행동 제어
+    public GremlinAnimatorController _controller { get; private set; }
 
     public void Init(Gremlin gremlin)
     {
@@ -13,7 +14,7 @@ public class GremlinInstance : MonoBehaviour
         {
             gameObject.AddComponent<StrikerGremlin>();
             StrikerGremlin striker = gameObject.GetComponent<StrikerGremlin>();
-            striker.Init(DataManager.Instance.GetData<Gremlin_StatusData>(gremlin._gremlinData.PetID),
+            striker.Init(ItemCalculator.GetGremlinEffect(gremlin._gremlinData.PetID),
                 GremlinManager.Instance.PlayerTransform, gremlin._rarity);
             striker.finalAttack = (striker.attackDamage * DataManager.Instance.GetData<Gremlin_TierData>((int)gremlin._rarity).Gremlin_Tier_Multiplier)
                 + (gremlin._currentLevel * DataManager.Instance.GetData<Gremlin_AtkerData>((int)gremlin._rarity).Gremlin_Level_Bonus);
@@ -41,5 +42,9 @@ public class GremlinInstance : MonoBehaviour
         }
 
         _movement.Init(GremlinManager.Instance.PlayerTransform);
+        
+        GremlinAnimatorController controller = gameObject.AddComponent<GremlinAnimatorController>();
+        controller.Init();
+        _controller = controller;
     }
 }
