@@ -7,6 +7,13 @@ using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
+[System.Serializable]
+public struct AttackEffectGroup
+{
+    public ParticleSystem attackEffect1, attackEffect2, attackEffect3;
+    public ParticleSystem hitEffect1, hitEffect2, hitEffect3;
+}
+
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
     [Header("키 매핑 스킬 사용 유무(테스트)")]
@@ -30,8 +37,19 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [Header("히트박스 & 이펙트")]
     [SerializeField] private BoxCollider _hitBox;
     [SerializeField] private BoxCollider _hitBox3;
-    [SerializeField] private ParticleSystem _attackEffect1, _attackEffect2, _attackEffect3;
-    [SerializeField] private ParticleSystem _attackHitEffect, _attackHitEffect2, _attackHitEffect3;
+
+    [Header("이펙트 그룹")]
+    [SerializeField] private AttackEffectGroup _effectGroupA; // 승급 1~4
+    [SerializeField] private AttackEffectGroup _effectGroupB; // 승급 5~8
+
+    // 현재 활성 그룹 (지역변수 캐싱용)
+    private AttackEffectGroup _currentEffectGroup;
+
+    // 현재 활성 그룹의 원본 트랜스폼 캐시 (0=effect1, 1=effect2, 2=effect3)
+    private Vector3[] _originAtkPos = new Vector3[3];
+    private Quaternion[] _originAtkRot = new Quaternion[3];
+    private Vector3[] _originHitPos = new Vector3[3];
+    private Quaternion[] _originHitRot = new Quaternion[3];
 
     //  프로퍼티
     public Vector2 MoveInput => _moveInput;
@@ -102,10 +120,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         CurrentState = IdleState;
         CurrentState.Enter(this);
 
-        _originPos3 = _attackEffect3.transform.localPosition;
-        _originRot3 = _attackEffect3.transform.localRotation;
-        _originHitPos3 = _attackHitEffect3.transform.localPosition;
-        _originHitRot3 = _attackHitEffect3.transform.localRotation;
+        // 승급 이펙트 업데이트
+        UpdateEffectGroup(1);
     }
 
     private void OnEnable() => _playerStats.OnDead += ChangeDead;
@@ -345,7 +361,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     #endregion
 
     // ══════════════════════════════════════════════════════
-    #region Skill - 렌더러 / 애니메이터 제어 (JumpAttackModule 전용)
+    #region 렌더러 / 애니메이터 제어 (JumpAttackModule 전용)
 
     // 캐릭터 메시 전체 표시 / 숨김
     public void SetRenderersEnabled(bool isEnabled)
@@ -358,6 +374,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public void PauseAnimation() => _anima.speed = 0f;
     public void ResumeAnimation() => _anima.speed = 1f;
 
+    public void UpdateEffectGroup(int promotionLevel)
+    {
+        _currentEffectGroup = promotionLevel <= 4 ? _effectGroupA : _effectGroupB;
+        CacheCurrentGroupTransforms();
+    }
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -414,35 +435,60 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void EnableAttackEffect(int index)
     {
-        ResetEffect3Transform();
+        int i = index - 1; // 1-based → 0-based
+        var g = _currentEffectGroup;
 
         if (_odm.IsModeOn)
         {
-            _attackEffect3.Play();
-            _attackHitEffect3.Play();
+            // effect3를 콤보 index 위치/회전으로 이동 후 재생
+            g.attackEffect3.transform.localPosition = _originAtkPos[i];
+            g.attackEffect3.transform.localRotation = _originAtkRot[i];
+            g.hitEffect3.transform.localPosition = _originHitPos[i];
+            g.hitEffect3.transform.localRotation = _originHitRot[i];
+
+            g.attackEffect3.Play();
+            g.hitEffect3.Play();
+            SoundManager.Instance.PlaySFX(_audioClip[i]);
             return;
         }
 
+        // 일반 모드: effect3 원본 위치 복원
+        g.attackEffect3.transform.localPosition = _originAtkPos[2];
+        g.attackEffect3.transform.localRotation = _originAtkRot[2];
+        g.hitEffect3.transform.localPosition = _originHitPos[2];
+        g.hitEffect3.transform.localRotation = _originHitRot[2];
+
         switch (index)
         {
-            case 1: _attackEffect1.Play(); _attackHitEffect.Play(); SoundManager.Instance.PlaySFX(_audioClip[0]); break;
-            case 2: _attackEffect2.Play(); _attackHitEffect2.Play(); SoundManager.Instance.PlaySFX(_audioClip[1]); break;
+            case 1:
+                g.attackEffect1.Play(); g.hitEffect1.Play();
+                SoundManager.Instance.PlaySFX(_audioClip[0]);
+                break;
+            case 2:
+                g.attackEffect2.Play(); g.hitEffect2.Play();
+                SoundManager.Instance.PlaySFX(_audioClip[1]);
+                break;
             case 3:
-                _attackEffect3.Play();
-                _attackHitEffect.Play();
-                _attackHitEffect2.Play();
-                _attackHitEffect3.Play();
+                g.attackEffect3.Play();
+                g.hitEffect1.Play(); g.hitEffect2.Play(); g.hitEffect3.Play();
                 SoundManager.Instance.PlaySFX(_audioClip[2]);
                 break;
         }
     }
 
-    private void ResetEffect3Transform()
+    private void CacheCurrentGroupTransforms()
     {
-        _attackEffect3.transform.localPosition = _originPos3;
-        _attackEffect3.transform.localRotation = _originRot3;
-        _attackHitEffect3.transform.localPosition = _originHitPos3;
-        _attackHitEffect3.transform.localRotation = _originHitRot3;
+        var g = _currentEffectGroup;
+        ParticleSystem[] atks = { g.attackEffect1, g.attackEffect2, g.attackEffect3 };
+        ParticleSystem[] hits = { g.hitEffect1, g.hitEffect2, g.hitEffect3 };
+
+        for (int i = 0; i < 3; i++)
+        {
+            _originAtkPos[i] = atks[i].transform.localPosition;
+            _originAtkRot[i] = atks[i].transform.localRotation;
+            _originHitPos[i] = hits[i].transform.localPosition;
+            _originHitRot[i] = hits[i].transform.localRotation;
+        }
     }
 
     #endregion

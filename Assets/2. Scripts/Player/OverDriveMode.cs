@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -59,7 +59,7 @@ public class OverDriveMode : MonoBehaviour
 
     private IEnumerator OverdriveTimer(float duration)
     {
-        Debug.Log("오버드라이브 시작");
+        //Debug.Log("오버드라이브 시작");
         IsModeOn = true;
 
         StatManager.Instance.RefreshStats();
@@ -91,7 +91,7 @@ public class OverDriveMode : MonoBehaviour
         aura.enabled = false;
         afterImage.StopAfterImage();
         ApplyWeaponSettings(originWeaponMesh, originWeaponMat);
-        Debug.Log("오버드라이브 종료");
+        //Debug.Log("오버드라이브 종료");
 
         IsModeOn = false;
 

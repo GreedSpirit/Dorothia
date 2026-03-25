@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class HitBox : MonoBehaviour
 {
+    private const int HITCOUNT = 2;
+
     private PlayerCtrl _player;
     private OverDriveMode odm;
     private readonly HashSet<IMonster> _hitMonsters = new();
@@ -35,11 +37,13 @@ public class HitBox : MonoBehaviour
 
         _hitMonsters.Add(monster);
 
-        int damage = Mathf.RoundToInt(_player.PlayerStats.Attack); // 플레이어스탯 공격력
+        //int damage = Mathf.RoundToInt(_player.PlayerStats.Attack); // 플레이어스탯 공격력
+        int damage = Mathf.RoundToInt((float)StatManager.Instance.stats[Status.ATK].FinalValue); // 플레이어스탯 공격력
         //bool isCritical = CalcCritical();
         //bool testCri = Random.value < 0.5 ? false : true;
         //DamageTextManager.Instance.ShowDamage(damage, monster.Transform.position, testCri);
-        monster.TakeDamage(damage);
+        //monster.TakeDamage(damage);
+        StartCoroutine(_player.SingleHitRoutine(monster, HITCOUNT, damage));
     }
 
     private bool CalcCritical()
