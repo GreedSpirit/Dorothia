@@ -263,7 +263,8 @@ public class DungeonManager : MonoBehaviour
         {
             DungeonReturnContext.Save(
                 _stageManager.CurrentStageId,
-                _stageManager.CurrentSection
+                _stageManager.CurrentSection,
+                _stageManager.CurrentStageSectionId
             );
         }
 
@@ -522,6 +523,7 @@ public class DungeonManager : MonoBehaviour
     #region 던전 보상
     private void GiveReward()
     {
+
         //던전 보상 조회
         var reward =
             DataManager.Instance.GetData<Dungeon_RewardData>(_stepData.Reward_Group_Id);
@@ -599,7 +601,7 @@ public class DungeonManager : MonoBehaviour
         if (reward.Dungeon_Type == Dungeon_Type.Equipment)
         {
             //기존에 있던 스테이지 섹션 아이디 조회
-            var Ddata = DataManager.Instance.GetData<Stage_SectionData>(DungeonReturnContext.ReturnSection);
+            var Ddata = DataManager.Instance.GetData<Stage_SectionData>(DungeonReturnContext.ReturnEqsection);
 
             //장비담아둘 리스트
             var Equipmentlist = new List<Equipment>();
