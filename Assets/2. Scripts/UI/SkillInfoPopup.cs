@@ -1,7 +1,7 @@
-using System.Linq;
+using System.Numerics;
 using TMPro;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
-using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UI;
 
 public class SkillInfoPopup : BaseUI
@@ -48,18 +48,31 @@ public class SkillInfoPopup : BaseUI
         // 토글 리스너 등록
         basicToggle.onValueChanged.AddListener((isOn) => { if (isOn) UpdatePanel(true); });
         gradeToggle.onValueChanged.AddListener((isOn) => { if (isOn) UpdatePanel(false); });
+
+        if (ExchangeManager.Instance != null)
+        {
+            ExchangeManager.Instance.OnGoldChanged += RefreshGoldUI;
+        }
     }
 
     protected override void OnOpen()
     {
+
     }
 
     protected override void OnClose()
     {
-        SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
-        AddressableManager.Instance.ReleaseAsset(data.Skill_Icon);
-    }
+        if (ExchangeManager.Instance != null)
+        {
+            ExchangeManager.Instance.OnGoldChanged -= RefreshGoldUI;
+        }
 
+        SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
+        if (data != null)
+        {
+            AddressableManager.Instance.ReleaseAsset(data.Skill_Icon);
+        }
+    }
     public void Setup(SkillKey key, int targetIdx = -1)
     {
         this.key = key;
@@ -99,7 +112,7 @@ public class SkillInfoPopup : BaseUI
         {
             if (ranks.TryGetValue(i + 1, out var rankData))
             {
-                grades[i].text = $"{rankData.Skill_Rank} : {rankData.Skill_Value}% 상승";
+                grades[i].text = $"{rankData.Skill_Rank} : {rankData.Skill_Rank_Multiplier * 100}% 상승";
             }
             else
             {
@@ -109,15 +122,52 @@ public class SkillInfoPopup : BaseUI
 
         // 버튼 상태 제어
         btnText.text = "합성";
-        if (!key.isScroll) RefreshEquipStatus();
-
-        // 골드 관련 데이터 연결 (임시)
-        needsGold.text = "1,000";
-        currentGold.text = "보유 골드";
+        if (!key.isScroll)
+        {
+            RefreshEquipStatus();
+            RefreshReinforceUI();
+        }
 
         // 초기 패널 상태
         basicToggle.SetIsOnWithoutNotify(true);
         UpdatePanel(true);
+    }
+    private void RefreshReinforceUI()
+    {
+        var sm = SkillManager.Instance;
+        if (!sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
+
+        levelText.text = $"{skill.Level}/100";
+
+        BigInteger haveGold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
+        currentGold.text = $"{haveGold:N0}G";
+
+        int nextCost = sm.GetReinforceCost(key);
+        needsGold.text = $"{nextCost:N0}G";
+
+        bool isMaxLevel = skill.Level >= SkillManager.MAX_LEVEL;
+        bool canAfford = haveGold >= nextCost;
+
+        needsGold.color = canAfford ? Color.white : Color.red;
+
+        if (isMaxLevel)
+        {
+            reinforceBtn.interactable = false;
+            needsGold.text = "MAX";
+        }
+        else
+        {
+            reinforceBtn.interactable = canAfford;
+        }
+    }
+
+    private void RefreshGoldUI(BigInteger newGold)
+    {
+        // 현재 팝업이 열려있고 유효한 키가 있을 때만 갱신
+        if (gameObject.activeSelf)
+        {
+            RefreshReinforceUI();
+        }
     }
 
     private void UpdatePanel(bool isBasic)
@@ -125,6 +175,38 @@ public class SkillInfoPopup : BaseUI
         basicPanel.SetActive(isBasic);
         gradePanel.SetActive(!isBasic);
     }
+
+    public void Click_Reinforce()
+    {
+        var sm = SkillManager.Instance;
+
+        // 강화 시도
+        var result = sm.ReinforceSkill(key);
+
+        switch (result)
+        {
+            case SkillManager.ReinforceResult.Success:
+                RefreshReinforceUI(); // 성공 시 UI 갱신
+                break;
+
+            case SkillManager.ReinforceResult.NotEnoughGold:
+                Debug.Log("골드가 부족합니다.");
+                // UIManager.Instance.ShowToast("골드가 부족합니다.");
+                break;
+
+            case SkillManager.ReinforceResult.LevelMax:
+                Debug.Log("최대 레벨입니다.");
+                // UIManager.Instance.ShowToast("최대 레벨입니다.");
+                reinforceBtn.interactable = false;
+                break;
+
+            case SkillManager.ReinforceResult.NotFound:
+                Debug.LogWarning($"스킬 정보를 찾을 수 없습니다. key: {key.sid}");
+                break;
+        }
+    }
+
+
 
     // 버튼 클릭 이벤트 (인스펙터에서 연결하거나 Setup에서 등록)
     public void OnClickMainButton()
