@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class PlayerAttackState : IPlayerState<PlayerCtrl>
 {
@@ -18,9 +18,10 @@ public class PlayerAttackState : IPlayerState<PlayerCtrl>
     {
         if (player.IsAutoMode)
         {
-            BaseSkill readySkill = SkillManager.Instance.GetReadySkill();
+            BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
             if (readySkill != null)
             {
+                SkillManager.Instance.ConsumeReadySkill();
                 player.ExecuteFullReset();       // 공격 상태 초기화
                 player.PerformSkill(readySkill); // 스킬 상태로 전환
                 return;

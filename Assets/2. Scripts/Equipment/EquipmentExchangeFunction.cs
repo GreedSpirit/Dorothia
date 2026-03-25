@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -125,8 +126,8 @@ public class EquipmentExchangeFunction : BaseUI
     public void Salvage(Equipment equip, InventorySlot slot)
     {
         //계산기를 통해 구한 스크랩과 골드를 각각 추가합니다.
-        TestGoldAndScrapManager.Instance.testScrap += ItemCalculator.SalvageScrapCalculate(equip);
-        TestGoldAndScrapManager.Instance.testGold += ItemCalculator.SalvageGoldCalculate(equip);
+        ExchangeManager.Instance.GetMoney(MoneyType.Scrap, (BigInteger)ItemCalculator.SalvageScrapCalculate(equip));
+        ExchangeManager.Instance.GetMoney(MoneyType.Gold, (BigInteger)ItemCalculator.SalvageGoldCalculate(equip));
 
         //현재 장비를 인벤토리에서 제거합니다.
         _equipmentInventory.RemoveEquipment(equip);
@@ -146,7 +147,7 @@ public class EquipmentExchangeFunction : BaseUI
     public void SellEquip(Equipment equip, InventorySlot slot)
     {
         //계산기를 통해 구한 골드를 추가합니다.
-        TestGoldAndScrapManager.Instance.testGold += ItemCalculator.SellCalculate(equip);
+        ExchangeManager.Instance.GetMoney(MoneyType.Gold, (BigInteger)ItemCalculator.SellCalculate(equip));
         
         //현재 장비를 인벤토리에서 제거합니다.
         _equipmentInventory.RemoveEquipment(equip);

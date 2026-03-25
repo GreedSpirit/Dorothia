@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Numerics;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -119,9 +120,9 @@ public class EquipEnchant : BaseUI
             _costGoldText.text = $"{_costGold}<color=orange>G</color>";
 
         //현재의 골드량은, (테스트를 위해 임시로 작성한 테스트용)소지 중인 골드 값 뒤에 주황색 G를 붙여 표현합니다.
-        _currentGoldText.text = TestGoldAndScrapManager.Instance.testGold >= _costGold?
-            $"{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>":
-            $"<color=red>{TestGoldAndScrapManager.Instance.testGold}<color=orange>G</color>";
+        _currentGoldText.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) >= (BigInteger)_costGold?
+            $"{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>":
+            $"<color=red>{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>";
 
     }
 
@@ -139,15 +140,15 @@ public class EquipEnchant : BaseUI
         }
 
         //현재 소지 중인 골드가 요구하는 골드량보다 부족한 경우 안내하고 반환합니다.
-        if (TestGoldAndScrapManager.Instance.testGold < (int)_costGold)
+        if (ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) < (BigInteger)_costGold)
         {
             Debug.Log("소지 골드가 부족합니다.");
             return;
         }
 
         //우선 골드를 사용합니다.
-        TestGoldAndScrapManager.Instance.testGold -= (int)_costGold;
-        Debug.Log($"골드를 {_costGold}만큼 소모하여 강화를 시도합니다. 현재 남은 골드는 {TestGoldAndScrapManager.Instance.testGold}입니다.");
+        ExchangeManager.Instance.UseMoney(MoneyType.Gold, (BigInteger)_costGold);
+        Debug.Log($"골드를 {_costGold}만큼 소모하여 강화를 시도합니다. 현재 남은 골드는 {ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}입니다.");
 
         //우선 해당 장비에 대한 정보를 먼저 받아옵니다.
         //이때, 테이블 내에서 정의한 것이 "해당 강화도로 만들기 위한 장비 강화 과정"에 사용될 정보라는 것을 기반으로 작성합니다.

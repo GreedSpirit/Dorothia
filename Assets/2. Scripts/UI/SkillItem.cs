@@ -14,8 +14,9 @@ public class SkillItem : MonoBehaviour
 
     [Header("UI Components")]
     [SerializeField] private Image iconImage;
-    [SerializeField] public Image gradeOutlineImage;
+    [SerializeField] private Image outLine_Grade;
     [SerializeField] private GameObject outLine_Base;
+    [SerializeField] private GameObject outLine_Scroll;
     [SerializeField] private GameObject newNoti;
 
     [Header("Dynamic Info (Text & Slider)")]
@@ -33,6 +34,8 @@ public class SkillItem : MonoBehaviour
     private SkillKey _key;
     private Action<SkillKey, SkillItem> _onSelected;
     private int _targetIdx = -1;
+
+    public Image OutLine_Grade { get => outLine_Grade; set => outLine_Grade = value; }
 
     private void Awake()
     {
@@ -99,8 +102,9 @@ public class SkillItem : MonoBehaviour
     private void UpdateSlotVisual(SlotType type)
     {
         countObj.SetActive(false);
-        gradeOutlineImage.gameObject.SetActive(false);
+        OutLine_Grade.gameObject.SetActive(false);
         outLine_Base.SetActive(false);
+        outLine_Scroll.SetActive(false);
         levelText.gameObject.SetActive(false);
         newNoti.SetActive(false);
         resultCount.SetActive(false);
@@ -111,22 +115,23 @@ public class SkillItem : MonoBehaviour
         {
             case SlotType.Skill:
                 countObj.SetActive(true);
-                gradeOutlineImage.gameObject.SetActive(true);
+                OutLine_Grade.gameObject.SetActive(true);
                 levelText.gameObject.SetActive(true);
                 if (countSlider != null) countSlider.gameObject.SetActive(true);
                 if (_currentMode == DisplayMode.Info) equipText.gameObject.SetActive(true);
                 break;
             case SlotType.Scroll:
                 countObj.SetActive(true);
-                outLine_Base.SetActive(true);
+                outLine_Scroll.SetActive(true);
+                OutLine_Grade.gameObject.SetActive(false);
                 if (countSlider != null) countSlider.gameObject.SetActive(true);
                 break;
             case SlotType.InfoDetail:
                 countObj.SetActive(true);
-                gradeOutlineImage.gameObject.SetActive(true);
+                OutLine_Grade.gameObject.SetActive(true);
                 break;
             case SlotType.MergeResult:
-                gradeOutlineImage.gameObject.SetActive(true);
+                OutLine_Grade.gameObject.SetActive(true);
                 newNoti.SetActive(true);
                 resultCount.SetActive(true);
                 break;
@@ -223,7 +228,7 @@ public class SkillItem : MonoBehaviour
     private void ApplyGradeSprite(Rarity grade)
     {
         Sprite targetSprite = SkillManager.Instance.GetSpriteByGrade(grade);
-        if (targetSprite != null) gradeOutlineImage.sprite = targetSprite;
+        if (targetSprite != null) OutLine_Grade.sprite = targetSprite;
     }
 
     private void OnDestroy()

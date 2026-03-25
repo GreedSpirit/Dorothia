@@ -104,7 +104,7 @@ public abstract class BaseSkillModule : ISkillModule
             return;
         }
 
-        Debug.Log($"{EffectName},{ModuleIndex},{centerPoint}");
+        //Debug.Log($"{EffectName},{ModuleIndex},{centerPoint}");
 
         Vector3 effectPoint = centerPoint == default ? player.transform.position : centerPoint;
         Quaternion targetRot =
@@ -152,7 +152,7 @@ public abstract class BaseSkillModule : ISkillModule
             if (i < RepeatCount - 1)
             {
                 float interval = GetRepeatInterval(currentHitIndex);
-                Debug.Log($"<color=#ff0000>{currentHitIndex},{interval}</color>");
+                //Debug.Log($"<color=#ff0000>{currentHitIndex},{interval}</color>");
                 yield return new WaitForSeconds(interval);
             }
         }
