@@ -462,6 +462,12 @@ public class MonsterController : MonoBehaviour, IMonster
         if (_slotSystem == null)
             return;
 
+        //슬롯 유효성 체크
+        if (_mySlot != null && !_slotSystem.IsValidSlot(_mySlot))
+        {
+            _mySlot = null;
+        }
+
         //슬롯 영역 진입 체크
         bool inside = _slotSystem.IsInsideSlotArea(transform.position);
 
@@ -487,8 +493,13 @@ public class MonsterController : MonoBehaviour, IMonster
         //슬롯 없으면 fallback
         if (_mySlot == null)
         {
-            _agent.SetDestination(_target.Transform.position);
-            return;
+            _mySlot = _slotSystem.AcquireNearestSlot(this);
+
+            if (_mySlot == null)
+            {
+                _agent.SetDestination(_target.Transform.position);
+                return;
+            }
         }
 
         if (Time.time >= _nextSlotRefreshTime)

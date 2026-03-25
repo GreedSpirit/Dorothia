@@ -495,6 +495,8 @@ public class MonsterSpawnManager : MonoBehaviour
 
         _activeMonsters.Clear();
         _currentMonsterCount = 0;
+
+        _combatSlots.ClearAllSlots();
     }
     #endregion
 

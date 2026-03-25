@@ -12,13 +12,13 @@ public class PopUpTextManager : MonoBehaviour
     private void OnEnable()
     {
         _overdriveMode.OnClickOverdrive += OnOverdrive;
-        StageManager.OnStageCleared += OnStageClear;
+        StageManager.OnSectionCleard += HandleSectionChanged;
     }
 
     private void OnDisable()
     {
         _overdriveMode.OnClickOverdrive -= OnOverdrive;
-        StageManager.OnStageCleared -= OnStageClear;
+        StageManager.OnSectionCleard -= HandleSectionChanged;
     }
     private void OnOverdrive()
     {
@@ -32,15 +32,21 @@ public class PopUpTextManager : MonoBehaviour
         _overdiveText.SetActive(false);
     }
 
-    private void OnStageClear(int stageId)
+    private void HandleSectionChanged(int _)
     {
-        StartCoroutine(OnStageClearText(stageId));
+        StartCoroutine(UpdateText());
     }
 
-    IEnumerator OnStageClearText(int stageId)
+    IEnumerator UpdateText()
     {
-        //todo 스테이지 1-1이런식으로 출력되게해야함
-        string stageNumber = _stageNumberText.text = "";
+        int stageId = StageManager.Instance.CurrentStageId;
+        int sectionId = StageManager.Instance.CurrentSection;
+
+        int chapter = stageId % 1000;
+        int section = sectionId % 1000;
+
+        _stageNumberText.text = ($"{chapter}-{section} Clear!");
+
         _stageClearText.SetActive(true);
         yield return new WaitForSeconds(3f);
         _stageClearText.SetActive(false);

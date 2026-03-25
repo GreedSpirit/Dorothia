@@ -25,6 +25,9 @@ public static class DungeonRuleFactory
             case 150004: // 침묵의 성역
                 return new StandardWaveDungeonRule(useOrderedSpawn: true);
 
+            case 150006: // 아폴론 (레이드)
+                return new RaidDungeonRule();
+
             default:
                 // 미구현 던전은 기본 웨이브 룰 사용
                 return new StandardWaveDungeonRule(useOrderedSpawn: true);
