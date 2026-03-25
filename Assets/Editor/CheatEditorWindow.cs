@@ -8,7 +8,10 @@ public class CheatEditorWindow : EditorWindow
     private long scrapAmount = 10000;
     private long skillScrollAmount = 3000;
     private long expAmount = 3000;
+
     private float damageMultiplier = 2.0f;
+
+    private int jumpSection = 4;
 
     [MenuItem("Tools/Cheat Editor")]
     public static void ShowWindow()
@@ -73,6 +76,17 @@ public class CheatEditorWindow : EditorWindow
             AddExpCheat();
         }
 
+        EditorGUILayout.Space();
+        GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1)); // 구분선
+        EditorGUILayout.Space();
+
+        // --- 스테이지 섹션 ---
+        GUILayout.Label("스테이지 조작", EditorStyles.label);
+        jumpSection = EditorGUILayout.IntField("이동할 섹션", jumpSection);
+        if (GUILayout.Button($"{jumpSection}섹션으로 이동"))
+        {
+            AddExpCheat();
+        }
     }
 
     private void AddGoldCheat()
@@ -119,7 +133,15 @@ public class CheatEditorWindow : EditorWindow
     //    Debug.Log($"[Cheat] 캐릭터 무적{player.IsInvincible} 상태 토글됨" +
     //    $"\n<color=$ff0000>주의 : 스킬 시전 후 무적 상태 풀림</color>");
     //}
+    private void JumpSection()
+    {
+        if (!Application.isPlaying) { Debug.LogWarning("게임 실행 중에만 가능합니다."); return; }
 
+        if (StageManager.Instance == null) return;
+
+        StageManager.Instance.JumpSection(49);
+        Debug.Log($"[Cheat] {jumpSection}섹션으로 이동 됨");
+    }
 
     private void ResetCooldownCheat()
     {
