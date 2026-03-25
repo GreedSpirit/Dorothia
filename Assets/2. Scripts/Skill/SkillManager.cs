@@ -91,6 +91,7 @@ public class SkillManager : MonoBehaviour
     public event Action<Skill_Type, int> OnEquipSkillChanged;
 
     // 이벤트: 데이터 변경 시 (키)
+    public const int MAX_LEVEL = 100;
     public event Action<SkillKey> OnInventoryChanged;
 
     // 사이클 위치를 추적하기 위한 인덱스 (0, 1, 2: 액티브 / 3: 궁극기)
@@ -108,11 +109,6 @@ public class SkillManager : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.f5Key.wasPressedThisFrame)
-        {
-            for (int i = 0; i < 3000; i++) GetRandomScroll();
-        }
-
         //신비게이지 테스트
         //if (Keyboard.current.sKey.wasPressedThisFrame)
         //{
@@ -130,9 +126,9 @@ public class SkillManager : MonoBehaviour
         UltimateSlot?.UpdateCooldown(dt);
     }
 
-    public void GetRandomScroll()
+    public void GetRandomScroll(int amount)
     {
-        AddItem(GetRandomkey());
+        for (int i = 0; i < amount; i++) AddItem(GetRandomkey());
     }
 
 
@@ -186,6 +182,17 @@ public class SkillManager : MonoBehaviour
             return UltimateSlot;
         }
         return null;
+    }
+
+    public void ResetAllCooldown()
+    {
+        for (int i = 0; i < ActiveSlots.Length; i++)
+        {
+            ActiveSlots[i]?.ResetCoolDown();
+        }
+
+        // 궁극기 쿨다운 업데이트
+        UltimateSlot?.ResetCoolDown();
     }
     #endregion
 
@@ -395,7 +402,7 @@ public class SkillManager : MonoBehaviour
                         && !IsEquipped(pair.Key)
                         && !equippedSids.Contains(pair.Key.sid))
             .OrderByDescending(pair => (int)pair.Key.rarity)
-            .ThenByDescending(pair => DataManager.Instance.GetData<Skill_RankData>((int)pair.Value.Rarity).Skill_Value)
+            .ThenByDescending(pair => pair.Value.Level)
             .ToList();
 
         foreach (var (key, skill) in candidates)
@@ -542,6 +549,65 @@ public class SkillManager : MonoBehaviour
         // 궁극기 스킬 모션 해제
 
         OnEquipSkillChanged?.Invoke(Skill_Type.Ultimate, 0);
+    }
+
+    #endregion
+
+    #region Reinforce
+
+    public int GetReinforceCost(SkillKey key)
+    {
+        if (!_unlockedSkills.TryGetValue(key, out BaseSkill skill)) return -1;
+
+        Skill_Upgrade_GoldData upgradeData = DataManager.Instance.GetData<Skill_Upgrade_GoldData>((int)key.rarity);
+        if (upgradeData == null) return -1;
+
+        float baseCost = upgradeData.Skill_Rank_Gold;
+        float levelWeight = upgradeData.Skill_Upgrade_CostRate;
+
+        // 베이스 골드 * (가중치^스킬레벨)
+        // 2->3레벨 강화 기준 : 605골드
+        float totalCost = baseCost * Mathf.Pow(levelWeight, skill.Level);
+
+        return Mathf.RoundToInt(totalCost);
+    }
+    public enum ReinforceResult { Success, NotFound, LevelMax, NotEnoughGold }
+
+    public ReinforceResult ReinforceSkill(SkillKey key)
+    {
+        // 스킬 존재 여부 확인
+        if (!_unlockedSkills.TryGetValue(key, out BaseSkill skill))
+        {
+            return ReinforceResult.NotFound;
+        }
+
+        if (skill.Level >= MAX_LEVEL)
+        {
+            return ReinforceResult.LevelMax;
+        }
+
+        // 데이터 존재 여부 먼저 확인
+        Skill_Upgrade_GoldData upgradeData = DataManager.Instance.GetData<Skill_Upgrade_GoldData>((int)key.rarity);
+        if (upgradeData == null)
+        {
+            Debug.LogError($"Skill_Upgrade_GoldData를 찾을 수 없습니다: {key.rarity}");
+            return ReinforceResult.NotFound; // 또는 별도의 DataError 리턴값 추가
+        }
+
+        // 비용 계산
+        int cost = GetReinforceCost(key);
+        if (cost == -1) return ReinforceResult.NotFound;
+
+        // 골드 차감 시도
+        if (!ExchangeManager.Instance.UseMoney(MoneyType.Gold, cost))
+            return ReinforceResult.NotEnoughGold;
+
+        // 강화 성공 처리
+        skill.Level++;
+        OnInventoryChanged?.Invoke(key);
+
+        Debug.Log($"{key.sid} 강화 완료 → Lv.{skill.Level} (비용: {cost}G)");
+        return ReinforceResult.Success;
     }
 
     #endregion

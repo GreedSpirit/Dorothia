@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using UnityEngine;
 public class PlayerStats : MonoBehaviour
@@ -48,6 +48,8 @@ public class PlayerStats : MonoBehaviour
         
         //스탯매니저셋팅
         StatManager.Instance.InitStats(_data);
+
+        _player = GetComponent<PlayerCtrl>();
 
         //TODO : 불러오기 함수 호출
 
@@ -167,6 +169,8 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        if (_player.IsInvincible) return;
+
         _currentHp -= amount;
 
         //Debug.Log($"Damaged: {amount}, HP: {_currentHp}");
