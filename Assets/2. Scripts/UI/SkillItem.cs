@@ -78,6 +78,7 @@ public class SkillItem : MonoBehaviour
     public void SetSlotData(SlotType type, SkillKey key, int targetIdx = -1, DisplayMode display = DisplayMode.None, Action<SkillKey, SkillItem> onSelected = null)
     {
         _key = key;
+
         _currentMode = display;
         _onSelected = onSelected;
         _targetIdx = targetIdx;
