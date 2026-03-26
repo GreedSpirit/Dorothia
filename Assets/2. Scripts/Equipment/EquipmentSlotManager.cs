@@ -75,22 +75,15 @@ public class EquipmentSlotManager : MonoBehaviour
             //해당 데이터는 리스트이므로, 리스트 내의 각각의 데이터를 확인합니다.
             foreach (var SetEffect in SetData)
             {
-                Debug.Log($"장비 세트 ID : {SetEffect.Equip_Set_Id}, 요구 장비 수 : {SetEffect.Equip_Set_Need_Number}, 장착 장비 수 : {set.Value}");
                 //현재 장착 중인 해당 세트의 장비 수가 세트효과를 받기 위해 요구하는 장비 수보다 많을 경우 아래 코드를 실행합니다.
                 if(set.Value >= SetEffect.Equip_Set_Need_Number)
                 {
-                    Debug.Log($"세트 효과 {SetEffect.Equip_Set_Need_Number}셋 적용, {SetEffect.Affection_Equip_Set} {SetEffect.Affection_Equip_Set_Value} 증가");
                     //세트 효과로 인해 받는 스텟 증가를 적용합니다.
                     ApplySetStats(SetEffect.Affection_Equip_Set, SetEffect.Affection_Equip_Set_Value);
                 }
             }
         }
 
-        //세트효과를 통해 얻는 스텟을 확인합니다. (세트효과는 여기서 끝)
-        foreach(var status in SetStatus.Keys)
-        {
-            Debug.Log($"{status} = {SetStatus[status]}");
-        }
         EquipmentStatus = new Dictionary<Status, float>
         {
             { Status.HP, 0 },
@@ -106,10 +99,6 @@ public class EquipmentSlotManager : MonoBehaviour
         };
         //세트효과 적용 후, 현재 장비의 효과를 처리합니다.
         GetAllStatusFromEquipment();
-        foreach(var status in EquipmentStatus.Keys)
-        {
-            Debug.Log($"{status} = {EquipmentStatus[status]}");
-        }
         //스탯계산 후 적용
         StatManager.Instance.RefreshStats();
         //플레이어스탯에게 알림
@@ -124,7 +113,6 @@ public class EquipmentSlotManager : MonoBehaviour
     private void ApplySetStats(Status stat, float value)
     {
         SetStatus[stat] += value;
-        Debug.Log($"{stat} {value}만큼 증가 성공, 현재 스탯 {SetStatus[stat]}");
     }
 
     /// <summary>

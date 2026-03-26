@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using UnityEngine;
 
@@ -40,6 +41,8 @@ public class PlayerCombatSlots : MonoBehaviour
 
     private Dictionary<IMonster, bool> _arrived = new();
 
+    private bool _isInitialized = false;
+
     // 내부 캐시/풀
     private struct SlotData
     {
@@ -60,9 +63,17 @@ public class PlayerCombatSlots : MonoBehaviour
     //같은 슬롯을 점유해도 매 프레임 랜덤이 바뀌면 부자연스러움
     private Vector2[] _slotOffsetSeed;
 
-    private void Awake()
+    private void Start()
     {
-        BuildSlots(initial: true); // 빌더 호출
+        StartCoroutine(InitSlots());
+    }
+
+    private IEnumerator InitSlots()
+    {
+        yield return null; // 1프레임 대기
+        BuildSlots(true);
+
+        _isInitialized = true;
     }
 
     private void LateUpdate()
@@ -443,6 +454,12 @@ public class PlayerCombatSlots : MonoBehaviour
     /// </summary>
     public void ClearAllSlots()
     {
+        if (!_isInitialized)
+        {
+            Debug.Log("[PlayerCombatSlots] 아직 초기화 안됨");
+            return;
+        }
+
         _occupied.Clear();
 
         for (int i = 0; i < _used.Length; i++)

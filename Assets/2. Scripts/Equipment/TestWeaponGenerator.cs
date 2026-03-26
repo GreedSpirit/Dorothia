@@ -20,11 +20,6 @@ public class TestWeaponGenerator : MonoBehaviour
         }
 
         Instance = this;
-
-        //GetComponent<Button>().onClick.AddListener(() =>
-        //{
-        //    Test2(10, 3);
-        //}); 테스트용!
     }
 
     private void Start()
@@ -102,7 +97,6 @@ public class TestWeaponGenerator : MonoBehaviour
     {
         if (equipmentInventory == null)
         {
-            Debug.LogError("EquipmentInventory를 연결해주세요!");
             return;
         }
 
@@ -113,7 +107,6 @@ public class TestWeaponGenerator : MonoBehaviour
 
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
-        Debug.Log("장비 획득 성공!");
 
         if (inventoryPanel.currentPart != 0)
         {
@@ -126,7 +119,6 @@ public class TestWeaponGenerator : MonoBehaviour
     {
         if (equipmentInventory == null)
         {
-            Debug.LogError("EquipmentInventory를 연결해주세요!");
             return null;
         }
 
@@ -140,7 +132,6 @@ public class TestWeaponGenerator : MonoBehaviour
 
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
-        Debug.Log("장비 획득 성공!");
 
         if (inventoryPanel.currentPart != 0)
         {

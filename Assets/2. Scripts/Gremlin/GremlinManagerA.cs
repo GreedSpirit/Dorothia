@@ -41,8 +41,6 @@ public class GremlinManagerA : MonoBehaviour
             //현재 장착 중인 그렘린 오브젝트 파괴
             Destroy(currentGremlinInstance.gameObject);
             currentGremlinInstance = null;
-
-            Debug.Log("[GremlinManager] 기존 그렘린 소멸 함수 작동");
         }
     }
 
@@ -67,13 +65,11 @@ public class GremlinManagerA : MonoBehaviour
                 //해당 그렘린 위치에 소환 이펙트 생성
                 Instantiate(spawnEffectPrefab, newGremlinObj.transform.position, Quaternion.identity);
             }
-            Debug.Log($"[GremlinManager] {name} (Tier : {tier}, Lv: {level}) 소환 성공");
         }
         //인스턴스가 존재하지 않을 경우
         else
         {
             //그렘린이 아니라고 판단, 삭제
-            Debug.LogError("그렘린 프리팹에 GremlinBase 컴포넌트가 있는지 확인해 볼 것!");
             Destroy(newGremlinObj);
         }
     }

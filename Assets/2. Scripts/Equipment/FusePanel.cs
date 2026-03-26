@@ -56,7 +56,6 @@ public class FusePanel : BaseUI
         //합성 슬롯에 3개의 장비가 전부 채워지지 않으면 합성을 진행하지 않습니다.
         if(mainSlot.equipped == null || subSlot1.equipped == null || subSlot2.equipped == null)
         {
-            Debug.Log("합성을 위한 슬롯에 장비가 전부 채워지지 않았습니다.");
             return;
         }
 
@@ -71,7 +70,6 @@ public class FusePanel : BaseUI
         if (mainEquipment.equip_type != subEquipmentOne.equip_type ||
             mainEquipment.equip_type != subEquipmentTwo.equip_type)
         {
-            Debug.Log("합성하기 위한 세 장비의 장착 부위가 일치하지 않습니다.");
             return;
         }
 
@@ -79,7 +77,6 @@ public class FusePanel : BaseUI
         if(mainEquipment.equipment_Rarity != subEquipmentOne.equipment_Rarity ||
             mainEquipment.equipment_Rarity != subEquipmentTwo.equipment_Rarity)
         {
-            Debug.Log("합성하기 위한 세 장비의 레어도가 일치하지 않습니다.");
             return;
         }
 
@@ -88,7 +85,6 @@ public class FusePanel : BaseUI
             (Rarity)subEquipmentOne.equipment_Rarity == Rarity.Mythtic ||
             (Rarity)subEquipmentTwo.equipment_Rarity == Rarity.Mythtic)
         {
-            Debug.Log("신화 장비는 합성할 수 없습니다.");
             return;
         }
 
@@ -96,7 +92,6 @@ public class FusePanel : BaseUI
         if(mainEquipment.equip_name != subEquipmentOne.equip_name ||
             mainEquipment.equip_name != subEquipmentTwo.equip_name)
         {
-            Debug.Log("합성하기 위한 세 장비의 이름이 일치하지 않습니다.");
             return;
         }
 
@@ -105,7 +100,6 @@ public class FusePanel : BaseUI
             inventory.GetInventoryIndex(mainEquipment) == inventory.GetInventoryIndex(subEquipmentTwo)||
             inventory.GetInventoryIndex(subEquipmentOne) == inventory.GetInventoryIndex(subEquipmentTwo))
         {
-            Debug.Log("동일한 장비를 중복으로 사용하실 수 없습니다.");
             return;
         }
 
@@ -130,13 +124,9 @@ public class FusePanel : BaseUI
             }
         }
 
-        //디버그를 위한, 확인용 출력입니다.
-        Debug.Log($"{randomNumber} / {successNumber}");
-
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자보다 작거나 같은 경우, 합성에 성공합니다.
         if (randomNumber <= successNumber)
         {
-            Debug.Log("합성에 성공하였습니다! 장비의 레어도가 상승합니다.");
             //가중치를 사용한 것인 경우, 체크하고 감소시킵니다.
             if(_isUsingWeight == true)
             {
@@ -162,7 +152,6 @@ public class FusePanel : BaseUI
         //랜덤으로 뽑은 숫자가 성공을 결정할 숫자를 넘어갔을 경우, 합성에 실패합니다.
         else
         {
-            Debug.Log($"합성에 실패하였습니다. 가중치를 {DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure * 100}만큼 획득합니다.");
             //만약 가중치를 사용했다면, 가중치를 0으로 초기화합니다.
             if(_isUsingWeight == true)
             {
@@ -172,7 +161,6 @@ public class FusePanel : BaseUI
 
             //실패한 등급 기준 가중치를 획득합니다.
             mainEquipment.equip_Fuse_Weight += DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure * 100;
-            Debug.Log($"현재 합성 가중치는 {mainEquipment.equip_Fuse_Weight}입니다.");
         }
 
         //재료로 넣은 장비 두 개를 슬롯에서 삭제합니다.

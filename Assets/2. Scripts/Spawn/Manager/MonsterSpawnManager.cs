@@ -80,10 +80,10 @@ public class MonsterSpawnManager : MonoBehaviour
         _target = _targetProvider as IMonsterTarget;
 
         if (_target == null)
-            Debug.LogError("[MonsterSpawnManager] TargetProvider 설정");
+            Debug.Log("[MonsterSpawnManager] TargetProvider 설정");
 
         if (_projectileDatabase == null)
-            Debug.LogError("[MonsterSpawnManager] ProjectileDatabase 설정 안됨");
+            Debug.Log("[MonsterSpawnManager] ProjectileDatabase 설정 안됨");
 
         _orbPool = new ObjectPool<OverdriveOrb>(
             () => CreateOrb(),
@@ -341,14 +341,14 @@ public class MonsterSpawnManager : MonoBehaviour
     {
         if (monsterId <= 0)
         {
-            Debug.LogError("[MonsterSpawnManager] SpawnSingle monsterId <= 0");
+            Debug.Log("[MonsterSpawnManager] SpawnSingle monsterId <= 0");
             return;
         }
 
         Monster_Data data = DataManager.Instance.GetData<Monster_Data>(monsterId);
         if (data == null)
         {
-            Debug.LogError($"MonsterData 없음 {monsterId}");
+            Debug.Log($"MonsterData 없음 {monsterId}");
             return;
         }
 
@@ -448,17 +448,13 @@ public class MonsterSpawnManager : MonoBehaviour
     public void SpawnBoss(int bossMonsterId)
     {
         if (bossMonsterId <= 0)
-        {
-            Debug.LogError("[MonsterSpawnManager] SpawnBoss called with bossMonsterId <= 0");
             return;
-        }
 
         _isBossFight = true;
-        _isSpawning = false; // 보스전 동안 절대 스폰 루틴이 돌지 않게 강제
 
         if (_spawnAreaProvider == null)
         {
-            Debug.LogError("SpawnAreaProvider 없음");
+            Debug.Log("SpawnAreaProvider 없음");
             return;
         }
 
@@ -599,7 +595,7 @@ public class MonsterSpawnManager : MonoBehaviour
     {
         if (_overdriveOrbPrefab == null)
         {
-            Debug.LogError("OverdriveOrbPrefab 없음");
+            Debug.Log("OverdriveOrbPrefab 없음");
             return null;
         }
 
@@ -638,21 +634,21 @@ public class MonsterSpawnManager : MonoBehaviour
     {
         if (monsterId <= 0)
         {
-            Debug.LogError("[MonsterSpawnManager] SpawnSingleDungeon monsterId <= 0");
+            Debug.Log("[MonsterSpawnManager] SpawnSingleDungeon monsterId <= 0");
             return false;
         }
 
         Monster_Data data = DataManager.Instance.GetData<Monster_Data>(monsterId);
         if (data == null)
         {
-            Debug.LogError($"[DungeonSpawn] MonsterData 없음 {monsterId}");
+            Debug.Log($"[DungeonSpawn] MonsterData 없음 {monsterId}");
             return false;
         }
 
         MonsterController prefab = MonsterPrefabRegistry.Instance.GetPrefab(monsterId);
         if (prefab == null)
         {
-            Debug.LogError($"[DungeonSpawn] Prefab 없음 {monsterId}");
+            Debug.Log($"[DungeonSpawn] Prefab 없음 {monsterId}");
             return false;
         }
 
@@ -662,7 +658,7 @@ public class MonsterSpawnManager : MonoBehaviour
 
         if (monster == null)
         {
-            Debug.LogError($"[DungeonSpawn] Pool Get 실패 {monsterId}");
+            Debug.Log($"[DungeonSpawn] Pool Get 실패 {monsterId}");
             return false;
         }
 

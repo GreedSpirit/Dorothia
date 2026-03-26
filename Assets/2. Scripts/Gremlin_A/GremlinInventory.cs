@@ -11,17 +11,23 @@ public class GremlinInventory : MonoBehaviour
         _gremlinInventory = new List<Gremlin>();
     }
 
+    /// <summary>
+    /// 그렘린 추가
+    /// </summary>
+    /// <param name="item"></param>
     public void AddGremlin(Gremlin item)
     {
+        //받아온 그렘린을 리스트에 추가
         _gremlinInventory.Add(item);
     }
+
+    /// <summary>
+    /// 인벤토리 정렬
+    /// </summary>
     public void SortInventory()
     {
+        //PetID 순서에 맞춰 정렬한 후, 등급에 따라 한번 더 정렬
         _gremlinInventory = _gremlinInventory.OrderBy(p => p._gremlinData.PetID).ThenByDescending(p => p._rarity).ToList();
-        foreach(var pet in  _gremlinInventory)
-        {
-            Debug.Log(pet._gremlinData.PetID);
-        }
     }
 
     /// <summary>

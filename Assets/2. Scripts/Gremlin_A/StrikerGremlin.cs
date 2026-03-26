@@ -22,7 +22,8 @@ public class StrikerGremlin : GremlinBehaviour
     private Transform _transform;                                       // 해당 그렘린의 위치
 
     private float _timer;                                               // 시간 체크용
-                                       // 플레이어
+                                                                        // 플레이어
+    private GremlinInstance _instance;
 
     private AttackType _attackType;
 
@@ -30,6 +31,7 @@ public class StrikerGremlin : GremlinBehaviour
     {
         //플레이어 찾기
         _player = FindAnyObjectByType<PlayerCtrl>();
+        _instance = gameObject.GetComponent<GremlinInstance>();
     }
     private void Update()
     {
@@ -48,7 +50,6 @@ public class StrikerGremlin : GremlinBehaviour
             _transform = transform;
 
             _attackType = (AttackType)statusData.Target_Type;
-            Debug.Log(_attackType);
             _enemyLayer = LayerMask.GetMask("Monster");
         }
     }
@@ -57,10 +58,9 @@ public class StrikerGremlin : GremlinBehaviour
     {
         _timer += Time.deltaTime;
 
-        if (_timer >= 1f/attackSpeed)
+        if (_timer >= 1f/(attackSpeed * DataManager.Instance.GetData<Gremlin_AtkerData>((int)_rarity).Gremlin_Tier_Dps))
         {
             Transform targetEnemy = FindTarget();
-            Debug.Log(targetEnemy == null);
 
             if (targetEnemy != null)
             {
@@ -80,7 +80,7 @@ public class StrikerGremlin : GremlinBehaviour
 
     private Transform FindTarget()
     {
-        if (_player != null && _player.CurrentTarget != null)
+        if (_player != null && _player.CurrentTarget != null && _player.CurrentTarget.IsAlive != false)
         {
             if (Vector3.Distance(_transform.position, _player.CurrentTarget.Transform.position) <= _attackRange)
             {
@@ -108,18 +108,13 @@ public class StrikerGremlin : GremlinBehaviour
 
     private void ExecuteAttack(Transform targetEnemy)
     {
-        float finalDamage = finalAttack;
+        float finalDamage = ItemCalculator.StrikerGremlinValueCalc(_instance, this);
 
         var enemy = targetEnemy.GetComponent<IMonster>();
         if(enemy != null)
         {
             enemy.TakeDamage((int)finalDamage);
         }
-        else
-        {
-            Debug.Log("오류! 대상을 찾을 수 없습니다.");
-        }
-            Debug.Log($"그렘린이 {targetEnemy}에게 {finalDamage}를 입힙니다.");
     }
 
     private void ExecuteAOEAttack(Transform targetEnemy)
@@ -133,11 +128,6 @@ public class StrikerGremlin : GremlinBehaviour
             if (enemy != null)
             {
                 enemy.TakeDamage((int)finalDamage);
-                Debug.Log($"그렘린이 {targetEnemy}에게 {finalDamage}를 입힙니다.");
-            }
-            else
-            {
-                Debug.Log("오류! 대상을 찾을 수 없습니다.");
             }
         }
     }

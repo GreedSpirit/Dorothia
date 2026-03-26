@@ -85,7 +85,7 @@ public class StageManager : MonoBehaviour
         _player = _playerBehaviour as IMonsterTarget;
 
         if (_player == null)
-            Debug.LogError("플레이어 넣어야함");
+            Debug.Log("플레이어 넣어야함");
     }
 
     private void OnEnable()
@@ -186,28 +186,28 @@ public class StageManager : MonoBehaviour
 
         if (DataManager.Instance == null)
         {
-            Debug.LogError("[StageManager] DataManager NULL");
+            Debug.Log("[StageManager] DataManager NULL");
             return;
         }
 
         _stage = DataManager.Instance.GetData<StageData>(stageId);
         if (_stage == null)
         {
-            Debug.LogError("StageData 없음");
+            Debug.Log("StageData 없음");
             return;
         }
 
         _spawnData = DataManager.Instance.GetData<Monster_SpawnData>(_stage.Monster_Spawn_Id);
         if (_spawnData == null)
         {
-            Debug.LogError("SpawnData 없음");
+            Debug.Log("SpawnData 없음");
             return;
         }
 
         var dict = DataManager.Instance.GetDict<Stage_SectionData>();
         if (dict == null)
         {
-            Debug.LogError("SectionData Dict NULL");
+            Debug.Log("SectionData Dict NULL");
             return;
         }
 
@@ -218,7 +218,7 @@ public class StageManager : MonoBehaviour
 
         if (sections.Count == 0)
         {
-            Debug.LogError("해당 Stage에 Section 없음");
+            Debug.Log("해당 Stage에 Section 없음");
             return;
         }
 
@@ -236,7 +236,7 @@ public class StageManager : MonoBehaviour
 
             if (matched == null)
             {
-                Debug.LogError("선택 섹션에 맞는 구간 없음");
+                Debug.Log("선택 섹션에 맞는 구간 없음");
                 return;
             }
 
@@ -362,7 +362,7 @@ public class StageManager : MonoBehaviour
     {
         _state = newState;
         OnStageStateChanged?.Invoke(_state);
-        Debug.LogError($"현재상태{_state}");
+        Debug.Log($"현재상태{_state}");
         switch (_state)
         {
             case StageState.Enter:
@@ -420,12 +420,14 @@ public class StageManager : MonoBehaviour
             _bossAlive = false;
             _bossTimerRunning = false;
 
+            _spawnManager.EndBossFight(); // 스폰 다시 가능하게
+
             _currentSection++;
 
             //증가 직후 현재 구간 범위 체크 -> 필요시 다음 Stage_Section_Id로 이동
             if (!TryAdvanceSectionDataIfNeeded())
             {
-                Debug.LogError("[StageManager] 섹션 구간 갱신 실패");
+                Debug.Log("[StageManager] 섹션 구간 갱신 실패");
                 return;
             }
 
@@ -488,17 +490,17 @@ public class StageManager : MonoBehaviour
     {
         if (_bossMonsterId <= 0)
         {
-            Debug.LogError("Boss ID 무효");
+            Debug.Log("Boss ID 무효");
             return;
         }
 
         _bossAlive = true;
 
         //일반 스폰 완전 정지
-        _spawnManager.StopNormalSpawn();
+        //_spawnManager.StopNormalSpawn();
 
         //기존 몬스터 제거
-        _spawnManager.ForceClearAll();
+        //_spawnManager.ForceClearAll();
 
         //보스 1마리 소환
         _spawnManager.SpawnBoss(_bossMonsterId);
@@ -566,7 +568,7 @@ public class StageManager : MonoBehaviour
 
         if (!TryRetreatSectionDataIfNeeded())
         {
-            Debug.LogError("[StageManager] 이전 구간 이동 실패");
+            Debug.Log("[StageManager] 이전 구간 이동 실패");
             return;
         }
 
@@ -618,7 +620,7 @@ public class StageManager : MonoBehaviour
 
         if (dict == null)
         {
-            Debug.LogError("[StageManager] SectionData Dict 없음");
+            Debug.Log("[StageManager] SectionData Dict 없음");
             return;
         }
 
@@ -629,7 +631,7 @@ public class StageManager : MonoBehaviour
 
         if (matched == null)
         {
-            Debug.LogError($"[Cheat] 해당 Section 없음: {targetSection}");
+            Debug.Log($"[Cheat] 해당 Section 없음: {targetSection}");
             return;
         }
 
