@@ -102,6 +102,7 @@ public class GremlinManager : MonoBehaviour
                 Addressables.ReleaseInstance(_gremlinPrefab);
                 Destroy(removeParticle);
             }
+            StatManager.Instance.RefreshStats();
         }
 
         //그렘린이 존재하고, 바꾸려는 그렘린의 GUID가 소환한 것과 일치하며 등급이 다른 경우
@@ -109,6 +110,8 @@ public class GremlinManager : MonoBehaviour
         {
             //등급 변화시의 모델 변화
             currentGremlin.ChangeModeling(toChange._rarity);
+            currentGremlin.ReCalculation(gremlinInstance);
+            StatManager.Instance.RefreshStats();
             yield break;
         }
         //그냥 완전히 동일한 경우 스킵
@@ -152,6 +155,7 @@ public class GremlinManager : MonoBehaviour
         //소환 파티클을 제거합니다.
         Destroy(spawnParticle);
         yield return null;
+        StatManager.Instance.RefreshStats();
     }
     //Addressable
 

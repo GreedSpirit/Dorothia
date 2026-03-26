@@ -92,7 +92,6 @@ public class Equipment
         equip_Fuse_Weight = 0;
 
         equip_status = new Dictionary<Status, float>();
-        Debug.Log(equipData.Equip_Type);
         ItemCalculator.AddEquipStatusByType(this, equipData, (Rarity)DataManager.Instance.GetData<Equip_RankData>(equipment_Rarity).Equip_Rank);
 
         LoadIcon(equip_icon);

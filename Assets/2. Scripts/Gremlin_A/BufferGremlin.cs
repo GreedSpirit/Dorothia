@@ -15,6 +15,7 @@ public class BufferGremlin : GremlinBehaviour
 
     private float _timer;
     [SerializeField]private PlayerCtrl _player;
+    public GremlinInstance _instance {  get; private set; }
 
     public float finalValue { get; set; }
 
@@ -23,6 +24,7 @@ public class BufferGremlin : GremlinBehaviour
         //플레이어 찾기
         _player = FindAnyObjectByType<PlayerCtrl>();
         onActing += ApplyBuff;
+        _instance = gameObject.GetComponent<GremlinInstance>();
     }
 
     private void Update()
@@ -43,12 +45,10 @@ public class BufferGremlin : GremlinBehaviour
             {
                 ActiveStatus.Add(statusdata.Gremlin_Buff, statusdata.Buff_Value);
                 _buffCooltime = statusdata.Gremlin_Cooltime;
-                Debug.Log($"{statusdata.Gremlin_Buff}를 {statusdata.Buff_Value}만큼 건드는 액티브 추가");
             }
             else if(statusdata.Effect_Type==Effect_Type.Passive)
             {
                 PassiveStatus.Add(statusdata.Gremlin_Buff, statusdata.Buff_Value);
-                Debug.Log($"{statusdata.Gremlin_Buff}를 {statusdata.Buff_Value}만큼 건드는 패시브 추가");
             }
         }
         _rarity = rarity;

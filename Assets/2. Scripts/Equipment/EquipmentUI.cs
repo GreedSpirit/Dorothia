@@ -17,17 +17,6 @@ public class EquipmentUI : BaseUI
 
     private int _slotIndex;                   //중요! 부위 별 슬롯 인덱스이므로 2개를 장착 가능한 반지의 2번째 반지 슬롯만 1, 나머지는 전부 0으로 두어야 합니다.
 
-    private void Awake()
-    {
-        //인스펙터상의 연결 오류 확인용
-        if (_partSlots == null)
-            Debug.LogError("EquipmentUI - 각 파트별 버튼이 하나도 등록되지 않았습니다!");
-        if (_partSlots.Count != 6)
-            Debug.LogWarning("EquipmentUI - 파트별 버튼이 모자랍니다!");
-        if (_inventoryPanel == null)
-            Debug.LogError("EquipmentUI - 장비를 담은 인벤토리 확인용 창이 등록되지 않았습니다!");
-    }
-
     private void Start()
     {
         Equip_Type[] partMapping = new Equip_Type[]

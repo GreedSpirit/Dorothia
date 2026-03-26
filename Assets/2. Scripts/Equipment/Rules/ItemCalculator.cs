@@ -408,7 +408,23 @@ public static class ItemCalculator
                 }
             }
         }
-        Debug.Log("해당 아이디값은 발동 타입이 없습니다.");
         return statusList.Count > 0 ? statusList : null;
+    }
+
+    public static float StrikerGremlinValueCalc(GremlinInstance gremlin, StrikerGremlin striker)
+    {
+        float a = 0.0f;
+
+        a = (striker.attackDamage * DataManager.Instance.GetData<Gremlin_TierData>((int)GremlinManager.Instance.gremlinInstance._rarity).Gremlin_Tier_Multiplier)
+            + (GremlinManager.Instance.gremlinInstance._currentLevel * DataManager.Instance.GetData<Gremlin_AtkerData>((int)GremlinManager.Instance.gremlinInstance._rarity).Gremlin_Level_Bonus);
+        return a;
+        
+    }
+    public static float BufferGremlinValueCalc(GremlinInstance gremlin, float value, BufferGremlin buffer)
+    {
+        float a = 0.0f;
+        a = (value * DataManager.Instance.GetData<Gremlin_TierData>((int)GremlinManager.Instance.gremlinInstance._rarity).Gremlin_Tier_Multiplier)
+                + (GremlinManager.Instance.gremlinInstance._currentLevel * DataManager.Instance.GetData<Gremlin_BufferData>((int)GremlinManager.Instance.gremlinInstance._rarity).Gremlin_Level_Bonus);
+        return a;
     }
 }

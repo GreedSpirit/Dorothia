@@ -28,8 +28,7 @@ public class GremlinInstance : MonoBehaviour
                 GremlinManager.Instance.PlayerTransform, gremlin._rarity);
 
             //그렘린의 최종 공격력 : (공격력 * 등급 배율) + (그렘린 강화수치 * 강화 배율)
-            striker.finalAttack = (striker.attackDamage * DataManager.Instance.GetData<Gremlin_TierData>((int)gremlin._rarity).Gremlin_Tier_Multiplier)
-                + (gremlin._currentLevel * DataManager.Instance.GetData<Gremlin_AtkerData>((int)gremlin._rarity).Gremlin_Level_Bonus);
+            striker.finalAttack = ItemCalculator.StrikerGremlinValueCalc(this, striker);
 
             //변경이 완료된 그렘린 동작 투입
             _behaviour = striker;
@@ -62,10 +61,10 @@ public class GremlinInstance : MonoBehaviour
                 }
 
                 //버프의 최종값 : (버프값 * 등급 배율) + (강화 수치 * 강화 보너스)
-                buffer.finalValue = (buffValue * DataManager.Instance.GetData<Gremlin_TierData>((int)gremlin._rarity).Gremlin_Tier_Multiplier)
-                    + (gremlin._currentLevel * DataManager.Instance.GetData<Gremlin_BufferData>((int)gremlin._rarity).Gremlin_Level_Bonus);
+                buffer.finalValue = ItemCalculator.BufferGremlinValueCalc(this, buffValue, buffer);
             }
 
+            
             //버퍼그렘린의 행동 시의 액션에 움직임제어 - 버프 사용시 고정 상태로 변화
             buffer.onActing += _movement.ChangeActingState;
 
@@ -97,6 +96,31 @@ public class GremlinInstance : MonoBehaviour
         {
             //등급에 따라 모델링을 변화시킵니다.
             _modeling.ChangeModel(rarity);
+        }
+    }
+
+    public void ReCalculation(Gremlin gremlin)
+    {
+        if(_behaviour is BufferGremlin)
+        {
+            BufferGremlin buffer = gameObject.GetComponent<BufferGremlin>();
+
+            //버프값은 0
+            float buffValue = 0;
+            //Dictionary의 값을 가져옴 ( 기획상 1개만 사용, 확장 고려 X )
+            foreach (var item in buffer.PassiveStatus.Values)
+            {
+                buffValue = item;
+            }
+
+            //버프의 최종값 : (버프값 * 등급 배율) + (강화 수치 * 강화 보너스)
+            buffer.finalValue = ItemCalculator.BufferGremlinValueCalc(this, buffValue, buffer);
+        }
+        else if(_behaviour is StrikerGremlin)
+        {
+            StrikerGremlin striker = gameObject.GetComponent<StrikerGremlin>();
+
+            striker.finalAttack = ItemCalculator.StrikerGremlinValueCalc(this, striker);
         }
     }
 }

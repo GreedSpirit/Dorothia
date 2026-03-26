@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
@@ -178,8 +178,12 @@ public class ExchangeManager : MonoBehaviour
         if (_money[GetShardTargetGremlin(id)] > 2)
         {
             currentGremlinShard = id;
+            for(int i = 0; _money[GetShardTargetGremlin(currentGremlinShard)] > 2; i++)
+            {
+                _money[GetShardTargetGremlin(currentGremlinShard)] -= 3;
+                onShardValueChanged?.Invoke();
+            }
         }
-        onShardValueChanged?.Invoke();
     }
 
     public int GetCurrentShardID()

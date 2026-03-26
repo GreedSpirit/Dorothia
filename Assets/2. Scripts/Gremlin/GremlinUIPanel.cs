@@ -13,6 +13,8 @@ public class GremlinUIPanel : BaseUI
     [SerializeField] private TextMeshProUGUI _txtName; // 그렘린 이름
     [SerializeField] private TextMeshProUGUI _txtLevel;// 그렘린 레벨
     [SerializeField] private TextMeshProUGUI _txtStat; // 그렘린 스텟
+    [SerializeField] private TextMeshProUGUI _txtRarityStat; // 그렘린 스텟
+    [SerializeField] private TextMeshProUGUI _txtUpgradeStat; // 그렘린 스텟
 
     [Header("스크롤뷰(중간 패널, 아이템 표기용)")]
     [SerializeField] private Transform _scrollContent; // 스크롤 컨턴츠
@@ -92,8 +94,6 @@ public class GremlinUIPanel : BaseUI
                     _equippedUIItem = uiItem;
                 }
             }
-
-            Debug.Log($"{data._gremlinData.PetID}생성 완료.");
         }
 
         // TODO 첫 번째 아이템을 기본으로 선택 처리, 추후 기획팀과 대화해볼 내용
@@ -135,15 +135,42 @@ public class GremlinUIPanel : BaseUI
         //이름이 존재하는 경우, 데이터에서 그렘린 이름을 찾아 지정.
         if (_txtName != null)
         {
-            Debug.Log(data._gremlinData.PetID);
             _txtName.color = RarityColor.GetColor(data._rarity);
             _txtName.text = DataManager.Instance.GetData<GremlinData>(data._gremlinData.PetID).Gremlin_Name;
         }
         //레벨이 존재하는 경우, 레벨 텍스트는 아래 형식.
         if (_txtLevel != null) _txtLevel.text = $"강화 : {data._currentLevel}";
-        
-        // TODO 공격력인지 버프 수치인지 표시 포맷은 추후 수정 가능
-        //if (_txtStat != null) _txtStat.text = $"능력치: {data.currentStat}"; 
+        if (_txtStat != null && data._gremlinData.Type == Gremlin_Type.공격형)
+        {
+            List<Gremlin_StatusData> listData = DataManager.Instance.GetList<Gremlin_StatusData>(data._gremlinData.PetID);
+            string text = "";
+            foreach(var statusData in listData)
+            {
+                text += $"공격력 : {statusData.Gremlin_Atk} 공격속도 : {(statusData.Gremlin_Dps * DataManager.Instance.GetData<Gremlin_AtkerData>((int)data._rarity).Gremlin_Tier_Dps).ToString("F2")}/초";
+            }
+            _txtStat.text = text;
+        }
+        else if(_txtStat != null && data._gremlinData.Type == Gremlin_Type.지원형)
+        {
+            List<Gremlin_StatusData> listData = DataManager.Instance.GetList<Gremlin_StatusData>(data._gremlinData.PetID);
+            string text = "";
+            foreach (var statusData in listData)
+            {
+                if(statusData.Effect_Type == Effect_Type.Active)
+                {
+                    text += $"체력 회복 : {DataManager.Instance.GetData<Gremlin_BufferData>((int)data._rarity).Gremlin_Tier_Cooltime}초마다 {statusData.Buff_Value * 100}% ";
+                }
+                else if(statusData.Effect_Type == Effect_Type.Passive)
+                {
+                    text += $"스텟 버프 : {statusData.Gremlin_Buff} + {(statusData.Buff_Value * 100).ToString("F1")}%";
+                }
+            }
+            _txtStat.text = text;
+        }
+        if (_txtRarityStat != null) _txtRarityStat.text = $"등급 보너스 : {DataManager.Instance.GetData<Gremlin_TierData>((int)data._rarity).Gremlin_Tier_Multiplier * 100}%";
+        if (_txtUpgradeStat != null) _txtUpgradeStat.text = data._gremlinData.Type == Gremlin_Type.공격형?
+                $"강화 보너스 : 공격력 + {DataManager.Instance.GetData<Gremlin_AtkerData>((int)data._rarity).Gremlin_Level_Bonus * data._currentLevel}":
+                $"강화 보너스 : {DataManager.Instance.GetData<Gremlin_BufferData>((int)data._rarity).Gremlin_Level_Bonus * data._currentLevel * 100}%";
     }
 
     private void OnClickEquip()
@@ -186,8 +213,6 @@ public class GremlinUIPanel : BaseUI
         //장비 상태 업데이트 true
         _equippedUIItem.UpdateEquipState(true);
 
-        // TODO: 여기서 GremlinManager.EquipGremlin() 호출
-        Debug.Log($"[{DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name}] 장착 완료!");
         if(isAccepted == true)
         {
             AcceptModify();
@@ -198,18 +223,6 @@ public class GremlinUIPanel : BaseUI
     private void AcceptModify()
     {
         isAccepted = !isAccepted;
-    }
-
-    private void OnClickGoEnhance()
-    {
-        if (_selectedGremlinData == null) return;
-        Debug.Log("강화 패널 열기 요청 - 선택된 그렘린: " + DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name);
-    }
-
-    private void OnClickGoMerge()
-    {
-        if (_selectedGremlinData == null) return;
-        Debug.Log("합성 패널 열기 요청 - 선택된 그렘린: " + DataManager.Instance.GetData<GremlinData>(_selectedGremlinData._gremlinData.PetID).Gremlin_Name);
     }
 
     private void ClearScrollContent()

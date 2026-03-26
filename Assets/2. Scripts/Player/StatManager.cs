@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
@@ -190,7 +190,7 @@ public class StatManager : MonoBehaviour
             {
                 foreach (var passive in gremlin.PassiveStatus.Keys)
                 {
-                    stats[passive].AddMultiModifier(gremlin.PassiveStatus[passive]);
+                    stats[passive].AddMultiModifier(ItemCalculator.BufferGremlinValueCalc(GremlinManager.Instance.currentGremlin,gremlin.PassiveStatus[passive], gremlin));
                 }
             }
         }

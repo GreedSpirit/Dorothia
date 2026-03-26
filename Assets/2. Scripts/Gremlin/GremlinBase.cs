@@ -81,14 +81,12 @@ public abstract class GremlinBase : MonoBehaviour
     {
         if(growthConfig == null)
         {
-            Debug.LogError("growthConfig 연결 비어있습니다!");
             return 0;
         }
 
         var tierData = growthConfig.GetTierData(currentTier);
         if(tierData == null)
         {
-            Debug.LogError("growthConfig 데이터에 뭔가 문제가 있습니다.");
             return 0;
         }
 

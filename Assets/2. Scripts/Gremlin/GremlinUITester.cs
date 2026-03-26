@@ -19,16 +19,6 @@ public class GremlinUITester : MonoBehaviour
         //더미데이터 생성
         GenerateDummyData();
         
-        //그렘린 UI 패널이 존재할 경우
-        if (_gremlinUIPanel != null)
-        {
-
-        }
-        else
-        {
-            Debug.LogError("[GremlinUITester] _gremlinUIPanel 필요");
-        }
-
         ExchangeManager.Instance.onShardValueChanged += MergeShard;
     }
 
@@ -81,53 +71,37 @@ public class GremlinUITester : MonoBehaviour
         //그렘린아이템데이터의 집합체
         _dummyGremlins = _gremlinList._gremlinInventory;
 
-        // 장착 중인 그렘린 (빨간 테두리 테스트용)
-        Gremlin TestGremlin1 = new Gremlin();
-
         var so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
         await so.Task;
         GremlinSOData data = so.Result;
+
+        Gremlin TestGremlin1 = new Gremlin();
         TestGremlin1.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-        TestGremlin1._isEquipped = true;
         _gremlinList.AddGremlin(TestGremlin1);
 
 
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Core");
         await so.Task;
         data = so.Result;
-        for(int i = 0; i< 3; i++)
-        {
-            Gremlin TestGremlin2 = new Gremlin();
-            TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-            _gremlinList.AddGremlin(TestGremlin2);
-        }
 
-
-        so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Zinc");
-        await so.Task;
-        data = so.Result;
-        for(int i =0; i< 3; i++)
-        {
-            Gremlin TestGremlin3 = new Gremlin();
-            TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Uncommon);
-            _gremlinList.AddGremlin(TestGremlin3);
-        }
+        Gremlin TestGremlin2 = new Gremlin();
+        TestGremlin2.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin2);
 
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Flint");
         await so.Task;
         data = so.Result;
-        Gremlin TestGremlin4 = new Gremlin();
-        TestGremlin4.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-        _gremlinList.AddGremlin(TestGremlin4);
+
+        Gremlin TestGremlin3 = new Gremlin();
+        TestGremlin3.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin3);
 
         so = Addressables.LoadAssetAsync<GremlinSOData>("SO_Pinion");
         await so.Task;
         data = so.Result;
-        for(int i = 0; i<81; i++)
-        {
-            Gremlin TestGremlin5 = new Gremlin();
-            TestGremlin5.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
-            _gremlinList.AddGremlin(TestGremlin5);
-        }
+
+        Gremlin TestGremlin4 = new Gremlin();
+        TestGremlin4.Init(Guid.NewGuid().ToString(), data, Rarity.Normal);
+        _gremlinList.AddGremlin(TestGremlin4);
     }
 }

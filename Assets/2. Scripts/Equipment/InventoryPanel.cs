@@ -63,9 +63,6 @@ public class InventoryPanel : BaseUI
     private InventorySlot _currentSelectedSlot;
     private void Awake()
     {
-        //인스펙터상의 실수 확인용
-        if (_slots.Count != 16)
-            Debug.LogWarning("InventoryPanel - 슬롯의 수가 맞지 않습니다.");
         _inventoryEquipFunction = GetComponent<InventoryEquipFunction>();
         _equipButton.onClick.AddListener(() =>
         {
