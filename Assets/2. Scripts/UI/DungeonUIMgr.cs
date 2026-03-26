@@ -37,7 +37,7 @@ public class DungeonUIMgr : MonoBehaviour
     {
         DungeonManager.OnDungeonEQReward += UpdateEQRewardUI;
         DungeonManager.OnDungeonGSReward += UpdateGSRewardUI;
-        DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
+        //DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
         DungeonManager.OnDungeonReward += UpdateRewardUI;
         DungeonManager.OnDungeonCleared += UpdateDungeonInfo;
         DungeonManager.OnDungeonCleared += CloseDungeonInfo;
@@ -51,7 +51,7 @@ public class DungeonUIMgr : MonoBehaviour
     {
         DungeonManager.OnDungeonEQReward -= UpdateEQRewardUI;
         DungeonManager.OnDungeonGSReward -= UpdateGSRewardUI;
-        DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
+        //DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
         DungeonManager.OnDungeonReward -= UpdateRewardUI;
         DungeonManager.OnDungeonCleared -= UpdateDungeonInfo;
         DungeonManager.OnDungeonCleared -= CloseDungeonInfo;
@@ -105,7 +105,7 @@ public class DungeonUIMgr : MonoBehaviour
         }
     }
 
-    public void UpdateSKRewardUI(List<Sk_SclData> list)
+    public void UpdateSKRewardUI(List<SkillData> list)
     {
         _dungeonRewardText.text = "";
 
@@ -114,15 +114,17 @@ public class DungeonUIMgr : MonoBehaviour
 
         foreach (var SK in list)
         {
-            if (rewardCounts.ContainsKey(SK.Sk_Scl_Name))
+            string name = SK.Skill_Name + " 주문서";
+
+            if (rewardCounts.ContainsKey(name))
             {
                 // 이미 있는 이름이면 개수만 +1
-                rewardCounts[SK.Sk_Scl_Name]++;
+                rewardCounts[name]++;
             }
             else
             {
                 // 처음 나온 이름이면 사전에 추가
-                rewardCounts[SK.Sk_Scl_Name] = 1;
+                rewardCounts[name] = 1;
             }
         }
 

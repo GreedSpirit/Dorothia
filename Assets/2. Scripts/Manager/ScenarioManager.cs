@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 public class ScenarioManager : MonoBehaviour
@@ -20,11 +18,14 @@ public class ScenarioManager : MonoBehaviour
     [SerializeField] private CanvasGroup _backGroundImage;
     //캐릭터스탠딩이미지
     [SerializeField] private Image _portraitImage;
+    //CG
+    [SerializeField] private Image _cgImage;
 
     //출력할 대사들을 담아둘 큐
     private Queue<Talk_TableData> _dialogueQueue = new Queue<Talk_TableData>();
-    //메모리 해제용 현재이미지 체크용핸들
-    private AsyncOperationHandle<Sprite> _portraitHandle;
+    //메모리 해제용 변수
+    private string _currentPortraitKey;
+    private string _currentCgKey;
 
     private void OnEnable()
     {
@@ -69,14 +70,14 @@ public class ScenarioManager : MonoBehaviour
 
         _dialoguePanel.SetActive(true);
         DisplayNextSentence();
-        /*
+        
         //페이드인 완료 콜백받으면 대사창활성화
         StartCoroutine(FadeInBackground(() =>
         {
             _dialoguePanel.SetActive(true);
             DisplayNextSentence(); 
         }));
-        */
+        
     }
 
     //버튼클릭함수 (대사패널을 버튼으로 화면덮음)
@@ -99,6 +100,8 @@ public class ScenarioManager : MonoBehaviour
 
         //TODO: 스탠딩이미지 변경로직 추가
         UpdatePortrait(currentData.portrait);
+
+        UpdateCG(currentData.cg);
     }
 
     private void EndDialogue()
@@ -129,27 +132,56 @@ public class ScenarioManager : MonoBehaviour
 
     private void UpdatePortrait(string portraitKey)
     {
+        Debug.LogError(portraitKey);
         //이미 로드된 이미지가 있다면 메모리에서 해제
-        if (_portraitHandle.IsValid())
+        if (!string.IsNullOrEmpty(_currentPortraitKey))
         {
-            Addressables.Release(_portraitHandle);
+            AddressableManager.Instance.ReleaseAsset(portraitKey);
+            _currentPortraitKey = null;
         }
 
         //이미지없는경우는 숨기기
         if (string.IsNullOrEmpty(portraitKey))
         {
             _portraitImage.gameObject.SetActive(false);
+            Debug.LogError(portraitKey);
+            return;
+        }
+
+        //새이미지 저장
+        _currentPortraitKey = portraitKey;
+
+        //어드레서블 로드 (어드레서블 그룹에 있는 이름과 CSV의 portrait 이름같아야함)
+        AddressableManager.Instance.LoadAsset<Sprite>(portraitKey, (sprite) =>
+        {
+            _portraitImage.gameObject.SetActive(true);
+            _portraitImage.sprite = sprite;
+        });
+
+    }
+
+    private void UpdateCG(string cgKey)
+    {
+        //이미 로드된 이미지가 있다면 메모리에서 해제
+        if (!string.IsNullOrEmpty(_currentCgKey))
+        {
+            AddressableManager.Instance.ReleaseAsset(cgKey);
+            _currentCgKey = null;
+        }
+
+        //이미지없는경우는 숨기기
+        if (string.IsNullOrEmpty(cgKey))
+        {
+            _cgImage.gameObject.SetActive(false);
             return;
         }
 
         //어드레서블 로드 (어드레서블 그룹에 있는 이름과 CSV의 portrait 이름같아야함)
-        _portraitHandle = Addressables.LoadAssetAsync<Sprite>(portraitKey);
-
-        //로드 완료되면 활성화
-        _portraitHandle.Completed += (handle) =>
+        AddressableManager.Instance.LoadAsset<Sprite>(cgKey, (sprite) =>
         {
-            _portraitImage.sprite = handle.Result;
-            _portraitImage.gameObject.SetActive(true);
-        };
+            _cgImage.gameObject.SetActive(true);
+            _cgImage.sprite = sprite;
+        });
+
     }
 }
