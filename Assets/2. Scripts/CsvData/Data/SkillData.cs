@@ -12,6 +12,7 @@ public class SkillData : ICSVLoad, ITableKey
     public float Affection_Skill_Value { get; set; }
     public string Skill_Animation_Patch { get; set; }
     public string Skill_Icon { get; set; }
+    public string Skill_Information { get; set; }
 
     int ITableKey.Id => Job_Skill_Id;
     string ITableKey.Key => Skill_Name;
@@ -34,5 +35,7 @@ public class SkillData : ICSVLoad, ITableKey
         if (values.Length > 6) Skill_Animation_Patch = values[6];
         // 7: Skill_Icon (string)
         if (values.Length > 7) Skill_Icon = values[7];
+        // 7: Skill_Information (string)
+        if (values.Length > 8) Skill_Information = values[8];
     }
 }

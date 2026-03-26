@@ -8,6 +8,8 @@ using UnityEngine;
 public abstract class BaseSkill
 {
     public SkillData Data { get; set; }
+    public Skill_RankData Rank { get => DataManager.Instance.GetData<Skill_RankData>((int)Rarity); }
+    public Skill_UpgradeData Upgrade { get => DataManager.Instance.GetData<Skill_UpgradeData>(Level); }
     public float CurrentCooldown { get; private set; }
     public Rarity Rarity { get; set; }
     public int Level { get; set; }

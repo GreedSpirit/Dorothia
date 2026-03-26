@@ -79,38 +79,31 @@ public class SkillInfoPopup : BaseUI
         _targetIdx = targetIdx;
 
         var sm = SkillManager.Instance;
-        SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
-
-        title.text = $"{data.Skill_Name} 정보";
+        var dm = DataManager.Instance;
 
         icon.SetSlotData(SkillItem.SlotType.InfoDetail, key);
-
-        // 주문서 여부에 따른 레벨 및 개수 표시 수정
-        //iconSkillLevel.gameObject.SetActive(!key.isScroll);
         levelText.gameObject.SetActive(!key.isScroll);
 
-        if (!key.isScroll)
-        {
-            // 해금된 스킬 정보 가져오기 (딕셔너리 안전 접근)
-            if (sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill))
-            {
-                //iconSkillLevel.text = skill.Level.ToString();
-                levelText.text = skill.Level.ToString();
-            }
-        }
+        if (!sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
+        var data = skill.Data;
 
-        // 기본 정보 셋팅
-        Color color = RarityColor.GetColor(key.rarity);
-        string hexColor = ColorUtility.ToHtmlStringRGB(color);
+        levelText.text = skill.Level.ToString();
+        title.text = $"{data.Skill_Name} 정보";
+
+        Color rarityColor = RarityColor.GetColor(key.rarity);
+        string hexColor = ColorUtility.ToHtmlStringRGB(rarityColor);
+
         skillName.text = $"{data.Skill_Name} <color=#{hexColor}><{key.rarity}></color>";
         cooldown.text = $"{data.Skill_Cooltime}s";
-        description.text = $"스킬 설명 컬럼이 없음";
 
-        // 승급/랭크 정보 (Skill_RankData)
-        var ranks = DataManager.Instance.GetDict<Skill_RankData>();
+        float dmg = skill.Data.Affection_Skill_Value * skill.Rank.Skill_Rank_Multiplier * skill.Upgrade.Skill_Upgrade_Multiplier;
+        description.text = string.Format(data.Skill_Information, dmg * 100);
+
+        var rankDict = dm.GetDict<Skill_RankData>();
         for (int i = 0; i < grades.Length; i++)
         {
-            if (ranks.TryGetValue(i + 1, out var rankData))
+            int rankLevel = i + 1;
+            if (rankDict.TryGetValue(rankLevel, out var rankData))
             {
                 grades[i].text = $"{rankData.Skill_Rank} : {rankData.Skill_Rank_Multiplier * 100}% 상승";
             }
@@ -120,7 +113,6 @@ public class SkillInfoPopup : BaseUI
             }
         }
 
-        // 버튼 상태 제어
         btnText.text = "합성";
         if (!key.isScroll)
         {
@@ -128,7 +120,6 @@ public class SkillInfoPopup : BaseUI
             RefreshReinforceUI();
         }
 
-        // 초기 패널 상태
         basicToggle.SetIsOnWithoutNotify(true);
         UpdatePanel(true);
     }
