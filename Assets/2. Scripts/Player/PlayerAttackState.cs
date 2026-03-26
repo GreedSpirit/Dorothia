@@ -16,18 +16,6 @@ public class PlayerAttackState : IPlayerState<PlayerCtrl>
 
     public void Execute(PlayerCtrl player)
     {
-        if (player.IsAutoMode)
-        {
-            BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
-            if (readySkill != null)
-            {
-                SkillManager.Instance.ConsumeReadySkill();
-                player.ExecuteFullReset();       // 공격 상태 초기화
-                player.PerformSkill(readySkill); // 스킬 상태로 전환
-                return;
-            }
-        }
-
         // 조이스틱을 아주 강하게 밀었을 때만 공격 캔슬
         if (player.MoveInput.sqrMagnitude > 0.2f)
         {

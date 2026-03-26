@@ -126,9 +126,20 @@ public class SkillManager : MonoBehaviour
         UltimateSlot?.UpdateCooldown(dt);
     }
 
-    public void GetRandomScroll(int amount)
+    public List<SkillData> GetRandomScroll(int amount)
     {
-        for (int i = 0; i < amount; i++) AddItem(GetRandomkey());
+        List<SkillData> list = new List<SkillData>();
+
+        for (int i = 0; i < amount; i++)
+        {
+            SkillKey key = GetRandomkey();
+            SkillData data = DataManager.Instance.GetData<SkillData>(key.sid);
+            list.Add(data);
+
+            AddItem(key);
+        }
+
+        return list;
     }
 
 

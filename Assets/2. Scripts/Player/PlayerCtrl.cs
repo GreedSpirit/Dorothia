@@ -66,6 +66,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public int ComboIndex { get; set; } = 0;
     public bool IsAttack { get; set; } = false;
     public bool IsInvincible { get; set; }
+    public bool IsSkillPending { get; private set; } = false;
 
     // 캐싱
     private PlayerStats _playerStats;
@@ -253,7 +254,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         if (CurrentState == SkillState || _isDead) return;
         if (skill == null || !skill.IsReady) return;
-
+      
         SkillState.SetSkill(skill);
         ChangeState(SkillState);
     }
@@ -261,12 +262,17 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // AutoState 등 내부에서 바로 전환 (IsReady 체크 생략)
     public void PerformSkill(BaseSkill skill)
     {
+        if (IsSkillPending) return; // 중복 실행 차단
+
+        IsSkillPending = true;
+
         if (skill == null || _isDead) return;
 
         SkillState.SetSkill(skill);
         ChangeState(SkillState);
     }
-
+   
+    public void ClearSkillPending() => IsSkillPending = false;
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -309,6 +315,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         // 루트모션 회전도 반영이 필요하면 아래 주석 해제
         // transform.rotation *= _anima.deltaRotation;
+    }
+    public void OnSkillAnimationEnd()
+    {
+        ClearSkillPending();
+        if (CurrentState == SkillState)
+            ChangeState(IdleState);
     }
 
     #endregion
