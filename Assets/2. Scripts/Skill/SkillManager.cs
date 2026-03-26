@@ -606,7 +606,7 @@ public class SkillManager : MonoBehaviour
         skill.Level++;
         OnInventoryChanged?.Invoke(key);
 
-        Debug.Log($"{key.sid} 강화 완료 → Lv.{skill.Level} (비용: {cost}G)");
+        //Debug.Log($"{key.sid} 강화 완료 → Lv.{skill.Level} (비용: {cost}G)");
         return ReinforceResult.Success;
     }
 

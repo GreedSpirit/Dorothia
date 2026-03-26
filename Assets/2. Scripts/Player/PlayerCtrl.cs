@@ -70,6 +70,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // 캐싱
     private PlayerStats _playerStats;
     private OverDriveMode _odm;
+    private PlayerVisual _visual;
     private Animator _anima;
     private AnimatorOverrideController _overrideController;
     private NavMeshAgent _navMesh;
@@ -108,6 +109,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _anima.runtimeAnimatorController = _overrideController;
         _navMesh = GetComponent<NavMeshAgent>();
         _odm = GetComponent<OverDriveMode>();
+        _visual = GetComponent<PlayerVisual>();
         _navMesh.updateRotation = false;
 
         IdleState = new PlayerIdleState();
@@ -149,7 +151,17 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         { Key.J, 18002 }, // 차원 난무 그대로 사용하는데 걷는게 더 길어야할듯 o
         { Key.K, 18003 }  // 제노사이드 그대로
     };
-
+    private Dictionary<Key, int> visualMapping = new Dictionary<Key, int>
+    {
+        { Key.F1, 1 }, 
+        { Key.F2, 2 }, 
+        { Key.F3, 3 }, 
+        { Key.F4, 4 }, 
+        { Key.F5, 5 }, 
+        { Key.F6, 6 }, 
+        { Key.F7, 7 }, 
+        { Key.F8, 8 }, 
+    };
 
     private void Update()
     {
@@ -171,6 +183,16 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (CurrentState != null)
         {
             CurrentState.Execute(this);
+        }
+
+        foreach (var mapping in visualMapping)
+        {
+            if (Keyboard.current[mapping.Key].wasPressedThisFrame)
+            {
+                _visual.SetGrade(mapping.Value);
+                UpdateEffectGroup(mapping.Value);
+                break;
+            }
         }
     }
 

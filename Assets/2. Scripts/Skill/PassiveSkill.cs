@@ -20,7 +20,7 @@ public class PassiveSkill : BaseSkill
 
         _isApplied = true;
         StatManager.Instance.RefreshStats();
-        Debug.Log($"[PassiveSkill] {Data.Skill_Name} 적용 완료");
+        //Debug.Log($"[PassiveSkill] {Data.Skill_Name} 적용 완료");
     }
 
     public void Undo()
@@ -31,7 +31,7 @@ public class PassiveSkill : BaseSkill
 
         _isApplied = false;
 
-        Debug.Log($"[PassiveSkill] {Data.Skill_Name} 해제 완료");
+        //Debug.Log($"[PassiveSkill] {Data.Skill_Name} 해제 완료");
     }
 
     // 패시브는 직접 실행 없음 (장착/해제가 전부)
