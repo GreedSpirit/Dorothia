@@ -389,53 +389,85 @@ public class SkillManager : MonoBehaviour
     }
     public void AutoEquip()
     {
-        // 이미 장착된 sid 수집 (등급 무관하게 같은 sid는 중복 장착 불가)
+        // 모든 슬롯을 비우고
+        ClearAllSlots();
+
+        // 중복 장착 방지
         var equippedSids = new HashSet<int>();
 
-        foreach (var s in ActiveSlots) if (s != null) equippedSids.Add(s.Data.Job_Skill_Id);
-        foreach (var s in PassiveSlots) if (s != null) equippedSids.Add(s.Data.Job_Skill_Id);
-        if (UltimateSlot != null) equippedSids.Add(UltimateSlot.Data.Job_Skill_Id);
-
+        // 2. 장착 후보 리스트 추출 및 정렬 (희귀도 순 -> 레벨 순)
         var candidates = _unlockedSkills
-            .Where(pair => !pair.Key.isScroll
-                        && GetItemCount(pair.Key) > 0
-                        && !IsEquipped(pair.Key)
-                        && !equippedSids.Contains(pair.Key.sid))
+            .Where(pair => !pair.Key.isScroll && GetItemCount(pair.Key) > 0)
             .OrderByDescending(pair => (int)pair.Key.rarity)
             .ThenByDescending(pair => pair.Value.Level)
             .ToList();
 
+        // 최적의 스킬들로 배치
         foreach (var (key, skill) in candidates)
         {
+            // 동일한 스킬 종류(sid)는 하나만 장착 가능
             if (equippedSids.Contains(key.sid)) continue;
+
+            bool isEquipped = false;
 
             switch (skill.Data.Skill_Type)
             {
                 case Skill_Type.Active:
+                    int activeIdx = Array.FindIndex(ActiveSlots, s => s == null);
+                    if (activeIdx != -1)
                     {
-                        int emptyIdx = Array.FindIndex(ActiveSlots, s => s == null);
-                        if (emptyIdx < 0) break;
-                        EquipSkill(key, emptyIdx);
-                        equippedSids.Add(key.sid);
-                        break;
+                        EquipSkill(key, activeIdx);
+                        isEquipped = true;
                     }
+                    break;
+
                 case Skill_Type.Passive:
+                    int passiveIdx = Array.FindIndex(PassiveSlots, s => s == null);
+                    if (passiveIdx != -1)
                     {
-                        int emptyIdx = Array.FindIndex(PassiveSlots, s => s == null);
-                        if (emptyIdx < 0) break;
-                        EquipSkill(key, emptyIdx);
-                        equippedSids.Add(key.sid);
-                        break;
+                        EquipSkill(key, passiveIdx);
+                        isEquipped = true;
                     }
+                    break;
+
                 case Skill_Type.Ultimate:
+                    if (UltimateSlot == null)
                     {
-                        if (UltimateSlot != null) break;
                         EquipSkill(key, 0);
-                        equippedSids.Add(key.sid);
-                        break;
+                        isEquipped = true;
                     }
+                    break;
+            }
+
+            if (isEquipped)
+            {
+                equippedSids.Add(key.sid);
             }
         }
+    }
+
+    public void ClearAllSlots()
+    {
+        // 액티브 슬롯 초기화
+        for (int i = 0; i < ActiveSlots.Length; i++)
+        {
+            if (ActiveSlots[i] != null) UnequipActive(i);
+        }
+
+        // 패시브 슬롯 초기화
+        for (int i = 0; i < PassiveSlots.Length; i++)
+        {
+            if (PassiveSlots[i] != null) UnequipPassive(i);
+        }
+
+        // 궁극기 슬롯 초기화
+        if (UltimateSlot != null)
+        {
+            UnequipUltimate();
+        }
+
+        // 필요 시 능력치 재계산이나 UI 갱신 호출
+        // RefreshTotalStats();
     }
 
     public void EquipSkill(SkillKey key, int targetIndex = -1)

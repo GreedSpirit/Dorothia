@@ -22,4 +22,8 @@ public class SkillPanel : BaseUI
     public void AutoEquip(){
         SkillManager.Instance.AutoEquip();
     }
+
+    public void ResetSlot(){
+        SkillManager.Instance.ClearAllSlots();
+    }
 }
