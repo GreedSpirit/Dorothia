@@ -195,6 +195,7 @@ public class DungeonManager : MonoBehaviour
         DungeonEntryTracker.ForceSetUsedCount(150003, 0);
         DungeonEntryTracker.ForceSetUsedCount(150004, 0);
         DungeonEntryTracker.ForceSetUsedCount(150005, 0);
+        DungeonEntryTracker.ForceSetUsedCount(150006, 0);
 
         if (_isDungeonRunning)
         {
