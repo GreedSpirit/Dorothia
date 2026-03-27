@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using GameUtility;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
-using GameUtility;
 
 public enum DungeonState
 {
@@ -170,7 +171,7 @@ public class DungeonManager : MonoBehaviour
     {
         if (_state == DungeonState.Prepare)
         {
-            if (Time.time - _prepareStartTime >= 3f)
+            if (TimeManager.Instance.GetDelta(_prepareStartTime) >= 3f)
             {
                 StartCombat();
             }
@@ -178,7 +179,7 @@ public class DungeonManager : MonoBehaviour
 
         if (_state == DungeonState.Combat)
         {
-            if (Time.time - _combatStartTime >= _timeLimit)
+            if (TimeManager.Instance.GetElapsed("Dungeon") >= _timeLimit)
             {
                 Debug.Log("[Dungeon] 시간 초과");
                 ChangeState(DungeonState.Fail);
@@ -391,7 +392,7 @@ public class DungeonManager : MonoBehaviour
     {
         Debug.Log("[Dungeon] 준비");
 
-        _prepareStartTime = Time.time;
+        _prepareStartTime = TimeManager.Instance.RecordTime();
 
         OnDungeonPrepareStarted?.Invoke(3f);
 
@@ -403,7 +404,8 @@ public class DungeonManager : MonoBehaviour
     {
         Debug.Log("[Dungeon] 전투 시작");
 
-        _combatStartTime = Time.time;
+        TimeManager.Instance.StartTimer("Dungeon");
+
         ChangeState(DungeonState.Combat);
 
         _rule?.OnCombatStarted(); // 실제 스폰은 룰이 담당
@@ -416,65 +418,6 @@ public class DungeonManager : MonoBehaviour
         }
     }
     #endregion
-
-    //private void SpawnWave(int wave)
-    //{
-    //    if (wave > _maxWave)
-    //    {
-    //        ChangeState(DungeonState.Clear);
-    //        return;
-    //    }
-
-    //    int start = _waveStartIndex[wave];
-    //    int end = _waveEndIndex[wave];
-
-    //    if (start == -1)
-    //    {
-    //        Debug.LogError($"Wave 없음 {wave}");
-    //        ChangeState(DungeonState.Fail);
-    //        return;
-    //    }
-
-    //    _aliveMonsterCount = 0;
-
-    //    OnDungeonWaveChanged?.Invoke(wave);
-
-    //    for (int i = start; i <= end; i++)
-    //    {
-    //        int monsterId = _waveEntries[i].monsterId;
-    //        int spawnNum = _waveEntries[i].spawnNum;
-
-    //        for (int j = 0; j < spawnNum; j++)
-    //        {
-    //            SpawnSingle(monsterId);
-    //        }
-    //    }
-
-    //    //0마리 스폰 보호처리
-    //    if (_aliveMonsterCount <= 0)
-    //    {
-    //        Debug.LogError($"[Dungeon] Wave {wave} 스폰 결과가 0마리");
-    //        ChangeState(DungeonState.Fail);
-    //    }
-    //}
-
-    //private void SpawnSingle(int monsterId)
-    //{
-    //    if (_spawnManager == null)
-    //        return;
-
-    //    if (!_spawnManager.TryGetSpawnPosition(out UnityEngine.Vector3 pos))
-    //        pos = UnityEngine.Vector3.zero;
-
-    //    if (_spawnManager.SpawnSingleDungeon(monsterId, pos))
-    //    {
-    //        _aliveMonsterCount++;
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning($"[Dungeon] Spawn 실패 monsterId={monsterId}");
-    //    }
-    //}
 
     private void HandleMonsterKilled(int monsterId, bool isBoss)
     {
@@ -493,24 +436,41 @@ public class DungeonManager : MonoBehaviour
     #region 성공 / 실패
     private void ClearDungeon()
     {
-        float clearTime = (Time.time - _combatStartTime);
+        float clearTime = TimeManager.Instance.StopTimer("Dungeon");
+
         int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
         Debug.Log("[Dungeon] 성공");
 
-        GiveReward();
+        OnDungeonStateChanged?.Invoke(DungeonState.Clear);
 
-        DataManager.Instance.TryConsumeEntry(_dungeon.Dungeon_Id, _dungeon.Daily_Entry, out int usedCount);
+        GiveReward(); // 보상은 미리 계산
 
-        OnDungeonEntryCountChanged?.Invoke(_dungeon.Dungeon_Id, usedCount, _dungeon.Daily_Entry);
+        StartCoroutine(ClearFlowRoutine(clearTime, dungeonStep)); // 3초 대기후 처리
+    }
 
-        OnDungeonCleared?.Invoke(_dungeon.Dungeon_Name, dungeonStep, clearTime);
+    private IEnumerator ClearFlowRoutine(float clearTime, int dungeonStep)
+    {
+        string dungeonName = _dungeon.Dungeon_Name;
+        int dungeonId = _dungeon.Dungeon_Id;
+        int dailyEntry = _dungeon.Daily_Entry;
 
+        yield return new WaitForSeconds(3f); // 던전 안에서 3초
+
+        //먼저 UI 이벤트 호출 (중요)
+        DataManager.Instance.TryConsumeEntry(dungeonId, dailyEntry, out int usedCount);
+
+        OnDungeonEntryCountChanged?.Invoke(dungeonId, usedCount, dailyEntry);
+
+        OnDungeonCleared?.Invoke(dungeonName, dungeonStep, clearTime);
+
+        //마지막에 Exit
         ChangeState(DungeonState.Exit);
     }
 
     private void FailDungeon()
     {
-        float clearTime = (Time.time - _combatStartTime);
+        float clearTime = TimeManager.Instance.StopTimer("Dungeon");
+
         int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
 
         Debug.Log("[Dungeon] 실패");
@@ -635,6 +595,8 @@ public class DungeonManager : MonoBehaviour
         {
             _stageManager.ResumeStageFromSavedContext();
         }
+
+        OnDungeonStateChanged?.Invoke(DungeonState.Exit);
 
         ResetDungeonRuntime();
     }

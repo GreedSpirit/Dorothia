@@ -128,7 +128,7 @@ public class StageManager : MonoBehaviour
         if (!_bossTimerRunning)
             return;
 
-        if (Time.time - _bossStartTime >= _bossTimeLimit)
+        if (TimeManager.Instance.GetElapsed("Boss") >= _bossTimeLimit)
         {
             Debug.Log("보스 시간 초과");
             HandleBossFail();
@@ -496,19 +496,13 @@ public class StageManager : MonoBehaviour
 
         _bossAlive = true;
 
-        //일반 스폰 완전 정지
-        //_spawnManager.StopNormalSpawn();
-
-        //기존 몬스터 제거
-        //_spawnManager.ForceClearAll();
-
         //보스 1마리 소환
         _spawnManager.SpawnBoss(_bossMonsterId);
 
         //제한시간
-        _bossStartTime = Time.time;
         _bossTimeLimit = _defaultBossTimeLimit;
         _bossTimerRunning = true;
+        TimeManager.Instance.StartTimer("Boss");
 
         OnBossSpawned?.Invoke(_bossMonsterId);
         OnScenarioTrigger?.Invoke(CurrentSection, 2);
