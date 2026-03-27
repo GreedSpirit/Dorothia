@@ -40,7 +40,7 @@ public class ScenarioManager : MonoBehaviour
 
     private void HandleDialogueTrigger(int sectionId, int outputTime)
     {
-        Debug.LogError($"대사호출 {sectionId} , {outputTime}");
+        //Debug.LogError($"대사호출 {sectionId} , {outputTime}");
         
         //전체대사 가져오기
         var dict = DataManager.Instance.GetDict<Talk_TableData>();
