@@ -112,6 +112,7 @@ public class EquipmentUI : BaseUI
             {
                 Debug.Log(equip.icon == null);
                 _firstRingSlot.equipped = equip;
+                _firstRingSlot.iconImage.color = Color.white;
                 equip.SetEquipped(_firstRingSlot.slotIndex);
                 _firstRingSlot.iconImage.sprite = equip.icon;
                 _firstRingSlot.iconImage.enabled = true;
@@ -120,6 +121,7 @@ public class EquipmentUI : BaseUI
             {
                 Debug.Log(equip.icon == null);
                 _secondRingSlot.equipped = equip;
+                _secondRingSlot.iconImage.color = Color.white;
                 equip.SetEquipped(_secondRingSlot.slotIndex);
                 _secondRingSlot.iconImage.sprite = equip.icon;
                 _secondRingSlot.iconImage.enabled = true;
@@ -137,6 +139,7 @@ public class EquipmentUI : BaseUI
                 {
                     Debug.Log(equip.icon == null);
                     slots.equipped = equip;
+                    slots.iconImage.color = Color.white;
                     equip.SetEquipped(slots.slotIndex);
                     slots.iconImage.sprite = equip.icon;
                     slots.iconImage.enabled = true;
