@@ -141,36 +141,47 @@ public class SkillItem : MonoBehaviour
 
     private void UpdateEquipUI(Skill_Type type, int idx)
     {
-        // 1. 현재 이 스킬(아이템)이 전체 인벤토리/매니저 기준으로 장착 중인지 확인
-        // targetSkill이 null이든 아니든, 이 정보는 SkillManager가 알고 있습니다.
+        // 1. 현재 이 스킬의 전역 장착 상태 확인 (인벤토리 아이콘 UI 갱신용)
         bool isEquipped = SkillManager.Instance.IsEquipped(_key);
 
-        // 2. 텍스트 상태 즉시 반영 (여기서 다른 아이템들도 상태가 동기화됨)
+        // 2. 장착 중 표시(Text/Icon) 활성화/비활성화
         if (equipText != null)
         {
             equipText.gameObject.SetActive(isEquipped);
         }
 
-        // 3. [선택 사항] 만약 이 스킬이 방금 '해제'된 대상인지 로그를 찍거나 
-        // 특정 연출을 하고 싶을 때만 아래 null 체크를 사용합니다.
-        BaseSkill targetSkill = type switch
-        {
-            Skill_Type.Active => SkillManager.Instance.ActiveSlots[idx],
-            Skill_Type.Passive => SkillManager.Instance.PassiveSlots[idx],
-            _ => SkillManager.Instance.UltimateSlot
-        };
+        // 3. 슬롯 인덱스 유효성 검사 및 타겟 스킬 가져오기
+        BaseSkill targetSkill = null;
 
-        if (targetSkill == null)
+        switch (type)
         {
-            // 슬롯이 비었음을 확인했지만, 위에서 이미 내 장착 상태를 갱신했으므로 
-            // 추가 로직이 없다면 여기서 종료해도 무방합니다.
+            case Skill_Type.Active:
+                // 액티브 슬롯 범위 체크 (0~2)
+                if (idx >= 0 && idx < SkillManager.ACTIVE_SLOT_MAX)
+                    targetSkill = SkillManager.Instance.ActiveSlots[idx];
+                break;
+
+            case Skill_Type.Passive:
+                // 패시브 슬롯 범위 체크 (0~4)
+                if (idx >= 0 && idx < SkillManager.PASSIVE_SLOT_MAX)
+                    targetSkill = SkillManager.Instance.PassiveSlots[idx];
+                break;
+
+            default: // Ultimate 등
+                targetSkill = SkillManager.Instance.UltimateSlot;
+                break;
+        }
+
+        // 4. 슬롯이 비어있거나 타겟 스킬이 없는 경우 얼리 리턴
+        if (targetSkill == null || targetSkill.Data == null)
+        {
             return;
         }
 
-        // 4. 내가 방금 이 슬롯에 들어온 주인공이라면 추가 작업 (예: 강조 연출)
+        // 5. 현재 UI의 스킬 ID와 실제 슬롯에 장착된 스킬 ID 비교 (강조 연출 등)
         if (_key.sid == targetSkill.Data.Job_Skill_Id)
         {
-            // Debug.Log($"{targetSkill.Data.Skill_Name}이(가) {idx}번 슬롯에 장착됨!");
+            // 연출 로직 (예: 장착된 슬롯 테두리 하이라이트 등)
         }
     }
 

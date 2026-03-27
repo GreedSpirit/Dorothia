@@ -258,7 +258,7 @@ public class SkillInfoPopup : BaseUI
     private void RefreshEquipStatus()
     {
         isEquip = SkillManager.Instance.IsEquipped(key);
-        btnText.text = isEquip ? "장착 중" : "합성";
+        btnText.text = isEquip ? "장착 중" : "장착";
     }
 
 }

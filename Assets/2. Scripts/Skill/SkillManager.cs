@@ -642,6 +642,7 @@ public class SkillManager : MonoBehaviour
         if (cost == -1) return ReinforceResult.NotFound;
 
         // 골드 차감 시도
+        // todo : 장비 효과에 골드 차감효과 적용해야함
         if (!ExchangeManager.Instance.UseMoney(MoneyType.Gold, cost))
             return ReinforceResult.NotEnoughGold;
 
