@@ -130,9 +130,13 @@ public class PlayerStats : MonoBehaviour, IResettable
     // ══════════════════════════════════════════════════════
     #region Combat
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(float amount)
     {
         if (_player.IsInvincible) return;
+
+        // 방어력 적용
+        float def = 100 / (float)StatManager.Instance.GetStat(Status.DEF);
+        amount = amount * def;
 
         CurrentHp = Mathf.Max(0f, CurrentHp - amount);
         OnHpChanged?.Invoke(CurrentHp, MaxHp);

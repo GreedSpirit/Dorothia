@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 [System.Serializable]
 public struct AttackEffectGroup
@@ -123,7 +124,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         CurrentState = IdleState;
         CurrentState.Enter(this);
 
-        // 승급 이펙트 업데이트
+        // 승급 이펙트 업데이트 (불러오기로 변경해야함)
         UpdateEffectGroup(1);
     }
 
@@ -154,14 +155,14 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     };
     private Dictionary<Key, int> visualMapping = new Dictionary<Key, int>
     {
-        { Key.F1, 1 }, 
-        { Key.F2, 2 }, 
-        { Key.F3, 3 }, 
-        { Key.F4, 4 }, 
-        { Key.F5, 5 }, 
-        { Key.F6, 6 }, 
-        { Key.F7, 7 }, 
-        { Key.F8, 8 }, 
+        { Key.F1, 1 },
+        { Key.F2, 2 },
+        { Key.F3, 3 },
+        { Key.F4, 4 },
+        { Key.F5, 5 },
+        { Key.F6, 6 },
+        { Key.F7, 7 },
+        { Key.F8, 8 },
     };
 
     private void Update()
@@ -254,7 +255,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         if (CurrentState == SkillState || _isDead) return;
         if (skill == null || !skill.IsReady) return;
-      
+
         SkillState.SetSkill(skill);
         ChangeState(SkillState);
     }
@@ -271,7 +272,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         SkillState.SetSkill(skill);
         ChangeState(SkillState);
     }
-   
+
     public void ClearSkillPending() => IsSkillPending = false;
     #endregion
 
@@ -344,13 +345,19 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // 단일 타겟 연타 (MeleeAttackModule 단일 모드)
     internal IEnumerator SingleHitRoutine(IMonster target, int hitCount, float totalDamage)
     {
+
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
+
 
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             if (target == null || !target.IsAlive) yield break;
 
-            target.TakeDamage((int)dmgPerHit);
+            target.TakeDamage((int)dmgPerHit, isCritical);
             // EffectManager.Instance.PlayEffect(...);
 
             yield return new WaitForSeconds(0.08f);
@@ -362,15 +369,20 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
+
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             foreach (var col in targets)
             {
                 if (col == null || !col.gameObject.activeInHierarchy) continue;
 
                 IMonster monster = col.GetComponentInParent<IMonster>();
                 if (monster != null && monster.IsAlive)
-                    monster.TakeDamage((int)dmgPerHit);
+                    monster.TakeDamage((int)dmgPerHit, isCritical);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -382,13 +394,18 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
+
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             foreach (var target in targets)
             {
                 if (target == null || !target.IsAlive) continue;
 
-                target.TakeDamage((int)dmgPerHit);
+                target.TakeDamage((int)dmgPerHit, isCritical);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -583,6 +600,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
 
     public void ApplyDamage(int amount) { if (!_isDead) _playerStats.TakeDamage(amount); }
+
+    private bool RollCritical() => UnityEngine.Random.value < StatManager.Instance.GetStat(Status.CriticalChance);
 
     public void ResetState()
     {
