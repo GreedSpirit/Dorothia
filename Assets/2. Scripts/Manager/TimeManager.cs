@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public enum TimerType
 {
@@ -16,6 +17,8 @@ public class TimeManager : MonoBehaviour
     public static TimeManager Instance { get; private set; }
 
     private float _startTime;
+
+    private DateTime _lastQuitTime; // 마지막 종료 시간
 
     private Dictionary<TimerType, float> _timerStartDict = new(); // 타이머들 관리
 
@@ -93,4 +96,53 @@ public class TimeManager : MonoBehaviour
     {
         return Time.time - startTime;
     }
+
+    #region 저장
+    /*
+     게임 시작시
+        double offlineSeconds = TimeManager.Instance.GetOfflineSeconds();
+        Debug.Log($"방치 시간: {offlineSeconds}초");
+
+     보상 계산
+        BigInteger gold = (BigInteger)(offlineSeconds * goldPerSecond);
+
+     종료 또는 저장 시점
+        TimeManager.Instance.SaveQuitTime();
+     */
+
+    /// <summary>
+    /// 저장
+    /// </summary>
+    public void SaveQuitTime()
+    {
+        _lastQuitTime = DateTime.UtcNow;
+
+        PlayerPrefs.SetString("LastQuitTime", _lastQuitTime.ToBinary().ToString());
+    }
+
+    /// <summary>
+    /// 로드
+    /// </summary>
+    /// <returns></returns>
+    public DateTime LoadQuitTime()
+    {
+        if (!PlayerPrefs.HasKey("LastQuitTime"))
+            return DateTime.UtcNow;
+
+        long binary = Convert.ToInt64(PlayerPrefs.GetString("LastQuitTime"));
+        return DateTime.FromBinary(binary);
+    }
+
+    /// <summary>
+    /// 방치 시간 계산
+    /// </summary>
+    /// <returns></returns>
+    public double GetOfflineSeconds()
+    {
+        DateTime last = LoadQuitTime();
+        DateTime now = DateTime.UtcNow;
+
+        return (now - last).TotalSeconds;
+    }
+    #endregion
 }
