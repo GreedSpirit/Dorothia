@@ -707,7 +707,7 @@ public class MonsterController : MonoBehaviour, IMonster
             _target.ApplyDamage(_stats.Damage);
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(int amount, bool isCritical = false)
     {
         if (_currentState == MonsterState.Dead)
             return;
@@ -718,8 +718,7 @@ public class MonsterController : MonoBehaviour, IMonster
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(amount * damageRate)); // 실제 피해량
 
-            //todo : 테스트 코드
-        DamageTextManager.Instance.ShowDamage(amount, transform.position, Random.value < 0.5 ? false : true);
+        DamageTextManager.Instance.ShowDamage(amount, transform.position, isCritical);
         
         _hp -= finalDamage;
 

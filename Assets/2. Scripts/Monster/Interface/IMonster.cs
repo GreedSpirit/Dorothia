@@ -14,6 +14,6 @@ public interface IMonster
         ProjectileDatabase projectileDb,
         PlayerCombatSlots slotSystem
         );
-    void TakeDamage(int amount);
+    void TakeDamage(int amount, bool isCritical = false);
     void ForceDespawn();
 }
