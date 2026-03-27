@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 [Serializable]
@@ -15,7 +15,7 @@ public class Character_UpgradeData : ICSVLoad, ITableKey
     public float Character_Upgrade_Def_M { get; set; }
     public float Character_Upgrade_Hp_Regen { get; set; }
     public float Character_Upgrade_Agi { get; set; }
-    public int Character_Upgrade_Scrap { get; set; }
+    public int Character_Upgrade_Gold { get; set; }
     public int Character_Upgrade_Max { get; set; }
 
     int ITableKey.Id => Character_Id;

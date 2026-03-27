@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 [Serializable]
@@ -7,7 +7,7 @@ public class Character_RankData : ICSVLoad, ITableKey
     public Character_Rank Character_Rank { get; set; }
     public int Character_Rank_Level { get; set; }
     public float Character_Rank_Value { get; set; }
-    public int Character_Rank_Scrap { get; set; }
+    public int Character_Rank_Gold { get; set; }
 
     int ITableKey.Id => (int)Character_Rank;
     string ITableKey.Key => Character_Rank.ToString();
