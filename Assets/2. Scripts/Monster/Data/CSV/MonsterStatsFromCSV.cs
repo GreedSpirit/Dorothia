@@ -6,14 +6,16 @@ public class MonsterStatsFromCSV : IMonsterStats
     private readonly Monster_Data _data;
     private readonly Monster_ValueData _value;
     private readonly ProjectileData _projectile;
+    private readonly int _step;
 
     private float _agentRadius = 0.2f;
 
-    public MonsterStatsFromCSV(Monster_Data data, Monster_ValueData value, 
+    public MonsterStatsFromCSV(Monster_Data data, Monster_ValueData value, int step,
         ProjectileDatabase projectileDb, MonsterController prefab)
     {
         _data = data;
         _value = value;
+        _step = step;
 
         if (_data.Projectile_Id > 0 && projectileDb != null)
         {
@@ -33,8 +35,9 @@ public class MonsterStatsFromCSV : IMonsterStats
     public Monster_Type Rank => _data.Monster_Type;
     public Monster_Kind Archetype => _data.Monster_Kind;
 
-    public int MaxHp => Mathf.RoundToInt(_data.Monster_Hp * _value.Monster_Hp_Value);
-    public int Damage => Mathf.RoundToInt(_data.Monster_Atk * _value.Monster_Atk_Value);
+    public int MaxHp => Mathf.RoundToInt(_data.Monster_Hp * Mathf.Pow(_value.Monster_Hp_Value, _step));
+    public int Damage => Mathf.RoundToInt(_data.Monster_Atk * Mathf.Pow(_value.Monster_Atk_Value, _step));
+    public float Defense => _data.Monster_Def * Mathf.Pow(_value.Monster_Def_Value, _step);
 
     public float MoveSpeed => _data.Monster_Agi;
     public float RotateSpeed => 10f;

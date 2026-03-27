@@ -169,12 +169,29 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
         }
 
+        int currentSection = StageManager.Instance.CurrentSection;
+
+        int sectionIndex = currentSection % 1000; // 130001 -> 1
+
+        if (sectionIndex <= 0)
+            sectionIndex = 1;
+
+        int step = sectionIndex - 1;
+
+        if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
+        {
+            step = 0;
+        }
+
+        Debug.Log($"[MonsterInit] Section:{currentSection}, Step:{step}");
+
         if (_projectileDatabase == null)
         {
             Debug.LogError("ProjectileDatabase NULL");
         }
         
-        _stats = new MonsterStatsFromCSV(monsterData, valueData, _projectileDatabase, poolKeyPrefab);
+        _stats = new MonsterStatsFromCSV(monsterData, valueData, step,
+            _projectileDatabase, poolKeyPrefab);
 
         _spawnTime = Time.time; // 생존시간 측정 시작
         _hp = _stats.MaxHp; // 체력 초기화
@@ -695,9 +712,16 @@ public class MonsterController : MonoBehaviour, IMonster
         if (_currentState == MonsterState.Dead)
             return;
 
+        float defense = _stats.Defense;
+
+        float damageRate = 100f / (100f + defense); // 피해 적용률
+
+        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(amount * damageRate)); // 실제 피해량
+
             //todo : 테스트 코드
         DamageTextManager.Instance.ShowDamage(amount, transform.position, Random.value < 0.5 ? false : true);
-        _hp -= amount;
+        
+        _hp -= finalDamage;
 
         if (_hp <= 0)
         {

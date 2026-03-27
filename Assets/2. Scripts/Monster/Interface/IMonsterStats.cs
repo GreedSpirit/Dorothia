@@ -11,10 +11,10 @@ public interface IMonsterStats
     float RotateSpeed { get; }
 
     int Damage { get; }
+    float Defense { get; }
 
     float AttackRange { get; }
     float AttackCooldown { get; }
-    //float PreferredRange { get; }
 
     float AgentRadius { get; }
     int AvoidancePriorityMin { get; }

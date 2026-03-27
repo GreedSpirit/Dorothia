@@ -1,5 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
+
+public enum TimerType
+{
+    Boss,
+    Dungeon,
+    Skill
+}
 
 /// <summary>
 /// 게임 전체 시간 관리
@@ -10,7 +18,9 @@ public class TimeManager : MonoBehaviour
 
     private float _startTime;
 
-    private Dictionary<string, float> _timerStartDict = new(); // 타이머들 관리
+    private DateTime _lastQuitTime; // 마지막 종료 시간
+
+    private Dictionary<TimerType, float> _timerStartDict = new(); // 타이머들 관리
 
     private void Awake()
     {
@@ -34,35 +44,35 @@ public class TimeManager : MonoBehaviour
     /// <summary>
     /// 타이머 시작
     /// </summary>
-    /// <param name="key"></param>
-    public void StartTimer(string key)
+    /// <param name="type"></param>
+    public void StartTimer(TimerType type)
     {
-        _timerStartDict[key] = Time.time;
+        _timerStartDict[type] = Time.time;
     }
 
     /// <summary>
     /// 타이머 종료 (경과시간 반환)
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public float StopTimer(string key)
+    public float StopTimer(TimerType type)
     {
-        if (!_timerStartDict.TryGetValue(key, out float start))
+        if (!_timerStartDict.TryGetValue(type, out float start))
             return 0f;
 
         float elapsed = Time.time - start;
-        _timerStartDict.Remove(key);
+        _timerStartDict.Remove(type);
         return elapsed;
     }
 
     /// <summary>
     /// 현재 진행중 타이머 시간
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public float GetElapsed(string key)
+    public float GetElapsed(TimerType type)
     {
-        if (!_timerStartDict.TryGetValue(key, out float start))
+        if (!_timerStartDict.TryGetValue(type, out float start))
             return 0f;
 
         return Time.time - start;
@@ -86,4 +96,53 @@ public class TimeManager : MonoBehaviour
     {
         return Time.time - startTime;
     }
+
+    #region 저장
+    /*
+     게임 시작시
+        double offlineSeconds = TimeManager.Instance.GetOfflineSeconds();
+        Debug.Log($"방치 시간: {offlineSeconds}초");
+
+     보상 계산
+        BigInteger gold = (BigInteger)(offlineSeconds * goldPerSecond);
+
+     종료 또는 저장 시점
+        TimeManager.Instance.SaveQuitTime();
+     */
+
+    /// <summary>
+    /// 저장
+    /// </summary>
+    public void SaveQuitTime()
+    {
+        _lastQuitTime = DateTime.UtcNow;
+
+        PlayerPrefs.SetString("LastQuitTime", _lastQuitTime.ToBinary().ToString());
+    }
+
+    /// <summary>
+    /// 로드
+    /// </summary>
+    /// <returns></returns>
+    public DateTime LoadQuitTime()
+    {
+        if (!PlayerPrefs.HasKey("LastQuitTime"))
+            return DateTime.UtcNow;
+
+        long binary = Convert.ToInt64(PlayerPrefs.GetString("LastQuitTime"));
+        return DateTime.FromBinary(binary);
+    }
+
+    /// <summary>
+    /// 방치 시간 계산
+    /// </summary>
+    /// <returns></returns>
+    public double GetOfflineSeconds()
+    {
+        DateTime last = LoadQuitTime();
+        DateTime now = DateTime.UtcNow;
+
+        return (now - last).TotalSeconds;
+    }
+    #endregion
 }
