@@ -43,7 +43,7 @@ public class Equipment
     /// <param name="slotIndex">장착할 슬롯(반지 슬롯 대비)</param>
     public void SetEquipped(int slotIndex)
     {
-        if(isEquipped == true)
+        if(isEquipped == true && EquippedSlotIndex != -1)
         {
             return;
         }
