@@ -1,6 +1,5 @@
-using System.Numerics;
+﻿using System.Numerics;
 using TMPro;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.UI;
 

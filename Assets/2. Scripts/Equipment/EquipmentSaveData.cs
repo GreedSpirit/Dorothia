@@ -6,6 +6,8 @@ public class EquipmentSaveData
     public int equipLevel;                  // 해당 장비의 장착레벨
     public int equipEnchant;                // 해당 장비의 강화단계
     public int equipRarity;                 // 해당 장비의 등급
+    public int slotIndex;
     public float enchantWeight;             // 해당 장비의 강화 가중치
     public float fuseWeight;                // 해당 장비의 합성 가중치
+    public bool isEquipped;
 }

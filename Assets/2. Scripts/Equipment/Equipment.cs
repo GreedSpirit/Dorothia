@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -43,7 +45,7 @@ public class Equipment
     /// <param name="slotIndex">장착할 슬롯(반지 슬롯 대비)</param>
     public void SetEquipped(int slotIndex)
     {
-        if(isEquipped == true)
+        if(isEquipped == true && EquippedSlotIndex != -1)
         {
             return;
         }
@@ -102,6 +104,16 @@ public class Equipment
         equip_Upgrade = 0;
         equip_Upgrade_Weight = 0;
 
+    }
+
+    public async Task<Equipment> WaitSprite(string GUID, EquipData equipData, Rarity rarity, int equipLevel)
+    {
+        Equipment equip = new Equipment(GUID, equipData, rarity, equipLevel);
+
+        var sprite = await Addressables.LoadAssetAsync<Sprite>(equip_icon).Task;
+        icon = sprite;
+
+        return equip;
     }
 
     

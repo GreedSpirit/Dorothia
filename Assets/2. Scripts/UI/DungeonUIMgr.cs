@@ -18,16 +18,15 @@ public class DungeonUIMgr : MonoBehaviour
     [SerializeField] TextMeshProUGUI _dungeonName;
     [SerializeField] TextMeshProUGUI _dungeonTime;
     bool _isEnterDungeon;
-    float _timer;
 
     private void Update()
     {
         if (_isEnterDungeon == false) return;
 
-        _timer += Time.deltaTime;
+        float elapsed = TimeManager.Instance.GetElapsed(TimerType.Dungeon);
 
-        int minutes = (int)(_timer / 60);
-        int seconds = (int)(_timer % 60);
+        int minutes = (int)(elapsed / 60);
+        int seconds = (int)(elapsed % 60);
 
         //00:00 표시
         _dungeonTime.text = ($"{minutes:00} : {seconds:00}");
@@ -45,6 +44,7 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonFailed += CloseDungeonInfo;
 
         DungeonManager.OnDungeonStarted += UpdateDungeonInfo;
+        DungeonManager.OnDungeonStateChanged += HandleStateChanged;
     }
 
     private void OnDisable()
@@ -59,6 +59,7 @@ public class DungeonUIMgr : MonoBehaviour
         DungeonManager.OnDungeonFailed -= CloseDungeonInfo;
 
         DungeonManager.OnDungeonStarted -= UpdateDungeonInfo;
+        DungeonManager.OnDungeonStateChanged -= HandleStateChanged;
     }
 
     public void UpdateDungeonInfo(int currentDungeonId)
@@ -80,7 +81,6 @@ public class DungeonUIMgr : MonoBehaviour
         _dungeonInfoPanel.SetActive(false);
 
         _isEnterDungeon = false;
-        _timer = 0;
     }
 
 
@@ -144,6 +144,8 @@ public class DungeonUIMgr : MonoBehaviour
 
     public void UpdateDungeonInfo(string dungeonName, int stepId, float clearTime)
     {
+        _isEnterDungeon = false;
+
         int minutes = Mathf.FloorToInt(clearTime / 60F);
         int seconds = Mathf.FloorToInt(clearTime - minutes * 60);
 
@@ -168,5 +170,29 @@ public class DungeonUIMgr : MonoBehaviour
         _dungeonFailText.text = ($"{dungeonName}\n{stepId}단계 Fail\n진행시간 {time}");
 
         _dungeonFailPanel.SetActive(true);
+    }
+
+    private void HandleStateChanged(DungeonState state)
+    {
+        if (state == DungeonState.Prepare)
+        {
+            _isEnterDungeon = false; // 준비 중에는 타이머 OFF
+        }
+
+        if (state == DungeonState.Combat)
+        {
+            _isEnterDungeon = true; // 전투 시작시 시작
+        }
+
+        if (state == DungeonState.Clear)
+        {
+            _isEnterDungeon = false; // 타이머 멈춤
+        }
+
+        if (state == DungeonState.Exit)
+        {
+            _dungeonInfoPanel.SetActive(false);
+            _isEnterDungeon = false;
+        }
     }
 }

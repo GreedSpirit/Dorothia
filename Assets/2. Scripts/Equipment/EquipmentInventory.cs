@@ -1,12 +1,20 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class EquipmentInventory : MonoBehaviour
+public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
 {
+    public static EquipmentInventory Instance;
     Dictionary<Equip_Type, List<Equipment>> invDic = new Dictionary<Equip_Type, List<Equipment>>(); // 장착 부위에 맞는 인벤토리를 담을 Dictionary
 
     private void Awake()
     {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         //각 장착 부위마다 새롭게 인벤토리를 지정해줍니다.
         foreach(Equip_Type part in System.Enum.GetValues(typeof(Equip_Type)))
         {
@@ -57,15 +65,15 @@ public class EquipmentInventory : MonoBehaviour
         return invDic[part];
     }
 
-    /// <summary>
-    /// 현재 인벤토리 상태를 저장합니다.
-    /// </summary>
-    public void Save()
+    public int GetInventoryIndex(Equipment equip)
     {
-        //저장할 데이터를 생성합니다.
-        InventorySaveData saveData = new InventorySaveData();
-        //데이터의 인벤토리를 새로 지정합니다.
-        saveData.EquipmentInventory = new List<EquipmentSaveData>();
+        return invDic[equip.equip_type].IndexOf(equip);
+    }
+
+    public InventorySaveData GetSaveData()
+    {
+        var data = new InventorySaveData();
+        data.EquipmentInventory = new List<EquipmentSaveData>();
 
         //각 장비 부위별 인벤토리마다 아래 코드를 실행합니다.
         foreach (var pair in invDic)
@@ -83,68 +91,45 @@ public class EquipmentInventory : MonoBehaviour
                 if (list[i] != null)
                 {
                     //저장할 데이터에 아래 항목을 추가합니다.
-                    saveData.EquipmentInventory.Add(new EquipmentSaveData
+                    data.EquipmentInventory.Add(new EquipmentSaveData
                     {
                         instanceGUID = list[i].InstanceGUID,
                         equipID = list[i].equip_id,
                         equipLevel = list[i].equip_level,
                         equipEnchant = list[i].equip_Upgrade,
                         equipRarity = list[i].equipment_Rarity,
-                        enchantWeight = 0,                     //list[i].강화가중치,
-                        fuseWeight = 0                         //list[i].합성가중치
+                        enchantWeight = list[i].equip_Upgrade_Weight,
+                        fuseWeight = list[i].equip_Fuse_Weight,
+                        isEquipped = list[i].isEquipped,
+                        slotIndex = list[i].EquippedSlotIndex
                     });
                 }
             }
         }
-
-        //이 데이터를 JsonUtility를 통해 Json 형식으로 변경합니다.
-        string json = JsonUtility.ToJson(saveData);
-
-        //테스트용 PlayerPrefs를 사용하여, Json형식으로 변경한 문자열을 InventorySave로 저장합니다.
-        PlayerPrefs.SetString("InventorySave", json);
-        PlayerPrefs.Save();
+        return data;
     }
 
-    /// <summary>
-    /// 저장된 인벤토리를 불러옵니다.
-    /// </summary>
-    public void Load()
+    public async void LoadFromSaveData(InventorySaveData data)
     {
-        //PlayerPrefs에 InventorySave Key값이 없다면 저장한 적 없는 것이므로 반환합니다.
-        if (!PlayerPrefs.HasKey("InventorySave"))
-            return;
-
-        //PlayerPrefs에 저장한 InventorySave 문자열을 받아옵니다.
-        string json = PlayerPrefs.GetString("InventorySave");
-        //해당 문자열을 다시 InventorySaveData로 치환합니다.
-        InventorySaveData saveData = JsonUtility.FromJson<InventorySaveData>(json);
-
-        //인벤토리 Dictionary 내에 있는 모든 데이터를 대상으로 아래 코드를 실행합니다.
-        foreach (var pair in invDic)
-        {
-            pair.Value.Clear();
-        }
-
         //이제 받아온 세이브데이터의 모든 데이터를 대상으로 아래 코드를 실행합니다.
-        foreach (var data in saveData.EquipmentInventory)
+        foreach (var slot in data.EquipmentInventory)
         {
+            Equipment equipment = new Equipment(slot.instanceGUID, DataManager.Instance.GetData<EquipData>(slot.equipID), (Rarity)slot.equipRarity, slot.equipLevel);
+            var equip = await equipment.WaitSprite(slot.instanceGUID, DataManager.Instance.GetData<EquipData>(slot.equipID), (Rarity)slot.equipRarity, slot.equipLevel);
             //저장 데이터의 인벤토리 내에 담아둔 장비 저장 데이터를 기반으로 새롭게 장비를 생성합니다.
-            Equipment equipment = new Equipment(data.instanceGUID, DataManager.Instance.GetData<EquipData>(data.equipID), (Rarity)data.equipRarity, data.equipLevel);
 
             //강화 단계와 강화 가중치, 합성 가중치는 0으로 생성되므로, 해당 값을 대입해줍니다.
-            equipment.equip_Upgrade = data.equipEnchant;
-            equipment.equip_Upgrade_Weight = data.enchantWeight;
-            equipment.equip_Fuse_Weight = data.fuseWeight;
+            equip.equip_Upgrade = slot.equipEnchant;
+            equip.equip_Upgrade_Weight = slot.enchantWeight;
+            equip.equip_Fuse_Weight = slot.fuseWeight;
+            equip.isEquipped = slot.isEquipped;
+            equip.EquippedSlotIndex = slot.slotIndex;
 
-            AddEquipment(equipment);
-            //장비 Dictionary의 Key값을 저장 데이터의 Equip_Type으로, 그 Key값의 Value로 나오는 리스트의 칸 위치는 저장 데이터의 slotIndex로 하여
-            //해당 위치에 방금 생성한 장비를 끼워넣습니다.
-            //invDic = equipment;
+            AddEquipment(equip);
         }
-    }
-
-    public int GetInventoryIndex(Equipment equip)
-    {
-        return invDic[equip.equip_type].IndexOf(equip);
+        EquipmentUI ui = FindAnyObjectByType<EquipmentUI>(FindObjectsInactive.Include);
+        Debug.Log(ui == null);
+        ui.UpdateEquipState();
+        Debug.Log("장비 장착 갱신완료");
     }
 }

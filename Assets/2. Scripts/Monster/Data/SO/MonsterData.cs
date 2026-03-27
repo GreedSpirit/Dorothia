@@ -16,6 +16,8 @@ public class MonsterData : ScriptableObject
     [Header("Damage")]
     public int damage = 10;
 
+    public float defense = 1f;
+
     [Header("Chase / Attack")]
     public float attackRange = 1.8f;
     public float attackCooldown = 1.0f;
