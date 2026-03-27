@@ -4,7 +4,7 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
 {
     private BaseSkill _targetSkill;
     private bool _skillAnimStarted = false;
-    private bool _waitingForClip = false; // ★ 클립 로딩 대기 플래그
+    private bool _waitingForClip = false; // 클립 로딩 대기 플래그
 
     public BaseSkill TargetSkill => _targetSkill;
 
@@ -59,28 +59,15 @@ public class PlayerSkillState : IPlayerState<PlayerCtrl>
 
     public void Execute(PlayerCtrl player)
     {
-        // 클립 로딩 중 또는 D스킬 정점 대기 중 스킵
+        // 클립 로딩 중 또는 일시정지 중만 체크
         if (_waitingForClip || player.Anima.speed == 0f) return;
 
         var stateInfo = player.Anima.GetCurrentAnimatorStateInfo(0);
-        bool isTransitioning = player.Anima.IsInTransition(0);
-
-        if (!_skillAnimStarted)
+        if (stateInfo.IsTag("Skill") && stateInfo.normalizedTime >= 1.0f  // 0.95 → 1.0
+            && !player.Anima.IsInTransition(0))
         {
-            if (stateInfo.IsTag("Skill")) _skillAnimStarted = true;
-            else return;
-        }
-
-        bool skillFinished = stateInfo.IsTag("Skill") &&
-                             stateInfo.normalizedTime >= 0.95f &&
-                             !isTransitioning;
-
-        bool leftSkillAnim = _skillAnimStarted &&
-                             !stateInfo.IsTag("Skill") &&
-                             !isTransitioning;
-
-        if (skillFinished || leftSkillAnim)
             player.ChangeState(player.IdleState);
+        }
     }
 
     public void Exit(PlayerCtrl player)

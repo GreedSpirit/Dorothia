@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,7 +31,7 @@ public class PlayerLevelText : MonoBehaviour
     IEnumerator UpdateDelay()
     {
         yield return null;
-        _text.text = ($" Level {_playerStats._currentLevel}");
+        _text.text = ($" Level {_playerStats.CurrentLevel}");
     }
 
     void ChangeLevel(int currentLevel)

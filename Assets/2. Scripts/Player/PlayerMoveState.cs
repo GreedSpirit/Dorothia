@@ -18,7 +18,7 @@ public class PlayerMoveState : IPlayerState<PlayerCtrl>
             Quaternion lookRotation = Quaternion.LookRotation(moveDir);
             player.transform.rotation = Quaternion.Slerp(player.transform.rotation, lookRotation, Time.deltaTime * 10f);
 
-            float currentSpeed = Mathf.Min(player.PlayerStats._agi, 3f);
+            float currentSpeed = Mathf.Min((float)StatManager.Instance.GetStat(Status.MoveSpeed), 3f);
 
             Vector3 movement = moveDir * currentSpeed * Time.deltaTime;
 

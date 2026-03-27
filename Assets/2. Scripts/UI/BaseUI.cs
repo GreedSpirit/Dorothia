@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ public abstract class BaseUI : MonoBehaviour
     {
         if (close != null)
         {
-            Debug.Log(gameObject.name);
+            //Debug.Log(gameObject.name);
             close.onClick.AddListener(() => UIManager.Instance.CloseTopPanel());
         }
     }

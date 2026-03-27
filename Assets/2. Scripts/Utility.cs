@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using UnityEngine;
 
 namespace GameUtility
@@ -53,6 +53,17 @@ namespace GameUtility
             }
 
             return result;
+        }
+
+        public static BigInteger MultiplyPower(this BigInteger baseValue, float weight, int level)
+        {
+            if (level <= 1) return baseValue;
+
+            // 지수 계산 후 소수점 반올림하여 BigInteger로 복구
+            double multiplier = Mathf.Pow(weight, level - 1);
+            decimal result = (decimal)baseValue * (decimal)multiplier;
+
+            return (BigInteger)result;
         }
     }
 

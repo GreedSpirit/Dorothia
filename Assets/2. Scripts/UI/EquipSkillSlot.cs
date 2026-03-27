@@ -10,7 +10,7 @@ public class EquipSkillSlot : BaseSkillSlot
 
             if (_skill.Data.Skill_Type == Skill_Type.Passive) return;
 
-            player.TryUseSkill(_skill);
+            player.PerformSkill(_skill);
         }
         else
         {
