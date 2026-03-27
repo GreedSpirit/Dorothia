@@ -46,7 +46,13 @@ public class SoundManager : MonoBehaviour
 
     public void PlayBGM(AudioClip clip, bool loop = true)
     {
-        if (bgmSource.clip == clip) return; // 이미 재생 중이면 무시
+        if (clip == null)
+            return;
+
+        if (bgmSource.clip == clip && bgmSource.isPlaying)
+            return;
+
+        bgmSource.Stop();
 
         bgmSource.clip = clip;
         bgmSource.loop = loop;

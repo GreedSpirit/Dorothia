@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
@@ -127,16 +128,23 @@ public class MapManager : MonoBehaviour
         if (_currentStageId == stageId && _currentMapInstance != null)
             return;
 
-        if (!_stageMapTable.TryGetValue(stageId, out GameObject prefab))
+        var entry = _stageMaps.FirstOrDefault(x => x.StageId == stageId);
+
+        if (entry == null || entry.MapPrefab == null)
         {
             Debug.LogError($"[MapManager] Map prefab 없음 stageId={stageId}");
             return;
         }
 
-        LoadMapCommon(prefab, isDungeon: false);
+        LoadMapCommon(entry.MapPrefab, isDungeon: false);
 
         _currentStageId = stageId;
         _currentDungeonId = -1;
+
+        if (entry.BGM != null) // BGM 적용
+        {
+            SoundManager.Instance.PlayBGM(entry.BGM);
+        }
 
         Debug.Log($"[MapManager] Stage 맵 로드 : {stageId}");
     }

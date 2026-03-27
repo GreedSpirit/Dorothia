@@ -5,4 +5,5 @@ public class StageMapEntry
 {
     public int StageId;
     public GameObject MapPrefab;
+    public AudioClip BGM;
 }
