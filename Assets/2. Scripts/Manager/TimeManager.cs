@@ -1,6 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public enum TimerType
+{
+    Boss,
+    Dungeon,
+    Skill
+}
+
 /// <summary>
 /// 게임 전체 시간 관리
 /// </summary>
@@ -10,7 +17,7 @@ public class TimeManager : MonoBehaviour
 
     private float _startTime;
 
-    private Dictionary<string, float> _timerStartDict = new(); // 타이머들 관리
+    private Dictionary<TimerType, float> _timerStartDict = new(); // 타이머들 관리
 
     private void Awake()
     {
@@ -34,35 +41,35 @@ public class TimeManager : MonoBehaviour
     /// <summary>
     /// 타이머 시작
     /// </summary>
-    /// <param name="key"></param>
-    public void StartTimer(string key)
+    /// <param name="type"></param>
+    public void StartTimer(TimerType type)
     {
-        _timerStartDict[key] = Time.time;
+        _timerStartDict[type] = Time.time;
     }
 
     /// <summary>
     /// 타이머 종료 (경과시간 반환)
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public float StopTimer(string key)
+    public float StopTimer(TimerType type)
     {
-        if (!_timerStartDict.TryGetValue(key, out float start))
+        if (!_timerStartDict.TryGetValue(type, out float start))
             return 0f;
 
         float elapsed = Time.time - start;
-        _timerStartDict.Remove(key);
+        _timerStartDict.Remove(type);
         return elapsed;
     }
 
     /// <summary>
     /// 현재 진행중 타이머 시간
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
-    public float GetElapsed(string key)
+    public float GetElapsed(TimerType type)
     {
-        if (!_timerStartDict.TryGetValue(key, out float start))
+        if (!_timerStartDict.TryGetValue(type, out float start))
             return 0f;
 
         return Time.time - start;

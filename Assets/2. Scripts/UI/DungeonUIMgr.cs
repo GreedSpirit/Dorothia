@@ -23,7 +23,7 @@ public class DungeonUIMgr : MonoBehaviour
     {
         if (_isEnterDungeon == false) return;
 
-        float elapsed = TimeManager.Instance.GetElapsed("Dungeon");
+        float elapsed = TimeManager.Instance.GetElapsed(TimerType.Dungeon);
 
         int minutes = (int)(elapsed / 60);
         int seconds = (int)(elapsed % 60);

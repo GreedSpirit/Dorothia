@@ -179,7 +179,7 @@ public class DungeonManager : MonoBehaviour
 
         if (_state == DungeonState.Combat)
         {
-            if (TimeManager.Instance.GetElapsed("Dungeon") >= _timeLimit)
+            if (TimeManager.Instance.GetElapsed(TimerType.Dungeon) >= _timeLimit)
             {
                 Debug.Log("[Dungeon] 시간 초과");
                 ChangeState(DungeonState.Fail);
@@ -404,7 +404,7 @@ public class DungeonManager : MonoBehaviour
     {
         Debug.Log("[Dungeon] 전투 시작");
 
-        TimeManager.Instance.StartTimer("Dungeon");
+        TimeManager.Instance.StartTimer(TimerType.Dungeon);
 
         ChangeState(DungeonState.Combat);
 
@@ -436,7 +436,7 @@ public class DungeonManager : MonoBehaviour
     #region 성공 / 실패
     private void ClearDungeon()
     {
-        float clearTime = TimeManager.Instance.StopTimer("Dungeon");
+        float clearTime = TimeManager.Instance.StopTimer(TimerType.Dungeon);
 
         int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
         Debug.Log("[Dungeon] 성공");
@@ -469,8 +469,7 @@ public class DungeonManager : MonoBehaviour
 
     private void FailDungeon()
     {
-        float clearTime = TimeManager.Instance.StopTimer("Dungeon");
-
+        float clearTime = TimeManager.Instance.StopTimer(TimerType.Dungeon);
         int dungeonStep = (_stepData.Dungeon_Step_Id % 100);
 
         Debug.Log("[Dungeon] 실패");
