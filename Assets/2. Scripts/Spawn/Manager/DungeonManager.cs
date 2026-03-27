@@ -551,27 +551,14 @@ public class DungeonManager : MonoBehaviour
         //클리어한 던전 보상이 스킬주문서
         if (reward.Dungeon_Type == Dungeon_Type.SkillScroll)
         {
-            //스킬주문서 데이터가져오고
-            var SData = DataManager.Instance.GetDict<Sk_SclData>();
-
-            var RandomList = new List<Sk_SclData>();
-
-            //값들 리스트 만들고
-            var list = new List<Sk_SclData>(SData.Values);
-
             int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+            
 
-            for (int i = 0; i < a; i++)
-            {
-                
-                //랜덤돌리기
-                var random = list[Random.Range(0, list.Count)];
-                //선택된값 추가
-                RandomList.Add(random);
-            }
+            //var RandomList = SkillManager.Instance.GetRandomScroll(a);
 
+            
             //랜덤값 이벤트 보내기
-            OnDungeonSKReward?.Invoke(RandomList);
+            //OnDungeonSKReward?.Invoke(RandomList);
         }
 
         //클리어한 던전 보상이 요정석

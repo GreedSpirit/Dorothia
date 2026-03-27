@@ -1,11 +1,11 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
+using UnityEngine;
 
 namespace GameUtility
 {
     public static class BigIntRandom
     {
-        private static readonly Random _rng = new Random();
+        private static readonly System.Random _rng = new System.Random();
 
         public static BigInteger Range(BigInteger min, BigInteger max)
         {
@@ -53,6 +53,52 @@ namespace GameUtility
             }
 
             return result;
+        }
+    }
+
+    public static class NumberFormatterBigInt
+    {
+        private static readonly string[] units = { "K", "M", "B", "T" };
+
+        public static string Format(BigInteger value)
+        {
+            if (value < 1000)
+                return value.ToString();
+
+            int unitIndex = 0;
+            BigInteger temp = value;
+
+            // K, M, B, T 단위 계산
+            while (temp >= 1000 && unitIndex < units.Length)
+            {
+                temp /= 1000;
+                unitIndex++;
+            }
+
+            // T 이하 (K/M/B/T)
+            if (unitIndex <= units.Length)
+            {
+                BigInteger remainder = (value * 10 / BigInteger.Pow(1000, unitIndex)) % 10;
+                string unit = units[unitIndex - 1];
+                return remainder > 0 ? $"{temp}.{remainder}{unit}" : $"{temp}{unit}";
+            }
+
+            // T 초과 → aa, ab, ac ...
+            int alphaIndex = unitIndex - units.Length;
+            string suffix = GetAlphabetSuffix(alphaIndex);
+
+            return temp + suffix;
+        }
+
+        private static string GetAlphabetSuffix(int index)
+        {
+            int first = index / 26;
+            int second = index % 26;
+
+            char firstChar = (char)('a' + first);
+            char secondChar = (char)('a' + second);
+
+            return $"{firstChar}{secondChar}";
         }
     }
 }

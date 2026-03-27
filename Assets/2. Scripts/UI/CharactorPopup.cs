@@ -15,15 +15,15 @@ public class CharactorPopup : BaseUI
 
     [SerializeField] private TextMeshProUGUI totalPower;
 
-    [SerializeField] private TextMeshProUGUI hp;
-    [SerializeField] private TextMeshProUGUI atk;
+    [SerializeField] private TextMeshProUGUI[] hp;
+    [SerializeField] private TextMeshProUGUI[] atk;
     [SerializeField] private TextMeshProUGUI def;
     [SerializeField] private TextMeshProUGUI mAtk;
     [SerializeField] private TextMeshProUGUI mDef;
     [SerializeField] private TextMeshProUGUI cri;
     [SerializeField] private TextMeshProUGUI criDmg;
     [SerializeField] private TextMeshProUGUI mSpd;
-    [SerializeField] private TextMeshProUGUI aSpd;
+    [SerializeField] private TextMeshProUGUI[] aSpd;
     [SerializeField] private TextMeshProUGUI regen;
 
     [SerializeField] private StatUpgradePopup statUpgradePopup;
@@ -73,16 +73,19 @@ public class CharactorPopup : BaseUI
     {
         level.text = ($"Level. {playerStats._level}");
         //정수 표시하고 소수점 첫째부터 내림
-        hp.text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP)).ToString();
-        atk.text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.ATK)).ToString();
+        hp[0].text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP)).ToString();
+        hp[1].text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP)).ToString();
+        atk[0].text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.ATK)).ToString();
+        atk[1].text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.ATK)).ToString();
         def.text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.DEF)).ToString();
         mDef.text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.MagicDEF)).ToString();
         //소수점 첫째까지 표시 두번째부터 내림
         mAtk.text = (Math.Floor(StatManager.Instance.GetStat(Status.MagicATK) * 10) / 10).ToString("F1");
-        cri.text = (Math.Floor(StatManager.Instance.GetStat(Status.CriticalChance) * 10) / 10).ToString("F1");
+        cri.text = ($"{(Math.Floor(StatManager.Instance.GetStat(Status.CriticalChance) * 10) / 10).ToString("F1")}%");
         criDmg.text = (Math.Floor(StatManager.Instance.GetStat(Status.CriticalDamage) * 10) / 10).ToString("F1");
         mSpd.text = (Math.Floor(StatManager.Instance.GetStat(Status.MoveSpeed) * 10) / 10).ToString("F1");
-        aSpd.text = (Math.Floor(StatManager.Instance.GetStat(Status.AttackSpeed) * 10) / 10).ToString("F1");
+        aSpd[0].text = (Math.Floor(StatManager.Instance.GetStat(Status.AttackSpeed) * 10) / 10).ToString("F1");
+        aSpd[1].text = (Math.Floor(StatManager.Instance.GetStat(Status.AttackSpeed) * 10) / 10).ToString("F1");
         regen.text = (Math.Floor(StatManager.Instance.GetStat(Status.HPRegen) * 10) / 10).ToString("F1");
     }
 }

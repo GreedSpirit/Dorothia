@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Numerics;
 
@@ -85,7 +85,7 @@ public class CheatEditorWindow : EditorWindow
         jumpSection = EditorGUILayout.IntField("이동할 섹션", jumpSection);
         if (GUILayout.Button($"{jumpSection}섹션으로 이동"))
         {
-            AddExpCheat();
+            JumpSection();
         }
     }
 
@@ -139,7 +139,7 @@ public class CheatEditorWindow : EditorWindow
 
         if (StageManager.Instance == null) return;
 
-        StageManager.Instance.JumpSection(49);
+        StageManager.Instance.JumpSection(jumpSection);
         Debug.Log($"[Cheat] {jumpSection}섹션으로 이동 됨");
     }
 

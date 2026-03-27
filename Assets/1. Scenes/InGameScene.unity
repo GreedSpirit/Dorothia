@@ -506,6 +506,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!1 &238872361 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4078210760957367598, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
+  m_PrefabInstance: {fileID: 1501011581}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &322306507 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6217856141946335815, guid: 9f469cfbdfdcce54793bbff8b8531f09, type: 3}
@@ -1539,8 +1544,9 @@ MonoBehaviour:
   _dialoguePanel: {fileID: 211280643}
   _nameText: {fileID: 1855346395}
   _dialogueText: {fileID: 1596334027}
-  _backGroundImage: {fileID: 0}
-  _portraitImage: {fileID: 0}
+  _backGroundImage: {fileID: 997382608}
+  _portraitImage: {fileID: 1077824726}
+  _cgImage: {fileID: 1851400528}
 --- !u!4 &413719557
 Transform:
   m_ObjectHideFlags: 0
@@ -2725,7 +2731,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PopUpTextManager
   _overdriveMode: {fileID: 6883391311551316758}
-  _overdiveText: {fileID: 1886923876}
+  _overdiveText: {fileID: 238872361}
   _stageClearText: {fileID: 1785097104}
   _stageNumberText: {fileID: 1785097106}
 --- !u!4 &877665939
@@ -3160,6 +3166,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!225 &997382608 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 3947592028306103330, guid: b22b730fcbe0d8747b6279e2110ef5eb, type: 3}
+  m_PrefabInstance: {fileID: 1629648036}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1024450200 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8614476473190306484, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
@@ -3277,6 +3288,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3025841115585011528, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
   m_PrefabInstance: {fileID: 1501011581}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1077824726 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8578522054828332446, guid: b22b730fcbe0d8747b6279e2110ef5eb, type: 3}
+  m_PrefabInstance: {fileID: 1629648036}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!114 &1102456077 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2452955206764577168, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
@@ -10180,6 +10202,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageBtnLabelUpdater
   _text: {fileID: 1102456077}
+--- !u!114 &1851400528 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 306738817002220195, guid: b22b730fcbe0d8747b6279e2110ef5eb, type: 3}
+  m_PrefabInstance: {fileID: 1629648036}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!114 &1855346395 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1135681355187939325, guid: b22b730fcbe0d8747b6279e2110ef5eb, type: 3}
@@ -10292,11 +10325,6 @@ PrefabInstance:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9107006239373987769, guid: 0f78e4f19c5e62f48b69c7da433054d3, type: 3}
   m_PrefabInstance: {fileID: 1886016536}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1886923876 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5090067684416096415, guid: e3a878e2e4650024aa8b5b18884b941e, type: 3}
-  m_PrefabInstance: {fileID: 1501011581}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1920088155 stripped
 GameObject:
