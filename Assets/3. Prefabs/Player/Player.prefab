@@ -1406,7 +1406,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -5249464930044936117, guid: 779c00c0be9a37d43b21acdfed505a9c, type: 3}
+  - {fileID: 2100000, guid: ff84b3facb1958443836f53cb0e934b8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1433,7 +1433,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: -4400093424780985507, guid: 779c00c0be9a37d43b21acdfed505a9c, type: 3}
+  m_Mesh: {fileID: 7169037757195897777, guid: cfae09f43e8391c45a219930354867eb, type: 3}
   m_Bones:
   - {fileID: 909044210384183077}
   - {fileID: 4331230496126420385}
@@ -1881,6 +1881,7 @@ GameObject:
   - component: {fileID: 2135851063452930395}
   - component: {fileID: 6915657591430412173}
   - component: {fileID: 1433044844601458935}
+  - component: {fileID: 3626383288858966668}
   m_Layer: 0
   m_Name: Dorothia_Ver02
   m_TagString: Player
@@ -2242,14 +2243,9 @@ MonoBehaviour:
   button: {fileID: 0}
   overdriveTime: 10
   maxGauge: 300
-  leftWeapon: {fileID: 969913575204638813}
-  rightWeapon: {fileID: 5484075464559942802}
-  originWeaponMat: {fileID: 3770116981524204771, guid: 400f0c94a85856a49980ffee4f032206, type: 3}
-  originWeaponMesh: {fileID: 1911028412125078994, guid: 400f0c94a85856a49980ffee4f032206, type: 3}
+  playerVisual: {fileID: 3626383288858966668}
   aura: {fileID: 6819976892790551514}
   afterImage: {fileID: 1433044844601458935}
-  overDriveWeaponMat: {fileID: 2100000, guid: ce62e1b08b3de454da83a50197dbb320, type: 2}
-  overDriveWeaponMesh: {fileID: -6529844068306885629, guid: e0f2f21c37ed09d4a9318dfea8af4c29, type: 3}
 --- !u!114 &1433044844601458935
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2267,6 +2263,48 @@ MonoBehaviour:
   ghostColor: {r: 0.7490196, g: 0.15294118, b: 0, a: 0.47058824}
   targetRenderer: {fileID: 8261962318652785708}
   ghostMaterial: {fileID: 2100000, guid: e23e9650707e528469a90c25e3fd78c2, type: 2}
+--- !u!114 &3626383288858966668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7507282556335131659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38b4ba97b4fd904096fa3fc0e3b6a1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVisual
+  leftWeapon: {fileID: 969913575204638813}
+  rightWeapon: {fileID: 5484075464559942802}
+  character: {fileID: 5335403410131108599}
+  characterPresets:
+  - mesh: {fileID: 7169037757195897777, guid: cfae09f43e8391c45a219930354867eb, type: 3}
+    material: {fileID: 2100000, guid: ff84b3facb1958443836f53cb0e934b8, type: 2}
+  - mesh: {fileID: 3995718363322187548, guid: 15f554c5e76e2b245a2cacec35adfc55, type: 3}
+    material: {fileID: 2100000, guid: 528d29bb72ffad346a6638362327d417, type: 2}
+  - mesh: {fileID: -3851827228974935660, guid: 5bedce1ee0b51ad43b701f6711d06ebe, type: 3}
+    material: {fileID: 2100000, guid: 309d62a47f3a2194f803c0da8e93ab64, type: 2}
+  - mesh: {fileID: -943356093344828512, guid: 4fd3917ed205bca4ea4098f6cf2e28f6, type: 3}
+    material: {fileID: 2100000, guid: da94adcc027403b42961662aa5ed46b0, type: 2}
+  - mesh: {fileID: 2405180061873548864, guid: 08f862feb15eefb4cb8a6262ac17862c, type: 3}
+    material: {fileID: 2100000, guid: 0b7bc57bd258ee2408657d1c8b063b08, type: 2}
+  - mesh: {fileID: 635689908386629244, guid: b0a9b771d13d73649930a530b2e4b85f, type: 3}
+    material: {fileID: 2100000, guid: 0092a69f4067a0746ba47049d97fdbd1, type: 2}
+  - mesh: {fileID: 2601398368785779866, guid: 90258f6a007dce64ca8dec0a68e6438b, type: 3}
+    material: {fileID: 2100000, guid: f872c5277f8b00c4ca023c83acc43098, type: 2}
+  - mesh: {fileID: -7245786388909602638, guid: fce2a21ab5736ad48a26bdcf66949b63, type: 3}
+    material: {fileID: 2100000, guid: fa8d27eb39d21ce4abefc2c5f96a27f7, type: 2}
+  originWeaponPresets:
+  - mesh: {fileID: 1911028412125078994, guid: 400f0c94a85856a49980ffee4f032206, type: 3}
+    material: {fileID: 3770116981524204771, guid: 400f0c94a85856a49980ffee4f032206, type: 3}
+  - mesh: {fileID: -2700137717732870028, guid: 170b15b4904995746a0ef073295487f9, type: 3}
+    material: {fileID: 2782416494391207730, guid: 170b15b4904995746a0ef073295487f9, type: 3}
+  overdriveWeaponPresets:
+  - mesh: {fileID: -6529844068306885629, guid: e0f2f21c37ed09d4a9318dfea8af4c29, type: 3}
+    material: {fileID: 2100000, guid: ce62e1b08b3de454da83a50197dbb320, type: 2}
+  - mesh: {fileID: 9210988673067724144, guid: 015094f4830dc3f44bfb3e920176aaff, type: 3}
+    material: {fileID: 2100000, guid: 7f8f77206e15e6d4eb9a09c4157f4441, type: 2}
 --- !u!1 &7562381982653086205
 GameObject:
   m_ObjectHideFlags: 0

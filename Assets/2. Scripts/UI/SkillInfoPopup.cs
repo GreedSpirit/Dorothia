@@ -56,7 +56,7 @@ public class SkillInfoPopup : BaseUI
 
     protected override void OnOpen()
     {
-
+     
     }
 
     protected override void OnClose()
@@ -80,39 +80,53 @@ public class SkillInfoPopup : BaseUI
         var sm = SkillManager.Instance;
         var dm = DataManager.Instance;
 
+        var data = dm.GetData<SkillData>(key.sid);
+        if (data == null) return;
+
         icon.SetSlotData(SkillItem.SlotType.InfoDetail, key);
-        levelText.gameObject.SetActive(!key.isScroll);
-
-        if (!sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
-        var data = skill.Data;
-
-        levelText.text = skill.Level.ToString();
         title.text = $"{data.Skill_Name} 정보";
+        cooldown.text = $"{data.Skill_Cooltime}s";
+        btnText.text = "합성";
 
+        reinforceBtn.interactable = !key.isScroll;
+        currentGold.text = $"{0:N0}G";
+
+        // 희귀도 컬러 적용
         Color rarityColor = RarityColor.GetColor(key.rarity);
         string hexColor = ColorUtility.ToHtmlStringRGB(rarityColor);
-
         skillName.text = $"{data.Skill_Name} <color=#{hexColor}><{key.rarity}></color>";
-        cooldown.text = $"{data.Skill_Cooltime}s";
 
-        float dmg = skill.Data.Affection_Skill_Value * skill.Rank.Skill_Rank_Multiplier * skill.Upgrade.Skill_Upgrade_Multiplier;
-        description.text = string.Format(data.Skill_Information, dmg * 100);
+        float displayDmg = 0;
 
+        if (!key.isScroll && sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill))
+        {
+            // 해금된 스킬인 경우 실제 수치 반영
+            levelText.gameObject.SetActive(true);
+            levelText.text = skill.Level.ToString();
+
+            // 데미지 계산 로직
+            displayDmg = data.Affection_Skill_Value * skill.Rank.Skill_Rank_Multiplier * skill.Upgrade.Skill_Upgrade_Multiplier;
+        }
+        else
+        {
+            // 주문서이거나 미해금 스킬인 경우 기본값 혹은 1레벨 기준 표시
+            levelText.gameObject.SetActive(false);
+            displayDmg = data.Affection_Skill_Value; // 기본 배율만 표시 (필요시 조정)
+        }
+
+        description.text = string.Format(data.Skill_Information, displayDmg * 100);
+
+        // 랭크 정보 리스트 셋팅
         var rankDict = dm.GetDict<Skill_RankData>();
         for (int i = 0; i < grades.Length; i++)
         {
             int rankLevel = i + 1;
-            if (rankDict.TryGetValue(rankLevel, out var rankData))
-            {
-                grades[i].text = $"{rankData.Skill_Rank} : {rankData.Skill_Rank_Multiplier * 100}% 상승";
-            }
-            else
-            {
-                grades[i].text = "-";
-            }
+            grades[i].text = rankDict.TryGetValue(rankLevel, out var rankData)
+                ? $"{rankData.Skill_Rank} : {rankData.Skill_Rank_Multiplier * 100}% 상승"
+                : "-";
         }
 
-        btnText.text = "합성";
+        // 후속 UI 처리
         if (!key.isScroll)
         {
             RefreshEquipStatus();
@@ -122,15 +136,17 @@ public class SkillInfoPopup : BaseUI
         basicToggle.SetIsOnWithoutNotify(true);
         UpdatePanel(true);
     }
+
     private void RefreshReinforceUI()
     {
+        BigInteger haveGold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
+        currentGold.text = $"{haveGold:N0}G";
+
         var sm = SkillManager.Instance;
         if (!sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
 
         levelText.text = $"{skill.Level}/100";
 
-        BigInteger haveGold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
-        currentGold.text = $"{haveGold:N0}G";
 
         int nextCost = sm.GetReinforceCost(key);
         needsGold.text = $"{nextCost:N0}G";

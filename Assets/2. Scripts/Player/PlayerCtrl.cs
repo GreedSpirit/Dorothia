@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 [System.Serializable]
 public struct AttackEffectGroup
@@ -66,10 +67,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public int ComboIndex { get; set; } = 0;
     public bool IsAttack { get; set; } = false;
     public bool IsInvincible { get; set; }
+    public bool IsSkillPending { get; private set; } = false;
 
     // 캐싱
     private PlayerStats _playerStats;
     private OverDriveMode _odm;
+    private PlayerVisual _visual;
     private Animator _anima;
     private AnimatorOverrideController _overrideController;
     private NavMeshAgent _navMesh;
@@ -108,6 +111,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         _anima.runtimeAnimatorController = _overrideController;
         _navMesh = GetComponent<NavMeshAgent>();
         _odm = GetComponent<OverDriveMode>();
+        _visual = GetComponent<PlayerVisual>();
         _navMesh.updateRotation = false;
 
         IdleState = new PlayerIdleState();
@@ -120,7 +124,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         CurrentState = IdleState;
         CurrentState.Enter(this);
 
-        // 승급 이펙트 업데이트
+        // 승급 이펙트 업데이트 (불러오기로 변경해야함)
         UpdateEffectGroup(1);
     }
 
@@ -149,7 +153,17 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         { Key.J, 18002 }, // 차원 난무 그대로 사용하는데 걷는게 더 길어야할듯 o
         { Key.K, 18003 }  // 제노사이드 그대로
     };
-
+    private Dictionary<Key, int> visualMapping = new Dictionary<Key, int>
+    {
+        { Key.F1, 1 },
+        { Key.F2, 2 },
+        { Key.F3, 3 },
+        { Key.F4, 4 },
+        { Key.F5, 5 },
+        { Key.F6, 6 },
+        { Key.F7, 7 },
+        { Key.F8, 8 },
+    };
 
     private void Update()
     {
@@ -171,6 +185,16 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (CurrentState != null)
         {
             CurrentState.Execute(this);
+        }
+
+        foreach (var mapping in visualMapping)
+        {
+            if (Keyboard.current[mapping.Key].wasPressedThisFrame)
+            {
+                _visual.SetGrade(mapping.Value);
+                UpdateEffectGroup(mapping.Value);
+                break;
+            }
         }
     }
 
@@ -239,12 +263,17 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // AutoState 등 내부에서 바로 전환 (IsReady 체크 생략)
     public void PerformSkill(BaseSkill skill)
     {
+        if (IsSkillPending) return; // 중복 실행 차단
+
+        IsSkillPending = true;
+
         if (skill == null || _isDead) return;
 
         SkillState.SetSkill(skill);
         ChangeState(SkillState);
     }
 
+    public void ClearSkillPending() => IsSkillPending = false;
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -288,6 +317,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         // 루트모션 회전도 반영이 필요하면 아래 주석 해제
         // transform.rotation *= _anima.deltaRotation;
     }
+    public void OnSkillAnimationEnd()
+    {
+        ClearSkillPending();
+        if (CurrentState == SkillState)
+            ChangeState(IdleState);
+    }
 
     #endregion
 
@@ -310,13 +345,19 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // 단일 타겟 연타 (MeleeAttackModule 단일 모드)
     internal IEnumerator SingleHitRoutine(IMonster target, int hitCount, float totalDamage)
     {
+
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
+
 
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             if (target == null || !target.IsAlive) yield break;
 
-            target.TakeDamage((int)dmgPerHit);
+            target.TakeDamage((int)dmgPerHit, isCritical);
             // EffectManager.Instance.PlayEffect(...);
 
             yield return new WaitForSeconds(0.08f);
@@ -328,15 +369,20 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
+
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             foreach (var col in targets)
             {
                 if (col == null || !col.gameObject.activeInHierarchy) continue;
 
                 IMonster monster = col.GetComponentInParent<IMonster>();
                 if (monster != null && monster.IsAlive)
-                    monster.TakeDamage((int)dmgPerHit);
+                    monster.TakeDamage((int)dmgPerHit, isCritical);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -348,13 +394,18 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     {
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
+
         for (int i = 0; i < hitCount; i++)
         {
+            //크리티컬 계산
+            bool isCritical = RollCritical();
+            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+
             foreach (var target in targets)
             {
                 if (target == null || !target.IsAlive) continue;
 
-                target.TakeDamage((int)dmgPerHit);
+                target.TakeDamage((int)dmgPerHit, isCritical);
             }
 
             yield return new WaitForSeconds(0.08f);
@@ -549,6 +600,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     }
 
     public void ApplyDamage(int amount) { if (!_isDead) _playerStats.TakeDamage(amount); }
+
+    private bool RollCritical() => UnityEngine.Random.value < StatManager.Instance.GetStat(Status.CriticalChance);
 
     public void ResetState()
     {

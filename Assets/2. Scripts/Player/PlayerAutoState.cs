@@ -22,19 +22,18 @@ public class PlayerAutoState : IPlayerState<PlayerCtrl>
             if (player.NavMesh.isOnNavMesh) player.NavMesh.ResetPath();
             LookAtTarget(player, targetPos);
 
-            // 스킬 사용 가능 상태일 때만 Peek + Consume
-            if (player.CurrentState != player.SkillState)
+            if (player.IsSkillPending) return; // 스킬 중이면 대기
+            if (player.Anima.IsInTransition(0)) return;
+
+            BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
+            if (readySkill != null)
             {
-                BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
-                if (readySkill != null)
-                {
-                    SkillManager.Instance.ConsumeReadySkill(); // 사용 확정 후 인덱스 전진
-                    player.PerformSkill(readySkill);
-                }
-                else
-                {
-                    player.ChangeState(player.AttackState);
-                }
+                SkillManager.Instance.ConsumeReadySkill();
+                player.PerformSkill(readySkill); // SkillState로 전환
+            }
+            else
+            {
+                player.ChangeState(player.AttackState); // 스킬 없으면 일반 공격
             }
         }
         else

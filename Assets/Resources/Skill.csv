@@ -2,21 +2,18 @@
 직업 스킬  id (10001부터 1씩 증가),스킬의 이름,스킬의 타입,스킬의 쿨타임,효과를 받는 스테이터스,스킬 배율,애니메이션 위치,스킬 아이콘,스킬 설명
 Job_Skill_Id,Skill_Name,Skill_Type,Skill_Cooltime,Affection_Skill,Affection_Skill_Value,Skill_Animation_Patch,Skill_Icon,Skill_Information
 int,string,enum,float,enum,float,string,string,string
-10001,난무,1,7,2,2,DanceOfBlade,Skill_001,<color=#FFFFFF>도로시아의 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10002,폭풍 난무,1,10,2,4,StormOfBlade,Skill_002,<color=#FFFFFF>도로시아의 주변에 열의 폭풍을 일으켜 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10003,순보 베기,1,4,2,5,Soonbo,Skill_005,<color=#FFFFFF>도로시아가 순식간에 적의 목을 베어내며 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10004,암살자의 발걸음,1,14,2,5,AssasinFoot,Skill_006,"<color=#FFFFFF>도로시아가 조심스러운 발걸음으로 순식간에 다수의 적을 쓸어버리며 최대 8번의 공격을 실행하여, 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다. 데미지는 실행 횟수에 비례하여 적용됩니다.</color>"
-10005,스피어,1,5,2,5,Spear,Skill_007,<color=#FFFFFF>도로시아가 창과 같은 찌르기를 시전하여 충격파를 일으키며 돌진합니다. 경로상 적들에게 공격력의 </color> <color=#FF0000>{0}%</color><color=#FFFFFF> 데미지를 입힙니다.</color>
-10006,파이어 피어스,1,3,2,6,FirePierce,Skill_008,<color=#FFFFFF>도로시아가 코어의 열 에너지를 이용하여 파괴적인 찌르기를 시전합니다. 경로상 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10007,입체 기동 블레이드,1,8,2,7,FlyingBlade,Skill_009,"<color=#FFFFFF>도로시아가 체인이 달린 검을 적을 향해 투척합니다. 검에 달린 체인을 순식간에 수축하여 빠르게 적에게 이동하고, 열기 폭발을 일으켜 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
-10008,파이어 샷,1,6,2,5,FireShot,Skill_010,<color=#FFFFFF>도로시아가 적을 향해 불꽃의 참격을 발사하여 적들에게 공격력의 </color><color=#FF0000>{0}%</color><color=#FFFFFF>데미지를 입힙니다.</color>
-10009,연쇄 참격,1,15,2,9,ComboShot,Skill_011,"<color=#FFFFFF>도로시아가 코어의 힘을 이용한 고열 참격을 생성하고, 3번의 거대한 검기를 시전하여 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다. 타격한 참격 개수에 비례하여 데미지를 적용합니다.</color>"
-10010,콤보 슬래시,1,6,2,4,ComboSlash,Skill_012,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘둘러 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10011,크로스 슬래시,1,5,2,3,CrossSlash,Skill_013,<color=#FFFFFF>도로시아가 자신이 가진 코어의 힘을 끌어올려 전방의 모든 적을 베어내어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10012,피어스 슬래시,1,6,2,3,PierceSlash,Skill_014,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘두른 후 돌진하여 찌릅니다. 마지막 고열의 찌르기는 적을 관통하며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10013,필살,1,5,2,4,Finisher,Skill_015,<color=#FFFFFF>도로시아가 순식간에 적에게 접근해 절명에 이르는 3번의 공격을 시전하여 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10014,히트 쉐이커,1,11,2,4,HitShaker,Skill_016,<color=#FFFFFF>도로시아가 강렬한 일격을 지면에 꽂아 지형을 솟아오르게 하여 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10015,탈론 스크래치,1,7,2,6,TalonScratch,Skill_018,"<color=#FFFFFF>도로시아가 원거리 참격을 지면으로 발사하여, 해당 지점의 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
+10001,난무,1,3,2,2.4,DanceOfBlade,Skill_001,<color=#FFFFFF>도로시아의 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10002,폭풍 난무,1,7,2,4.2,StormOfBlade,Skill_002,<color=#FFFFFF>도로시아의 주변에 열의 폭풍을 일으켜 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10003,순보 베기,1,5,2,5.5,Soonbo,Skill_005,<color=#FFFFFF>도로시아가 순식간에 적의 목을 베어내며 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10004,암살자의 발걸음,1,12,2,8.4,AssasinFoot,Skill_006,"<color=#FFFFFF>도로시아가 조심스러운 발걸음으로 순식간에 다수의 적을 쓸어버리며 최대 8번의 공격을 실행하여, 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다. 데미지는 실행 횟수에 비례하여 적용됩니다.</color>"
+10005,스피어,1,4,2,4.2,Spear,Skill_007,<color=#FFFFFF>도로시아가 창과 같은 찌르기를 시전하여 충격파를 일으키며 돌진합니다. 경로상 적들에게 공격력의 </color> <color=#FF0000>{0}%</color><color=#FFFFFF> 데미지를 입힙니다.</color>
+10006,파이어 피어스,1,3,2,2.7,FirePierce,Skill_008,<color=#FFFFFF>도로시아가 코어의 열 에너지를 이용하여 파괴적인 찌르기를 시전합니다. 경로상 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10010,콤보 슬래시,1,7,2,7.2,ComboSlash,Skill_012,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘둘러 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10011,크로스 슬래시,1,8,2,4,CrossSlash,Skill_013,<color=#FFFFFF>도로시아가 자신이 가진 코어의 힘을 끌어올려 전방의 모든 적을 베어내어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10012,피어스 슬래시,1,4,2,4,PierceSlash,Skill_014,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘두른 후 돌진하여 찌릅니다. 마지막 고열의 찌르기는 적을 관통하며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10013,필살,1,8,2,7.2,Finisher,Skill_015,<color=#FFFFFF>도로시아가 순식간에 적에게 접근해 절명에 이르는 3번의 공격을 시전하여 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10014,히트 쉐이커,1,5,2,5,HitShaker,Skill_016,<color=#FFFFFF>도로시아가 강렬한 일격을 지면에 꽂아 지형을 솟아오르게 하여 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10015,탈론 스크래치,1,6,2,6,TalonScratch,Skill_018,"<color=#FFFFFF>도로시아가 원거리 참격을 지면으로 발사하여, 해당 지점의 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
 15001,무기 연마,2,0,2,0.2,,Skill_019,<color=#FFFFFF>도로시아의 무기에 강력한 힘이 담긴 광물을 녹여내어 연마하였습니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15002,복수자,2,0,2,0.3,,Skill_020,<color=#FFFFFF>도로시아가 복수에 몸을 맡겨 파괴적인 힘을 이끌어내어 복수의 화신이 되었습니다. 플레이어의 공격력이 <color=#00FF00>{0}%</color> 증가합니다.</color>
 15003,데우스 엑스 마키나의 축복,2,0,2,0.4,,Skill_021,<color=#FFFFFF>데우스 엑스 마키나의 강력한 권능이 도로시아와 그녀의 무기에 부여됩니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
@@ -24,8 +21,8 @@ int,string,enum,float,enum,float,string,string,string
 15005,도로시아 식 쌍검술,2,0,4,0.3,,Skill_023,<color=#FFFFFF>자신만의 고유 검술을 더욱 강화하여 폭풍 같은 공격이 가능하게 되었습니다. 플레이어의 공격속도가 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15006,경량화 인첸트,2,0,10,0.4,,Skill_024,<color=#FFFFFF>개조된 신체 부위에 경량화의 힘을 부여하여 무거운 소재를 가볍게 개조하였습니다. 플레이어의 이동속도가 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15007,석유 정제 기관,2,0,1,0.3,,Skill_025,"<color=#FFFFFF>도로시아가 유입되는 석유를 고순도로 흡수하는 기관을 장착하여, 에너지 효율을 높이고 흡수 능력을 대폭 상승시켰습니다. 플레이어의 체력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
-15008,마력 무효화 망토,2,0,7,0.5,,Skill_026,"<color=#FFFFFF>마법을 분산시키는 소재의 망토를 둘러, 마력 공격에 대한 대비책을 완성했습니다. 플레이어의 마법 저항력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
-15009,경량화 마법을 머금은 오리할콘 갑주,2,0,8,0.5,,Skill_027,"<color=#FFFFFF>신의 금속 오리할콘으로 제작된 갑옷을 증기 기사가 이용하기 쉽게 개량하고, 경량화 마법을 부여하여 전투 효율을 극대화하였습니다. 플레이어의 방어력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
+15008,마력 무효화 망토,2,0,8,0.5,,Skill_026,"<color=#FFFFFF>마법을 분산시키는 소재의 망토를 둘러, 마력 공격에 대한 대비책을 완성했습니다. 플레이어의 마법 저항력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
+15009,경량화 마법을 머금은 오리할콘 갑주,2,0,7,0.5,,Skill_027,"<color=#FFFFFF>신의 금속 오리할콘으로 제작된 갑옷을 증기 기사가 이용하기 쉽게 개량하고, 경량화 마법을 부여하여 전투 효율을 극대화하였습니다. 플레이어의 방어력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
 15010,자가 수복 프로토콜,2,0,9,0.3,,Skill_028,"<color=#FFFFFF>도로시아의 파츠에 재생 마법과 자가 수복 장치를 추가하여, 전투 지속성과 회복력을 대폭 상승시켰습니다. 플레이어의 체력 재생력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
 15011,암살자의 눈,2,0,5,0.2,,Skill_029,<color=#FFFFFF>도로시아가 수많은 사선을 넘나들며 익힌 암살자의 눈입니다. 상대의 약점을 쉽게 파악하여 치명적인 공격을 가할 수 있게 합니다. 플레이어의 치명타 확률이 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15012,절삭 인챈트,2,0,6,0.2,,Skill_030,<color=#FFFFFF>도로시아의 무기에 단단한 광석뿐만 아니라 영혼마저 베어낼 수 있는 절삭력을 부여하였습니다. 플레이어의 치명타 데미지가 <color=#FF0000>{0}%</color> 증가합니다.</color>

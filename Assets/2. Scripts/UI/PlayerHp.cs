@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +31,7 @@ public class PlayerHp : MonoBehaviour
     IEnumerator UpdateDelay()
     {
         yield return null;
-        _slider.value = _playerStats._currentHp;
+        _slider.value = _playerStats.CurrentHp;
     }
 
     void ChangeHpBar(float currentHp, float maxHp)

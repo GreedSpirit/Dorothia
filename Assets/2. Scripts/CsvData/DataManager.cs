@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -71,7 +71,7 @@ public class DataManager : MonoBehaviour
         LoadData<Equip_Rank_GoldData>("Equip_Rank_Gold");
 
         //Character 테이블
-        LoadData<CharacterData>("Character");
+        //LoadData<CharacterData>("Character");
         LoadData<Character_RankData>("Character_Rank");
         LoadData<Character_StatsData>("Character_Stats");
         LoadData<Character_UpgradeData>("Character_Upgrade");
