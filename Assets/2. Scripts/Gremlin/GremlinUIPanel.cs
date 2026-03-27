@@ -188,7 +188,7 @@ public class GremlinUIPanel : BaseUI
             return;
         }
 
-        if(isAccepted == false && _selectedUIItem.GetGremlin()._rarity < _equippedUIItem.GetGremlin()._rarity)
+        if(isAccepted == false && _equippedUIItem != null && _selectedUIItem.GetGremlin()._rarity < _equippedUIItem.GetGremlin()._rarity)
         {
             _noticeUIPanel.ChangeNoticeTitle("오류");
             _noticeUIPanel.ChangeNoticeDescription("장착 중인 그렘린보다 약합니다.\n정말 교체하시겠습니까?");
@@ -250,7 +250,7 @@ public class GremlinUIPanel : BaseUI
     {
         if(_selectedUIItem != null)
         {
-            GremlinManager.Instance.StartCoroutine(GremlinManager.Instance.ChangeGremlin(_equippedUIItem.GetGremlin()));
+            GremlinManager.Instance.StartCoroutine(GremlinManager.Instance.ChangeGremlin(_equippedUIItem?.GetGremlin()));
         }
     }
 }

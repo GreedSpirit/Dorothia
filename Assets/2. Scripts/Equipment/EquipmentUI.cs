@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -98,6 +99,52 @@ public class EquipmentUI : BaseUI
     public void SecondRingSlotFunction()
     {
         _slotIndex = 1;
+    }
+
+    public void UpdateEquipState()
+    {
+        List<Equipment> inv = EquipmentInventory.Instance.GetInventory(_firstRingSlot.part);
+        Debug.Log(inv.Count);
+        foreach(var equip in inv)
+        {
+            Debug.Log($"equip: {equip.EquippedSlotIndex}, slot: {_firstRingSlot.slotIndex}");
+            if (equip.isEquipped == true && equip.EquippedSlotIndex == _firstRingSlot.slotIndex)
+            {
+                Debug.Log(equip.icon == null);
+                _firstRingSlot.equipped = equip;
+                equip.SetEquipped(_firstRingSlot.slotIndex);
+                _firstRingSlot.iconImage.sprite = equip.icon;
+                _firstRingSlot.iconImage.enabled = true;
+            }
+            else if (equip.isEquipped == true && equip.EquippedSlotIndex == _secondRingSlot.slotIndex)
+            {
+                Debug.Log(equip.icon == null);
+                _secondRingSlot.equipped = equip;
+                equip.SetEquipped(_secondRingSlot.slotIndex);
+                _secondRingSlot.iconImage.sprite = equip.icon;
+                _secondRingSlot.iconImage.enabled = true;
+
+            }
+        }
+        foreach (var slots in _partSlots)
+        {
+            inv = EquipmentInventory.Instance.GetInventory(slots.part);
+
+            foreach(var equip in inv)
+            {
+                Debug.Log($"equip: {equip.EquippedSlotIndex}, slot: {_firstRingSlot.slotIndex}");
+                if (equip.isEquipped == true && equip.EquippedSlotIndex == slots.slotIndex)
+                {
+                    Debug.Log(equip.icon == null);
+                    slots.equipped = equip;
+                    equip.SetEquipped(slots.slotIndex);
+                    slots.iconImage.sprite = equip.icon;
+                    slots.iconImage.enabled = true;
+                }
+            }
+        }
+        //EquipmentSlotManager.Instance.ApplyEquipmentSet();
+        _inventoryPanel.onInventoryChanged?.Invoke();
     }
 
     protected override void OnOpen()

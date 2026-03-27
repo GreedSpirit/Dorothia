@@ -38,6 +38,8 @@ public class GremlinUIItem : MonoBehaviour
 
     public Gremlin GetGremlin()
     {
+        Debug.Log(_itemData == null);
+        if (_itemData == null) return null;
         return _itemData;
     }
 

@@ -48,9 +48,6 @@ public class EquipSlot : MonoBehaviour
     public void OnClickSlot()
     {
         OnSlotClicked?.Invoke(this);
-        //equipmentUI.SetSlot(this);
-        ////이 슬롯을 기반으로, 해당 슬롯에 맞는 인벤토리를 열도록 EquipmentUI의 메서드를 실행합니다.
-        //equipmentUI.OpenInventory(this);
     }
 
     /// <summary>
