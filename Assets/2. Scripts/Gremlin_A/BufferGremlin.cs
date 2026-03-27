@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -75,7 +75,7 @@ public class BufferGremlin : GremlinBehaviour
         if(ActiveStatus.TryGetValue(Status.HP, out float value))
         {
             int healamount = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP) * value);
-            int maxHealAmount = Mathf.FloorToInt(_player.PlayerStats._maxHp - _player.PlayerStats._currentHp);
+            int maxHealAmount = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP) - _player.PlayerStats.CurrentHp);
 
             if(healamount > maxHealAmount)
             {

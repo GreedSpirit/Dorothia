@@ -154,5 +154,5 @@ public class SkillProjectile : MonoBehaviour
 
     //private float CalculateDamage() => _caster != null ? _caster.Stat.SkillDamage : 10f;
 
-    private bool RollCritical() => _caster != null && Random.value < _caster.PlayerStats._crt_prob;
+    private bool RollCritical() => _caster != null && Random.value < StatManager.Instance.GetStat(Status.CriticalChance);
 }

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +18,7 @@ public class DungeonSelect : BaseUI
     protected override void OnOpen()
     {
         //플레이어 현재 레벨 값 가져오기
-        UpdateLevel(_playerStats._currentLevel);
+        UpdateLevel(_playerStats.CurrentLevel);
     }
 
     protected override void OnClose()

@@ -18,7 +18,7 @@ public class StatUpgradePopup : BaseUI
     [SerializeField] private GameObject upgradePanel;
     [SerializeField] private GameObject promotionPanel;
 
-    private void Awake()
+    private void Start()
     {
         upgradeToggle.onValueChanged.AddListener(ToggleActiveCheck);
         promotionToggle.onValueChanged.AddListener(ToggleActiveCheck);
