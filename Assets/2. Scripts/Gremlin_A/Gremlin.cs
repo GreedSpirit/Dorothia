@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class Gremlin
 {
@@ -26,5 +30,45 @@ public class Gremlin
         _gremlinData = data;
         _rarity = rarity;
         _enchantCount = enchantCount;
+    }
+
+    public GremlinSaveData ToSaveData()
+    {
+        GremlinSaveData data = new GremlinSaveData();
+        data.guid = InstanceGUID;
+        int id = _gremlinData.PetID;
+        Debug.Log(id);
+        data.petID = _gremlinData.PetID;
+        data.rarity = (int)_rarity;
+        data.level = _currentLevel;
+        data.enchantCount = _enchantCount;
+        data.isEquipped = _isEquipped;
+        return data;
+    }
+
+    public async Task<Gremlin> FromSaveData(GremlinSaveData data)
+    {
+        Gremlin gremlin = new Gremlin();
+        GremlinSOData SO = await GetSOData(data.petID);
+        gremlin.Init(data.guid, SO, (Rarity)data.rarity, data.level, data.enchantCount);
+        gremlin._isEquipped = data.isEquipped;
+        return gremlin;
+    }
+
+    public async Task<GremlinSOData> GetSOData(int id)
+    {
+        string key = id switch
+        {
+            140001 => "SO_Flint",
+            140002 => "SO_Pinion",
+            143001 => "SO_Core",
+            143002 => "SO_Zinc",
+            _ => null
+        };
+
+        var handle = Addressables.LoadAssetAsync<GremlinSOData>(key);
+        await handle.Task;
+
+        return handle.Result;
     }
 }

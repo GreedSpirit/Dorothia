@@ -1,13 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class GremlinInventory : MonoBehaviour
+public class GremlinInventory : MonoBehaviour, ISaveable<List<GremlinSaveData>>
 {
+    public static GremlinInventory Instance;
     public List<Gremlin> _gremlinInventory { get; private set; }
 
     private void Awake()
     {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
         _gremlinInventory = new List<Gremlin>();
     }
 
@@ -39,5 +47,26 @@ public class GremlinInventory : MonoBehaviour
     {
         List<Gremlin> item = _gremlinInventory.Where(p => p._gremlinData.PetID == id && p._rarity == rarity).Take(3).ToList();
         return item;
+    }
+
+    public List<GremlinSaveData> GetSaveData()
+    {
+        return _gremlinInventory.Select(p => p.ToSaveData()).ToList();
+    }
+
+    public async void LoadFromSaveData(List<GremlinSaveData> data)
+    {
+        _gremlinInventory.Clear();
+        foreach (var item in data)
+        {
+           Gremlin gremlin = new Gremlin();
+            var g = await gremlin.FromSaveData(item);
+            gremlin = g;
+            if(gremlin._isEquipped == true)
+            {
+                GremlinManager.Instance.ChangeGremlin(gremlin);
+            }
+            AddGremlin(gremlin);
+        }
     }
 }

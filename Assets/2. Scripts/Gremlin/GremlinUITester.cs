@@ -16,9 +16,6 @@ public class GremlinUITester : MonoBehaviour
 
     private void Start()
     {
-        //더미데이터 생성
-        GenerateDummyData();
-        
         ExchangeManager.Instance.onShardValueChanged += MergeShard;
     }
 
