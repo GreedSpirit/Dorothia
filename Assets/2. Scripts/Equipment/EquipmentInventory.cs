@@ -109,22 +109,23 @@ public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
         return data;
     }
 
-    public void LoadFromSaveData(InventorySaveData data)
+    public async void LoadFromSaveData(InventorySaveData data)
     {
         //이제 받아온 세이브데이터의 모든 데이터를 대상으로 아래 코드를 실행합니다.
         foreach (var slot in data.EquipmentInventory)
         {
-            //저장 데이터의 인벤토리 내에 담아둔 장비 저장 데이터를 기반으로 새롭게 장비를 생성합니다.
             Equipment equipment = new Equipment(slot.instanceGUID, DataManager.Instance.GetData<EquipData>(slot.equipID), (Rarity)slot.equipRarity, slot.equipLevel);
+            var equip = await equipment.WaitSprite(slot.instanceGUID, DataManager.Instance.GetData<EquipData>(slot.equipID), (Rarity)slot.equipRarity, slot.equipLevel);
+            //저장 데이터의 인벤토리 내에 담아둔 장비 저장 데이터를 기반으로 새롭게 장비를 생성합니다.
 
             //강화 단계와 강화 가중치, 합성 가중치는 0으로 생성되므로, 해당 값을 대입해줍니다.
-            equipment.equip_Upgrade = slot.equipEnchant;
-            equipment.equip_Upgrade_Weight = slot.enchantWeight;
-            equipment.equip_Fuse_Weight = slot.fuseWeight;
-            equipment.isEquipped = slot.isEquipped;
-            equipment.EquippedSlotIndex = slot.slotIndex;
+            equip.equip_Upgrade = slot.equipEnchant;
+            equip.equip_Upgrade_Weight = slot.enchantWeight;
+            equip.equip_Fuse_Weight = slot.fuseWeight;
+            equip.isEquipped = slot.isEquipped;
+            equip.EquippedSlotIndex = slot.slotIndex;
 
-            AddEquipment(equipment);
+            AddEquipment(equip);
         }
         EquipmentUI ui = FindAnyObjectByType<EquipmentUI>(FindObjectsInactive.Include);
         Debug.Log(ui == null);
