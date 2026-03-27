@@ -18,6 +18,7 @@ public class MonsterStatsFromSO : IMonsterStats
     public float RotateSpeed => _data.rotateSpeed;
 
     public int Damage => _data.damage;
+    public float Defense => _data.defense;
 
     public float AttackRange => _data.attackRange;  
     public float AttackCooldown => _data.attackCooldown;
