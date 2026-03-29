@@ -1990,20 +1990,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d7bb060e496a64f839b3f1305ad365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  _level: 0
-  _currentLevel: 0
-  _maxHp: 0
-  _currentHp: 0
-  _atk: 0
-  _atk_m: 0
-  _dps: 0
-  _crt_prob: 0
-  _crt_dmg: 0
-  _def: 0
-  _def_m: 0
-  _hp_regen: 0
-  _agi: 5
-  _upgrade_scrap_n: 0
 --- !u!114 &6032601063345712281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2277,6 +2263,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVisual
   leftWeapon: {fileID: 969913575204638813}
   rightWeapon: {fileID: 5484075464559942802}
+  _effectGroupA:
+    attackEffect1: {fileID: 8960352883985790566}
+    attackEffect2: {fileID: 7613104542995506992}
+    attackEffect3: {fileID: 3896775889347982756}
+    hitEffect1: {fileID: 2862424883200959923}
+    hitEffect2: {fileID: 2656603569726417580}
+    hitEffect3: {fileID: 822698893290044076}
+  _effectGroupB:
+    attackEffect1: {fileID: 4716677916849982564}
+    attackEffect2: {fileID: 1264702533644621883}
+    attackEffect3: {fileID: 5902094359116494208}
+    hitEffect1: {fileID: 2011801414029630603}
+    hitEffect2: {fileID: 9203116088955408167}
+    hitEffect3: {fileID: 7967388366811458542}
   character: {fileID: 5335403410131108599}
   characterPresets:
   - mesh: {fileID: 7169037757195897777, guid: cfae09f43e8391c45a219930354867eb, type: 3}
