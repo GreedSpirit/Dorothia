@@ -14,6 +14,9 @@ public class AddressableEditor : EditorWindow
 
     private const string EquipFolder = "Assets/99. IgnoredAssets/EquipIcon/";
 
+    private const string PromotionFolder = "Assets/Resources/Player/Promotion";
+
+
     [MenuItem("Tools/Resource Manager")]
     public static void ShowWindow()
     {
@@ -22,7 +25,7 @@ public class AddressableEditor : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label("Skill Resource Auto Addressable Tool", EditorStyles.boldLabel);
+        GUILayout.Label("Resource Auto Addressable Tool", EditorStyles.boldLabel);
         EditorGUILayout.Space();
 
         EditorGUILayout.HelpBox($"설정된 경로:\n1. 스킬 이펙트: {EffectFolder}" +
@@ -68,6 +71,11 @@ public class AddressableEditor : EditorWindow
             count += ScanDirectory(settings, folderPath, type.ToString(), "*.jpg");
             count += ScanDirectory(settings, folderPath, type.ToString(), "*.tga");
         }
+
+        // 승급 아이콘, 외형 폴더 스캔 (다중 확장자 지원)
+        count += ScanDirectory(settings, PromotionFolder, "Promotion", "*.png");
+        count += ScanDirectory(settings, PromotionFolder, "Promotion", "*.jpg");
+        count += ScanDirectory(settings, PromotionFolder, "Promotion", "*.tga");
 
         AssetDatabase.SaveAssets();
         Debug.Log($"총 {count}개의 에셋이 어드레서블로 업데이트되었습니다.");
