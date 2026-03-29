@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Numerics;
 
@@ -12,6 +12,7 @@ public class CheatEditorWindow : EditorWindow
     private float damageMultiplier = 2.0f;
 
     private int jumpSection = 4;
+    private int levelAmount = 1;
 
     [MenuItem("Tools/Cheat Editor")]
     public static void ShowWindow()
@@ -74,6 +75,14 @@ public class CheatEditorWindow : EditorWindow
         if (GUILayout.Button($"{expAmount} 경험치 추가"))
         {
             AddExpCheat();
+        }
+
+        EditorGUILayout.Space();
+
+        levelAmount = EditorGUILayout.IntField("레벨 업 할 단위", levelAmount);
+        if (GUILayout.Button($"{levelAmount} 레벨 추가"))
+        {
+            PlayerStats.Instance.CheatLevelUp(levelAmount);
         }
 
         EditorGUILayout.Space();
