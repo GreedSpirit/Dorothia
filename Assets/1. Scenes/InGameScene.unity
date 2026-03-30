@@ -5234,6 +5234,7 @@ GameObject:
   - component: {fileID: 86312569245434779}
   - component: {fileID: 86312569245434776}
   - component: {fileID: 86312569245434777}
+  - component: {fileID: 86312569245434780}
   m_Layer: 5
   m_Name: TotalPower
   m_TagString: Untagged
@@ -5299,6 +5300,20 @@ RectTransform:
   m_AnchoredPosition: {x: -265, y: 0}
   m_SizeDelta: {x: 389, y: 158}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &86312569245434780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86312569245434756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 253771791e618de4686d00ff93b484c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TotalPowerText
+  targetText:
+  - {fileID: 853150369602996463}
 --- !u!1 &119521104514703570
 GameObject:
   m_ObjectHideFlags: 0
