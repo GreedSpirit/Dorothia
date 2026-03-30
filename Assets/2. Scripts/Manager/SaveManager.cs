@@ -140,7 +140,7 @@ public class SaveManager : MonoBehaviour
 
         if (offlineHours <= 0) return;
 
-        double clearsPerHour = 90 / 90;
+        double clearsPerHour = 3600 / 90;
 
         BigInteger sectionGold = sectionData.Section_Gold;
         BigInteger sectionExp = sectionData.Section_Exp;
