@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class DungeonSelect : BaseUI
 {
-    [SerializeField] PlayerStats _playerStats;
     [SerializeField] GameObject[] _dungeons;
     [SerializeField] GameObject[] _lockDungeons;
     [SerializeField] TextMeshProUGUI[] _clearMessage;
@@ -18,7 +17,7 @@ public class DungeonSelect : BaseUI
     protected override void OnOpen()
     {
         //플레이어 현재 레벨 값 가져오기
-        UpdateLevel(_playerStats.CurrentLevel);
+        UpdateLevel(PlayerStats.Instance.CurrentLevel);
     }
 
     protected override void OnClose()
@@ -28,12 +27,12 @@ public class DungeonSelect : BaseUI
 
     private void OnEnable()
     {
-        _playerStats.OnLevelChanged += UpdateLevel;
+        PlayerStats.Instance.OnLevelChanged += UpdateLevel;
     }
 
     private void OnDisable()
     {
-        _playerStats.OnLevelChanged -= UpdateLevel;
+        PlayerStats.Instance.OnLevelChanged -= UpdateLevel;
     }
 
     void UpdateLevel(int currentLevel)

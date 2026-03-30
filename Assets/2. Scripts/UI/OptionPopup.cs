@@ -40,6 +40,7 @@ public class OptionPopup : BaseUI
         //옵션저장하기 구현 
         //언어만 저장해주면 될 듯
         //사운드는 실시간
+        UIManager.Instance.CloseTopPanel();
     }
 
     private void LanaguageSettings(int value)

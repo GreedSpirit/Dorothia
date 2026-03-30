@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using UnityEngine;
@@ -74,6 +74,7 @@ public class PlayerCombatSlots : MonoBehaviour
         BuildSlots(true);
 
         _isInitialized = true;
+        Debug.Log("컴뱃 슬롯 초기화 완료");
     }
 
     private void LateUpdate()
@@ -456,7 +457,6 @@ public class PlayerCombatSlots : MonoBehaviour
     {
         if (!_isInitialized)
         {
-            Debug.Log("[PlayerCombatSlots] 아직 초기화 안됨");
             return;
         }
 

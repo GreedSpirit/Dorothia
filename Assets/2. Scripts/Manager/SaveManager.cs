@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Numerics;
 using UnityEngine;
@@ -73,13 +73,13 @@ public class SaveManager : MonoBehaviour
     {
         var saveData = CreateSaveData();
         SaveManagement.Save("GameData", saveData);
-        Debug.LogError("저장 완료!");
+        Debug.LogWarning("저장 완료!");
     }
 
     private SaveData CreateSaveData()
     {
-        Debug.Log(EquipmentInventory.Instance);
-        Debug.Log(GremlinInventory.Instance);
+        //Debug.Log(EquipmentInventory.Instance);
+        //Debug.Log(GremlinInventory.Instance);
         return new SaveData
         {
             equipInv = EquipmentInventory.Instance.GetSaveData(),
@@ -106,8 +106,8 @@ public class SaveManager : MonoBehaviour
         var data = SaveManagement.Load<SaveData>("GameData");
 
         if (data == null) return;
-        Debug.Log(EquipmentInventory.Instance);
-        Debug.Log(GremlinInventory.Instance);
+        //Debug.Log(EquipmentInventory.Instance);
+        //Debug.Log(GremlinInventory.Instance);
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
         StageManager.Instance.LoadFromSaveData(data.stageData);
@@ -123,11 +123,11 @@ public class SaveManager : MonoBehaviour
 
     private void GiveOfflineReward()
     {
-        Debug.LogError("DataManager: " + (DataManager.Instance != null));
-        Debug.LogError("StageManager: " + (StageManager.Instance != null));
-        Debug.LogError("ExchangeManager: " + (ExchangeManager.Instance != null));
-        Debug.LogError("TestWeaponGenerator: " + (TestWeaponGenerator.Instance != null));
-        Debug.LogError("_playerStat: " + (_playerStat != null));
+        //Debug.LogError("DataManager: " + (DataManager.Instance != null));
+        //Debug.LogError("StageManager: " + (StageManager.Instance != null));
+        //Debug.LogError("ExchangeManager: " + (ExchangeManager.Instance != null));
+        //Debug.LogError("TestWeaponGenerator: " + (TestWeaponGenerator.Instance != null));
+        //Debug.LogError("_playerStat: " + (_playerStat != null));
         var sectionData = DataManager.Instance.GetData<Stage_RewardData>(StageManager.Instance.CurrentSection);
 
         if (sectionData == null)
@@ -152,9 +152,9 @@ public class SaveManager : MonoBehaviour
         BigInteger gold = new BigInteger(Math.Floor(goldCalc));
         BigInteger exp = new BigInteger(Math.Floor(expCalc));
 
-        Debug.LogError($"방치보상 골드: {goldCalc}");
-        Debug.LogError($"방치보상 경험치: {expCalc}");
-        Debug.LogError($"방치 장비 수: {equipCount}");
+        //Debug.LogError($"방치보상 골드: {goldCalc}");
+        //Debug.LogError($"방치보상 경험치: {expCalc}");
+        //Debug.LogError($"방치 장비 수: {equipCount}");
 
         //실제 지급
         ExchangeManager.Instance.GetMoney(MoneyType.Gold, gold);

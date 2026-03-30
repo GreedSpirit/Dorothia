@@ -191,7 +191,7 @@ public class PlayerStats : MonoBehaviour, IResettable
 
         if (CurrentHp <= 0f)
         {
-            Debug.Log("플레이어 사망");
+            //Debug.Log("플레이어 사망");
             OnDead?.Invoke();
         }
     }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -166,7 +166,7 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
         if (TimeManager.Instance.GetElapsed(TimerType.Boss) >= _bossTimeLimit)
         {
-            Debug.Log("보스 시간 초과");
+            //Debug.Log("보스 시간 초과");
             HandleBossFail();
         }
     }
@@ -398,7 +398,7 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
     {
         _state = newState;
         OnStageStateChanged?.Invoke(_state);
-        Debug.Log($"현재상태{_state}");
+        //Debug.Log($"현재상태{_state}");
         switch (_state)
         {
             case StageState.Enter:
@@ -474,7 +474,7 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
             OnSectionChanged?.Invoke(_currentSection);
 
-            Debug.Log($"섹션 확인 {_currentSection} (SectionId:{CurrentStageSectionId})");
+            //Debug.Log($"섹션 확인 {_currentSection} (SectionId:{CurrentStageSectionId})");
 
             //현재 Stage의 Section 끝에 도달했는가?
             if (_currentSection > _sectionData.Section_End)
@@ -485,7 +485,7 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
                 if (nextStage != null)
                 {
-                    Debug.Log($"Stage 구간 바뀜 -> {nextStageId}");
+                    //Debug.Log($"Stage 구간 바뀜 -> {nextStageId}");
                     StartStage(nextStageId);
                 }
                 else
@@ -590,7 +590,7 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
     private void ResetSectionAndRespawn()
     {
-        Debug.Log($"[Stage] 실패 -> 이전 섹션 이동 전: {_currentSection}");
+        //Debug.Log($"[Stage] 실패 -> 이전 섹션 이동 전: {_currentSection}");
 
         _spawnManager.StopNormalSpawn();
         _spawnManager.ForceClearAll();
@@ -608,14 +608,14 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
         OnSectionChanged?.Invoke(_currentSection);
 
-        Debug.Log($"[Stage] 실패 -> 현재 섹션: {_currentSection}");
+        //Debug.Log($"[Stage] 실패 -> 현재 섹션: {_currentSection}");
 
         _killCount = 0;
 
         if (_player is IResettable resettable)
             resettable.ResetState();
 
-        Debug.Log("[Stage] Spawning 재시작");
+        //Debug.Log("[Stage] Spawning 재시작");
 
         ChangeState(StageState.Spawning);
     }
@@ -625,18 +625,18 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
         //던전 진행 중 플레이어 사망은 DungeonManager가 처리하므로 StageManager는 무시
         if (DungeonManager.Instance != null && DungeonManager.Instance.IsDungeonRunning)
         {
-            Debug.LogWarning("던전 진행중이라 StageManager 처리 스킵");
+            //Debug.LogWarning("던전 진행중이라 StageManager 처리 스킵");
             return;
         }
 
         if (_bossAlive)
         {
-            Debug.Log("플레이어 사망 -> 보스전 실패");
+            //Debug.Log("플레이어 사망 -> 보스전 실패");
             HandleBossFail();
         }
         else
         {
-            Debug.Log("플레이어 사망 -> 섹션 리셋");
+            //Debug.Log("플레이어 사망 -> 섹션 리셋");
 
             ResetSectionAndRespawn();
         }

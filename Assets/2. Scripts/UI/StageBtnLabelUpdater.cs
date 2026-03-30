@@ -1,11 +1,11 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 public class StageBtnLabelUpdater : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
 
-    private void OnEnable()
+    private void Start()
     {
         StageManager.OnStageIdChanged += HandleStageChanged;
         StageManager.OnSectionChanged += HandleSectionChanged;
@@ -13,7 +13,7 @@ public class StageBtnLabelUpdater : MonoBehaviour
         UpdateText();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         StageManager.OnStageIdChanged -= HandleStageChanged;
         StageManager.OnSectionChanged -= HandleSectionChanged;

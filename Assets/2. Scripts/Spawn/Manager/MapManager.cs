@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -146,7 +146,7 @@ public class MapManager : MonoBehaviour
             SoundManager.Instance.PlayBGM(entry.BGM);
         }
 
-        Debug.Log($"[MapManager] Stage 맵 로드 : {stageId}");
+        //Debug.Log($"[MapManager] Stage 맵 로드 : {stageId}");
     }
 
     public void LoadDungeonMap(int dungeonId)
