@@ -13,7 +13,7 @@ public enum InventoryStatus
 public class InventoryPanel : BaseUI
 {
     public InventoryStatus status = InventoryStatus.Equip;
-    public Equip_Type currentPart;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
+    public Equip_Type currentPart = Equip_Type.Weapon;                          // 현재 열람하고자 하는 인벤토리의 장착 부위 정보
     public Action onInventoryChanged;
     public Action onInventoryClosed;
     public Action onClickEquipment;

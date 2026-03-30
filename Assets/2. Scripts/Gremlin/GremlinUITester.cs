@@ -22,7 +22,11 @@ public class GremlinUITester : MonoBehaviour
     public void MergeShard()
     {
         int id = ExchangeManager.Instance.GetCurrentShardID();
-        GenerateGremlin(id);
+        while(ExchangeManager.Instance.GetMoneyAmount(ExchangeManager.Instance.GetShardTargetGremlin(id)) > 2)
+        {
+            ExchangeManager.Instance.RemoveGremlinPiece(id, 3);
+            GenerateGremlin(id);
+        }
     }
 
     public async void GenerateGremlin(int id)
@@ -63,7 +67,7 @@ public class GremlinUITester : MonoBehaviour
     }
 
     //더미데이터 생성
-    private async void GenerateDummyData()
+    public async void GenerateDummyData()
     {
         //그렘린아이템데이터의 집합체
         _dummyGremlins = _gremlinList._gremlinInventory;

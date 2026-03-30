@@ -14,6 +14,7 @@ public class SaveManager : MonoBehaviour
 
     DateTime lastQuitTime;
     double offlineSeconds;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -23,6 +24,7 @@ public class SaveManager : MonoBehaviour
         }
         Instance = this;
 
+        OnSave += SaveGame;
     }
 
     private void Start()
@@ -83,8 +85,10 @@ public class SaveManager : MonoBehaviour
             equipInv = EquipmentInventory.Instance.GetSaveData(),
             GremlinInv = GremlinInventory.Instance.GetSaveData(),
             stageData = StageManager.Instance.GetSaveData(),
+            skillData = SkillManager.Instance.GetSaveData()
         };
     }
+
     public async void LoadGame()
     {
         //종료시각 불러오기
@@ -156,7 +160,7 @@ public class SaveManager : MonoBehaviour
         ExchangeManager.Instance.GetMoney(MoneyType.Gold, gold);
         _playerStat.AddExp(exp);
 
-        var eqlevel = DataManager.Instance.GetData<Stage_SectionData>(StageManager.Instance.CurrentSection);
+        var eqlevel = StageManager.Instance.CurrentSectionData;
 
         if (eqlevel == null)
         {
@@ -164,13 +168,9 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
-        for (int i = 0; i < equipCount; i++)
+        for (int i = 0; i < (int)equipCount; i++)
         {
             TestWeaponGenerator.Instance.Test(eqlevel.Equip_Drop_Level);
         }
     }
-
-
-
-
 }

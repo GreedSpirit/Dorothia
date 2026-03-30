@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Numerics;
 
@@ -13,6 +13,8 @@ public class CheatEditorWindow : EditorWindow
 
     private int jumpSection = 4;
     private int levelAmount = 1;
+
+    private int shardCount = 1;
 
     [MenuItem("Tools/Cheat Editor")]
     public static void ShowWindow()
@@ -38,6 +40,25 @@ public class CheatEditorWindow : EditorWindow
         if (GUILayout.Button($"{scrapAmount} 스크랩 추가"))
         {
             AddScrapCheat();
+        }
+
+        // --- 그렘린 조각 치트 섹션 ---
+        shardCount = EditorGUILayout.IntField("추가할 그렘린 조각 양", shardCount);
+        if(GUILayout.Button($"{shardCount} 플린트 조각 추가"))
+        {
+            AddGremlinShardCheat(210001);
+        }
+        if(GUILayout.Button($"{shardCount} 피니언 조각 추가"))
+        {
+            AddGremlinShardCheat(210002);
+        }
+        if(GUILayout.Button($"{shardCount} 코어 조각 추가"))
+        {
+            AddGremlinShardCheat(210003);
+        }
+        if(GUILayout.Button($"{shardCount} 징크 조각 추가"))
+        {
+            AddGremlinShardCheat(210004);
         }
 
         EditorGUILayout.Space();
@@ -158,5 +179,13 @@ public class CheatEditorWindow : EditorWindow
 
         SkillManager.Instance.ResetAllCooldown();
         Debug.Log("[Cheat] 모든 스킬 쿨타임 초기화됨");
+    }
+
+    private void AddGremlinShardCheat(int id)
+    {
+        if (!Application.isPlaying) return;
+        ExchangeManager.Instance.SetCurrentShardID(id);
+        ExchangeManager.Instance.AddGremlinPiece(id, shardCount);
+        Debug.Log($"{shardCount} 조각 추가 완료");
     }
 }
