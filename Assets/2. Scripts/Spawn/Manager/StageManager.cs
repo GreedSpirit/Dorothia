@@ -14,7 +14,8 @@ public enum StageState
 
 [System.Serializable]
 public class StageSaveData
-{    
+{
+    public int stageId;
     public int currentSection;
     public int maxClearSection;
 }
@@ -92,6 +93,8 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
     public StageSaveData GetSaveData()
     {
         var data = new StageSaveData();
+
+        data.stageId = CurrentStageId;
         data.currentSection = CurrentSection;
         data.maxClearSection = MaxClearedSection;
         return data;
@@ -100,7 +103,9 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
     public void LoadFromSaveData(StageSaveData data)
     {
         MaxClearedSection = data.maxClearSection;
-        CurrentSection = data.currentSection;
+
+        //Stage를 다시 구성
+        StartStageFromSection(data.stageId, data.currentSection);
     }
     
 
