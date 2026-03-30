@@ -127,7 +127,12 @@ public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
 
             AddEquipment(equip);
         }
+        
+        //장착한 장비의 슬롯 이미지 갱신
         EquipmentUI ui = FindAnyObjectByType<EquipmentUI>(FindObjectsInactive.Include);
         ui.UpdateEquipState();
+
+        //장비 장착 이후 스탯 갱신
+        EquipmentSlotManager.Instance.ApplyEquipmentSet();
     }
 }
