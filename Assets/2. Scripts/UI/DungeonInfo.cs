@@ -16,7 +16,7 @@ public class DungeonInfo : MonoBehaviour
     [SerializeField] TextMeshProUGUI _dungeonPower;
     [SerializeField] TextMeshProUGUI _dungeonTime;
     [SerializeField] Image _dungeonImage;
-    [SerializeField] TextMeshProUGUI _dungeonMessage;
+    //[SerializeField] TextMeshProUGUI _dungeonMessage;
     [SerializeField] TextMeshProUGUI _clearCount;
 
     //이미지 들고있는 SO
@@ -131,7 +131,7 @@ public class DungeonInfo : MonoBehaviour
         _dungeonTime.text = stepData.Time_Limit;
 
         //TODO 메세지 테이블값으로 바꿔야함
-        _dungeonMessage.text = level.ToString();      
+        //_dungeonMessage.text = level.ToString();      
     }
 
 

@@ -12,6 +12,13 @@ public enum StageState
     Failed
 }
 
+[System.Serializable]
+public class StageSaveData
+{    
+    public int currentSection;
+    public int maxClearSection;
+}
+
 /// <summary>
 /// 스테이지 진행 FSM
 /// StageData(스테이지 테이블) -> Monster_SpawnData(스폰풀 테이블)로 연결
@@ -21,7 +28,7 @@ public enum StageState
 /// 보스 ID는 SpawnData의 특정 슬롯에 고정하지 않고
 /// Monster_Data.Monster_Type == Boss로 해서 결정
 /// </summary>
-public class StageManager : MonoBehaviour
+public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 {
     public static StageManager Instance { get; private set; }
 
@@ -63,7 +70,12 @@ public class StageManager : MonoBehaviour
     private bool _bossTimerRunning;
 
     //RewardManager용
-    public int CurrentSection => _currentSection;                   // 현재 섹션
+    
+    public int CurrentSection   //현재 섹션
+    {
+        get => _currentSection;
+        private set => _currentSection = value;
+    }
     public int CurrentStageSectionId => 
         _sectionData != null ? _sectionData.Stage_Section_Id : 0;   // 현재 스테이지섹션 ID
     public Stage_SectionData CurrentSectionData => _sectionData;    // 현재 구간 데이터
@@ -71,7 +83,26 @@ public class StageManager : MonoBehaviour
     //UI용
     public int CurrentStageId => _stage != null ? _stage.Stage_Id : 0;
     public int CurrentProgressSection => _currentSection;
-    public int MaxClearedSection => _maxClearedSection;
+    public int MaxClearedSection
+    {
+        get => _maxClearedSection;
+        private set => _maxClearedSection = value;
+    }
+
+    public StageSaveData GetSaveData()
+    {
+        var data = new StageSaveData();
+        data.currentSection = CurrentSection;
+        data.maxClearSection = MaxClearedSection;
+        return data;
+    }
+
+    public void LoadFromSaveData(StageSaveData data)
+    {
+        MaxClearedSection = data.maxClearSection;
+        CurrentSection = data.currentSection;
+    }
+    
 
     private void Awake()
     {
@@ -651,5 +682,7 @@ public class StageManager : MonoBehaviour
 
         Debug.Log($"[Cheat] Section 이동 완료: {_currentSection} (SectionId:{_sectionData.Stage_Section_Id})");
     }
+
+   
     #endregion
 }

@@ -107,6 +107,7 @@ public class TestWeaponGenerator : MonoBehaviour
 
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
+        Debug.LogError(testWeapon.equip_name);
 
         if (inventoryPanel.currentPart != 0)
         {
