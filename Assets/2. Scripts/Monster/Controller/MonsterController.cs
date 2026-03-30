@@ -612,8 +612,11 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
         }
 
-        _agent.isStopped = true;
-        _agent.ResetPath();
+        if (gameObject.activeInHierarchy)
+        {
+            _agent.isStopped = true;
+            _agent.ResetPath();
+        }
 
         int deathIndex = 0;
 
