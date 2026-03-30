@@ -655,4 +655,113 @@ public class SkillManager : MonoBehaviour
     }
 
     #endregion
+
+    #region Save & Load
+
+    public SaveSkillData GetSaveData()
+    {
+        var data = new SaveSkillData();
+
+        // 인벤토리
+        foreach (var (key, count) in _inventory)
+        {
+            data.inventory.Add(new InventoryEntry
+            {
+                key = new SerializableSkillKey(key),
+                count = count
+            });
+        }
+
+        // 해금 된 스킬(레벨포함)
+        foreach (var (key, skill) in _unlockedSkills)
+        {
+            data.unlockedSkills.Add(new UnlockedSkillEntry
+            {
+                key = new SerializableSkillKey(key),
+                level = skill.Level
+            });
+        }
+
+        // 슬롯 관련
+        for (int i = 0; i < ACTIVE_SLOT_MAX; i++)
+        {
+            data.activeSlots[i] = SlotToEntry(ActiveSlots[i]);
+        }
+
+        for (int i = 0; i < PASSIVE_SLOT_MAX; i++)
+        {
+            data.passiveSlots[i] = SlotToEntry(PassiveSlots[i]);
+        }
+
+        data.ultimateSlot = SlotToEntry(UltimateSlot);
+
+        // 신비게이지
+        data.mysteryGauge = _mysteryGauge;
+
+        return data;
+    }
+
+    public void LoadFromSaveData(SaveSkillData data)
+    {
+        if (data == null) return;
+
+        _inventory.Clear();
+        _unlockedSkills.Clear();
+        ClearAllSlots();
+
+        // 해금 된 스킬 먼저 로드
+        foreach (var entry in data.unlockedSkills)
+        {
+            SkillKey key = entry.key.ToSkillKey();
+            var sData = DataManager.Instance.GetData<SkillData>(key.sid);
+            if (sData == null) continue;
+
+            BaseSkill skill = BaseSkill.Create(sData);
+            skill.Rarity = key.rarity;
+            skill.Level = entry.level;          
+            _unlockedSkills[key] = skill;
+        }
+
+        // 인벤토리 복원
+        foreach (var entry in data.inventory)
+        {
+            SkillKey key = entry.key.ToSkillKey();
+            _inventory[key] = entry.count;
+            OnInventoryChanged?.Invoke(key);
+        }
+
+        // 슬롯 복원
+        for (int i = 0; i < ACTIVE_SLOT_MAX; i++)
+        {
+            if (data.activeSlots[i] != null && !data.activeSlots[i].isEmpty)
+                EquipSkill(data.activeSlots[i].key.ToSkillKey(), i);
+        }
+
+        for (int i = 0; i < PASSIVE_SLOT_MAX; i++)
+        {
+            if (data.passiveSlots[i] != null && !data.passiveSlots[i].isEmpty)
+                EquipSkill(data.passiveSlots[i].key.ToSkillKey(), i);
+        }
+
+        if (data.ultimateSlot != null && !data.ultimateSlot.isEmpty)
+            EquipSkill(data.ultimateSlot.key.ToSkillKey(), 0);
+
+        // 신비게이지
+        MysteryGauge = data.mysteryGauge;
+    }
+
+    private SlotEntry SlotToEntry(BaseSkill skill)
+    {
+        if (skill == null)
+            return new SlotEntry { isEmpty = true };
+
+        return new SlotEntry
+        {
+            isEmpty = false,
+            key = new SerializableSkillKey(
+                          new SkillKey(skill.Data.Job_Skill_Id, skill.Data.Skill_Type, skill.Rarity))
+        };
+    }
+
+    #endregion
 }
