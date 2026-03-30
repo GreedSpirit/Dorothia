@@ -13,7 +13,5 @@ public class DungeonEnter : MonoBehaviour
         var btn = GetComponent<Button>();
 
         btn.onClick.AddListener(() => _targetpanel.Open(_dungeonId));
-        Debug.LogError("버튼눌림");
-
     }
 }
