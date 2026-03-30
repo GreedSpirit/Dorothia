@@ -148,6 +148,7 @@ GameObject:
   - component: {fileID: 343402211141100389}
   - component: {fileID: 1974900114888978349}
   - component: {fileID: 1856564175195239184}
+  - component: {fileID: 8192989484014419003}
   m_Layer: 5
   m_Name: '[Panel]Promotion'
   m_TagString: Untagged
@@ -170,7 +171,6 @@ RectTransform:
   - {fileID: 504605936282301841}
   - {fileID: 5551949045898195814}
   - {fileID: 607411680055061405}
-  - {fileID: 8603060123927534770}
   - {fileID: 786331696378946265}
   - {fileID: 1089485142552302372}
   m_Father: {fileID: 0}
@@ -218,81 +218,27 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &2681298433160271433
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8603060123927534770}
-  - component: {fileID: 481145910926817066}
-  - component: {fileID: 8643144807631728360}
-  m_Layer: 5
-  m_Name: '[Image]Arrow'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &8603060123927534770
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2681298433160271433}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 343402211141100389}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 545}
-  m_SizeDelta: {x: 70, y: 70}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &481145910926817066
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2681298433160271433}
-  m_CullTransparentMesh: 1
---- !u!114 &8643144807631728360
+--- !u!114 &8192989484014419003
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2681298433160271433}
+  m_GameObject: {fileID: 574436447200216349}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e8215a9d08afc7459f2c4c22e1671b7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_EditorClassIdentifier: Assembly-CSharp::PromotionPanel
+  haveGold: {fileID: 5962133704822876189}
+  needsGold: {fileID: 7710543758916824010}
+  beforeRank: {fileID: 1003025994002085373}
+  beforeStand: {fileID: 3674128701313801770}
+  afterRank: {fileID: 3422756045068741410}
+  afterStand: {fileID: 1282507578363983659}
+  afterStat: {fileID: 5943401923120732804}
+  afterSkill: {fileID: 5989573756969590144}
+  promotionButton: {fileID: 1575263287630129584}
 --- !u!1 &2688892337598868411
 GameObject:
   m_ObjectHideFlags: 0
@@ -1702,7 +1648,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6386144030376013930}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8192989484014419003}
+        m_TargetAssemblyTypeName: PromotionPanel, Assembly-CSharp
+        m_MethodName: Click_Promotion
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8516907340027417953
 GameObject:
   m_ObjectHideFlags: 0

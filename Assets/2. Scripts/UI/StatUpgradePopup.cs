@@ -52,11 +52,11 @@ public class StatUpgradePopup : BaseUI
     {
         bool isUpgrade = (type == Type.Upgrade);
 
-        Debug.Log($"{isUpgrade}");
+        //Debug.Log($"{isUpgrade}");
         upgradeToggle.isOn = isUpgrade;
         promotionToggle.isOn = !isUpgrade;
 
-        Debug.Log($"{upgradeToggle.isOn},{promotionToggle.isOn}");
+        //Debug.Log($"{upgradeToggle.isOn},{promotionToggle.isOn}");
 
         ToggleActiveCheck(true);
     }
