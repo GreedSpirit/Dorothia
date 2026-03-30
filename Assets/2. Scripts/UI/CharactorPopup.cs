@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class CharactorPopup : BaseUI
 {
-    [SerializeField] private PlayerStats playerStats;
 
     [SerializeField] private TextMeshProUGUI rank;
     [SerializeField] private TextMeshProUGUI level;
@@ -30,22 +29,22 @@ public class CharactorPopup : BaseUI
 
     private void OnEnable()
     {
-        playerStats.OnExpChanged += UpdateExp;
-        playerStats.OnLevelChanged += UpdateStats;
+        PlayerStats.Instance.OnExpChanged += UpdateExp;
+        PlayerStats.Instance.OnLevelChanged += UpdateStats;
         StatManager.Instance.OnStatsRefreshed += RefreshUI;
     }
 
     private void OnDisable()
     {
-        playerStats.OnExpChanged -= UpdateExp;
-        playerStats.OnLevelChanged -= UpdateStats;
+        PlayerStats.Instance.OnExpChanged -= UpdateExp;
+        PlayerStats.Instance.OnLevelChanged -= UpdateStats;
         StatManager.Instance.OnStatsRefreshed -= RefreshUI;
     }
     protected override void OnOpen()
     {
-        UpdateExp(playerStats.CurrentExp, playerStats.LevelExpN);
+        UpdateExp(PlayerStats.Instance.CurrentExp, PlayerStats.Instance.LevelExpN);
 
-        UpdateStats(playerStats.CurrentLevel);
+        UpdateStats(PlayerStats.Instance.CurrentLevel);
     }
 
     protected override void OnClose()
@@ -68,7 +67,7 @@ public class CharactorPopup : BaseUI
     }
 
     void RefreshUI(){
-        UpdateStats(playerStats.CurrentLevel);
+        UpdateStats(PlayerStats.Instance.CurrentLevel);
     }
 
     void UpdateStats(int currentLvl)
