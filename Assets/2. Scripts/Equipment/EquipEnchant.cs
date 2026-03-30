@@ -209,6 +209,9 @@ public class EquipEnchant : BaseUI
                 0.1f;
         }
 
+        //저장!!
+        SaveManager.Instance.OnSave?.Invoke();
+
         RefreshEnchantPanel(equip);
     }
 

@@ -104,13 +104,10 @@ public class EquipmentUI : BaseUI
     public void UpdateEquipState()
     {
         List<Equipment> inv = EquipmentInventory.Instance.GetInventory(_firstRingSlot.part);
-        Debug.Log(inv.Count);
         foreach(var equip in inv)
         {
-            Debug.Log($"equip: {equip.EquippedSlotIndex}, slot: {_firstRingSlot.slotIndex}");
             if (equip.isEquipped == true && equip.EquippedSlotIndex == _firstRingSlot.slotIndex)
             {
-                Debug.Log(equip.icon == null);
                 _firstRingSlot.equipped = equip;
                 _firstRingSlot.iconImage.color = Color.white;
                 equip.SetEquipped(_firstRingSlot.slotIndex);
@@ -119,7 +116,6 @@ public class EquipmentUI : BaseUI
             }
             else if (equip.isEquipped == true && equip.EquippedSlotIndex == _secondRingSlot.slotIndex)
             {
-                Debug.Log(equip.icon == null);
                 _secondRingSlot.equipped = equip;
                 _secondRingSlot.iconImage.color = Color.white;
                 equip.SetEquipped(_secondRingSlot.slotIndex);
@@ -134,10 +130,8 @@ public class EquipmentUI : BaseUI
 
             foreach(var equip in inv)
             {
-                Debug.Log($"equip: {equip.EquippedSlotIndex}, slot: {_firstRingSlot.slotIndex}");
                 if (equip.isEquipped == true && equip.EquippedSlotIndex == slots.slotIndex)
                 {
-                    Debug.Log(equip.icon == null);
                     slots.equipped = equip;
                     slots.iconImage.color = Color.white;
                     equip.SetEquipped(slots.slotIndex);

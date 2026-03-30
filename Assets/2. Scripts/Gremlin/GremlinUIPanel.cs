@@ -16,6 +16,12 @@ public class GremlinUIPanel : BaseUI
     [SerializeField] private TextMeshProUGUI _txtRarityStat; // 그렘린 스텟
     [SerializeField] private TextMeshProUGUI _txtUpgradeStat; // 그렘린 스텟
 
+    [Header("보유 중인 그렘린 수 표기용 텍스트")]
+    [SerializeField] private TextMeshProUGUI _flintShardCount;
+    [SerializeField] private TextMeshProUGUI _pinionShardCount;
+    [SerializeField] private TextMeshProUGUI _coreShardCount;
+    [SerializeField] private TextMeshProUGUI _zincShardCount;
+
     [Header("스크롤뷰(중간 패널, 아이템 표기용)")]
     [SerializeField] private Transform _scrollContent; // 스크롤 컨턴츠
     [SerializeField] private GameObject _gremlinItemPrefab; // 그렘린 프리팹
@@ -25,6 +31,7 @@ public class GremlinUIPanel : BaseUI
     [SerializeField] private Button _btnGoEnhance;      // 강화버튼
     [SerializeField] private Button _btnGoMerge;        // 합성버튼
 
+    [Header("연결해야 하는 다른 오브젝트")]
     [SerializeField] private GremlinInventory _gremlinList;
     [SerializeField] private NoticeUIPanel _noticeUIPanel;
     [SerializeField] private GremlinUpgradePanel _mergePanel;
@@ -58,6 +65,7 @@ public class GremlinUIPanel : BaseUI
 
     private void Start()
     {
+        ExchangeManager.Instance.onShardValueChanged += Refresh;
         Close();
     }
 
@@ -101,7 +109,17 @@ public class GremlinUIPanel : BaseUI
         {
             //첫 번째 아이템을 기본 선택 상태로 처리.
             _createdItems[0]._btnItem.onClick.Invoke();
+            _imgPortrait.color = new Color32(255, 255, 255, 255);
         }
+        else
+        {
+            _imgPortrait.color = new Color32(255, 255, 255, 0);
+        }
+
+        _flintShardCount.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.FlintPiece).ToString();
+        _pinionShardCount.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.PinionPiece).ToString();
+        _coreShardCount.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.CorePiece).ToString();
+        _zincShardCount.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.ZincPiece).ToString();
     }
 
     // 개별 슬롯을 터치했을 때 호출됨

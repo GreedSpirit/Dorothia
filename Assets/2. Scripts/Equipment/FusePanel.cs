@@ -171,6 +171,9 @@ public class FusePanel : BaseUI
         inventory.RemoveEquipment(subEquipmentOne);
         inventory.RemoveEquipment(subEquipmentTwo);
 
+        //저장!!
+        SaveManager.Instance.OnSave?.Invoke();
+
         //메인 슬롯에 합성 성공 여부를 확인할 수 있게 색상을 변화시킵니다.
         mainSlot.UpdatePartUI();
 

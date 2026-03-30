@@ -128,8 +128,6 @@ public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
             AddEquipment(equip);
         }
         EquipmentUI ui = FindAnyObjectByType<EquipmentUI>(FindObjectsInactive.Include);
-        Debug.Log(ui == null);
         ui.UpdateEquipState();
-        Debug.Log("장비 장착 갱신완료");
     }
 }

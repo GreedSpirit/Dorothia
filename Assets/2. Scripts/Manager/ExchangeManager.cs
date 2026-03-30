@@ -175,20 +175,17 @@ public class ExchangeManager : MonoBehaviour
     public void AddGremlinPiece(int id, BigInteger amount)
     {
         _money[GetShardTargetGremlin(id)] += amount;
-        if (_money[GetShardTargetGremlin(id)] > 2)
-        {
-            currentGremlinShard = id;
-            for(int i = 0; _money[GetShardTargetGremlin(currentGremlinShard)] > 2; i++)
-            {
-                _money[GetShardTargetGremlin(currentGremlinShard)] -= 3;
-                onShardValueChanged?.Invoke();
-            }
-        }
+        onShardValueChanged?.Invoke();
     }
 
     public int GetCurrentShardID()
     {
         return currentGremlinShard;
+    }
+
+    public void SetCurrentShardID(int id)
+    {
+        currentGremlinShard = id;
     }
 
     public void GetCoreGremlinShard(BigInteger amount)
