@@ -7,10 +7,14 @@ public class PromotionPanel : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI haveGold;
     [SerializeField] private TextMeshProUGUI needsGold;
+
     [Header("승급 전")]
+    [SerializeField] private GameObject before;
     [SerializeField] private TextMeshProUGUI beforeRank;
     [SerializeField] private Image beforeStand;
+
     [Header("승급 후")]
+    [SerializeField] private GameObject after;
     [SerializeField] private TextMeshProUGUI afterRank;
     [SerializeField] private Image afterStand;
     [SerializeField] private TextMeshProUGUI afterStat;
@@ -56,6 +60,10 @@ public class PromotionPanel : MonoBehaviour
 
         if (isMaxPromotion)
         {
+            beforeRank.text = "최대 승급";
+
+            after.SetActive(false);
+
             afterRank.text = "최대 승급";
             afterStat.text = "";
             needsGold.text = "/ -";
