@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Pool;
 using TMPro;
+using GameUtility;
 
 public class DamageTextManager : MonoBehaviour
 {
@@ -47,6 +48,8 @@ public class DamageTextManager : MonoBehaviour
         Color color = isCritical ? Color.red : Color.white;
         float size = isCritical ? 6f : 4f;
 
-        ft.Setup(damage.ToString(), color, size, (target) => _pool.Release(target));
+        string formatted = NumberFormatterBigInt.Format(new System.Numerics.BigInteger(damage));
+
+        ft.Setup(formatted, color, size, (target) => _pool.Release(target));
     }
 }

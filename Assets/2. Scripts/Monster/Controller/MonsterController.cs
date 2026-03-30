@@ -716,8 +716,8 @@ public class MonsterController : MonoBehaviour, IMonster
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(amount * damageRate)); // 실제 피해량
 
-        DamageTextManager.Instance.ShowDamage(amount, transform.position, isCritical);
-        
+        DamageTextManager.Instance.ShowDamage(finalDamage, transform.position, isCritical);
+
         _hp -= finalDamage;
 
         if (_hp <= 0)
