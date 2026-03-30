@@ -10,6 +10,8 @@ public class Character_RankData : ICSVLoad, ITableKey
     public int Character_Rank_Gold { get; set; }
     public string Character_Icon { get; set; }
     public string Character_Stand { get; set; }
+    public string Character_Name { get; set; }
+    public string Character_Information { get; set; }
 
     int ITableKey.Id => (int)Character_Rank;
     string ITableKey.Key => Character_Rank.ToString();
@@ -28,5 +30,9 @@ public class Character_RankData : ICSVLoad, ITableKey
         if (values.Length > 4) Character_Icon = values[4];
         // 5: Character_Stand (string)
         if (values.Length > 5) Character_Stand = values[5];
+        // 6: Character_Name (string)
+        if (values.Length > 6) Character_Name = values[6];
+        // 7: Character_Information (string)
+        if (values.Length > 7) Character_Information = values[7];
     }
 }

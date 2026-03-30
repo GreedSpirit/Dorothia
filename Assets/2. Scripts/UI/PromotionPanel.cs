@@ -14,7 +14,6 @@ public class PromotionPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI afterRank;
     [SerializeField] private Image afterStand;
     [SerializeField] private TextMeshProUGUI afterStat;
-    [SerializeField] private TextMeshProUGUI afterSkill;
     [SerializeField] private Button promotionButton;
 
     // 현재 로드된 어드레서블 키 추적
@@ -59,7 +58,6 @@ public class PromotionPanel : MonoBehaviour
         {
             afterRank.text = "최대 승급";
             afterStat.text = "";
-            afterSkill.text = "";
             needsGold.text = "/ -";
             promotionButton.interactable = false;
 
@@ -73,6 +71,8 @@ public class PromotionPanel : MonoBehaviour
 
             needsGold.text = "/ " + afterData.Character_Rank_Gold.ToString("N0");
 
+            afterStat.text = afterData.Character_Information;
+
             bool canPromote = PlayerStats.Instance.CanPromote(out _);
             promotionButton.interactable = canPromote;
         }
@@ -81,10 +81,9 @@ public class PromotionPanel : MonoBehaviour
     }
 
     /// <summary>랭크 텍스트 + 스탠드 이미지 갱신. 이전 키 릴리즈 후 새 키 로드.</summary>
-    private void UpdateStandUI(TextMeshProUGUI rankText, Image standImage,
-                                Character_RankData data, ref string trackedKey)
+    private void UpdateStandUI(TextMeshProUGUI rankText, Image standImage, Character_RankData data, ref string trackedKey)
     {
-        rankText.text = $"{data.Character_Rank}";
+        rankText.text = data.Character_Name;
 
         string newKey = data.Character_Stand;
 
