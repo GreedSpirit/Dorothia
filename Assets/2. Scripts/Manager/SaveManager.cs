@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -68,7 +68,8 @@ public class SaveManager : MonoBehaviour
         return new SaveData
         {
             equipInv = EquipmentInventory.Instance.GetSaveData(),
-            GremlinInv = GremlinInventory.Instance.GetSaveData()
+            GremlinInv = GremlinInventory.Instance.GetSaveData(),
+            skillData = SkillManager.Instance.GetSaveData()
         };
     }
     public async void LoadGame()
@@ -80,5 +81,6 @@ public class SaveManager : MonoBehaviour
         Debug.Log(GremlinInventory.Instance);
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
+        SkillManager.Instance.LoadFromSaveData(data.skillData);
     }
 }
