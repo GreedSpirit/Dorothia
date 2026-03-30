@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +11,7 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [Header("키 매핑 스킬 사용 유무(테스트)")]
     [SerializeField] private bool IsTestSkill = false;
 
-    [SerializeField] AudioClip[] _audioClip;
+    //[SerializeField] AudioClip[] _audioClip;
 
     [Header("조이스틱 & UI 설정")]
     [SerializeField] private RectTransform joystickBase;

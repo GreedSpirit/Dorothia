@@ -1,12 +1,23 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+
+public enum SFXType
+{
+    attack1 = 0,
+    attack2 = 1,
+    attack3 = 2
+}
 
 public class SoundManager : MonoBehaviour
 {
     static private SoundManager instance;
 
     static public SoundManager Instance { get => instance; private set => instance = value; }
+
+    //효과음 매핑용 딕셔너리
+    private Dictionary<SFXType, AudioClip> sfxDict;
 
     private void Awake()
     {
@@ -17,15 +28,26 @@ public class SoundManager : MonoBehaviour
 
         instance = this;
 
-        PlayBGM(audioClip);
+        sfxDict = new Dictionary<SFXType, AudioClip>();
+
+        //SFXType enum순서대로 매핑
+        foreach (SFXType type in Enum.GetValues(typeof(SFXType)))
+        {
+            //순서대로 해야하니까 형변환
+            int index = (int)type;
+            //매핑
+            sfxDict[type] = sfxClip[index];
+        }
+
     }
 
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
-    [SerializeField] private AudioClip audioClip;
+    [SerializeField] private AudioClip[] sfxClip;
     [SerializeField] private AudioMixer mainMixer;
     [SerializeField] private AudioMixerGroup bgmGroup;
     [SerializeField] private AudioMixerGroup sfxGroup;
+
 
     //볼륨 설정을 위한 파라미터 이름 (믹서와 일치해야 함)
     private const string MAIN_PARAM = "MAINVol";
@@ -59,8 +81,13 @@ public class SoundManager : MonoBehaviour
         bgmSource.Play();
     }
 
-    public void PlaySFX(AudioClip clip)
+    public void PlaySFX(SFXType type)
     {
-        sfxSource.PlayOneShot(clip);
+        //타입으로 키로 값찾아서
+        if (sfxDict.TryGetValue(type, out var clip))
+        {
+            //있으면 클립에 담기
+            sfxSource.PlayOneShot(clip);
+        }
     }
 }
