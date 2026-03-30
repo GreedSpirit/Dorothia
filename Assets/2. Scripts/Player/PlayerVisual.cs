@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 
@@ -123,16 +123,16 @@ public class PlayerVisual : MonoBehaviour
         {
             case 1:
                 g.attackEffect1.Play(); g.hitEffect1.Play();
-                //SoundManager.Instance.PlaySFX(_audioClip[0]);
+                SoundManager.Instance.PlaySFX(SFXType.attack1);
                 break;
             case 2:
                 g.attackEffect2.Play(); g.hitEffect2.Play();
-                //SoundManager.Instance.PlaySFX(_audioClip[1]);
+                SoundManager.Instance.PlaySFX(SFXType.attack2);
                 break;
             case 3:
                 g.attackEffect3.Play();
                 g.hitEffect1.Play(); g.hitEffect2.Play(); g.hitEffect3.Play();
-                //SoundManager.Instance.PlaySFX(_audioClip[2]);
+                SoundManager.Instance.PlaySFX(SFXType.attack3);
                 break;
         }
     }
