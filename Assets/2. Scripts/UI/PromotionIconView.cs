@@ -27,7 +27,6 @@ public class PromotionIconView : MonoBehaviour
 
     private void RefreshIcon(int currentPromotion)
     {
-        Debug.Log(currentPromotion);
         Character_RankData data = DataManager.Instance.GetData<Character_RankData>(currentPromotion);
         //Debug.Log(data.Character_Icon);
         string newKey = data.Character_Icon;

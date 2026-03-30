@@ -27,7 +27,8 @@ public class PlayerStats : MonoBehaviour, IResettable
     public float CurrentHp { get; private set; }
     private float MaxHp => (float)StatManager.Instance.GetStat(Status.HP);
     public BigInteger CurrentExp { get; private set; }
-    public BigInteger LevelExpN => StatManager.Instance.LevelExpN; // 이건 편의상 유지 가능
+    public BigInteger LevelExpN => StatManager.Instance.LevelExpN;
+    public string TotalPower { get; private set; } = "0";
 
     #endregion
 
@@ -52,6 +53,9 @@ public class PlayerStats : MonoBehaviour, IResettable
     /// <summary>사망 처리용</summary>
     public event Action OnDead;
 
+    /// <summary>종합 전투력 </summary>
+    public event Action<string> OnTotalPowerChanged;
+
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -74,6 +78,8 @@ public class PlayerStats : MonoBehaviour, IResettable
         EquipmentSlotManager.Instance.OnEquipChanged += OnEquipChanged;
         StatManager.Instance.OnStatsRefreshed += OnStatsRefreshed;
 
+        OnStatsRefreshed();
+
     }
 
     private void OnDisable()
@@ -91,10 +97,11 @@ public class PlayerStats : MonoBehaviour, IResettable
     #region Stat Refresh
     void OnStatsRefreshed()
     {
+        RefreshTotalPower();
         OnStatsChanged?.Invoke(); // UI에 전파
     }
 
-    void RefreshStats() => StatManager.Instance.RefreshStats(CurrentLevel, CurrentPromotion);
+    void  RefreshStats() => StatManager.Instance.RefreshStats(CurrentLevel, CurrentPromotion);
 
     void OnEquipChanged() => StatManager.Instance.RefreshStats();
 
@@ -203,6 +210,30 @@ public class PlayerStats : MonoBehaviour, IResettable
     public void ResetState()
     {
         ResetHPToMax();
+    }
+
+    #endregion
+
+    #region Total Power
+
+    private void RefreshTotalPower()
+    {
+        double atk = StatManager.Instance.GetStat(Status.ATK);
+        double hp = StatManager.Instance.GetStat(Status.HP);
+        double def = StatManager.Instance.GetStat(Status.DEF);
+
+        // 공격 점수
+        double attackScore = atk;
+
+        // 생존 점수
+        double survivalScore = hp * (100.0 + def) / 100.0;
+
+        // 최종 전투력
+        double raw = Math.Pow(attackScore * survivalScore, 1.0 / 3.0);
+        long power = (long)raw; 
+
+        TotalPower = power.ToString("N0");
+        OnTotalPowerChanged?.Invoke(TotalPower);
     }
 
     #endregion

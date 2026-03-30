@@ -85,5 +85,7 @@ public class CharactorPopup : BaseUI
         mSpd.text = (Math.Floor(StatManager.Instance.GetStat(Status.MoveSpeed) * 10) / 10).ToString("F1");
         aSpd.text = (Math.Floor(StatManager.Instance.GetStat(Status.AttackSpeed) * 10) / 10).ToString("F1");
         regen.text = (Math.Floor(StatManager.Instance.GetStat(Status.HPRegen) * 10) / 10).ToString("F1");
+
+        totalPower.text = $"종합 전투력 : {PlayerStats.Instance.TotalPower}";
     }
 }

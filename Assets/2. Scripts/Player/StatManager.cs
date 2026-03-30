@@ -153,6 +153,7 @@ public class StatManager : MonoBehaviour
 
     /// <summary>레벨업 필요 경험치 (BigInteger이므로 별도 보관)</summary>
     public BigInteger LevelExpN { get; private set; }
+    private BigInteger _baseLevelExp;
 
     // 재계산 시 사용할 캐싱값
     private int _currentLevel;
@@ -188,8 +189,9 @@ public class StatManager : MonoBehaviour
         stats[Status.CriticalDamage] = new FinalStat(data.Character_Crt_Dmg, isScaledByLevel: false, maxUpgradeLevel: MAX_UPGRADE_LEVEL, upgradeValuePerStep: upgradeData.Character_Upgrade_Crt_Dmg);
         stats[Status.HPRegen] = new FinalStat(data.Character_Hp_Regen, isScaledByLevel: false, maxUpgradeLevel: MAX_UPGRADE_LEVEL, upgradeValuePerStep: upgradeData.Character_Upgrade_Hp_Regen);
         stats[Status.MoveSpeed] = new FinalStat(data.Character_Agi, isScaledByLevel: false, maxUpgradeLevel: MAX_UPGRADE_LEVEL, upgradeValuePerStep: upgradeData.Character_Upgrade_Agi);
-
-        LevelExpN = data.Character_Level_Exp_N;
+       
+        _baseLevelExp = data.Character_Level_Exp_N;
+        LevelExpN = _baseLevelExp;
     }
 
     #endregion
@@ -199,7 +201,7 @@ public class StatManager : MonoBehaviour
 
     public void RefreshExp(int currentLevel, float LEVEL_WEIGHT)
     {
-        LevelExpN = LevelExpN.MultiplyPower(LEVEL_WEIGHT, currentLevel);
+        LevelExpN = _baseLevelExp.MultiplyPower(LEVEL_WEIGHT, currentLevel);
     }
 
     /// <summary>캐싱된 레벨·승급으로 재계산 (장비·스킬 변경 시 호출)</summary>

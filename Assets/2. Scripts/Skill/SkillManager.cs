@@ -478,7 +478,6 @@ public class SkillManager : MonoBehaviour
         }
 
         // 필요 시 능력치 재계산이나 UI 갱신 호출
-        // RefreshTotalStats();
     }
 
     public void EquipSkill(SkillKey key, int targetIndex = -1)
@@ -558,6 +557,8 @@ public class SkillManager : MonoBehaviour
         if (index < 0 || index >= PASSIVE_SLOT_MAX || PassiveSlots[index] == null) return;
 
         string iconAddr = PassiveSlots[index].Data.Skill_Icon;
+
+        (PassiveSlots[index] as PassiveSkill).Undo();
         PassiveSlots[index] = null;
 
         AddressableManager.Instance.ReleaseAsset(iconAddr);
