@@ -1,19 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
-
-[System.Serializable]
-public struct AttackEffectGroup
-{
-    public ParticleSystem attackEffect1, attackEffect2, attackEffect3;
-    public ParticleSystem hitEffect1, hitEffect2, hitEffect3;
-}
 
 public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 {
@@ -38,19 +29,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     [Header("히트박스 & 이펙트")]
     [SerializeField] private BoxCollider _hitBox;
     [SerializeField] private BoxCollider _hitBox3;
-
-    [Header("이펙트 그룹")]
-    [SerializeField] private AttackEffectGroup _effectGroupA; // 승급 1~4
-    [SerializeField] private AttackEffectGroup _effectGroupB; // 승급 5~8
-
-    // 현재 활성 그룹 (지역변수 캐싱용)
-    private AttackEffectGroup _currentEffectGroup;
-
-    // 현재 활성 그룹의 원본 트랜스폼 캐시 (0=effect1, 1=effect2, 2=effect3)
-    private Vector3[] _originAtkPos = new Vector3[3];
-    private Quaternion[] _originAtkRot = new Quaternion[3];
-    private Vector3[] _originHitPos = new Vector3[3];
-    private Quaternion[] _originHitRot = new Quaternion[3];
 
     //  프로퍼티
     public Vector2 MoveInput => _moveInput;
@@ -123,13 +101,18 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         CurrentState = IdleState;
         CurrentState.Enter(this);
-
-        // 승급 이펙트 업데이트 (불러오기로 변경해야함)
-        UpdateEffectGroup(1);
     }
 
-    private void OnEnable() => _playerStats.OnDead += ChangeDead;
-    private void OnDisable() => _playerStats.OnDead -= ChangeDead;
+    private void OnEnable()
+    {
+        _playerStats.OnDead += ChangeDead;
+        _playerStats.OnStatsChanged += ApplyAttackSpeed;
+    }
+    private void OnDisable()
+    {
+        _playerStats.OnDead -= ChangeDead;
+        _playerStats.OnStatsChanged -= ApplyAttackSpeed;
+    }
 
     // 클래스 상단에 필드 선언
     private Dictionary<Key, int> _skillMappings = new Dictionary<Key, int>
@@ -152,17 +135,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         { Key.H, 18001 }, // 대지의 분노 그대로
         { Key.J, 18002 }, // 차원 난무 그대로 사용하는데 걷는게 더 길어야할듯 o
         { Key.K, 18003 }  // 제노사이드 그대로
-    };
-    private Dictionary<Key, int> visualMapping = new Dictionary<Key, int>
-    {
-        { Key.F1, 1 },
-        { Key.F2, 2 },
-        { Key.F3, 3 },
-        { Key.F4, 4 },
-        { Key.F5, 5 },
-        { Key.F6, 6 },
-        { Key.F7, 7 },
-        { Key.F8, 8 },
     };
 
     private void Update()
@@ -187,15 +159,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
             CurrentState.Execute(this);
         }
 
-        foreach (var mapping in visualMapping)
-        {
-            if (Keyboard.current[mapping.Key].wasPressedThisFrame)
-            {
-                _visual.SetGrade(mapping.Value);
-                UpdateEffectGroup(mapping.Value);
-                break;
-            }
-        }
     }
 
     #endregion
@@ -428,11 +391,6 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public void PauseAnimation() => _anima.speed = 0f;
     public void ResumeAnimation() => _anima.speed = 1f;
 
-    public void UpdateEffectGroup(int promotionLevel)
-    {
-        _currentEffectGroup = promotionLevel <= 4 ? _effectGroupA : _effectGroupB;
-        CacheCurrentGroupTransforms();
-    }
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -470,6 +428,11 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         if (!_isDead && CurrentState != SkillState)
             ChangeState(IdleState);
     }
+    private void ApplyAttackSpeed()
+    {
+        float speed = (float)StatManager.Instance.GetStat(Status.AttackSpeed);
+        _anima.SetFloat("AttackSpeed", speed);
+    }
 
     #endregion
 
@@ -489,60 +452,8 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void EnableAttackEffect(int index)
     {
-        int i = index - 1; // 1-based → 0-based
-        var g = _currentEffectGroup;
+        _visual.EnableAttackEffect(index);
 
-        if (_odm.IsModeOn)
-        {
-            // effect3를 콤보 index 위치/회전으로 이동 후 재생
-            g.attackEffect3.transform.localPosition = _originAtkPos[i];
-            g.attackEffect3.transform.localRotation = _originAtkRot[i];
-            g.hitEffect3.transform.localPosition = _originHitPos[i];
-            g.hitEffect3.transform.localRotation = _originHitRot[i];
-
-            g.attackEffect3.Play();
-            g.hitEffect3.Play();
-            SoundManager.Instance.PlaySFX(_audioClip[i]);
-            return;
-        }
-
-        // 일반 모드: effect3 원본 위치 복원
-        g.attackEffect3.transform.localPosition = _originAtkPos[2];
-        g.attackEffect3.transform.localRotation = _originAtkRot[2];
-        g.hitEffect3.transform.localPosition = _originHitPos[2];
-        g.hitEffect3.transform.localRotation = _originHitRot[2];
-
-        switch (index)
-        {
-            case 1:
-                g.attackEffect1.Play(); g.hitEffect1.Play();
-                SoundManager.Instance.PlaySFX(_audioClip[0]);
-                break;
-            case 2:
-                g.attackEffect2.Play(); g.hitEffect2.Play();
-                SoundManager.Instance.PlaySFX(_audioClip[1]);
-                break;
-            case 3:
-                g.attackEffect3.Play();
-                g.hitEffect1.Play(); g.hitEffect2.Play(); g.hitEffect3.Play();
-                SoundManager.Instance.PlaySFX(_audioClip[2]);
-                break;
-        }
-    }
-
-    private void CacheCurrentGroupTransforms()
-    {
-        var g = _currentEffectGroup;
-        ParticleSystem[] atks = { g.attackEffect1, g.attackEffect2, g.attackEffect3 };
-        ParticleSystem[] hits = { g.hitEffect1, g.hitEffect2, g.hitEffect3 };
-
-        for (int i = 0; i < 3; i++)
-        {
-            _originAtkPos[i] = atks[i].transform.localPosition;
-            _originAtkRot[i] = atks[i].transform.localRotation;
-            _originHitPos[i] = hits[i].transform.localPosition;
-            _originHitRot[i] = hits[i].transform.localRotation;
-        }
     }
 
     #endregion
@@ -601,7 +512,10 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
     public void ApplyDamage(int amount) { if (!_isDead) _playerStats.TakeDamage(amount); }
 
-    private bool RollCritical() => UnityEngine.Random.value < StatManager.Instance.GetStat(Status.CriticalChance);
+    private bool RollCritical()
+    {
+        return UnityEngine.Random.value < StatManager.Instance.GetStat(Status.CriticalChance) * 0.01f;
+    }
 
     public void ResetState()
     {

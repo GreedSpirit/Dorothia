@@ -5,6 +5,16 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour, IResettable
 {
+    public static PlayerStats Instance { get; private set; }
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        Instance = this;
+    }
+
     // ══════════════════════════════════════════════════════
     #region Fields & Properties
 
@@ -13,7 +23,7 @@ public class PlayerStats : MonoBehaviour, IResettable
     PlayerCtrl _player;
 
     public int CurrentLevel { get; private set; }
-    public int CurrentPromotion { get; private set; }
+    public int CurrentPromotion { get; private set; } = 1;
     public float CurrentHp { get; private set; }
     private float MaxHp => (float)StatManager.Instance.GetStat(Status.HP);
     public BigInteger CurrentExp { get; private set; }
@@ -35,6 +45,9 @@ public class PlayerStats : MonoBehaviour, IResettable
 
     /// <summary>스탯창 전체 갱신용 (장비·강화·레벨업 시 발행)</summary>
     public event Action OnStatsChanged;
+
+    /// <summary>승급 갱신용 </summary>
+    public event Action<int> OnPromotionChanged;
 
     /// <summary>사망 처리용</summary>
     public event Action OnDead;
@@ -102,6 +115,22 @@ public class PlayerStats : MonoBehaviour, IResettable
 
     private const float LEVEL_WEIGHT = 1.10f;
 
+    public void CheatLevelUp(int amount)
+    {
+        if (CurrentLevel + amount > 200) return;
+
+        BigInteger prevRequired = LevelExpN;
+        CurrentLevel += amount;
+        CurrentExp -= prevRequired;
+
+        StatManager.Instance.RefreshExp(CurrentLevel, LEVEL_WEIGHT);
+
+        RefreshStats();
+        CurrentHp = MaxHp;
+
+        OnLevelChanged?.Invoke(CurrentLevel);
+    }
+
     void LevelUp()
     {
         if (CurrentLevel >= 200) return;
@@ -118,11 +147,23 @@ public class PlayerStats : MonoBehaviour, IResettable
         OnLevelChanged?.Invoke(CurrentLevel);
     }
 
-    /// <summary>승급 처리 (승급 UI에서 호출)</summary>
-    public void Promote(int promotionGrade)
+    public void Promote()
     {
-        CurrentPromotion = promotionGrade;
+        if (CurrentPromotion >= 8) return; // 최대 승급 방어
+
+        CurrentPromotion++;
+        OnPromotionChanged?.Invoke(CurrentPromotion);
         RefreshStats();
+    }
+    public bool CanPromote(out Character_RankData nextData)
+    {
+        nextData = null;
+        if (CurrentPromotion >= 8) return false;
+
+        nextData = DataManager.Instance.GetData<Character_RankData>(CurrentPromotion + 1);
+        bool levelOk = CurrentLevel >= nextData.Character_Rank_Level;
+        bool goldOk = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) >= nextData.Character_Rank_Gold;
+        return levelOk && goldOk;
     }
 
     #endregion

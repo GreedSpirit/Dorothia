@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [Serializable]
 public class FinalStat
@@ -56,7 +57,7 @@ public class FinalStat
     // ══════════════════════════════════════════════════════
     #region Calculation
 
-    public void UpdateFinalValue(int level, float promotionMulti = 1f)
+    public void UpdateFinalValue(int level, int promotion = 1)
     {
         if (overrideValue.HasValue)
         {
@@ -68,8 +69,10 @@ public class FinalStat
 
         if (isScaledByLevel)
         {
+            Character_RankData rankData = DataManager.Instance.GetData<Character_RankData>(promotion);
+
             double characterGrowth = (baseStat + growAdditiveStat) * Mathf.Pow(weight, level - 1);
-            totalBeforePercent = (characterGrowth * promotionMulti) + equipAdditiveStat;
+            totalBeforePercent = (characterGrowth * rankData.Character_Rank_Value) + equipAdditiveStat;
         }
         else
         {
@@ -153,7 +156,7 @@ public class StatManager : MonoBehaviour
 
     // 재계산 시 사용할 캐싱값
     private int _currentLevel;
-    private float _currentPromotion;
+    private int _currentPromotion;
 
     private const int MAX_UPGRADE_LEVEL = 50;
 
@@ -166,7 +169,7 @@ public class StatManager : MonoBehaviour
     public void InitStats(Character_StatsData data)
     {
         _currentLevel = data.Character_Level;
-        _currentPromotion = 1f;
+        _currentPromotion = 1;
 
         // 레벨 성장 O 스탯
         stats[Status.Level] = new FinalStat(data.Character_Level);
@@ -206,7 +209,7 @@ public class StatManager : MonoBehaviour
     /// 스탯에 변화가 있을 때 반드시 호출.
     /// 장비 탈착 / 스킬 탈착 / 강화 / 레벨업 / 승급
     /// </summary>
-    public void RefreshStats(int level, float promotion = 1f)
+    public void RefreshStats(int level, int promotion = 1)
     {
         _currentLevel = level;
         _currentPromotion = promotion;
