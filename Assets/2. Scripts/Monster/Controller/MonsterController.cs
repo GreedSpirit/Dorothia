@@ -183,8 +183,6 @@ public class MonsterController : MonoBehaviour, IMonster
             step = 0;
         }
 
-        Debug.Log($"[MonsterInit] Section:{currentSection}, Step:{step}");
-
         if (_projectileDatabase == null)
         {
             Debug.LogError("ProjectileDatabase NULL");
