@@ -214,8 +214,16 @@ public class InventoryPanel : BaseUI
     {
         _enchantButton.interactable = true;
         _ringEnchantButton.interactable = true;
-        _sellButton.interactable = true;
-        _salvageButton.interactable = true;
+        if(_selectedEquipment.isEquipped == false && _selectedEquipment.isLocked == false)
+        {
+            _sellButton.interactable = true;
+            _salvageButton.interactable = true;
+        }
+        else
+        {
+            _sellButton.interactable = false;
+            _salvageButton.interactable = false;
+        }
     }
     public void DisableInteractable()
     {
