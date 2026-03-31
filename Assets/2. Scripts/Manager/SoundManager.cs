@@ -20,7 +20,7 @@ public class SoundManager : MonoBehaviour
     private Dictionary<SFXType, AudioClip> sfxDict;
 
     // 어드레서블 용
-    private Dictionary<string , AudioClip> sfxCache;
+    private Dictionary<string , AudioClip> sfxCache =new Dictionary<string, AudioClip>();
 
     private void Awake()
     {
