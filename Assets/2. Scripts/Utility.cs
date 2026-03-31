@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using UnityEngine;
 
 namespace GameUtility
@@ -110,6 +110,23 @@ namespace GameUtility
             char secondChar = (char)('a' + second);
 
             return $"{firstChar}{secondChar}";
+        }
+
+        //골드용 포맷
+        public static string FormatGold(BigInteger value)
+        {
+            return $"{Format(value)}<color=orange>G</color>";
+        }
+
+        //부족하면 빨간색
+        public static string FormatGold(BigInteger value, BigInteger cost)
+        {
+            string formatted = Format(value);
+
+            if (value < cost)
+                return $"<color=red>{formatted}</color><color=orange>G</color>";
+
+            return $"{formatted}<color=orange>G</color>";
         }
     }
 }

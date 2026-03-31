@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -77,7 +77,8 @@ public class PromotionPanel : MonoBehaviour
             Character_RankData afterData = DataManager.Instance.GetData<Character_RankData>(currentPromotion + 1);
             UpdateStandUI(afterRank, afterStand, afterData, ref _afterStandKey);
 
-            needsGold.text = "/ " + afterData.Character_Rank_Gold.ToString("N0");
+            needsGold.text = "/ " + 
+                GameUtility.NumberFormatterBigInt.Format(afterData.Character_Rank_Gold);
 
             afterStat.text = afterData.Character_Information;
 
@@ -85,7 +86,8 @@ public class PromotionPanel : MonoBehaviour
             promotionButton.interactable = canPromote;
         }
 
-        haveGold.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold).ToString("N0");
+        haveGold.text = GameUtility.NumberFormatterBigInt.FormatGold(
+        ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold));
     }
 
     /// <summary>랭크 텍스트 + 스탠드 이미지 갱신. 이전 키 릴리즈 후 새 키 로드.</summary>
@@ -132,7 +134,7 @@ public class PromotionPanel : MonoBehaviour
     /// <summary>골드 변경 시 보유골드 텍스트 + 버튼 활성화만 갱신</summary>
     private void RefreshGold(BigInteger currentGold)
     {
-        haveGold.text = currentGold.ToString("N0");
+        haveGold.text = GameUtility.NumberFormatterBigInt.FormatGold(currentGold);
 
         bool canPromote = PlayerStats.Instance.CurrentPromotion < 8
                           && PlayerStats.Instance.CanPromote(out _);

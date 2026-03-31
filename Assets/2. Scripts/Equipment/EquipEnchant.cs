@@ -117,12 +117,15 @@ public class EquipEnchant : BaseUI
             _costGoldText.text = "<color=orange>G</color>";
         }
         else if(equip.equip_Upgrade < 50)
-            _costGoldText.text = $"{_costGold}<color=orange>G</color>";
+        {
+            _costGoldText.text = GameUtility.NumberFormatterBigInt.FormatGold((BigInteger)_costGold);
+        }
 
         //현재의 골드량은, (테스트를 위해 임시로 작성한 테스트용)소지 중인 골드 값 뒤에 주황색 G를 붙여 표현합니다.
-        _currentGoldText.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) >= (BigInteger)_costGold?
-            $"{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>":
-            $"<color=red>{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>";
+        BigInteger gold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
+
+        //기존 삼항 제거 -> Formatter로 통일
+        _currentGoldText.text = GameUtility.NumberFormatterBigInt.FormatGold(gold, (BigInteger)_costGold);
 
     }
 
