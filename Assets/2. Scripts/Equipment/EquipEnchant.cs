@@ -23,6 +23,7 @@ public class EquipEnchant : BaseUI
     [Header("강화 관련 툴팁 표현용 TMP")]
     [SerializeField] TextMeshProUGUI _beforeEnchantUpgradeValueText;  // 장비의 현재 강화 수치를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _afterEnchantUpgradeValueText;   // 장비의 강화 성공 후 강화 수치를 보여주기 위한 텍스트입니다.
+    [SerializeField] TextMeshProUGUI _UpgradeBonusText;               // 장비의 강화 단계에 따른 스텟 보너스를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _currentGoldText;                // 현재 소지중인 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
     [SerializeField] TextMeshProUGUI _costGoldText;                   // 강화 시에 소모될 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
 
@@ -57,7 +58,16 @@ public class EquipEnchant : BaseUI
 
     private void Start()
     {
+        //재화 매니저의 골드 변화가 발생할 경우의 이벤트에 다음 기능을 추가합니다.
+        // - 골드 변화시의 현재 보유량 표기
+        ExchangeManager.Instance.OnGoldChanged += OnGoldChanged;
+
         Close();
+    }
+    void OnGoldChanged(BigInteger currentGold)
+    {
+        if (ExchangeManager.Instance != null)
+            _currentGoldText.text = $"{GameUtility.NumberFormatterBigInt.FormatGold(currentGold, (BigInteger)_costGold)}";
     }
 
     private void UseWeight(bool value)
@@ -106,6 +116,8 @@ public class EquipEnchant : BaseUI
             //강화가 되기 전과 성공했을 때의 강화 수치를 기록하는 텍스트를 변경해줍니다.
         _beforeEnchantUpgradeValueText.text = $"+{equip.equip_Upgrade}";
         _afterEnchantUpgradeValueText.text = equip.equip_Upgrade < 50? $"+{equip.equip_Upgrade + 1}" : "";
+
+        _UpgradeBonusText.text = equip.equip_Upgrade > 0 ? $"강화 보너스 : {DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Value * 100}%" : "강화 보너스 : 100%";
 
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         _costGold = equip.equip_Upgrade < 50?Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)

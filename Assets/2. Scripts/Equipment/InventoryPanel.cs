@@ -447,7 +447,6 @@ public class InventoryPanel : BaseUI
             {
                 targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
                 equip.isFusing = true;
-                Close();
             }
         }
     }
