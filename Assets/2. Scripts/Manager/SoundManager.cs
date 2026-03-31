@@ -28,6 +28,8 @@ public class SoundManager : MonoBehaviour
 
         instance = this;
 
+        DontDestroyOnLoad(gameObject);
+
         sfxDict = new Dictionary<SFXType, AudioClip>();
 
         //SFXType enum순서대로 매핑
@@ -41,6 +43,24 @@ public class SoundManager : MonoBehaviour
 
     }
 
+    private void Start()
+    {
+        if (SettingManager.Instance != null)
+        {
+            SettingManager.Instance.OnVolumeLoaded += ApplySavedVolume;
+        }
+
+        ApplySavedVolume();
+    }
+
+    private void OnDestroy()
+    {
+        if (SettingManager.Instance != null)
+        {
+            SettingManager.Instance.OnVolumeLoaded -= ApplySavedVolume;
+        }
+    }
+
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioClip[] sfxClip;
@@ -48,11 +68,11 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioMixerGroup bgmGroup;
     [SerializeField] private AudioMixerGroup sfxGroup;
 
-
     //볼륨 설정을 위한 파라미터 이름 (믹서와 일치해야 함)
     private const string MAIN_PARAM = "MAINVol";
     private const string BGM_PARAM = "BGMVol";
     private const string SFX_PARAM = "SFXVol";
+
     // 0~1 슬라이더 값을 데시벨로 변환
     public void SetVolume(string paramName, float value)
     {
@@ -89,5 +109,14 @@ public class SoundManager : MonoBehaviour
             //있으면 클립에 담기
             sfxSource.PlayOneShot(clip);
         }
+    }
+
+    public void ApplySavedVolume()
+    {
+        if (SettingManager.Instance == null) return;
+
+        SetMainVolume(SettingManager.Instance.MainVolume);
+        SetBGMVolume(SettingManager.Instance.BGMVolume);
+        SetSFXVolume(SettingManager.Instance.SFXVolume);
     }
 }

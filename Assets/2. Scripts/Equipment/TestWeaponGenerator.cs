@@ -1,3 +1,4 @@
+﻿using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,9 @@ public class TestWeaponGenerator : MonoBehaviour
     [SerializeField] InventoryPanel inventoryPanel;                           // 갱신해야 할 인벤토리.
 
     private Dictionary<Equip_Type, List<EquipData>> _equipList;
+
+    //생성된 장비정보 전달용 이벤트
+    public event System.Action<List<Equipment>> _OnGetEquipment;
 
     private void Awake()
     {
@@ -107,7 +111,6 @@ public class TestWeaponGenerator : MonoBehaviour
 
         //해당 장비를 인벤토리에 넣습니다.
         equipmentInventory.AddEquipment(testWeapon);
-        //Debug.LogError(testWeapon.equip_name);
 
         if (inventoryPanel.currentPart != 0)
         {
@@ -140,5 +143,38 @@ public class TestWeaponGenerator : MonoBehaviour
         }
 
         return testWeapon;
+    }
+
+    public void Test3(int equipLevel, double count)
+    {
+        //이벤트로 보낼 장비리스트
+        List<Equipment> list = new List<Equipment>();
+
+        if (equipmentInventory == null)
+        {
+            return;
+        }
+
+        //카운트수만큼 만들어서 리스트만들고
+        for (int i = 0; i < (int)count; i++)
+        {
+
+            EquipData _equipData = GetEquipmentData(GetNumber());
+            int Rarity = ItemCalculator.RarityCalculator();
+            Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
+
+
+            //해당 장비를 인벤토리에 넣습니다.
+            equipmentInventory.AddEquipment(testWeapon);
+            list.Add(testWeapon);
+        }
+
+        //획득한장비리스트 이벤트 보내기
+        _OnGetEquipment?.Invoke(list);
+
+        if (inventoryPanel.currentPart != 0)
+        {
+            inventoryPanel.Refresh();
+        }
     }
 }

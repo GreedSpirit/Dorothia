@@ -132,7 +132,7 @@ public class ScenarioManager : MonoBehaviour
 
     private void UpdatePortrait(string portraitKey)
     {
-        Debug.LogError(portraitKey);
+        Debug.Log(portraitKey);
         //이미 로드된 이미지가 있다면 메모리에서 해제
         if (!string.IsNullOrEmpty(_currentPortraitKey))
         {
@@ -144,7 +144,7 @@ public class ScenarioManager : MonoBehaviour
         if (string.IsNullOrEmpty(portraitKey))
         {
             _portraitImage.gameObject.SetActive(false);
-            Debug.LogError(portraitKey);
+            Debug.Log(portraitKey);
             return;
         }
 
