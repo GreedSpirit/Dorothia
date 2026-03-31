@@ -8,6 +8,7 @@ public class SaveManager : MonoBehaviour
     public static SaveManager Instance;
 
     [SerializeField] private float autoSaveSecond = 60f;
+    [SerializeField] private PlayerCtrl _playerCtrl;
     [SerializeField] private PlayerStats _playerStat;
 
     public Action OnSave;
@@ -85,7 +86,8 @@ public class SaveManager : MonoBehaviour
             equipInv = EquipmentInventory.Instance.GetSaveData(),
             GremlinInv = GremlinInventory.Instance.GetSaveData(),
             stageData = StageManager.Instance.GetSaveData(),
-            skillData = SkillManager.Instance.GetSaveData()
+            skillData = SkillManager.Instance.GetSaveData(),
+            playerData = _playerStat.GetSaveData()
         };
     }
 
@@ -112,6 +114,7 @@ public class SaveManager : MonoBehaviour
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
         StageManager.Instance.LoadFromSaveData(data.stageData);
         SkillManager.Instance.LoadFromSaveData(data.skillData);
+        _playerStat.LoadFromSaveData(data.playerData);
 
         GiveOfflineReward();
     }

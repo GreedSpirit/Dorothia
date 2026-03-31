@@ -10,11 +10,24 @@ public class PromotionIconView : MonoBehaviour
     {
         _icon = GetComponent<Image>();
     }
-
     private void Start()
     {
         PlayerStats.Instance.OnPromotionChanged += RefreshIcon;
-        RefreshIcon(PlayerStats.Instance.CurrentPromotion); // 초기값 반영
+
+        if (PlayerStats.Instance.IsLoaded)
+        {
+            RefreshIcon(PlayerStats.Instance.CurrentPromotion);
+        }
+        else
+        {
+            PlayerStats.Instance.OnLoaded += OnPlayerLoaded;
+        }
+    }
+
+    private void OnPlayerLoaded()
+    {
+        PlayerStats.Instance.OnLoaded -= OnPlayerLoaded; 
+        RefreshIcon(PlayerStats.Instance.CurrentPromotion);
     }
 
     private void OnDestroy()
