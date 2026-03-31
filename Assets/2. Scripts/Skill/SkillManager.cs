@@ -659,9 +659,9 @@ public class SkillManager : MonoBehaviour
 
     #region Save & Load
 
-    public SaveSkillData GetSaveData()
+    public SkillSaveData GetSaveData()
     {
-        var data = new SaveSkillData();
+        var data = new SkillSaveData();
 
         // 인벤토리
         foreach (var (key, count) in _inventory)
@@ -702,7 +702,7 @@ public class SkillManager : MonoBehaviour
         return data;
     }
 
-    public void LoadFromSaveData(SaveSkillData data)
+    public void LoadFromSaveData(SkillSaveData data)
     {
         if (data == null) return;
 

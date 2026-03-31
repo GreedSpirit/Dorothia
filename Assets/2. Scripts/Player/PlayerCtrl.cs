@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -593,5 +593,12 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
         Gizmos.color = Color.red;
         Vector3 endDistance = new Vector3(transform.position.x, transform.position.y, transform.position.z + AttackRange);
         Gizmos.DrawLine(transform.position, endDistance);
+    }
+
+    /// <summary>저장 데이터 로드 시 자동전투 상태를 직접 지정</summary>
+    public void SetAutoMode(bool value)
+    {
+        if (_isAutoMode == value) return;
+        _isAutoMode = value;
     }
 }

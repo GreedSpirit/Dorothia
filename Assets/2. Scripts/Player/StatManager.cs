@@ -289,4 +289,47 @@ public class StatManager : MonoBehaviour
     public double GetStat(Status type) => stats[type].FinalValue;
 
     #endregion
+
+    #region Upgrade Save / Load
+
+    /// <summary>현재 강화 단계 목록을 반환 (저장용)</summary>
+    public List<StatUpgradeEntry> GetStatUpgrades()
+    {
+        var list = new List<StatUpgradeEntry>();
+        foreach (var kvp in stats)
+        {
+            if (kvp.Value.upgradeLevel > 0)
+                list.Add(new StatUpgradeEntry
+                {
+                    statType = (int)kvp.Key,
+                    upgradeLevel = kvp.Value.upgradeLevel
+                });
+        }
+        return list;
+    }
+
+    /// <summary>저장된 강화 단계를 복원 (로드용) — RefreshStats 호출 전에 사용</summary>
+    public void ApplyStatUpgrades(List<StatUpgradeEntry> entries)
+    {
+        if (entries == null) return;
+
+        // 먼저 모든 upgradeLevel 초기화
+        foreach (var stat in stats.Values)
+        {
+            stat.upgradeLevel = 0;
+            stat.growAdditiveStat = 0f;
+        }
+
+        foreach (var entry in entries)
+        {
+            var key = (Status)entry.statType;
+            if (!stats.ContainsKey(key)) continue;
+
+            var stat = stats[key];
+            stat.upgradeLevel = entry.upgradeLevel;
+            stat.growAdditiveStat = stat.upgradeLevel * stat.upgradeValuePerStep;
+        }
+    }
+
+    #endregion
 }

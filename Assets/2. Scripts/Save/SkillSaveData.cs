@@ -47,7 +47,7 @@ public class SlotEntry
 }
 
 [Serializable]
-public class SaveSkillData
+public class SkillSaveData
 {
     public List<InventoryEntry> inventory = new();
     public List<UnlockedSkillEntry> unlockedSkills = new();
