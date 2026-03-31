@@ -76,7 +76,6 @@ public class SaveManager : MonoBehaviour
 
     public void OnClickStartGame()
     {
-        Instance.LoadGame();
         StartCoroutine(AutoSaveCoroutine());
     }
 
@@ -118,8 +117,6 @@ public class SaveManager : MonoBehaviour
         var data = SaveManagement.Load<SaveData>("GameData");
 
         if (data == null) return;
-        //Debug.Log(EquipmentInventory.Instance);
-        //Debug.Log(GremlinInventory.Instance);
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
         StageManager.Instance.LoadFromSaveData(data.stageData);
