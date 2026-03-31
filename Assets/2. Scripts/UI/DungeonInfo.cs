@@ -55,8 +55,7 @@ public class DungeonInfo : MonoBehaviour
 
     //패널 열릴때 호출
     public void Open(int dungeonId, int startLevel = 0)
-    {
-        Debug.LogError($"[DungeonInfo] 지금 작동 중인 객체: {gameObject.name}", gameObject);
+    {       
 
         //패널 활성화하고
         gameObject.SetActive(true);
@@ -64,10 +63,6 @@ public class DungeonInfo : MonoBehaviour
         _currentStepIndex = startLevel;
 
         Init();
-        Debug.LogError(dungeonId);
-        Debug.LogError(startLevel);
-        Debug.LogError(_dungeonStep == null ? "_dungeonStep이 null" : "_dungeonStep 정상");
-        Debug.LogError(_levelButtons == null ? "_levelButtons가 null" : "_levelButtons 정상");
 
 
 
@@ -161,7 +156,7 @@ public class DungeonInfo : MonoBehaviour
     public void DungeonClear()
     {
         int count = DataManager.Instance.GetUsedEntryCount(_currentDungeonId);
-        Debug.LogError($"클리어횟수 = {count}");
+        Debug.Log($"클리어횟수 = {count}");
         if (count >= 3)
         {
             _cantClearCountPanel.SetActive(true);
