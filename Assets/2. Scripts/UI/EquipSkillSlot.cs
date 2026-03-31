@@ -8,6 +8,8 @@ public class EquipSkillSlot : BaseSkillSlot
         {
             if (_skill == null) return;
 
+            if (!_skill.IsReady) return;
+
             if (_skill.Data.Skill_Type == Skill_Type.Passive) return;
 
             player.PerformSkill(_skill);
