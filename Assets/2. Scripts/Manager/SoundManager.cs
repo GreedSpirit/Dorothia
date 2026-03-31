@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -18,6 +18,9 @@ public class SoundManager : MonoBehaviour
 
     //효과음 매핑용 딕셔너리
     private Dictionary<SFXType, AudioClip> sfxDict;
+
+    // 어드레서블 용
+    private Dictionary<string , AudioClip> sfxCache;
 
     private void Awake()
     {
@@ -109,6 +112,23 @@ public class SoundManager : MonoBehaviour
             //있으면 클립에 담기
             sfxSource.PlayOneShot(clip);
         }
+    }
+
+    public void PlaySFX(string address)
+    {
+        if (sfxCache.TryGetValue(address, out var cached))
+        {
+            sfxSource.PlayOneShot(cached);
+            return;
+        }
+
+        AddressableManager.Instance.LoadAsset<AudioClip>(address, clip =>
+        {
+            if (clip == null) return;
+
+            sfxCache[address] = clip;   // 캐시 저장
+            sfxSource.PlayOneShot(clip);
+        });
     }
 
     public void ApplySavedVolume()
