@@ -65,38 +65,72 @@ public class TitleManager : MonoBehaviour
 
     private IEnumerator CoLoadGame()
     {
-        //1. 기존 UI 숨김
-        _buttonUI.SetActive(false);
+        _buttonUI.SetActive(false); // 기존 UI 숨김
+        _loadingRoot.SetActive(true); // 로딩 UI 표시
 
-        // 2. 로딩 UI 표시
-        _loadingRoot.SetActive(true);
-
-        //3. Async 로딩 시작
+        //Async 로딩 시작
         AsyncOperation operation = SceneManager.LoadSceneAsync("InGameScene");
         operation.allowSceneActivation = false;
 
         float fakeProgress = 0f;
 
-        while (!operation.isDone)
+        while (fakeProgress < 1f)
         {
-            //0 ~ 0.9 → 0 ~ 1로 보정
             float realProgress = Mathf.Clamp01(operation.progress / 0.9f);
 
-            //부드러운 증가
-            fakeProgress = Mathf.Lerp(fakeProgress, realProgress, Time.deltaTime * 5f);
+            //랜덤 멈춤 (2% 확률)
+            if (Random.value < 0.02f)
+            {
+                yield return new WaitForSeconds(Random.Range(0.1f, 0.3f));
+            }
 
-            //UI 반영
+            //구간별 속도 + 랜덤
+            float speed = GetRandomSpeed(fakeProgress);
+            fakeProgress += Time.deltaTime * speed;
+
+            //가짜 점프 (5% 확률)
+            if (Random.value < 0.05f)
+            {
+                fakeProgress += Random.Range(0.01f, 0.03f);
+            }
+
+            //실제보다 앞서가지 않게 제한
+            fakeProgress = Mathf.Min(fakeProgress, realProgress);
+            fakeProgress = Mathf.Clamp01(fakeProgress);
+
             _progressBar.value = fakeProgress;
             _progressText.text = $"{(fakeProgress * 100f):0}%";
-
-            //로딩 완료
-            if (fakeProgress >= 0.99f)
-            {
-                yield return new WaitForSeconds(0.2f);
-                operation.allowSceneActivation = true;
-            }
+            
+            //완료 조건
+            if (realProgress >= 1f && fakeProgress >= 0.99f)
+                break;
 
             yield return null;
         }
+
+        // 마지막 연출
+        while (fakeProgress < 1f)
+        {
+            fakeProgress += Time.deltaTime * 1.2f;
+            _progressBar.value = fakeProgress;
+            _progressText.text = $"{(fakeProgress * 100f):0}%";
+            yield return null;
+        }
+
+        operation.allowSceneActivation = true;
+    }
+
+    private float GetRandomSpeed(float progress)
+    {
+        //초반: 빠르게
+        if (progress < 0.3f)
+            return Random.Range(1.2f, 2.0f);
+
+        //중반: 들쭉날쭉
+        if (progress < 0.8f)
+            return Random.Range(0.3f, 1.2f);
+
+        //후반: 느리게
+        return Random.Range(0.1f, 0.4f);
     }
 }
