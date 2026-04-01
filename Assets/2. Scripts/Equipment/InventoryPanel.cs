@@ -455,6 +455,7 @@ public class InventoryPanel : BaseUI
             {
                 targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
                 equip.isFusing = true;
+                targetSlot.OnSlotEquippedChanged?.Invoke();
             }
         }
     }
@@ -467,10 +468,29 @@ public class InventoryPanel : BaseUI
         //타겟 슬롯이 null이 아니라면
         if (targetSlot != null)
         {
+            //해당 슬롯에 이미 장착된 장비가 있을 때
+            if(targetSlot.equipped != null)
+            {
+                //해당 장비의 합성 중 여부를 거짓으로 변경합니다.
+                targetSlot.equipped.isFusing = false;
+                Refresh();
+            }
             //슬롯에 장착된 장비를 null로 바꾸고
             targetSlot.equipped = null;
-            //스프라이트를 제거합니다.
-            targetSlot.iconImage.sprite = null;
+            //슬롯이 장비 장착용 슬롯인 경우
+            if(targetSlot.slotType == SlotType.EquipSlot)
+            {
+                //스프라이트를 제거합니다.
+                targetSlot.iconImage.sprite = null;
+            }
+            //그 외에, 슬롯이 장비 합성용 슬롯인 경우
+            else if(targetSlot.slotType == SlotType.FuseSlot)
+            {
+                //슬롯을 초기화합니다.
+                targetSlot.ClearSlot();
+                //슬롯이 들고 있던 장비 변경 시의 이벤트를 실행합니다.
+                targetSlot.OnSlotEquippedChanged?.Invoke();
+            }
         }
     }
 

@@ -24,13 +24,13 @@ public class EquipEnchant : BaseUI
     [SerializeField] TextMeshProUGUI _beforeEnchantUpgradeValueText;  // 장비의 현재 강화 수치를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _afterEnchantUpgradeValueText;   // 장비의 강화 성공 후 강화 수치를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _UpgradeBonusText;               // 장비의 강화 단계에 따른 스텟 보너스를 보여주기 위한 텍스트입니다.
+    [SerializeField] TextMeshProUGUI _UpgradeWeightText;               // 장비의 강화 단계에 따른 스텟 보너스를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _currentGoldText;                // 현재 소지중인 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
     [SerializeField] TextMeshProUGUI _costGoldText;                   // 강화 시에 소모될 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
 
     private Equipment _equipment;                                     // 강화를 진행할 장비입니다. 장비를 선택한 채로 장비 강화 버튼을 누르면 해당 장비 정보를 담아두기 위함입니다.
     private bool _isUsingFailureCount = false;                        // 강화 실패로 쌓이게 된 보정값을 사용할지 여부를 결정합니다.
     private float _costGold;                                          // 강화 시에 사용하게 될 골드량입니다.
-
 
     private void Awake()
     {
@@ -54,6 +54,7 @@ public class EquipEnchant : BaseUI
             Enchant(_equipment);
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
+        _UpgradeWeightText.enabled = false;
     }
 
     private void Start()
@@ -74,6 +75,7 @@ public class EquipEnchant : BaseUI
     {
         _isUsingFailureCount = value;
         _toggleText.text = value == true ? "On" : "Off";
+        _UpgradeWeightText.enabled = value;
     }
 
     /// <summary>
@@ -122,6 +124,8 @@ public class EquipEnchant : BaseUI
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         _costGold = equip.equip_Upgrade < 50?Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
                 * ItemCalculator.GetEnchantWeightByRarity(DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)): 99999999;
+
+        _UpgradeWeightText.text = $"(+{(equip.equip_Upgrade_Weight * 100):F0}%)";
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         if (equip.equip_Upgrade >= 50)
@@ -174,7 +178,7 @@ public class EquipEnchant : BaseUI
         if(_isUsingFailureCount == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
-            if(successChance + equip.equip_Upgrade_Weight <= 100)
+            if(successChance + (equip.equip_Upgrade_Weight*100) <= 100)
             {
                 successChance += equip.equip_Upgrade_Weight * 100;
             }
