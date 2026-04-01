@@ -116,6 +116,7 @@ public class SaveManager : MonoBehaviour
         //Debug.Log(GremlinInventory.Instance);
         return new SaveData
         {
+            exchangeData = ExchangeManager.Instance.GetSaveData(),
             equipInv = EquipmentInventory.Instance.GetSaveData(),
             GremlinInv = GremlinInventory.Instance.GetSaveData(),
             stageData = StageManager.Instance.GetSaveData(),
@@ -132,9 +133,13 @@ public class SaveManager : MonoBehaviour
 
         if (data == null)
         {
+            Debug.LogError("Load된 데이터가 null!");
             lastSaveTime = DateTime.Now;
             return;
         }
+        if (data.exchangeData == null) Debug.LogError("exchangeData가 null!");
+
+        ExchangeManager.Instance.LoadFromSaveData(data.exchangeData);
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
         StageManager.Instance.LoadFromSaveData(data.stageData);

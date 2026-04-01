@@ -8,7 +8,14 @@ public enum MoneyType
 {
     Scrap, Gold, CorePiece, FlintPiece, PinionPiece, ZincPiece
 }
-public class ExchangeManager : MonoBehaviour
+
+[Serializable]
+public class ExchangeData
+{
+    public string gold;
+}
+
+public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
 {
     //싱글톤
     public static ExchangeManager Instance { get; private set; }
@@ -202,5 +209,31 @@ public class ExchangeManager : MonoBehaviour
     {
         bool success = UseMoney(GetShardTargetGremlin(id), amount);
         return success;
+    }
+
+    public ExchangeData GetSaveData()
+    {
+        var data = new ExchangeData();
+
+        data.gold = GetMoneyAmount(MoneyType.Gold).ToString();
+
+        Debug.Log($"데이타 {data}");
+        Debug.Log($"골드 {data.gold}");
+        return data;
+    }
+
+    public void LoadFromSaveData(ExchangeData data)
+    {
+        Debug.Log($"불러온골드 {data.gold}");
+        if (!string.IsNullOrEmpty(data.gold) && BigInteger.TryParse(data.gold, out BigInteger parsed))
+        {
+            _money[MoneyType.Gold] = parsed;
+        }
+        else
+        {
+            _money[MoneyType.Gold] = BigInteger.Zero;
+        }
+
+        UpdateGoods(_money, MoneyType.Gold);
     }
 }
