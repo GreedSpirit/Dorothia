@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,6 +10,12 @@ public class TitleManager : MonoBehaviour
     static public TitleManager Instance { get => instance; }
 
     [SerializeField] Image image;
+
+    [Header("UI")]
+    [SerializeField] private GameObject _buttonUI;       // 기존 버튼 UI
+    [SerializeField] private GameObject _loadingRoot;  // 로딩 UI
+    [SerializeField] private Slider _progressBar;
+    [SerializeField] private TMP_Text _progressText;
 
     private void Awake()
     {
@@ -24,6 +31,8 @@ public class TitleManager : MonoBehaviour
 
     private void Start()
     {
+        if (_loadingRoot != null)
+            _loadingRoot.SetActive(false);
         StartCoroutine(FadeOut());
     }
 
@@ -51,7 +60,43 @@ public class TitleManager : MonoBehaviour
 
     public void GameStart()
     {
-        SceneManager.LoadScene("InGameScene");
+        StartCoroutine(CoLoadGame());
     }
 
+    private IEnumerator CoLoadGame()
+    {
+        //1. 기존 UI 숨김
+        _buttonUI.SetActive(false);
+
+        // 2. 로딩 UI 표시
+        _loadingRoot.SetActive(true);
+
+        //3. Async 로딩 시작
+        AsyncOperation operation = SceneManager.LoadSceneAsync("InGameScene");
+        operation.allowSceneActivation = false;
+
+        float fakeProgress = 0f;
+
+        while (!operation.isDone)
+        {
+            //0 ~ 0.9 → 0 ~ 1로 보정
+            float realProgress = Mathf.Clamp01(operation.progress / 0.9f);
+
+            //부드러운 증가
+            fakeProgress = Mathf.Lerp(fakeProgress, realProgress, Time.deltaTime * 5f);
+
+            //UI 반영
+            _progressBar.value = fakeProgress;
+            _progressText.text = $"{(fakeProgress * 100f):0}%";
+
+            //로딩 완료
+            if (fakeProgress >= 0.99f)
+            {
+                yield return new WaitForSeconds(0.2f);
+                operation.allowSceneActivation = true;
+            }
+
+            yield return null;
+        }
+    }
 }
