@@ -22,6 +22,7 @@ namespace GameUtility
                 res = new BigInteger(data);
             } while (res >= offset); // 범위 내에 들어올 때까지 반복
 
+            Debug.Log($"parsed min: {min}, max: {max}");
             return res + min;
         }
 

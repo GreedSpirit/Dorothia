@@ -53,9 +53,9 @@ public class DungeonManager : MonoBehaviour
     public static event System.Action<float> OnDungeonTimeLimitChanged;            // timeLimit
     public static event System.Action<float> OnDungeonPrepareStarted;
     public static event System.Action<List<Equipment>> OnDungeonEQReward;
-    public static event System.Action<List<G_StoneData>> OnDungeonGSReward;
-    public static event System.Action<List<Sk_SclData>> OnDungeonSKReward;
-    public static event System.Action<System.Numerics.BigInteger> OnDungeonReward;
+    public static event System.Action<Dictionary<int, int>> OnDungeonGSReward;
+    public static event System.Action<List<SkillData>> OnDungeonSKReward;
+    public static event System.Action<Dungeon_Type, System.Numerics.BigInteger> OnDungeonReward;
 
     private bool _eventsRegistered;
 
@@ -494,30 +494,42 @@ public class DungeonManager : MonoBehaviour
             return;
         }
 
-        //클리어한 던전 보상이 골드, 경험치, 강자의증표
-        if (reward.Dungeon_Type == Dungeon_Type.Gold || reward.Dungeon_Type == Dungeon_Type.Exp || reward.Dungeon_Type == Dungeon_Type.TokenOfStrong)
+        //클리어한 던전 보상이 골드
+        if (reward.Dungeon_Type == Dungeon_Type.Gold)
         {
             System.Numerics.BigInteger amount =
                 BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
 
-            Debug.Log($"[Dungeon] Reward 지급 ConsumId={reward.Consum_Id}," +
-                $" Amount={amount}, Rank={reward.Reward_Rank}");
+            ExchangeManager.Instance.GetMoney(MoneyType.Gold, amount);
 
             //보상값 이벤트 보내기
-            OnDungeonReward?.Invoke(amount);
+            OnDungeonReward?.Invoke(Dungeon_Type.Gold, amount);
+        }
+
+        //클리어한 던전 보상이 경험치
+        if (reward.Dungeon_Type == Dungeon_Type.Exp)
+        {
+            System.Numerics.BigInteger amount =
+                BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+
+            PlayerStats.Instance.AddExp(amount);
+
+            //보상값 이벤트 보내기
+            OnDungeonReward?.Invoke(Dungeon_Type.Exp, amount);
         }
 
         //클리어한 던전 보상이 스킬주문서
         if (reward.Dungeon_Type == Dungeon_Type.SkillScroll)
         {
             int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+            Debug.Log(a);
             
 
-            //var RandomList = SkillManager.Instance.GetRandomScroll(a);
+            var RandomList = SkillManager.Instance.GetRandomScroll(a);
 
             
             //랜덤값 이벤트 보내기
-            //OnDungeonSKReward?.Invoke(RandomList);
+            OnDungeonSKReward?.Invoke(RandomList);
         }
 
         //클리어한 던전 보상이 요정석
@@ -529,19 +541,32 @@ public class DungeonManager : MonoBehaviour
             var RandomList = new List<G_StoneData>();
 
             int a = (int)BigIntRandom.Range(reward.Reward_Min, reward.Reward_Max + 1);
+            var list = new List<KeyValuePair<int, G_StoneData>>(GSData);
+            //중복값 매핑
+            Dictionary<int, int> rewardMap = new();
 
             for (int i = 0; i < a; i++)
-            {                
-                //값들 list에 넣고
-                var list = new List<G_StoneData>(GSData.Values);
+            {
                 //랜덤선택
                 var random = list[Random.Range(0, list.Count)];
-                //선택된값 추가
-                RandomList.Add(random);
+
+                int id = random.Key;
+
+                ExchangeManager.Instance.AddGremlinPiece(id, 1);
+
+                if (rewardMap.ContainsKey(id))
+                {
+                    rewardMap[id]++;
+                }
+                else
+                {
+                    rewardMap[id] = 1;
+                }
+
             }
 
             //랜덤값 이벤트 보내기
-            OnDungeonGSReward?.Invoke(RandomList);
+            OnDungeonGSReward?.Invoke(rewardMap);
         }
 
         //클리어한 던전 보상이 장비

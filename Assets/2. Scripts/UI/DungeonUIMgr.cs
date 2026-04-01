@@ -36,7 +36,7 @@ public class DungeonUIMgr : MonoBehaviour
     {
         DungeonManager.OnDungeonEQReward += UpdateEQRewardUI;
         DungeonManager.OnDungeonGSReward += UpdateGSRewardUI;
-        //DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
+        DungeonManager.OnDungeonSKReward += UpdateSKRewardUI;
         DungeonManager.OnDungeonReward += UpdateRewardUI;
         DungeonManager.OnDungeonCleared += UpdateDungeonInfo;
         DungeonManager.OnDungeonCleared += CloseDungeonInfo;
@@ -51,7 +51,7 @@ public class DungeonUIMgr : MonoBehaviour
     {
         DungeonManager.OnDungeonEQReward -= UpdateEQRewardUI;
         DungeonManager.OnDungeonGSReward -= UpdateGSRewardUI;
-        //DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
+        DungeonManager.OnDungeonSKReward -= UpdateSKRewardUI;
         DungeonManager.OnDungeonReward -= UpdateRewardUI;
         DungeonManager.OnDungeonCleared -= UpdateDungeonInfo;
         DungeonManager.OnDungeonCleared -= CloseDungeonInfo;
@@ -95,25 +95,43 @@ public class DungeonUIMgr : MonoBehaviour
         }
     }
 
-    public void UpdateGSRewardUI(List<G_StoneData> list)
+    public void UpdateGSRewardUI(Dictionary<int, int> rewardMap)
     {
         _dungeonRewardText.text = "";
+        int maxVisibleLines = 5;
+        int lineCount = 0;
 
-        foreach (var GS in list)
+        foreach (var GS in rewardMap)
         {
-            _dungeonRewardText.text += ($"{GS.G_Stone_Name}\n");
+            if (lineCount >= maxVisibleLines)
+            {
+                _dungeonRewardText.text += "...";
+                break;
+            }
+            var data = DataManager.Instance.GetData<G_StoneData>(GS.Key);
+            _dungeonRewardText.text += $"{data.G_Stone_Name} x {GS.Value}\n";
+            lineCount++;
         }
     }
 
     public void UpdateSKRewardUI(List<SkillData> list)
     {
         _dungeonRewardText.text = "";
+        int maxVisibleLines = 5;
+        int lineCount = 0;
 
         //중복 체크 담아두기
         Dictionary<string, int> rewardCounts = new Dictionary<string, int>();
 
+
         foreach (var SK in list)
         {
+            if (lineCount >= maxVisibleLines)
+            {
+                _dungeonRewardText.text += "...";
+                break;
+            }
+
             string name = SK.Skill_Name + " 주문서";
 
             if (rewardCounts.ContainsKey(name))
@@ -132,14 +150,24 @@ public class DungeonUIMgr : MonoBehaviour
         {
             //스킬주문서 x 중복수 출력
             _dungeonRewardText.text += $"{item.Key} x {item.Value}\n";
+            lineCount++;
         }
     }
 
-    public void UpdateRewardUI(BigInteger reward)
+    public void UpdateRewardUI(Dungeon_Type type, BigInteger reward)
     {
         _dungeonRewardText.text = "";
 
-        _dungeonRewardText.text = ($"{reward}");
+        switch (type)
+        {
+            case Dungeon_Type.Gold:
+                _dungeonRewardText.text = ($"골드 : {reward}");
+                break;
+
+            case Dungeon_Type.Exp:
+                _dungeonRewardText.text = ($"경험치 : {reward}");
+                break;
+        }
     }
 
     public void UpdateDungeonInfo(string dungeonName, int stepId, float clearTime)

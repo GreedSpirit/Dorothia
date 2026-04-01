@@ -158,7 +158,6 @@ public class TestWeaponGenerator : MonoBehaviour
         //카운트수만큼 만들어서 리스트만들고
         for (int i = 0; i < (int)count; i++)
         {
-
             EquipData _equipData = GetEquipmentData(GetNumber());
             int Rarity = ItemCalculator.RarityCalculator();
             Equipment testWeapon = new Equipment(System.Guid.NewGuid().ToString(), _equipData, (Rarity)Rarity, equipLevel);
