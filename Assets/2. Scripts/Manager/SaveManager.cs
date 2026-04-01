@@ -42,6 +42,10 @@ public class SaveManager : MonoBehaviour
 
     private void Start()
     {
+        if(lastSaveTime == DateTime.MinValue)
+        {
+            lastSaveTime = DateTime.Now;
+        }    
         StartCoroutine(LoadNextFrame());
         OnClickStartGame();
     }
@@ -60,6 +64,10 @@ public class SaveManager : MonoBehaviour
         {
             SaveGame();
             SaveTime();
+        }
+        else
+        {
+            TrySave();
         }
     }
 
@@ -122,7 +130,11 @@ public class SaveManager : MonoBehaviour
 
         var data = SaveManagement.Load<SaveData>("GameData");
 
-        if (data == null) return;
+        if (data == null)
+        {
+            lastSaveTime = DateTime.Now;
+            return;
+        }
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
         StageManager.Instance.LoadFromSaveData(data.stageData);
@@ -192,11 +204,11 @@ public class SaveManager : MonoBehaviour
         if (equipCount < 1)
         {
             _rewardEquipText.enabled = false;
-
+        
             _rewardText.text =
                     $"경험치 : {_exp}\n" +
                     $"골드 : {_gold}\n";
-
+        
             _rewardPanel.SetActive(true);
             return;
         }
@@ -249,9 +261,9 @@ public class SaveManager : MonoBehaviour
             $"골드 : {_gold}\n";
 
         _rewardEquipText.text = 
-            $"장비        신화 : {rarity[Rarity.Mythtic] : D3},\n" +
-            $"전설 : {rarity[Rarity.Legendary] : D3}, 레어 : {rarity[Rarity.Rare] : D3},\n" +
-            $"희귀 : {rarity[Rarity.Uncommon]: D3}, 일반 : {rarity[Rarity.Normal] : D3}";
+            $"장비           신화 : {rarity[Rarity.Mythtic]:D3},\n" +
+            $"전설 : {rarity[Rarity.Legendary]:D3}, 레어 : {rarity[Rarity.Rare]:D3},\n" +
+            $"희귀 : {rarity[Rarity.Uncommon]:D3}, 일반 : {rarity[Rarity.Normal]:D3}";
 
         _rewardPanel.SetActive(true);
 
