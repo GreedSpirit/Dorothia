@@ -11,6 +11,7 @@ public class AddressableEditor : EditorWindow
     private const string EffectFolder = "Assets/Resources/Skill/Effect";
     private const string MotionFolder = "Assets/Resources/Skill/Motion";
     private const string IconFolder = "Assets/Resources/Skill/Icon";
+    private const string SkillSFXFolder = "Assets/Resources/Skill/Skill_FX";
 
     private const string EquipFolder = "Assets/99. IgnoredAssets/EquipIcon/";
 
@@ -63,6 +64,9 @@ public class AddressableEditor : EditorWindow
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.png");
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.jpg");
         count += ScanDirectory(settings, IconFolder, "SkillIcon", "*.tga");
+        // 스킬 효과음 폴더 스캔
+        count += ScanDirectory(settings, SkillSFXFolder, "SkillSFX", "*.mp3");
+
         // 장비 아이콘 폴더 스캔
         foreach (var type in Enum.GetValues(typeof(Equip_Type)))
         {
