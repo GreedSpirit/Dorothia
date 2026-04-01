@@ -1,4 +1,4 @@
-using GameUtility;
+﻿using GameUtility;
 using System;
 using System.Collections;
 using System.Numerics;
@@ -85,8 +85,6 @@ public class PlayerStats : MonoBehaviour, IResettable
         StatManager.Instance.OnStatsRefreshed += OnStatsRefreshed;
 
         OnStatsRefreshed();
-
-        StartCoroutine(LoadNextFrame());
     }
 
     private void OnDisable()
@@ -96,12 +94,6 @@ public class PlayerStats : MonoBehaviour, IResettable
 
         if (StatManager.Instance != null)
             StatManager.Instance.OnStatsRefreshed -= OnStatsRefreshed;
-    }
-
-    private IEnumerator LoadNextFrame()
-    {
-        yield return null; // 한 프레임 대기 → 모든 Start() 완료 보장
-        SaveManager.Instance.LoadGame();
     }
 
     #endregion

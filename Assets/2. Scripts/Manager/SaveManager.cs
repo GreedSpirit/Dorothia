@@ -3,18 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance;
 
-    [SerializeField] private float autoSaveSecond = 300f;
+    [SerializeField] private float checkSaveSecond = 10f;             // 저장 조건 충족 확인할 시간 간격
     [SerializeField] private PlayerCtrl _playerCtrl;
     [SerializeField] private PlayerStats _playerStat;
     [SerializeField] private GameObject _rewardPanel;
     [SerializeField] private TextMeshProUGUI _rewardText;
-    [SerializeField] private TextMeshProUGUI _rewardEquipText;
+    [SerializeField] private TextMeshProUGUI _rewardEquipText;        // 장비 전용 보상 텍스트
 
     private BigInteger _gold;
     private BigInteger _exp;
@@ -23,6 +24,7 @@ public class SaveManager : MonoBehaviour
     public Action EquipName;
 
     DateTime lastQuitTime;
+    DateTime lastSaveTime;
     double offlineSeconds;
 
     private void Awake()
@@ -40,6 +42,7 @@ public class SaveManager : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(LoadNextFrame());
         OnClickStartGame();
     }
 
@@ -48,7 +51,6 @@ public class SaveManager : MonoBehaviour
     {
         SaveGame();
         SaveTime();
-        PlayerPrefs.Save();
     }
 
     //홈 버튼 등으로 인한 중지 상태에서의 강제종료 시
@@ -58,7 +60,6 @@ public class SaveManager : MonoBehaviour
         {
             SaveGame();
             SaveTime();
-            PlayerPrefs.Save();
         }
     }
 
@@ -67,11 +68,26 @@ public class SaveManager : MonoBehaviour
         while (true)
         {
             //정해진 시간만큼 대기한 후
-            yield return new WaitForSeconds(autoSaveSecond);
+            yield return new WaitForSeconds(checkSaveSecond);
 
             //게임 저장
-            SaveGame();
+            TrySave();
         }
+    }
+
+    private void TrySave()
+    {
+        if((DateTime.Now - lastSaveTime).TotalMinutes >= 5)
+        {
+            SaveGame();
+            lastSaveTime = DateTime.Now;
+
+        }
+    }
+    private IEnumerator LoadNextFrame()
+    {
+        yield return null; // 한 프레임 대기 → 모든 Start() 완료 보장
+        SaveManager.Instance.LoadGame();
     }
 
     public void OnClickStartGame()
@@ -219,23 +235,22 @@ public class SaveManager : MonoBehaviour
     {
         //문장만들 리스트랑 문자열준비
         List<string> equipStrings = new List<string>();
-        string result;
 
-        foreach (var equip in data)
+        Dictionary<Rarity, int> rarity = new Dictionary<Rarity, int>();
+
+        foreach (Rarity part in System.Enum.GetValues(typeof(Rarity)))
         {
-            string rarityText = GetRarityText(equip.equipment_Rarity);
-            equipStrings.Add($"{rarityText} : {equip.equip_name}");
+            rarity.Add(part, 0);
         }
 
-        //들어온 장비가 있으면
-        if (equipStrings.Count > 0)
+        if(data.Count > 0)
         {
-            result = string.Join(", ", equipStrings);
+            foreach (var equip in data)
+            {
+                rarity[(Rarity)equip.equipment_Rarity]++;
+            }
         }
-        else
-        {
-            result = "없음";
-        }
+
 
         _rewardEquipText.enabled = true;
 
@@ -243,7 +258,10 @@ public class SaveManager : MonoBehaviour
             $"경험치 : {_exp}\n" +
             $"골드 : {_gold}\n";
 
-        _rewardEquipText.text = $"장비  {result}";
+        _rewardEquipText.text = 
+            $"장비        신화 : {rarity[Rarity.Mythtic] : D3},\n" +
+            $"전설 : {rarity[Rarity.Legendary] : D3}, 레어 : {rarity[Rarity.Rare] : D3},\n" +
+            $"희귀 : {rarity[Rarity.Uncommon]: D3}, 일반 : {rarity[Rarity.Normal] : D3}";
 
         _rewardPanel.SetActive(true);
 
