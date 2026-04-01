@@ -118,17 +118,7 @@ public class SaveManager : MonoBehaviour
 
     public async void LoadGame()
     {
-        //종료시각 불러오기
-        lastQuitTime = TimeManager.Instance.LoadQuitTime();
-
-        //현재 시각
-        DateTime now = DateTime.UtcNow;
-
-        //방치 시간 계산
-        offlineSeconds = (now - lastQuitTime).TotalSeconds;
-
-        //12시간까지만
-        offlineSeconds = Math.Clamp(offlineSeconds, 0, 12 * 3600);
+        offlineSeconds = TimeManager.Instance.GetOfflineSecondsClamped(12 * 3600);
 
         var data = SaveManagement.Load<SaveData>("GameData");
 
