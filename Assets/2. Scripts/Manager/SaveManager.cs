@@ -27,6 +27,8 @@ public class SaveManager : MonoBehaviour
     DateTime lastSaveTime;
     double offlineSeconds;
 
+    private bool _isLoaded = false;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -71,18 +73,6 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    private IEnumerator AutoSaveCoroutine()
-    {
-        while (true)
-        {
-            //정해진 시간만큼 대기한 후
-            yield return new WaitForSeconds(checkSaveSecond);
-
-            //게임 저장
-            TrySave();
-        }
-    }
-
     private void TrySave()
     {
         if((DateTime.Now - lastSaveTime).TotalMinutes >= 5)
@@ -100,11 +90,34 @@ public class SaveManager : MonoBehaviour
 
     public void OnClickStartGame()
     {
+        StartCoroutine(StartAutoSaveAfterLoad());
+    }
+
+    private IEnumerator StartAutoSaveAfterLoad()
+    {
+        while (!_isLoaded) // 로딩체크
+            yield return null;
+
         StartCoroutine(AutoSaveCoroutine());
+    }
+
+    private IEnumerator AutoSaveCoroutine()
+    {
+        while (true)
+        {
+            //정해진 시간만큼 대기한 후
+            yield return new WaitForSeconds(checkSaveSecond);
+
+            //게임 저장
+            TrySave();
+        }
     }
 
     private void SaveGame()
     {
+        if (!_isLoaded)
+            return;
+
         var saveData = CreateSaveData();
 
         //AES 암호화된 JSON 파일로 저장
@@ -137,7 +150,11 @@ public class SaveManager : MonoBehaviour
         if (data == null)
         {
             Debug.LogWarning("Load된 데이터가 없음! 첫 시작");
+            StageManager.Instance.StartStage(110001); // 첫 시작시 110001로 시작하게
+
             lastSaveTime = DateTime.Now;
+            _isLoaded = true;
+
             return;
         }
         if (data.exchangeData == null) Debug.LogError("exchangeData가 null!");
@@ -150,6 +167,8 @@ public class SaveManager : MonoBehaviour
         _playerStat.LoadFromSaveData(data.playerData);
 
         GiveOfflineReward();
+
+        _isLoaded = true;
     }
 
     private void SaveTime()

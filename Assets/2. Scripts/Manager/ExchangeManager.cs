@@ -40,7 +40,7 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
             DontDestroyOnLoad(gameObject);
 
             //재화불러오기
-            LoadMoney();
+            //LoadMoney();
         }
         else
         {
@@ -63,7 +63,8 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
 
         UpdateGoods(type);
 
-        SaveMoney();
+        SaveManager.Instance?.OnSave?.Invoke();
+        //SaveMoney();
     }
 
     //살수있는지 없는지 불값반환
@@ -75,7 +76,9 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
         _money[type] -= amount;
 
         UpdateGoods(type);
-        SaveMoney();
+
+        SaveManager.Instance?.OnSave?.Invoke();
+        //SaveMoney();
 
         return true;
     }
@@ -231,6 +234,7 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
         Debug.Log($"불러온골드 {data.gold}");
         if (!string.IsNullOrEmpty(data.gold) && BigInteger.TryParse(data.gold, out BigInteger parsed))
         {
+            CheckDictionary(MoneyType.Gold);
             _money[MoneyType.Gold] = parsed;
         }
         else
