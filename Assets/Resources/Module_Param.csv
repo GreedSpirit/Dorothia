@@ -1,41 +1,41 @@
-����� �Ķ����,,,"����� Ÿ�� (2: Melee, 3: MeleeAoe, 4: Projectile, 5: Teleport, 6: Dash, 7:HideAppear, 8:EffectHit)",,,,,,,,,,,"��ų�� Ÿ��(1.�ڽ�, 2.����)",,,,,,,,,,,
-"��� �Ķ���� id
-(220001���� 1�� ����)",��ų ����Ʈ ���ϸ�,��ų ����Ʈ ���ӽð�,����� Ÿ��,Ÿ�� Ƚ��,���� ����,�����̵� �� ����,�ݺ� Ƚ��,�ݺ� ����,�뽬 �Ÿ�,�뽬 �ð�(��),����ü ���ϸ�,����ü �ӵ�,��ų ȿ���� ��ġ,��ų �����Ÿ�,�� �����ð�,��ų�� Ÿ��,,,,,,,,,
-Module_Param_Id,Skill_Effect_Name,Skill_Effect_Time,Module_Type,Hit_Count,Aoe_Radius,Behind_Offset,Repeat_Count,Repeat_Interval,Dash_Distance,Dash_Duration,Projectile_Name,Projectile_Speed,Skill_Sfx_Patch,SkillCast_Range,First_Delay,Skill_Target,,,,,,,,,
-int,string,float,enum,int,float,float,int,float,float,float,string,float,string,float,float,enum,,,,,,,,,
-220001,Sword Slash 7,,3,4,2.4,,,,,,,,Skill_DanceOfBlade_FX,2,,1,,,,,,,,,
-220002,Effect_33_DeathRevolution,,3,4,4,,,,,,,,Skill_StormOfBlade_FX,3.5,,1,,,,,,,,,
-220003,FX_DoubleMix_Slash,,2,1,1,0.5,,,,,,,Skill_Soonbo_FX,1,,2,,,,,,,,,
-220004,FX_Slash_aoe_Bursthit_Bluefire,,5,1,1,0.5,8,0.5,,,,,Skill_AssasinFoot_FX,4,,2,,,,,,,,,
-220005,Effect_07_OneHandSmash,,6,2,1.2,,,,6,1,,,Skill_Spear_FX,6,,2,,,,,,,,,
-220006,FX_Pierce_Fire,,6,1,1,,,,4,0.5,,,Skill_FirePierce_FX,4,,2,,,,,,,,,
-220007,,1,4,1,0.8,0.5,,,,,Effect_68_AnchorShot,2,,8,,2,,,,,,,,,
-220008,,,5,0,0,0.5,,,,,,,,8,,2,,,,,,,,,
-220009,FX_Slash_Burst_Fire,,3,4,4,,,,,,,,,3,,1,,,,,,,,,
-220010,,1,4,1,1.2,,,,,,Effect_03_ChargeFireShot,2.5,,8,,2,,,,,,,,,
-220011,,1,4,1,2,,3,"0.23,0.17",,,(Opt)Effect_04_SlashShot,1.5,,9,,2,,,,,,,,,
-220012,FX_Slash_Combo1_fire,,2,1,2,,,,,,,,Skill_ComboSlash_FX,2,,2,,,,,,,,,
-220013,FX_Slash_Combo2_fire,,2,1,2,,,,,,,,,2,,2,,,,,,,,,
-220014,FX_Slash_Combo3_fire,,2,1,2,,,,,,,,,2,,2,,,,,,,,,
-220015,FX_Slash_Combo4_fire,,2,1,2,,,,,,,,,2,,2,,,,,,,,,
-220016,FX_Slash_Combo5_fire,,2,1,2,,,,,,,,,2,,2,,,,,,,,,
-220017,FX_Slash_Combo6_fire,,2,1,2,,,,,,,,,2,,2,,,,,,,,,
-220018,,,5,0,0,0.2,,,,,,,,4,,2,,,,,,,,,
-220019,FX_CrossSlash_Hit_fire,,8,1,4,,,,,,,,Skill_CrossSlash_FX,5,,2,,,,,,,,,
-220020,FX_Pierce1_Slash,,2,1,2,,,,,,,,Skill_PierceSlash_FX 2,1.5,,2,,,,,,,,,
-220021,FX_Pierce2_Slash,,2,1,2,,,,,,,,,1.5,,2,,,,,,,,,
-220022,FX_Slash_CrossPierce_fire,,2,1,2,,,,,,,,,1.5,,2,,,,,,,,,
-220023,FX_Slash_StarPierce_fire,,6,1,2,,,,4,1,,,,4,,2,,,,,,,,,
-220024,,,5,0,0,0.5,,,,,,,,5,,2,,,,,,,,,
-220025,FX_AoePierce_BlueFire,,2,1,2,,,,,,,,Skill_Finisher_FX,4,,2,,,,,,,,,
-220026,FX_Slash_aoe_hit_Bluefire 1,,2,1,2,,,,,,,,,1.5,,2,,,,,,,,,
-220027,FX_Slash_aoeSlash_Bluefire,,2,1,2,,,,,,,,,1.5,,2,,,,,,,,,
-220028,HitShaker,,3,1,4,,,,,,,,Skill_HitShaker_FX,3.5,,1,,,,,,,,,
-220029,Effect_30_TalonScratch,,3,2,1.5,,,,,,,,Skill_TalonScratch_FX,5,,2,,,,,,,,,
-220030,Effect_21_InnertcoreFloor,,3,0,0,,,,,,,,Skill_Earthquake_FX,2,,1,,,,,,,,,
-220031,Effect_21_InnertcoreBoom,,3,1,2.3,,,,,,,,,2,,1,,,,,,,,,
-220032,Effect_38_SupercyanAura,,3,10,8.5,,,,,,,,,2,,1,,,,,,,,,
-220033,Effect_16_SpaceWarpPortal 1,,8,0,0,,,,,,,,Skill_DimensionBlade_FX,6,,2,,,,,,,,,
-220034,,,6,0,0,,,,2.7,2.9,,,,6,,2,,,,,,,,,
-220035,Effect_11_MadnessofDarkness,,3,20,9,,,,,,,,,8,,1,,,,,,,,,
-220036,Effect_11_EternalSlashDance,,3,"3,5,8,10",20,0,4,"0.4,0.4,2.75,0",0,0,,0,0,15,,1,,,,,,,,,
+모듈의 파라미터,,,"모듈의 타입 (2: Melee, 3: MeleeAoe, 4: Projectile, 5: Teleport, 6: Dash, 7:HideAppear, 8:EffectHit)",,,,,,,,,,,"스킬의 타겟(1.자신, 2.몬스터)",,
+"모듈 파라미터 id
+(220001부터 1씩 증가)",스킬 이펙트 파일명,스킬 이펙트 지속시간,모듈의 타입,타격 횟수,판정 범위,순간이동 후 간격,반복 횟수,반복 간격,대쉬 거리,대쉬 시간(초),투사체 파일명,투사체 속도,스킬 효과음 위치,스킬 시전거리,선 지연시간,스킬의 타겟
+Module_Param_Id,Skill_Effect_Name,Skill_Effect_Time,Module_Type,Hit_Count,Aoe_Radius,Behind_Offset,Repeat_Count,Repeat_Interval,Dash_Distance,Dash_Duration,Projectile_Name,Projectile_Speed,Skill_Sfx_Patch,SkillCast_Range,First_Delay,Skill_Target
+int,string,float,enum,int,float,float,int,float,float,float,string,float,string,float,float,enum
+220001,Sword Slash 7,,3,4,2.4,,,,,,,,Skill_DanceOfBlade_FX,2,,1
+220002,Effect_33_DeathRevolution,,3,4,4,,,,,,,,Skill_StormOfBlade_FX,3.5,,1
+220003,FX_DoubleMix_Slash,,2,1,1,0.5,,,,,,,Skill_Soonbo_FX,1,,2
+220004,FX_Slash_aoe_Bursthit_Bluefire,,5,1,1,0.5,8,0.5,,,,,Skill_AssasinFoot_FX,4,,2
+220005,26회,,6,2,1.2,,,,6,1,,,Skill_Spear_FX,6,,2
+220006,FX_Pierce_Fire,,6,1,1,,,,4,0.5,,,Skill_FirePierce_FX,4,,2
+220007,,1,4,1,0.8,0.5,,,,,Effect_68_AnchorShot,2,,8,,2
+220008,,,5,0,0,0.5,,,,,,,,8,,2
+220009,FX_Slash_Burst_Fire,,3,4,4,,,,,,,,,3,,1
+220010,,1,4,1,1.2,,,,,,Effect_03_ChargeFireShot,2.5,,8,,2
+220011,,1,4,1,2,,3,"0.23,0.17",,,(Opt)Effect_04_SlashShot,1.5,,9,,2
+220012,FX_Slash_Combo1_fire,,2,1,2,,,,,,,,Skill_ComboSlash_FX,2,,2
+220013,FX_Slash_Combo2_fire,,2,1,2,,,,,,,,-,2,,2
+220014,FX_Slash_Combo3_fire,,2,1,2,,,,,,,,,2,,2
+220015,FX_Slash_Combo4_fire,,2,1,2,,,,,,,,,2,,2
+220016,FX_Slash_Combo5_fire,,2,1,2,,,,,,,,,2,,2
+220017,FX_Slash_Combo6_fire,,2,1,2,,,,,,,,,2,,2
+220018,,,5,0,0,0.2,,,,,,,,4,,2
+220019,FX_CrossSlash_Hit_fire,,8,1,4,,,,,,,,Skill_CrossSlash_FX,5,,2
+220020,FX_Pierce1_Slash,,2,1,2,,,,,,,,Skill_PierceSlash_FX 2,1.5,,2
+220021,FX_Pierce2_Slash,,2,1,2,,,,,,,,,1.5,,2
+220022,FX_Slash_CrossPierce_fire,,2,1,2,,,,,,,,,1.5,,2
+220023,FX_Slash_StarPierce_fire,,6,1,2,,,,4,1,,,,4,,2
+220024,,,5,0,0,0.5,,,,,,,Skill_Finisher_FX,5,,2
+220025,FX_AoePierce_BlueFire,,2,1,2,,,,,,,,,4,,2
+220026,FX_Slash_aoe_hit_Bluefire 1,,2,1,2,,,,,,,,,1.5,,2
+220027,FX_Slash_aoeSlash_Bluefire,,2,1,2,,,,,,,,,1.5,,2
+220028,HitShaker,,3,1,4,,,,,,,,Skill_HitShaker_FX,3.5,,1
+220029,Effect_30_TalonScratch,,3,2,1.5,,,,,,,,Skill_TalonScratch_FX,5,,2
+220030,Effect_21_InnertcoreFloor,,3,0,0,,,,,,,,Skill_Earthquake_FX,2,,1
+220031,Effect_21_InnertcoreBoom,,3,1,2.3,,,,,,,,,2,,1
+220032,Effect_38_SupercyanAura,,3,10,8.5,,,,,,,,,2,,1
+220033,Effect_16_SpaceWarpPortal 1,,8,0,0,,,,,,,,Skill_DimensionBlade_FX,6,,2
+220034,,,6,0,0,,,,2.7,2.9,,,,6,,2
+220035,Effect_11_MadnessofDarkness,,3,20,9,,,,,,,,,8,,1
+220036,Effect_11_EternalSlashDance,,3,"3,5,8,10",20,0,4,"0.4,0.4,2.75,0",0,0,,0,0,15,,1
