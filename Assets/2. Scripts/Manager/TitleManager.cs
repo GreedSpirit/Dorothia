@@ -10,6 +10,7 @@ public class TitleManager : MonoBehaviour
     static public TitleManager Instance { get => instance; }
 
     [SerializeField] Image image;
+    [SerializeField] CanvasGroup font;
 
     [Header("UI")]
     [SerializeField] private GameObject _buttonUI;       // 기존 버튼 UI
@@ -34,6 +35,7 @@ public class TitleManager : MonoBehaviour
         if (_loadingRoot != null)
             _loadingRoot.SetActive(false);
         StartCoroutine(FadeOut());
+        StartCoroutine(StartButtonFadeInOut());
     }
 
     private IEnumerator FadeOut()
@@ -132,5 +134,39 @@ public class TitleManager : MonoBehaviour
 
         //후반: 느리게
         return Random.Range(0.1f, 0.4f);
+    }
+
+
+    private IEnumerator StartButtonFadeInOut()
+    {
+        //페이드 속도
+        float speed = 0.8f;
+        bool fadingIn = true;
+
+        font.alpha = 0f;
+
+        while (true)
+        {
+            if (fadingIn)
+            {
+                font.alpha += Time.deltaTime * speed;
+                if (font.alpha >= 1f)
+                {
+                    font.alpha = 1f;
+                    fadingIn = false;
+                }
+            }
+            else
+            {
+                font.alpha -= Time.deltaTime * speed;
+                if (font.alpha <= 0.2f)
+                {
+                    font.alpha = 0.2f;
+                    fadingIn = true;
+                }
+            }
+
+            yield return null;
+        }
     }
 }
