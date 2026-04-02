@@ -70,9 +70,7 @@ public static class SaveUtility
 
             File.WriteAllText(path, encrypted);
 
-#if UNITY_EDITOR
-            Debug.Log($"[Save] {path}");
-#endif
+
         }
         catch (Exception e)
         {
