@@ -1,4 +1,4 @@
-﻿using GameUtility;
+using GameUtility;
 using System;
 using System.Collections;
 using System.Numerics;
@@ -187,16 +187,20 @@ public class PlayerStats : MonoBehaviour, IResettable
     {
         if (_player.IsInvincible) return;
 
-        // 방어력 적용
-        float def = 100 / (float)StatManager.Instance.GetStat(Status.DEF);
-        amount = amount * def;
+        float statDef = (float)StatManager.Instance.GetStat(Status.DEF);
 
-        CurrentHp = Mathf.Max(0f, CurrentHp - amount);
+        float denominator = 100f + statDef;
+        if (denominator <= 0) denominator = 1f; 
+
+        float defMultiplier = 100f / denominator;
+
+        float finalDamage = amount * defMultiplier;
+        CurrentHp = Mathf.Max(0f, CurrentHp - finalDamage);
+
         OnHpChanged?.Invoke(CurrentHp, MaxHp);
 
         if (CurrentHp <= 0f)
         {
-            //Debug.Log("플레이어 사망");
             OnDead?.Invoke();
         }
     }
