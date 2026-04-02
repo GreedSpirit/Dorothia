@@ -8,6 +8,7 @@ public class EquipEnchant : BaseUI
     [Header("인벤토리 창 관련")]
     [SerializeField] InventoryPanel _inventoryPanel;
     [SerializeField] Button _enchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
+    [SerializeField] Button _ringEnchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
 
     [Header("강화 창 내의 강화 버튼")]
     [SerializeField] Button _proceedEnchantButton;                    // 실제 장비 강화를 진행하기 위한 버튼. 강화 창에서의 장비 강화 진행용 버튼을 연결해 주십시오.
@@ -39,6 +40,14 @@ public class EquipEnchant : BaseUI
         // - 강화 창 활성화
         // - 강화 창 갱신하기
         _enchantButton.onClick.AddListener(() =>
+        {
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                GetEquipment(_inventoryPanel.GiveEquipmentData());
+                RefreshEnchantPanel(_equipment);
+            }
+        });
+        _ringEnchantButton.onClick.AddListener(() =>
         {
             if (_inventoryPanel.CheckEquipmentSelected() == true)
             {

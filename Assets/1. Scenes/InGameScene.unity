@@ -2569,7 +2569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6d1592acc4c05c42b5c72ba91011754, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveManager
-  autoSaveSecond: 60
+  checkSaveSecond: 10
   _playerCtrl: {fileID: 58927744}
   _playerStat: {fileID: 58927743}
   _rewardPanel: {fileID: 22345495}
@@ -2664,6 +2664,17 @@ Transform:
 --- !u!114 &1212036484 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8075033061129168095, guid: 43c4b597457a9d94195b538598087a7b, type: 3}
+  m_PrefabInstance: {fileID: 4699037501433150925}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &1227797001 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7458198420497219684, guid: 43c4b597457a9d94195b538598087a7b, type: 3}
   m_PrefabInstance: {fileID: 4699037501433150925}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
@@ -10427,6 +10438,10 @@ PrefabInstance:
       propertyPath: _inventoryPanel
       value: 
       objectReference: {fileID: 1501011590}
+    - target: {fileID: 6402545195973985211, guid: 81c7a4f9808a3934c9992e2bdee94890, type: 3}
+      propertyPath: _ringEnchantButton
+      value: 
+      objectReference: {fileID: 1227797001}
     - target: {fileID: 6811805529236184681, guid: 81c7a4f9808a3934c9992e2bdee94890, type: 3}
       propertyPath: m_Name
       value: '[Panel]EquipEnchantMenu'
