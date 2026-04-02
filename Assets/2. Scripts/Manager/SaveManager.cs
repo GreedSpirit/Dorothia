@@ -106,7 +106,9 @@ public class SaveManager : MonoBehaviour
     private void SaveGame()
     {
         var saveData = CreateSaveData();
-        SaveManagement.Save("GameData", saveData);
+
+        //AES 암호화된 JSON 파일로 저장
+        SaveUtility.SaveEncrypted("GameData", saveData);
         Debug.LogWarning("저장 완료!");
     }
 
@@ -128,7 +130,8 @@ public class SaveManager : MonoBehaviour
     {
         offlineSeconds = TimeManager.Instance.GetOfflineSecondsClamped(12 * 3600);
 
-        var data = SaveManagement.Load<SaveData>("GameData");
+        //암호화된 JSON 로드, 파일 없으면 null 반환
+        var data = SaveUtility.LoadEncrypted<SaveData>("GameData");
 
         if (data == null)
         {
