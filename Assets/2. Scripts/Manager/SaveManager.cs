@@ -136,7 +136,7 @@ public class SaveManager : MonoBehaviour
 
         if (data == null)
         {
-            Debug.LogError("Load된 데이터가 null!");
+            Debug.LogWarning("Load된 데이터가 없음! 첫 시작");
             lastSaveTime = DateTime.Now;
             return;
         }
