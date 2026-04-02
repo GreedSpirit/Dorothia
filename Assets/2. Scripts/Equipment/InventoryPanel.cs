@@ -390,6 +390,7 @@ public class InventoryPanel : BaseUI
     {
         if (targetSlot != null)
         {
+            if (equip == null) return;
             //해당 슬롯에 아무것도 장착되지 않은 상태에서, 이미 다른 슬롯에 장착된 장비를 착용하려 할 경우 반환합니다.
             if(targetSlot.equipped == null && equip.isEquipped == true && targetSlot.slotIndex != equip.EquippedSlotIndex)
             {

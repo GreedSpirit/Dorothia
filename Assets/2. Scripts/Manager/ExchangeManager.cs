@@ -184,6 +184,7 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
     /// <param name="amount">획득 수량</param>
     public void AddGremlinPiece(int id, BigInteger amount)
     {
+        currentGremlinShard = id;
         _money[GetShardTargetGremlin(id)] += amount;
         onShardValueChanged?.Invoke();
     }
