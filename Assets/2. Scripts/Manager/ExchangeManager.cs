@@ -238,6 +238,6 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
             _money[MoneyType.Gold] = BigInteger.Zero;
         }
 
-        UpdateGoods(_money, MoneyType.Gold);
+        UpdateGoods(MoneyType.Gold);
     }
 }
