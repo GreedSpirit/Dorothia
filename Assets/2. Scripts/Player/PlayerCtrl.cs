@@ -55,6 +55,15 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     private AnimatorOverrideController _overrideController;
     private NavMeshAgent _navMesh;
     private IMonster _currentTarget;
+    private WaitForSeconds MultiAttackDelay = new WaitForSeconds(0.08f);
+
+    // 몬스터 탐색 버퍼
+    private readonly Collider[] _findBuffer = new Collider[50]; // 최대 탐색 수 조절
+    private readonly HashSet<IMonster> _checkedMonsters = new HashSet<IMonster>();
+
+    // 멀티 힛 버퍼
+    private readonly List<IMonster> _multiHitBuffer = new List<IMonster>(20);
+    private readonly HashSet<IMonster> _multiHitDedup = new HashSet<IMonster>();
 
     // 상태 인스턴스
     public PlayerIdleState IdleState { get; private set; }
@@ -266,20 +275,20 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     public void DisableRootMotion() => _anima.applyRootMotion = false;
 
     // applyRootMotion = true 일 때 Unity가 자동 적용을 포기하고 여기로 제어권을 넘김
-    private void OnAnimatorMove()
-    {
-        // 스킬 상태가 아니면 루트모션 무시
-        if (CurrentState != SkillState) return;
+    //private void OnAnimatorMove()
+    //{
+    //    // 스킬 상태가 아니면 루트모션 무시
+    //    if (CurrentState != SkillState) return;
 
-        Vector3 nextPos = transform.position + _anima.deltaPosition;
+    //    Vector3 nextPos = transform.position + _anima.deltaPosition;
 
-        // NavMesh 위의 유효한 위치로 스냅 후 Warp (transform 직접 수정 시 Agent가 되돌림)
-        if (UnityEngine.AI.NavMesh.SamplePosition(nextPos, out var hit, 0.5f, UnityEngine.AI.NavMesh.AllAreas))
-            _navMesh.Warp(hit.position);
+    //    // NavMesh 위의 유효한 위치로 스냅 후 Warp (transform 직접 수정 시 Agent가 되돌림)
+    //    if (UnityEngine.AI.NavMesh.SamplePosition(nextPos, out var hit, 0.5f, UnityEngine.AI.NavMesh.AllAreas))
+    //        _navMesh.Warp(hit.position);
 
-        // 루트모션 회전도 반영이 필요하면 아래 주석 해제
-        // transform.rotation *= _anima.deltaRotation;
-    }
+    //    // 루트모션 회전도 반영이 필요하면 아래 주석 해제
+    //    // transform.rotation *= _anima.deltaRotation;
+    //}
     public void OnSkillAnimationEnd()
     {
         ClearSkillPending();
@@ -311,67 +320,78 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
 
         float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
-
         for (int i = 0; i < hitCount; i++)
         {
-            //크리티컬 계산
-            bool isCritical = RollCritical();
-            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
-
             if (target == null || !target.IsAlive) yield break;
 
-            target.TakeDamage((int)dmgPerHit, isCritical);
-            // EffectManager.Instance.PlayEffect(...);
+            bool isCritical = RollCritical();
 
-            yield return new WaitForSeconds(0.08f);
+            float finalDmg = isCritical
+                ? dmgPerHit * (float)StatManager.Instance.GetStat(Status.CriticalDamage)
+                : dmgPerHit;
+
+            target.TakeDamage((int)finalDmg, isCritical);
+
+            yield return MultiAttackDelay;
         }
     }
 
-    // 다수 타겟 연타 (MeleeAttackModule AOE 모드 / JumpAttackModule)
     internal IEnumerator MultiHitRoutine(Collider[] targets, int hitCount, float totalDamage)
     {
-        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
+        _multiHitBuffer.Clear();
+        _multiHitDedup.Clear();
 
-
-        for (int i = 0; i < hitCount; i++)
+        foreach (var col in targets)
         {
-            //크리티컬 계산
-            bool isCritical = RollCritical();
-            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
+            if (col == null || !col.gameObject.activeInHierarchy) continue;
 
-            foreach (var col in targets)
-            {
-                if (col == null || !col.gameObject.activeInHierarchy) continue;
+            if (!col.TryGetComponent<IMonster>(out var m))
+                m = col.GetComponentInParent<IMonster>();
 
-                IMonster monster = col.GetComponentInParent<IMonster>();
-                if (monster != null && monster.IsAlive)
-                    monster.TakeDamage((int)dmgPerHit, isCritical);
-            }
+            if (m == null || !m.IsAlive) continue;
 
-            yield return new WaitForSeconds(0.08f);
+            if (_multiHitDedup.Add(m))
+                _multiHitBuffer.Add(m);
         }
+
+        yield return ExecuteMultiHit(_multiHitBuffer, hitCount, totalDamage);
     }
 
-    // 돌진 다수 타겟 연타 
+    // HashSet<IMonster> 버전 (DashModule 등)
     internal IEnumerator MultiHitRoutine(HashSet<IMonster> targets, int hitCount, float totalDamage)
     {
-        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
+        _multiHitBuffer.Clear();
 
+        foreach (var m in targets)
+            if (m != null && m.IsAlive)
+                _multiHitBuffer.Add(m);
+
+        yield return ExecuteMultiHit(_multiHitBuffer, hitCount, totalDamage);
+    }
+
+    // 히트 로직 통합
+    private IEnumerator ExecuteMultiHit(List<IMonster> monsters, int hitCount, float totalDamage)
+    {
+        if (monsters.Count == 0) yield break;
+
+        float dmgPerHit = totalDamage / Mathf.Max(hitCount, 1);
 
         for (int i = 0; i < hitCount; i++)
         {
-            //크리티컬 계산
             bool isCritical = RollCritical();
-            dmgPerHit *= isCritical ? (float)StatManager.Instance.GetStat(Status.CriticalDamage) : 1f;
 
-            foreach (var target in targets)
+            float finalDmg = isCritical
+                ? dmgPerHit * (float)StatManager.Instance.GetStat(Status.CriticalDamage)
+                : dmgPerHit;
+
+            for (int j = monsters.Count - 1; j >= 0; j--)
             {
-                if (target == null || !target.IsAlive) continue;
-
-                target.TakeDamage((int)dmgPerHit, isCritical);
+                var monster = monsters[j];
+                if (monster == null || !monster.IsAlive) continue;
+                monster.TakeDamage((int)finalDmg, isCritical);
             }
 
-            yield return new WaitForSeconds(0.08f);
+            yield return MultiAttackDelay;
         }
     }
 
@@ -461,26 +481,37 @@ public class PlayerCtrl : MonoBehaviour, IMonsterTarget, IResettable
     // ══════════════════════════════════════════════════════
     #region Utility
 
-    public IMonster FindEnemy(float skillCast_Range = 0)
+   
+    public IMonster FindEnemy(float skillCastRange = 0)
     {
-        float find_Range = skillCast_Range > 0 ? skillCast_Range : _enemyFindRange;
+        float findRange = skillCastRange > 0 ? skillCastRange : _enemyFindRange;
 
-        Collider[] colliders = Physics.OverlapSphere(transform.position, find_Range, _enemyLayer);
+        int count = Physics.OverlapSphereNonAlloc(
+            transform.position, findRange, _findBuffer, _enemyLayer);
+
         IMonster nearest = null;
-        float minSqrDistance = find_Range * find_Range;
+        float minSqrDist = findRange * findRange;
 
-        foreach (var col in colliders)
+        _checkedMonsters.Clear(); // 중복 방지
+
+        for (int i = 0; i < count; i++)
         {
-            IMonster monster = col.GetComponentInParent<IMonster>();
+            if (!_findBuffer[i].TryGetComponent<IMonster>(out var monster))
+                monster = _findBuffer[i].GetComponentInParent<IMonster>();
+
             if (monster == null || !monster.IsAlive) continue;
 
+            // 중복 몬스터 스킵
+            if (!_checkedMonsters.Add(monster)) continue;
+
             float sqrDist = (monster.Transform.position - transform.position).sqrMagnitude;
-            if (sqrDist < minSqrDistance)
+            if (sqrDist < minSqrDist)
             {
-                minSqrDistance = sqrDist;
+                minSqrDist = sqrDist;
                 nearest = monster;
             }
         }
+
         _currentTarget = nearest;
         return nearest;
     }

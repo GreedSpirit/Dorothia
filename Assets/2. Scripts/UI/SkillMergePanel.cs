@@ -32,6 +32,8 @@ public class SkillMergePanel : BaseUI
     {
         SkillManager.Instance.OnMysteryGaugeChanged += UpdateMysteryGauge;
 
+        UpdateMysteryGauge(SkillManager.Instance.MysteryGauge);
+
         RefreshUI();
     }
 

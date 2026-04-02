@@ -2,11 +2,23 @@ using UnityEngine;
 
 public class PlayerAutoState : IPlayerState<PlayerCtrl>
 {
-    public void Enter(PlayerCtrl player) => player.FindEnemy();
+    private float _findInterval = 0.2f;
+    private float _nextFindTime;
+
+    public void Enter(PlayerCtrl player)
+    {
+        _nextFindTime = 0f; // 진입 시 즉시 탐색
+        player.FindEnemy();
+    }
 
     public void Execute(PlayerCtrl player)
     {
-        player.FindEnemy();
+        if (Time.time >= _nextFindTime)
+        {
+            player.FindEnemy();
+            _nextFindTime = Time.time + _findInterval;
+        }
+
         if (player.CurrentTarget == null || !player.CurrentTarget.IsAlive)
         {
             player.Anima.SetBool("Run", false);
