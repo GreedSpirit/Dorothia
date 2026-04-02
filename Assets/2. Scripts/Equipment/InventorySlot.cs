@@ -12,6 +12,7 @@ public class InventorySlot : MonoBehaviour
     public GameObject lockedMark;                 // 인벤토리 내 아이템 잠금 여부입니다.
     public GameObject selectMark;                 // 인벤토리 내 해당 아이템 선택 여부입니다.
     public TextMeshProUGUI UpgradeValue;          // 인벤토리 내 해당 아이템의 강화 단계 표기용 텍스트입니다.
+    public TextMeshProUGUI levelText;          // 인벤토리 내 해당 아이템의 장착 레벨 표기용 텍스트입니다.
 
     public void Set(Equipment equip)
     {
@@ -19,6 +20,7 @@ public class InventorySlot : MonoBehaviour
         icon.enabled = true;
 
         UpgradeValue.text = "+" + equip.equip_Upgrade;
+        levelText.text = equip.equip_level.ToString();
 
         lockedMark.SetActive(equip.isLocked);
 
