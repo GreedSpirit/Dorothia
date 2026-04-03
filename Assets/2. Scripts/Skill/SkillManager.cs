@@ -110,10 +110,10 @@ public class SkillManager : MonoBehaviour
     private void Update()
     {
         //신비게이지 테스트
-        //if (Keyboard.current.sKey.wasPressedThisFrame)
-        //{
-        //    MysteryGauge += 1000;
-        //}
+        if (Keyboard.current.sKey.wasPressedThisFrame)
+        {
+            MysteryGauge += 1000;
+        }
 
         float dt = Time.deltaTime;
         // 액티브 슬롯 쿨다운 업데이트
@@ -228,7 +228,7 @@ public class SkillManager : MonoBehaviour
     }
 
     public BaseSkill GetSkill(SkillKey key) => UnlockedSkills.TryGetValue(key, out BaseSkill bs) ? bs : null;
-    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity-1];
+    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity - 1];
     public int GetItemCount(SkillKey key) => _inventory.GetValueOrDefault(key, 0);
     public bool IsNewSkill(SkillKey key) => UnlockedSkills.ContainsKey(key);
 
@@ -267,7 +267,12 @@ public class SkillManager : MonoBehaviour
         if (rankData == null) return false;
 
         float successProb = rankData.Skill_Success_Prob;
-        if (isMysteryOn) successProb = Mathf.Min(successProb * 2, 1.0f); // 확률 상한선 제한
+        if (isMysteryOn)
+        {
+            successProb = Mathf.Min(successProb * 2, 1.0f); // 확률 상한선 
+            // 신비게이지 작동 시 게이지 선 소모
+            MysteryGauge = 0;
+        }
 
         // 합성 시도 횟수 계산 및 재료 선소모
         int attemptCount = currentAmount / 3;
@@ -719,7 +724,7 @@ public class SkillManager : MonoBehaviour
 
             BaseSkill skill = BaseSkill.Create(sData);
             skill.Rarity = key.rarity;
-            skill.Level = entry.level;          
+            skill.Level = entry.level;
             _unlockedSkills[key] = skill;
         }
 
