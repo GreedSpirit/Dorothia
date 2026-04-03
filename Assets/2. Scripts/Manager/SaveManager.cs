@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -84,8 +85,14 @@ public class SaveManager : MonoBehaviour
     }
     private IEnumerator LoadNextFrame()
     {
-        yield return null; // 한 프레임 대기 → 모든 Start() 완료 보장
-        SaveManager.Instance.LoadGame();
+        yield return null;
+
+        var task = SaveManager.Instance.LoadGame();
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        // Task에서 예외 터졌을 때 무시 방지
+        if (task.IsFaulted)
+            Debug.LogError($"Load 실패: {task.Exception}");
     }
 
     public void OnClickStartGame()
@@ -140,30 +147,21 @@ public class SaveManager : MonoBehaviour
         };
     }
 
-    public async void LoadGame()
+    public async Task LoadGame()
     {
-        offlineSeconds = TimeManager.Instance.GetOfflineSecondsClamped(12 * 3600);
-
-        //암호화된 JSON 로드, 파일 없으면 null 반환
-        var data = SaveUtility.LoadEncrypted<SaveData>("GameData");
-
-        if (data == null)
-        {
-            Debug.LogWarning("Load된 데이터가 없음! 첫 시작");
-            StageManager.Instance.StartStage(110001); // 첫 시작시 110001로 시작하게
-
-            lastSaveTime = DateTime.Now;
-            _isLoaded = true;
-
-            return;
-        }
-        if (data.exchangeData == null) Debug.LogError("exchangeData가 null!");
+        var data = await SaveUtility.LoadEncryptedAsync<SaveData>("GameData");
 
         ExchangeManager.Instance.LoadFromSaveData(data.exchangeData);
+        // 프레임 양보
+        await Task.Yield(); 
         EquipmentInventory.Instance.LoadFromSaveData(data.equipInv);
+        await Task.Yield();
         GremlinInventory.Instance.LoadFromSaveData(data.GremlinInv);
+        await Task.Yield();
         StageManager.Instance.LoadFromSaveData(data.stageData);
+        await Task.Yield();
         SkillManager.Instance.LoadFromSaveData(data.skillData);
+        await Task.Yield();
         _playerStat.LoadFromSaveData(data.playerData);
 
         GiveOfflineReward();

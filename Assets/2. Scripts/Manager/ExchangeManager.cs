@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
@@ -224,8 +224,8 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
 
         data.gold = GetMoneyAmount(MoneyType.Gold).ToString();
 
-        Debug.Log($"데이타 {data}");
-        Debug.Log($"골드 {data.gold}");
+        //Debug.Log($"데이타 {data}");
+        //Debug.Log($"골드 {data.gold}");
         return data;
     }
 

@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /*
@@ -97,6 +98,29 @@ public static class SaveUtility
             string json = Decrypt(encrypted);
 
             return JsonUtility.FromJson<T>(json);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Load 실패: {e}");
+            return default;
+        }
+    }
+    public static async Task<T> LoadEncryptedAsync<T>(string fileName)
+    {
+        try
+        {
+            string path = GetPath(fileName);
+            if (!File.Exists(path)) return default;
+
+            // 파일 읽기 자체도 비동기로
+            string encrypted = await File.ReadAllTextAsync(path);
+
+            // 복호화 + JSON 파싱은 백그라운드에서
+            return await Task.Run(() =>
+            {
+                string json = Decrypt(encrypted);
+                return JsonUtility.FromJson<T>(json);
+            });
         }
         catch (Exception e)
         {
