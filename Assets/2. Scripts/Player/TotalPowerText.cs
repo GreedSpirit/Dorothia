@@ -28,7 +28,7 @@ public class TotalPowerText : MonoBehaviour
         foreach(var text in targetText)
         {
             //TMP 내 텍스트의 내용 변경
-            text.text = str;
+            text.text = ($"전투력 : {str}");
         }
     }
 }

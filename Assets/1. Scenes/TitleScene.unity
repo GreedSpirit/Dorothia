@@ -463,10 +463,10 @@ RectTransform:
   m_Children:
   - {fileID: 1096288827}
   - {fileID: 1455891925}
-  - {fileID: 5186464769992281694}
-  - {fileID: 521112624}
   - {fileID: 628204300}
   - {fileID: 695736488}
+  - {fileID: 5186464769992281694}
+  - {fileID: 521112624}
   m_Father: {fileID: 130879558}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2125,7 +2125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ae1e2c39ad7e624383a485b53f6cf57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIOpener
-  targetPanel: {fileID: 0}
+  targetPanel: {fileID: 1547824586}
 --- !u!1 &1370389177
 GameObject:
   m_ObjectHideFlags: 0
@@ -2243,6 +2243,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 100}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1547824586 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7682198026728132613, guid: 1640229f4e73d984c911b0f3b85abceb, type: 3}
+  m_PrefabInstance: {fileID: 362186254}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a70c4c56cad91a7478dafadfe9a09d0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OptionPopup
 --- !u!1 &1575970155
 GameObject:
   m_ObjectHideFlags: 0

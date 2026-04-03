@@ -1,3 +1,4 @@
+﻿using GameUtility;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -88,7 +89,7 @@ public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
     {
         if (type == MoneyType.Gold)
         {
-            _gold.text = _money[type].ToString("N0");
+            _gold.text = NumberFormatterBigInt.FormatGold(_money[type]);
             OnGoldChanged?.Invoke(_money[type]);
         }
     }
