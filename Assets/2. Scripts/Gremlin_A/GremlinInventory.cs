@@ -64,7 +64,7 @@ public class GremlinInventory : MonoBehaviour, ISaveable<List<GremlinSaveData>>
             gremlin = g;
             if(gremlin._isEquipped == true)
             {
-                GremlinManager.Instance.ChangeGremlin(gremlin);
+                StartCoroutine(GremlinManager.Instance.ChangeGremlin(gremlin));
             }
             AddGremlin(gremlin);
         }

@@ -36,7 +36,6 @@ public class InventoryPanel : BaseUI
     [Header("장비 상태별 활성화할 버튼 모음")]
     [SerializeField] Button _enchantButton;                  // 장비 강화 버튼입니다.
     [SerializeField] Button _ringEnchantButton;                  // 장비 강화 버튼입니다.
-    [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
     [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
 
     [Header("장비 정보 출력용")]
@@ -217,12 +216,10 @@ public class InventoryPanel : BaseUI
         if(_selectedEquipment.isEquipped == false && _selectedEquipment.isLocked == false)
         {
             _sellButton.interactable = true;
-            _salvageButton.interactable = true;
         }
         else
         {
             _sellButton.interactable = false;
-            _salvageButton.interactable = false;
         }
     }
     public void DisableInteractable()
@@ -230,7 +227,6 @@ public class InventoryPanel : BaseUI
         _enchantButton.interactable = false;
         _ringEnchantButton.interactable = false;
         _sellButton.interactable = false;
-        _salvageButton.interactable = false;
     }
 
     /// <summary>

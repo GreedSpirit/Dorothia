@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -47,7 +47,7 @@ public class SaveManager : MonoBehaviour
     {
         if(lastSaveTime == DateTime.MinValue)
         {
-            lastSaveTime = DateTime.Now;
+            lastSaveTime = DateTime.UtcNow;
         }    
         StartCoroutine(LoadNextFrame());
         OnClickStartGame();
@@ -76,10 +76,10 @@ public class SaveManager : MonoBehaviour
 
     private void TrySave()
     {
-        if((DateTime.Now - lastSaveTime).TotalMinutes >= 5)
+        if((DateTime.UtcNow - lastSaveTime).TotalMinutes >= 5)
         {
             SaveGame();
-            lastSaveTime = DateTime.Now;
+            lastSaveTime = DateTime.UtcNow;
 
         }
     }

@@ -3,33 +3,6 @@ using UnityEngine;
 
 public static class ItemCalculator
 {
-    public static int SalvageScrapCalculate(Equipment equip)
-    {
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
-        return ((equip.equip_level + breakData.Equip_Break_Gold_Scrap) / 10);
-    }
-    public static int SalvageGoldCalculate(Equipment equip)
-    {
-        int gold = 0;
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
-        //강화 수치가 0이 아닐 경우, 테이블로부터 강화 수치 기준 데이터를 받아와 골드에 공식을 적용합니다.
-        if (equip.equip_Upgrade > 0)
-        {
-            var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
-            gold = Mathf.RoundToInt
-                (
-                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade).Equip_Upgrade_Value)) *
-                    breakData.Equip_Break_Gold / DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Success_Prob * 0.2f
-                );
-        }
-        //강화 수치가 0인 경우, 골드는 기본값으로 적용하고 스크랩만 계산하여 지급합니다.
-        if (equip.equip_Upgrade == 0)
-        {
-            gold = equip.equip_price;
-        }
-        return gold;
-    }
-
     public static int SellCalculate(Equipment equip)
     {
         //해당 장비의 강화 단계를 기준으로 데이터를 먼저 불러옵니다.
