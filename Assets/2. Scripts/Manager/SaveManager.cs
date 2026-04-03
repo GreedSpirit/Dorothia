@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -155,6 +155,10 @@ public class SaveManager : MonoBehaviour
         {
             Debug.LogWarning("Load된 데이터가 없음! 첫 시작");
             StageManager.Instance.StartStage(110001); // 첫 시작시 110001로 시작하게
+
+            // 스타터 스킬 지급
+            int StartSkillId = 10001;
+            SkillManager.Instance.GiveStarterSkill(StartSkillId, slotIndex: 0);
 
             lastSaveTime = DateTime.UtcNow;
             _isLoaded = true;

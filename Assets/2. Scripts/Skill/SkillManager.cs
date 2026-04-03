@@ -126,6 +126,27 @@ public class SkillManager : MonoBehaviour
         UltimateSlot?.UpdateCooldown(dt);
     }
 
+    // 게임 첫 시작 시 스타터 스킬 지급 및 장착
+    public void GiveStarterSkill(int skillId, int slotIndex = 0)
+    {
+        var sData = DataManager.Instance.GetData<SkillData>(skillId);
+        if (sData == null)
+        {
+            Debug.LogError($"[SkillManager] 스타터 스킬 데이터 없음: {skillId}");
+            return;
+        }
+
+        SkillKey key = new SkillKey(skillId, sData.Skill_Type, Rarity.Normal, false);
+
+        // 인스턴스 생성 + 인벤토리 추가 (내부적으로 UnlockAndAddItem 호출)
+        UnlockAndAddItem(key, 1);
+
+        // 액티브 슬롯 0번에 장착
+        EquipSkill(key, slotIndex);
+
+        Debug.Log($"[SkillManager] 스타터 스킬 장착 완료: {sData.Skill_Name} → 슬롯 {slotIndex}");
+    }
+
     public List<SkillData> GetRandomScroll(int amount)
     {
         List<SkillData> list = new List<SkillData>();
