@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -50}
-  m_SizeDelta: {x: 400, y: 100}
+  m_AnchoredPosition: {x: 0, y: -30.911987}
+  m_SizeDelta: {x: 400, y: 61.824}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1606864849946517609
 CanvasRenderer:
@@ -170,7 +170,6 @@ RectTransform:
   - {fileID: 6212538131684158609}
   - {fileID: 3487776425749543795}
   - {fileID: 5758635471488359184}
-  - {fileID: 8713222695824753943}
   - {fileID: 5605792866702046521}
   m_Father: {fileID: 7839867229183326841}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -229,7 +228,7 @@ GameObject:
   - component: {fileID: 2692215702546159489}
   - component: {fileID: 4908601350376015426}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: '[Text]SkillName'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -247,12 +246,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 240553851897337418}
+  m_Father: {fileID: 5605792866702046521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 100, y: 569}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: -65}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2692215702546159489
 CanvasRenderer:
@@ -309,15 +308,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 40
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 30
+  m_fontSizeMax: 40
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -1002,7 +1001,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3571013708580320137, guid: 1e57e3d7db079fc408fafe8dd7d976d5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8713222695824753943}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e57e3d7db079fc408fafe8dd7d976d5, type: 3}
 --- !u!114 &1404691211277024299 stripped
