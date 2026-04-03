@@ -151,6 +151,17 @@ public class SaveManager : MonoBehaviour
     {
         var data = await SaveUtility.LoadEncryptedAsync<SaveData>("GameData");
 
+        if (data == null)
+        {
+            Debug.LogWarning("Load된 데이터가 없음! 첫 시작");
+            StageManager.Instance.StartStage(110001); // 첫 시작시 110001로 시작하게
+
+            lastSaveTime = DateTime.UtcNow;
+            _isLoaded = true;
+
+            return;
+        }
+
         ExchangeManager.Instance.LoadFromSaveData(data.exchangeData);
         // 프레임 양보
         await Task.Yield(); 
