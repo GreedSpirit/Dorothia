@@ -96,13 +96,14 @@ public class TitleManager : MonoBehaviour
                 fakeProgress += Random.Range(0.01f, 0.03f);
             }
 
+            fakeProgress = Mathf.Clamp01(fakeProgress);
             //실제보다 앞서가지 않게 제한
             fakeProgress = Mathf.Min(fakeProgress, realProgress);
-            fakeProgress = Mathf.Clamp01(fakeProgress);
 
             _progressBar.value = fakeProgress;
-            _progressText.text = $"{(fakeProgress * 100f):0}%";
-            
+            int percent = Mathf.Clamp(Mathf.RoundToInt(fakeProgress * 100f), 0, 100);
+            _progressText.text = $"{percent}%";
+
             //완료 조건
             if (realProgress >= 1f && fakeProgress >= 0.99f)
                 break;
@@ -114,8 +115,11 @@ public class TitleManager : MonoBehaviour
         while (fakeProgress < 1f)
         {
             fakeProgress += Time.deltaTime * 1.2f;
-            _progressBar.value = fakeProgress;
-            _progressText.text = $"{(fakeProgress * 100f):0}%";
+            fakeProgress = Mathf.Clamp01(fakeProgress);
+
+            int percent = Mathf.Clamp(Mathf.RoundToInt(fakeProgress * 100f), 0, 100);
+            _progressText.text = $"{percent}%";
+
             yield return null;
         }
 
