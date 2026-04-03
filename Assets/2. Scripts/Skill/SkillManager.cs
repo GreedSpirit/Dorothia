@@ -228,7 +228,7 @@ public class SkillManager : MonoBehaviour
     }
 
     public BaseSkill GetSkill(SkillKey key) => UnlockedSkills.TryGetValue(key, out BaseSkill bs) ? bs : null;
-    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity];
+    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity-1];
     public int GetItemCount(SkillKey key) => _inventory.GetValueOrDefault(key, 0);
     public bool IsNewSkill(SkillKey key) => UnlockedSkills.ContainsKey(key);
 
