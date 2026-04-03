@@ -721,6 +721,8 @@ public class MonsterController : MonoBehaviour, IMonster
 
         DamageTextManager.Instance.ShowDamage(finalDamage, transform.position, isCritical);
 
+        SoundManager.Instance?.PlayHitSFX();
+
         _hp -= finalDamage;
 
         if (_hp <= 0)

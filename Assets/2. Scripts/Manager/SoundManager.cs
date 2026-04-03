@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -22,6 +22,13 @@ public class SoundManager : MonoBehaviour
     // 어드레서블 용
     private Dictionary<string , AudioClip> sfxCache =new Dictionary<string, AudioClip>();
 
+    [Header("Hit SFX")]
+    [SerializeField] private AudioClip[] hitClips; // 몬스터 피격음
+    [SerializeField] private int maxSimultaneousHitSFX = 10; // 동시 재생 제한
+
+    private List<AudioSource> _sfxPool = new List<AudioSource>();
+    private int _currentSfxIndex = 0;
+
     private void Awake()
     {
         if(instance != null && instance != this){
@@ -44,6 +51,7 @@ public class SoundManager : MonoBehaviour
             sfxDict[type] = sfxClip[index];
         }
 
+        InitializeSfxPool();
     }
 
     private void Start()
@@ -102,6 +110,48 @@ public class SoundManager : MonoBehaviour
         bgmSource.clip = clip;
         bgmSource.loop = loop;
         bgmSource.Play();
+    }
+
+    private void InitializeSfxPool()
+    {
+        for (int i = 0; i < maxSimultaneousHitSFX;  i++)
+        {
+            GameObject gameObject = new GameObject($"SFX_{i}");
+            gameObject.transform.SetParent(transform);
+
+            var source = gameObject.AddComponent<AudioSource>();
+            source.outputAudioMixerGroup = sfxGroup;
+            source.playOnAwake = false;
+
+            _sfxPool.Add(source);
+        }
+    }
+
+    private void PlayLimitedSFX(AudioClip clip)
+    {
+        if (_sfxPool.Count == 0 || clip == null)
+            return;
+
+        var source = _sfxPool[_currentSfxIndex];
+
+        source.Stop();
+        source.clip = clip;
+
+        source.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+        source.Play();
+
+        _currentSfxIndex = (_currentSfxIndex + 1) % _sfxPool.Count;
+    }
+
+    public void PlayHitSFX()
+    {
+        if (hitClips == null || hitClips.Length == 0)
+            return;
+
+        int randomIndex = UnityEngine.Random.Range(0, hitClips.Length);
+        AudioClip clip = hitClips[randomIndex];
+
+        PlayLimitedSFX(clip);
     }
 
     public void PlaySFX(SFXType type)
