@@ -16,7 +16,8 @@ public class DungeonInfo : MonoBehaviour
     [SerializeField] TextMeshProUGUI _dungeonPower;
     [SerializeField] TextMeshProUGUI _dungeonTime;
     [SerializeField] Image _dungeonImage;
-    //[SerializeField] TextMeshProUGUI _dungeonMessage;
+    [SerializeField] Image _rewardImage;
+    [SerializeField] TextMeshProUGUI _rewardMessage;
     [SerializeField] TextMeshProUGUI _clearCount;
 
     //이미지 들고있는 SO
@@ -88,6 +89,26 @@ public class DungeonInfo : MonoBehaviour
         //클리어카운트
         int used = DataManager.Instance.GetUsedEntryCount(_currentDungeonId);
         _clearCount.text = $"클리어 횟수 {used}/{_maxCount}";
+
+        
+        switch (dungeonId)
+        {
+            case (150001):
+                _rewardMessage.text = $"보상     50000 골드";
+                break;
+            case (150002):
+                _rewardMessage.text = $"보상     101,933 경험치";
+                break;
+            case (150003):
+                _rewardMessage.text = $"보상     1개";
+                break;
+            case (150004):
+                _rewardMessage.text = $"보상     1개";
+                break;
+            case (150005):
+                _rewardMessage.text = $"보상     1~3개(희귀)";
+                break;
+        }
     }
 
     public void DungeonLevelClick(int dungeonId, int level)
@@ -119,14 +140,87 @@ public class DungeonInfo : MonoBehaviour
 
         //SO이미지 가져오기
         _dungeonImage.sprite = _dungeonUIData.GetSprite(dungeonId);
+        _rewardImage.sprite = _dungeonUIData.GetRewardSprite(dungeonId);
 
         //테이블값으로 UI갱신
         _dungeonName.text = dungeonData.Dungeon_Name;   
         _dungeonPower.text = stepData.Rec_Cp;
         _dungeonTime.text = stepData.Time_Limit;
 
-        //TODO 메세지 테이블값으로 바꿔야함
-        //_dungeonMessage.text = level.ToString();      
+        switch ((dungeonId, level))
+        {
+            case (150001, 0):
+                _rewardMessage.text = "보상     50000 골드";
+                break;
+            case (150001, 1):
+                _rewardMessage.text = "보상     200,000 골드";
+                break;
+            case (150001, 2):
+                _rewardMessage.text = "보상     1,000,000 골드";
+                break;
+            case (150001, 3):
+                _rewardMessage.text = "보상     5,000,000 골드";
+                break;
+            case (150001, 4):
+                _rewardMessage.text = "보상     20,000,000 골드";
+                break;
+
+            case (150002, 0):
+                _rewardMessage.text = "보상     101,933 경험치";
+                break;
+            case (150002, 1):
+                _rewardMessage.text = "보상     5,074,694 경험치";
+                break;
+            case (150002, 2):
+                _rewardMessage.text = "보상     208,797,157 경험치";
+                break;
+            case (150002, 3):
+                _rewardMessage.text = "보상     1,404,682,860 경험치";
+                break;
+            case (150002, 4):
+                _rewardMessage.text = "보상     24,510,876,300 경험치";
+                break;
+
+            case (150003, 0):
+                _rewardMessage.text = "보상     1개";
+                break;
+            case (150003, 1):
+                _rewardMessage.text = "보상     10개";
+                break;
+            case (150003, 2):
+                _rewardMessage.text = "보상     30개";
+                break;
+            case (150003, 3):
+                _rewardMessage.text = "보상     500개";
+                break;
+            case (150003, 4):
+                _rewardMessage.text = "보상     2000개";
+                break;
+
+            case (150004, 0):
+                _rewardMessage.text = "보상     1개";
+                break;
+            case (150004, 1):
+                _rewardMessage.text = "보상     2개";
+                break;
+            case (150004, 2):
+                _rewardMessage.text = "보상     4개";
+                break;
+            case (150004, 3):
+                _rewardMessage.text = "보상     6개";
+                break;
+            case (150004, 4):
+                _rewardMessage.text = "보상     8개";
+                break;
+
+            case (150006, 0):
+                _rewardMessage.text = "보상     1~3개(희귀)";
+                break;
+            case (150006, 1):
+                _rewardMessage.text = "보상     3~5개(희귀)";
+                break;
+        }
+
     }
 
 
