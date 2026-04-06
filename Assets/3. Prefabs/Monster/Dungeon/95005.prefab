@@ -104,7 +104,7 @@ CapsuleCollider:
   m_Radius: 0.4
   m_Height: 2.5
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &2619048793672444656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,7 +139,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 0.4, y: 1.25, z: 0.4}
   m_MoveThreshold: 0.1
-  m_Carve: 0
+  m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
@@ -169,7 +169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5f7e98f328db82f429ca4a3d39e5593b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5f7e98f328db82f429ca4a3d39e5593b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -256,7 +256,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 565c476423492f84abdf65e63a51c097, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 565c476423492f84abdf65e63a51c097, type: 3}
       propertyPath: m_LocalPosition.z
