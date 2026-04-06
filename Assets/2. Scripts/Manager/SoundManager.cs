@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -97,7 +98,9 @@ public class SoundManager : MonoBehaviour
     public void SetBGMVolume(float value) => SetVolume(BGM_PARAM, value);
     public void SetSFXVolume(float value) => SetVolume(SFX_PARAM, value);
 
-    public void PlayBGM(AudioClip clip, bool loop = true)
+    private Coroutine _bgmFadeCoroutine;
+
+    public void PlayBGM(AudioClip clip, bool loop = true, float fadeTime = 1f)
     {
         if (clip == null)
             return;
@@ -105,11 +108,43 @@ public class SoundManager : MonoBehaviour
         if (bgmSource.clip == clip && bgmSource.isPlaying)
             return;
 
-        bgmSource.Stop();
+        if (_bgmFadeCoroutine != null)
+            StopCoroutine(_bgmFadeCoroutine);
 
-        bgmSource.clip = clip;
+        _bgmFadeCoroutine = StartCoroutine(CoFadeBGM(clip, loop, fadeTime));
+    }
+
+    private IEnumerator CoFadeBGM(AudioClip newClip, bool loop, float fadeTime)
+    {
+        float startVolume = bgmSource.volume;
+
+        //Fade Out
+        float t = 0f;
+        while (t < fadeTime)
+        {
+            t += Time.deltaTime;
+            bgmSource.volume = Mathf.Lerp(startVolume, 0f, t / fadeTime);
+            yield return null;
+        }
+
+        bgmSource.volume = 0f;
+
+        //Clip 교체
+        bgmSource.Stop();
+        bgmSource.clip = newClip;
         bgmSource.loop = loop;
         bgmSource.Play();
+
+        //Fade In
+        t = 0f;
+        while (t < fadeTime)
+        {
+            t += Time.deltaTime;
+            bgmSource.volume = Mathf.Lerp(0f, startVolume, t / fadeTime);
+            yield return null;
+        }
+
+        bgmSource.volume = startVolume;
     }
 
     private void InitializeSfxPool()
