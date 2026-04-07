@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 public class StageBtnLabelUpdater : MonoBehaviour
@@ -42,6 +42,11 @@ public class StageBtnLabelUpdater : MonoBehaviour
 
         int chapter = stageId % 1000;
         int section = sectionId % 1000;
+
+        while(section > 100)
+        {
+            section -= 100;
+        }
 
         _text.text = $"스테이지 변경 \n {chapter} - {section}";
     }

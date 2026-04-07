@@ -11,7 +11,7 @@ public class StageData : ICSVLoad, ITableKey
     public int Monster_Spawn_Id { get; set; }
 
     int ITableKey.Id => Stage_Id;
-    string ITableKey.Key => Stage_Id.ToString();
+    string ITableKey.Key => Stage_Section_Id.ToString();
 
     public void LoadFromCsv(string[] values)
     {

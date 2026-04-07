@@ -8,7 +8,7 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager Instance { get; private set; }
 
-    private bool _eventsRegistered;
+    private bool _eventsRegistered = false;
 
     [SerializeField] private Transform _mapRoot;
 
@@ -115,6 +115,7 @@ public class MapManager : MonoBehaviour
     /// <param name="stageId"></param>
     private void HandleStageChanged(int stageId)
     {
+        Debug.Log("스테이지 변경 실행");
         LoadStageMap(stageId);
     }
 

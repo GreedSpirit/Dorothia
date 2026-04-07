@@ -346,9 +346,19 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
             Debug.LogError($"[StageManager] 다음 SectionData 없음 nextId={nextSectionId}");
             return false;
         }
+        bool isStageChanging = false;
+        if(next.Stage_Id != _sectionData.Stage_Id)
+        {
+            isStageChanging = true;
+        }
 
         _sectionData = next;
 
+        if(isStageChanging == true)
+        {
+            _stage = DataManager.Instance.GetData<StageData>(nextSectionId.ToString());
+            MapManager.Instance.LoadStageMap(_sectionData.Stage_Id);
+        }
         //새 구간 로드 후에도 현재 섹션이 범위에 들어오는지 검증
         bool valid = (_currentSection >= _sectionData.Section_Start &&
                       _currentSection <= _sectionData.Section_End);
