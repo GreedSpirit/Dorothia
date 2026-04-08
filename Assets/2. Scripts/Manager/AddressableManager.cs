@@ -74,13 +74,18 @@ public class AddressableManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"[Addressable] 로드 실패: {address}");
+                Debug.LogError($"[Addressable] 로드 실패: {address}\n원인: {op.OperationException}");
 
-                // 대기 콜백 정리
-                _pendingCallbacks.Remove(address);
+                // null로 콜백 호출해서 EffectManager가 _loadingAssets 정리할 수 있게
+                if (_pendingCallbacks.TryGetValue(address, out var callbacks))
+                {
+                    foreach (var cb in callbacks)
+                        cb?.Invoke(null);
+                    _pendingCallbacks.Remove(address);
+                }
+
                 _assetCache.Remove(address);
                 _refCounts.Remove(address);
-
                 if (newHandle.IsValid()) Addressables.Release(newHandle);
             }
         };

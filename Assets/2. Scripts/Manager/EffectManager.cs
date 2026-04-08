@@ -63,6 +63,14 @@ public class EffectManager : MonoBehaviour
         _loadingAssets.Add(effectName);
         AddressableManager.Instance.LoadAsset<GameObject>(effectName, prefab =>
         {
+            if (prefab == null)
+            {
+                Debug.LogError($"[EffectManager] '{effectName}' 주소의 프리팹을 로드하지 못했습니다!");
+                _loadingAssets.Remove(effectName); 
+                _pendingSpawns.Remove(effectName); 
+                return;
+            }
+
             CreatePool(effectName, prefab);
             _loadingAssets.Remove(effectName);
 

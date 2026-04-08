@@ -2,21 +2,21 @@
 직업 스킬  id (10001부터 1씩 증가),스킬의 이름,스킬의 타입,스킬의 쿨타임,효과를 받는 스테이터스,스킬 배율,애니메이션 위치,스킬 아이콘,스킬 설명
 Job_Skill_Id,Skill_Name,Skill_Type,Skill_Cooltime,Affection_Skill,Affection_Skill_Value,Skill_Animation_Patch,Skill_Icon,Skill_Information
 int,string,enum,float,enum,float,string,string,string
-10001,난무,1,3,2,2.4,DanceOfBlade,Skill_001,<color=#FFFFFF>도로시아의 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10002,폭풍 난무,1,7,2,4.2,StormOfBlade,Skill_002,<color=#FFFFFF>도로시아의 주변에 열의 폭풍을 일으켜 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10003,순보 베기,1,5,2,5.5,Soonbo,Skill_005,<color=#FFFFFF>도로시아가 순식간에 적의 목을 베어내며 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10004,암살자의 발걸음,1,12,2,8.4,AssasinFoot,Skill_006,"<color=#FFFFFF>도로시아가 조심스러운 발걸음으로 순식간에 다수의 적을 쓸어버리며 최대 8번의 공격을 실행하여, 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다. 데미지는 실행 횟수에 비례하여 적용됩니다.</color>"
-10005,스피어,1,4,2,4.2,Spear,Skill_007,<color=#FFFFFF>도로시아가 창과 같은 찌르기를 시전하여 충격파를 일으키며 돌진합니다. 경로상 적들에게 공격력의 </color> <color=#FF0000>{0}%</color><color=#FFFFFF> 데미지를 입힙니다.</color>
-10006,파이어 피어스,1,3,2,2.7,FirePierce,Skill_008,<color=#FFFFFF>도로시아가 코어의 열 에너지를 이용하여 파괴적인 찌르기를 시전합니다. 경로상 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10010,콤보 슬래시,1,7,2,7.2,ComboSlash,Skill_012,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘둘러 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10011,크로스 슬래시,1,8,2,4,CrossSlash,Skill_013,<color=#FFFFFF>도로시아가 자신이 가진 코어의 힘을 끌어올려 전방의 모든 적을 베어내어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10012,피어스 슬래시,1,4,2,4,PierceSlash,Skill_014,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘두른 후 돌진하여 찌릅니다. 마지막 고열의 찌르기는 적을 관통하며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10013,필살,1,8,2,7.2,Finisher,Skill_015,<color=#FFFFFF>도로시아가 순식간에 적에게 접근해 절명에 이르는 3번의 공격을 시전하여 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10014,히트 쉐이커,1,5,2,5,HitShaker,Skill_016,<color=#FFFFFF>도로시아가 강렬한 일격을 지면에 꽂아 지형을 솟아오르게 하여 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-10015,탈론 스크래치,1,6,2,6,TalonScratch,Skill_018,"<color=#FFFFFF>도로시아가 원거리 참격을 지면으로 발사하여, 해당 지점의 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
-15001,무기 연마,2,0,2,0.2,,Skill_019,<color=#FFFFFF>도로시아의 무기에 강력한 힘이 담긴 광물을 녹여내어 연마하였습니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
-15002,복수자,2,0,2,0.3,,Skill_020,<color=#FFFFFF>도로시아가 복수에 몸을 맡겨 파괴적인 힘을 이끌어내어 복수의 화신이 되었습니다. 플레이어의 공격력이 <color=#00FF00>{0}%</color> 증가합니다.</color>
-15003,데우스 엑스 마키나의 축복,2,0,2,0.4,,Skill_021,<color=#FFFFFF>데우스 엑스 마키나의 강력한 권능이 도로시아와 그녀의 무기에 부여됩니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
+10001,난무,1,3,2,1.5,DanceOfBlade,Skill_001,<color=#FFFFFF>도로시아의 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10002,폭풍 난무,1,7,2,2.5,StormOfBlade,Skill_002,<color=#FFFFFF>도로시아의 주변에 열의 폭풍을 일으켜 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10003,순보 베기,1,5,2,2.2,Soonbo,Skill_005,<color=#FFFFFF>도로시아가 순식간에 적의 목을 베어내며 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10004,암살자의 발걸음,1,12,2,4.5,AssasinFoot,Skill_006,"<color=#FFFFFF>도로시아가 조심스러운 발걸음으로 순식간에 다수의 적을 쓸어버리며 최대 8번의 공격을 실행하여, 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다. 데미지는 실행 횟수에 비례하여 적용됩니다.</color>"
+10005,스피어,1,4,2,1.8,Spear,Skill_007,<color=#FFFFFF>도로시아가 창과 같은 찌르기를 시전하여 충격파를 일으키며 돌진합니다. 경로상 적들에게 공격력의 </color> <color=#FF0000>{0}%</color><color=#FFFFFF> 데미지를 입힙니다.</color>
+10006,파이어 피어스,1,3,2,1.5,FirePierce,Skill_008,<color=#FFFFFF>도로시아가 코어의 열 에너지를 이용하여 파괴적인 찌르기를 시전합니다. 경로상 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10010,콤보 슬래시,1,7,2,3.5,ComboSlash,Skill_012,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘둘러 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10011,크로스 슬래시,1,8,2,2.5,CrossSlash,Skill_013,<color=#FFFFFF>도로시아가 자신이 가진 코어의 힘을 끌어올려 전방의 모든 적을 베어내어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10012,피어스 슬래시,1,4,2,2,PierceSlash,Skill_014,<color=#FFFFFF>도로시아가 강력한 화염의 검기를 휘두른 후 돌진하여 찌릅니다. 마지막 고열의 찌르기는 적을 관통하며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10013,필살,1,8,2,3.5,Finisher,Skill_015,<color=#FFFFFF>도로시아가 순식간에 적에게 접근해 절명에 이르는 3번의 공격을 시전하여 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10014,히트 쉐이커,1,5,2,2.2,HitShaker,Skill_016,<color=#FFFFFF>도로시아가 강렬한 일격을 지면에 꽂아 지형을 솟아오르게 하여 주변 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+10015,탈론 스크래치,1,6,2,2.5,TalonScratch,Skill_018,"<color=#FFFFFF>도로시아가 원거리 참격을 지면으로 발사하여, 해당 지점의 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
+15001,무기 연마,2,0,2,0.05,,Skill_019,<color=#FFFFFF>도로시아의 무기에 강력한 힘이 담긴 광물을 녹여내어 연마하였습니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
+15002,복수자,2,0,2,0.08,,Skill_020,<color=#FFFFFF>도로시아가 복수에 몸을 맡겨 파괴적인 힘을 이끌어내어 복수의 화신이 되었습니다. 플레이어의 공격력이 <color=#00FF00>{0}%</color> 증가합니다.</color>
+15003,데우스 엑스 마키나의 축복,2,0,2,0.12,,Skill_021,<color=#FFFFFF>데우스 엑스 마키나의 강력한 권능이 도로시아와 그녀의 무기에 부여됩니다. 플레이어의 공격력이 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15004,마력을 머금은 내연 기관,2,0,4,0.2,,Skill_022,<color=#FFFFFF>마력을 머금은 재료를 통해 내연 기관을 강화하여 기민한 행동이 가능하게 되었습니다. 플레이어의 공격속도가 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15005,도로시아 식 쌍검술,2,0,4,0.3,,Skill_023,<color=#FFFFFF>자신만의 고유 검술을 더욱 강화하여 폭풍 같은 공격이 가능하게 되었습니다. 플레이어의 공격속도가 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15006,경량화 인첸트,2,0,10,0.4,,Skill_024,<color=#FFFFFF>개조된 신체 부위에 경량화의 힘을 부여하여 무거운 소재를 가볍게 개조하였습니다. 플레이어의 이동속도가 <color=#FF0000>{0}%</color> 증가합니다.</color>
@@ -26,6 +26,6 @@ int,string,enum,float,enum,float,string,string,string
 15010,자가 수복 프로토콜,2,0,9,0.3,,Skill_028,"<color=#FFFFFF>도로시아의 파츠에 재생 마법과 자가 수복 장치를 추가하여, 전투 지속성과 회복력을 대폭 상승시켰습니다. 플레이어의 체력 재생력이 <color=#FF0000>{0}%</color> 증가합니다.</color>"
 15011,암살자의 눈,2,0,5,0.2,,Skill_029,<color=#FFFFFF>도로시아가 수많은 사선을 넘나들며 익힌 암살자의 눈입니다. 상대의 약점을 쉽게 파악하여 치명적인 공격을 가할 수 있게 합니다. 플레이어의 치명타 확률이 <color=#FF0000>{0}%</color> 증가합니다.</color>
 15012,절삭 인챈트,2,0,6,0.2,,Skill_030,<color=#FFFFFF>도로시아의 무기에 단단한 광석뿐만 아니라 영혼마저 베어낼 수 있는 절삭력을 부여하였습니다. 플레이어의 치명타 데미지가 <color=#FF0000>{0}%</color> 증가합니다.</color>
-18001,대지의 분노,3,30,2,18,Earthquake,Skill_017,"<color=#FFFFFF>도로시아가 코어의 열기를 폭주시킨 후, 대지를 분쇄하는 4단계의 강력한 일격을 퍼붓습니다. 궤를 달리하는 마지막 폭발은 주변의 모든 적을 휩쓸어버리며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
-18002,차원 난무,3,30,2,24,DimensionBlade,Skill_003,<color=#FFFFFF>도로시아가 계몽 마법으로 차원의 문을 열고 몸을 감춥니다. 차원의 틈에서 현세의 적들을 향해 피할 수 없는 참격을 쏟아부어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
-18003,제노사이드,3,30,2,32,Genocide,Skill_004,<color=#FFFFFF>도로시아식 검술의 정수. 초고속 이동을 통해 광범위한 지역에 무차별적인 참격을 쏟아냅니다. 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+18001,대지의 분노,3,30,2,10,Earthquake,Skill_017,"<color=#FFFFFF>도로시아가 코어의 열기를 폭주시킨 후, 대지를 분쇄하는 4단계의 강력한 일격을 퍼붓습니다. 궤를 달리하는 마지막 폭발은 주변의 모든 적을 휩쓸어버리며 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>"
+18002,차원 난무,3,30,2,14,DimensionBlade,Skill_003,<color=#FFFFFF>도로시아가 계몽 마법으로 차원의 문을 열고 몸을 감춥니다. 차원의 틈에서 현세의 적들을 향해 피할 수 없는 참격을 쏟아부어 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
+18003,제노사이드,3,30,2,18,Genocide,Skill_004,<color=#FFFFFF>도로시아식 검술의 정수. 초고속 이동을 통해 광범위한 지역에 무차별적인 참격을 쏟아냅니다. 적들에게 공격력의 <color=#FF0000>{0}%</color> 데미지를 입힙니다.</color>
