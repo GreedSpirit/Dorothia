@@ -113,7 +113,7 @@ public class DungeonUIMgr : MonoBehaviour
             lineCount++;
         }
     }
-
+    /*
     public void UpdateSKRewardUI(List<SkillData> list)
     {
         _dungeonRewardText.text = "";
@@ -149,6 +149,42 @@ public class DungeonUIMgr : MonoBehaviour
         foreach (var item in rewardCounts)
         {
             //스킬주문서 x 중복수 출력
+            _dungeonRewardText.text += $"{item.Key} x {item.Value}\n";
+            lineCount++;
+        }
+    }
+    */
+
+    public void UpdateSKRewardUI(List<SkillData> list)
+    {
+        _dungeonRewardText.text = "";
+
+        int maxVisibleLines = 3;
+
+        //중복 체크
+        Dictionary<string, int> rewardCounts = new Dictionary<string, int>();
+
+        //전체 데이터
+        foreach (var SK in list)
+        {
+            string name = SK.Skill_Name + " 주문서";
+
+            if (rewardCounts.ContainsKey(name))
+                rewardCounts[name]++;
+            else
+                rewardCounts[name] = 1;
+        }
+
+        //3줄까지만 출력
+        int lineCount = 0;
+        foreach (var item in rewardCounts)
+        {
+            if (lineCount >= maxVisibleLines)
+            {
+                _dungeonRewardText.text += "...";
+                break;
+            }
+
             _dungeonRewardText.text += $"{item.Key} x {item.Value}\n";
             lineCount++;
         }

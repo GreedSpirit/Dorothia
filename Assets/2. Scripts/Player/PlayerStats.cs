@@ -1,4 +1,4 @@
-using GameUtility;
+﻿using GameUtility;
 using System;
 using System.Collections;
 using System.Numerics;
@@ -238,7 +238,7 @@ public class PlayerStats : MonoBehaviour, IResettable
         double survivalScore = hp * (100.0 + def) / 100.0;
 
         // 최종 전투력
-        double raw = Math.Pow(attackScore * survivalScore, 1.0 / 3.0);
+        double raw = Math.Pow(attackScore * survivalScore, 1.0 / 2.0);
         long power = (long)raw; 
 
         TotalPower = power.ToString("N0");

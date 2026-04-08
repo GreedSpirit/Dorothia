@@ -150,19 +150,19 @@ public class DungeonInfo : MonoBehaviour
         switch ((dungeonId, level))
         {
             case (150001, 0):
-                _rewardMessage.text = "보상     50000 골드";
+                _rewardMessage.text = "보상     100,000 골드";
                 break;
             case (150001, 1):
-                _rewardMessage.text = "보상     200,000 골드";
+                _rewardMessage.text = "보상     400,000 골드";
                 break;
             case (150001, 2):
-                _rewardMessage.text = "보상     1,000,000 골드";
+                _rewardMessage.text = "보상     2,000,000 골드";
                 break;
             case (150001, 3):
-                _rewardMessage.text = "보상     5,000,000 골드";
+                _rewardMessage.text = "보상     10,000,000 골드";
                 break;
             case (150001, 4):
-                _rewardMessage.text = "보상     20,000,000 골드";
+                _rewardMessage.text = "보상     40,000,000 골드";
                 break;
 
             case (150002, 0):
@@ -182,35 +182,35 @@ public class DungeonInfo : MonoBehaviour
                 break;
 
             case (150003, 0):
-                _rewardMessage.text = "보상     1개";
+                _rewardMessage.text = "보상     1 ~ 5개";
                 break;
             case (150003, 1):
-                _rewardMessage.text = "보상     10개";
+                _rewardMessage.text = "보상     10 ~ 20개";
                 break;
             case (150003, 2):
-                _rewardMessage.text = "보상     30개";
+                _rewardMessage.text = "보상     30 ~ 70개";
                 break;
             case (150003, 3):
-                _rewardMessage.text = "보상     500개";
+                _rewardMessage.text = "보상     500 ~ 1000개";
                 break;
             case (150003, 4):
-                _rewardMessage.text = "보상     2000개";
+                _rewardMessage.text = "보상     2000 ~ 3000개";
                 break;
 
             case (150004, 0):
-                _rewardMessage.text = "보상     1개";
+                _rewardMessage.text = "보상     1 ~ 2개";
                 break;
             case (150004, 1):
-                _rewardMessage.text = "보상     2개";
+                _rewardMessage.text = "보상     2 ~ 4개";
                 break;
             case (150004, 2):
-                _rewardMessage.text = "보상     4개";
+                _rewardMessage.text = "보상     4 ~ 6개";
                 break;
             case (150004, 3):
-                _rewardMessage.text = "보상     6개";
+                _rewardMessage.text = "보상     6 ~ 8개";
                 break;
             case (150004, 4):
-                _rewardMessage.text = "보상     8개";
+                _rewardMessage.text = "보상     8 ~ 10개";
                 break;
 
             case (150006, 0):
