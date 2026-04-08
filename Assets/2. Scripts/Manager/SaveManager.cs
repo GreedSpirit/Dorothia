@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -178,6 +178,9 @@ public class SaveManager : MonoBehaviour
         SkillManager.Instance.LoadFromSaveData(data.skillData);
         await Task.Yield();
         _playerStat.LoadFromSaveData(data.playerData);
+
+        DateTime lastQuitTime = TimeManager.Instance.LoadQuitTime();
+        offlineSeconds = (DateTime.UtcNow - lastQuitTime).TotalSeconds;
 
         GiveOfflineReward();
 
