@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameUtility;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
@@ -8,7 +9,14 @@ public enum MoneyType
 {
     Scrap, Gold, CorePiece, FlintPiece, PinionPiece, ZincPiece
 }
-public class ExchangeManager : MonoBehaviour
+
+[Serializable]
+public class ExchangeData
+{
+    public string gold;
+}
+
+public class ExchangeManager : MonoBehaviour, ISaveable<ExchangeData>
 {
     //싱글톤
     public static ExchangeManager Instance { get; private set; }
@@ -54,89 +62,95 @@ public class ExchangeManager : MonoBehaviour
         CheckDictionary(type);
         _money[type] += amount;
 
-        UpdateGoods(_money, type);
+        UpdateGoods(type);
+
+        SaveManager.Instance?.OnSave?.Invoke();
+        //SaveMoney();
     }
 
     //살수있는지 없는지 불값반환
     public bool UseMoney(MoneyType type, BigInteger amount)
     {
-        //가진돈이 적다면 거짓반환
         if (_money[type] < amount)
-        {
             return false;
-        }
-        //살수있다면
-        else
-        {
-            //계산하고 참반환
-            _money[type] -= amount;
-            UpdateGoods(_money, type);
-            return true;
-        }
 
+        _money[type] -= amount;
+
+        UpdateGoods(type);
+
+        SaveManager.Instance?.OnSave?.Invoke();
+        //SaveMoney();
+
+        return true;
     }
 
     // 재화 변동 시
-    private void UpdateGoods(Dictionary<MoneyType, BigInteger> goods, MoneyType type)
+    private void UpdateGoods(MoneyType type) // JSONUtility 사용을 위해 딕셔너리 -> 리스트 변경
     {
-        switch (type)
+        if (type == MoneyType.Gold)
         {
-            case MoneyType.Scrap:
-                break;
-            case MoneyType.Gold:
-                _gold.text = goods[type].ToString("N0");
-                OnGoldChanged?.Invoke(goods[type]);
-                break;
-            case MoneyType.CorePiece:
-                break;
-            case MoneyType.FlintPiece:
-                break;
-            case MoneyType.PinionPiece:
-                break;
-            case MoneyType.ZincPiece:
-                break;
-            default:
-                break;
+            _gold.text = NumberFormatterBigInt.FormatGold(_money[type]);
+            OnGoldChanged?.Invoke(_money[type]);
         }
     }
 
-    //싱글플레이 기준 저장
-    void SaveMoney()
+    #region JSON SAVE DATA 구조
+    //JsonUtility 직렬화를 위해 Dictionary 대신 List 구조 사용
+    [Serializable]
+    public class MoneyData
     {
-        foreach (var type in _money)
+        public string type;     // enum을 string으로 저장
+        public string value;    // BigInteger를 string으로 저장
+    }
+
+    [Serializable]
+    public class ExchangeSaveData
+    {
+        public List<MoneyData> moneyList = new();
+    }
+
+    public void SaveMoney()
+    {
+        ExchangeSaveData data = new ExchangeSaveData();
+
+        foreach (var pair in _money)
         {
-            PlayerPrefs.SetString(type.Key.ToString(), type.Value.ToString());
+            data.moneyList.Add(new MoneyData
+            {
+                type = pair.Key.ToString(),
+                value = pair.Value.ToString()
+            });
         }
 
-        PlayerPrefs.Save();
+        SaveUtility.SaveEncrypted("ExchangeData", data);
     }
 
-
-
-    /*
-    파이어베이스 재화불러오기
-    void LoadMoney()
+    public void LoadMoney()
     {
-      //파이어베이스 사용시 서버데이터 불러오고
-      //Savedata data = SaveManager.Instance.Load();
+        var data = SaveUtility.LoadEncrypted<ExchangeSaveData>("ExchangeData");
 
-      _money[MoneyType.Gold] = data.Gold;
-      _money[MoneyType.Scrap] = data.Scrap;
-      _money[MoneyType.GremlinPiece] = data.GremlinPiece;
+        if (data == null) return;
+
+        _money.Clear();
+
+        //string → enum, string → BigInteger 변환
+        foreach (var item in data.moneyList)
+        {
+            MoneyType type = (MoneyType)Enum.Parse(typeof(MoneyType), item.type);
+            BigInteger value = BigInteger.Parse(item.value);
+
+            _money[type] = value;
+        }
+
+        UpdateGoods(MoneyType.Gold);
     }
-    */
 
-    /// <summary>
-    /// Dictionary에 해당 MoneyType Key가 있는지 체크하고, 없을 경우 Dictionary에 해당 Key를 추가합니다.
-    /// </summary>
-    /// <param name="type">Dictionary 내에서 확인해야 하는 재화 종류</param>
     public void CheckDictionary(MoneyType type)
     {
         if (!_money.ContainsKey(type))
-        {
             _money.Add(type, BigInteger.Zero);
-        }
     }
+    #endregion
 
     public MoneyType GetShardTargetGremlin(int id)
     {
@@ -174,6 +188,7 @@ public class ExchangeManager : MonoBehaviour
     /// <param name="amount">획득 수량</param>
     public void AddGremlinPiece(int id, BigInteger amount)
     {
+        currentGremlinShard = id;
         _money[GetShardTargetGremlin(id)] += amount;
         onShardValueChanged?.Invoke();
     }
@@ -202,5 +217,32 @@ public class ExchangeManager : MonoBehaviour
     {
         bool success = UseMoney(GetShardTargetGremlin(id), amount);
         return success;
+    }
+
+    public ExchangeData GetSaveData()
+    {
+        var data = new ExchangeData();
+
+        data.gold = GetMoneyAmount(MoneyType.Gold).ToString();
+
+        //Debug.Log($"데이타 {data}");
+        //Debug.Log($"골드 {data.gold}");
+        return data;
+    }
+
+    public void LoadFromSaveData(ExchangeData data)
+    {
+        Debug.Log($"불러온골드 {data.gold}");
+        if (!string.IsNullOrEmpty(data.gold) && BigInteger.TryParse(data.gold, out BigInteger parsed))
+        {
+            CheckDictionary(MoneyType.Gold);
+            _money[MoneyType.Gold] = parsed;
+        }
+        else
+        {
+            _money[MoneyType.Gold] = BigInteger.Zero;
+        }
+
+        UpdateGoods(MoneyType.Gold);
     }
 }

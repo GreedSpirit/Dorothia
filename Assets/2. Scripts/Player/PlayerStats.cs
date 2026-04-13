@@ -1,5 +1,6 @@
-using GameUtility;
+﻿using GameUtility;
 using System;
+using System.Collections;
 using System.Numerics;
 using UnityEngine;
 
@@ -18,10 +19,11 @@ public class PlayerStats : MonoBehaviour, IResettable
     // ══════════════════════════════════════════════════════
     #region Fields & Properties
 
-    readonly int _playerstats_id = 70001;
+    private readonly int _playerstats_id = 70001;
+    private PlayerCtrl _player;
+    private OverDriveMode _odm;
 
-    PlayerCtrl _player;
-
+    public bool IsLoaded { get; private set; } = false;
     public int CurrentLevel { get; private set; }
     public int CurrentPromotion { get; private set; } = 1;
     public float CurrentHp { get; private set; }
@@ -56,6 +58,9 @@ public class PlayerStats : MonoBehaviour, IResettable
     /// <summary>종합 전투력 </summary>
     public event Action<string> OnTotalPowerChanged;
 
+    /// <summary>데이터 로드</summary>
+    public event Action OnLoaded;
+
     #endregion
 
     // ══════════════════════════════════════════════════════
@@ -64,6 +69,7 @@ public class PlayerStats : MonoBehaviour, IResettable
     private void Start()
     {
         _player = GetComponent<PlayerCtrl>();
+        _odm = GetComponent<OverDriveMode>();
 
         var data = DataManager.Instance.GetData<Character_StatsData>(_playerstats_id);
         StatManager.Instance.InitStats(data);
@@ -79,7 +85,6 @@ public class PlayerStats : MonoBehaviour, IResettable
         StatManager.Instance.OnStatsRefreshed += OnStatsRefreshed;
 
         OnStatsRefreshed();
-
     }
 
     private void OnDisable()
@@ -182,16 +187,20 @@ public class PlayerStats : MonoBehaviour, IResettable
     {
         if (_player.IsInvincible) return;
 
-        // 방어력 적용
-        float def = 100 / (float)StatManager.Instance.GetStat(Status.DEF);
-        amount = amount * def;
+        float statDef = (float)StatManager.Instance.GetStat(Status.DEF);
 
-        CurrentHp = Mathf.Max(0f, CurrentHp - amount);
+        float denominator = 100f + statDef;
+        if (denominator <= 0) denominator = 1f; 
+
+        float defMultiplier = 100f / denominator;
+
+        float finalDamage = amount * defMultiplier;
+        CurrentHp = Mathf.Max(0f, CurrentHp - finalDamage);
+
         OnHpChanged?.Invoke(CurrentHp, MaxHp);
 
         if (CurrentHp <= 0f)
         {
-            //Debug.Log("플레이어 사망");
             OnDead?.Invoke();
         }
     }
@@ -229,7 +238,7 @@ public class PlayerStats : MonoBehaviour, IResettable
         double survivalScore = hp * (100.0 + def) / 100.0;
 
         // 최종 전투력
-        double raw = Math.Pow(attackScore * survivalScore, 1.0 / 3.0);
+        double raw = Math.Pow(attackScore * survivalScore, 1.0 / 2.0);
         long power = (long)raw; 
 
         TotalPower = power.ToString("N0");
@@ -237,4 +246,61 @@ public class PlayerStats : MonoBehaviour, IResettable
     }
 
     #endregion
+
+    #region Save / Load
+
+    public PlayerSaveData GetSaveData()
+    {
+        return new PlayerSaveData
+        {
+            level = CurrentLevel,
+            currentExpStr = CurrentExp.ToString(),
+            promotion = CurrentPromotion,
+            statUpgrades = StatManager.Instance.GetStatUpgrades(),
+            overdriveGauge = _odm != null ? _odm.Gauge : 0f,
+            isAutoMode = _player != null && _player.IsAutoMode
+        };
+    }
+
+    public void LoadFromSaveData(PlayerSaveData data)
+    {
+        if (data == null) return;
+
+        // 레벨 / 경험치
+        CurrentLevel = Mathf.Max(1, data.level);
+        CurrentExp = System.Numerics.BigInteger.TryParse(data.currentExpStr, out var parsed)
+                       ? parsed : System.Numerics.BigInteger.Zero;
+
+        // 경험치 임계값 재계산
+        StatManager.Instance.RefreshExp(CurrentLevel, 1.10f);
+
+        // 승급
+        CurrentPromotion = Mathf.Clamp(data.promotion, 1, 8);
+
+        // 강화 단계 적용 후 전체 스탯 재계산
+        StatManager.Instance.ApplyStatUpgrades(data.statUpgrades);
+        RefreshStats();
+        CurrentHp = MaxHp;
+
+        // UI 이벤트 발행 (외형 포함)
+        OnLevelChanged?.Invoke(CurrentLevel);
+        OnExpChanged?.Invoke(CurrentExp, LevelExpN);
+        // PlayerVisual.SetGrade 자동 호출
+        OnPromotionChanged?.Invoke(CurrentPromotion);   
+        OnHpChanged?.Invoke(CurrentHp, MaxHp);
+
+        // 오버드라이브 게이지
+        if (_odm != null)
+            _odm.Gauge = data.overdriveGauge;
+
+        // 자동전투 상태
+        if (_player != null && data.isAutoMode != _player.IsAutoMode)
+            _player.SetAutoMode(data.isAutoMode);
+
+        IsLoaded = true;
+        OnLoaded?.Invoke();
+    }
+
+    #endregion
+
 }

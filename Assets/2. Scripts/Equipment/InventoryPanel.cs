@@ -36,7 +36,6 @@ public class InventoryPanel : BaseUI
     [Header("장비 상태별 활성화할 버튼 모음")]
     [SerializeField] Button _enchantButton;                  // 장비 강화 버튼입니다.
     [SerializeField] Button _ringEnchantButton;                  // 장비 강화 버튼입니다.
-    [SerializeField] Button _salvageButton;                  // 장비 분해 시도를 위한 인벤토리 내 버튼입니다.
     [SerializeField] Button _sellButton;                     // 장비 판매 시도를 위한 인벤토리 내 버튼입니다.
 
     [Header("장비 정보 출력용")]
@@ -214,15 +213,20 @@ public class InventoryPanel : BaseUI
     {
         _enchantButton.interactable = true;
         _ringEnchantButton.interactable = true;
-        _sellButton.interactable = true;
-        _salvageButton.interactable = true;
+        if(_selectedEquipment.isEquipped == false && _selectedEquipment.isLocked == false)
+        {
+            _sellButton.interactable = true;
+        }
+        else
+        {
+            _sellButton.interactable = false;
+        }
     }
     public void DisableInteractable()
     {
         _enchantButton.interactable = false;
         _ringEnchantButton.interactable = false;
         _sellButton.interactable = false;
-        _salvageButton.interactable = false;
     }
 
     /// <summary>
@@ -382,6 +386,7 @@ public class InventoryPanel : BaseUI
     {
         if (targetSlot != null)
         {
+            if (equip == null) return;
             //해당 슬롯에 아무것도 장착되지 않은 상태에서, 이미 다른 슬롯에 장착된 장비를 착용하려 할 경우 반환합니다.
             if(targetSlot.equipped == null && equip.isEquipped == true && targetSlot.slotIndex != equip.EquippedSlotIndex)
             {
@@ -447,7 +452,7 @@ public class InventoryPanel : BaseUI
             {
                 targetSlot.iconImage.color = RarityColor.GetColor((Rarity)equip.equipment_Rarity);
                 equip.isFusing = true;
-                Close();
+                targetSlot.OnSlotEquippedChanged?.Invoke();
             }
         }
     }
@@ -460,10 +465,29 @@ public class InventoryPanel : BaseUI
         //타겟 슬롯이 null이 아니라면
         if (targetSlot != null)
         {
+            //해당 슬롯에 이미 장착된 장비가 있을 때
+            if(targetSlot.equipped != null)
+            {
+                //해당 장비의 합성 중 여부를 거짓으로 변경합니다.
+                targetSlot.equipped.isFusing = false;
+                Refresh();
+            }
             //슬롯에 장착된 장비를 null로 바꾸고
             targetSlot.equipped = null;
-            //스프라이트를 제거합니다.
-            targetSlot.iconImage.sprite = null;
+            //슬롯이 장비 장착용 슬롯인 경우
+            if(targetSlot.slotType == SlotType.EquipSlot)
+            {
+                //스프라이트를 제거합니다.
+                targetSlot.iconImage.sprite = null;
+            }
+            //그 외에, 슬롯이 장비 합성용 슬롯인 경우
+            else if(targetSlot.slotType == SlotType.FuseSlot)
+            {
+                //슬롯을 초기화합니다.
+                targetSlot.ClearSlot();
+                //슬롯이 들고 있던 장비 변경 시의 이벤트를 실행합니다.
+                targetSlot.OnSlotEquippedChanged?.Invoke();
+            }
         }
     }
 

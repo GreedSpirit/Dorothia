@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -92,16 +92,35 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
 
     public StageSaveData GetSaveData()
     {
-        var data = new StageSaveData();
+        if (_stage == null)
+        {
+            Debug.LogWarning("Stage 아직 초기화 안됨");
 
-        data.stageId = CurrentStageId;
-        data.currentSection = CurrentSection;
-        data.maxClearSection = MaxClearedSection;
-        return data;
+            return new StageSaveData // 안전하게 초기값 설정
+            {
+                stageId = 110001,
+                currentSection = 130001,
+                maxClearSection = 130001
+            };
+        }
+
+        return new StageSaveData
+        {
+            stageId = CurrentStageId,
+            currentSection = CurrentSection,
+            maxClearSection = MaxClearedSection
+        };
     }
 
     public void LoadFromSaveData(StageSaveData data)
     {
+        if (data == null)
+        {
+            Debug.LogWarning("StageSaveData 없음 → 기본 시작");
+            StartStage(110001);
+            return;
+        }
+
         MaxClearedSection = data.maxClearSection;
 
         //Stage를 다시 구성
@@ -152,11 +171,6 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
             _player.OnDead -= HandlePlayerDead;
 
         _eventsRegistered = false;
-    }
-
-    private void Start()
-    {
-        StartStage(_startStageId);
     }
 
     private void Update()
@@ -332,9 +346,19 @@ public class StageManager : MonoBehaviour, ISaveable<StageSaveData>
             Debug.LogError($"[StageManager] 다음 SectionData 없음 nextId={nextSectionId}");
             return false;
         }
+        bool isStageChanging = false;
+        if(next.Stage_Id != _sectionData.Stage_Id)
+        {
+            isStageChanging = true;
+        }
 
         _sectionData = next;
 
+        if(isStageChanging == true)
+        {
+            _stage = DataManager.Instance.GetData<StageData>(nextSectionId.ToString());
+            MapManager.Instance.LoadStageMap(_sectionData.Stage_Id);
+        }
         //새 구간 로드 후에도 현재 섹션이 범위에 들어오는지 검증
         bool valid = (_currentSection >= _sectionData.Section_Start &&
                       _currentSection <= _sectionData.Section_End);

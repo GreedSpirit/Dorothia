@@ -7,8 +7,8 @@ public static class EquipStatusStaticRule
         { Rarity.Normal, 0 },
         { Rarity.Uncommon, 0 },
         { Rarity.Rare, 0 },
-        { Rarity.Legendary, 1 },
-        { Rarity.Mythtic, 2 }
+        { Rarity.Legendary, 0 },
+        { Rarity.Mythtic, 1 }
     };
 
     public static readonly Dictionary<Equip_Type, EquipPartStatusRule> _rules = new Dictionary<Equip_Type, EquipPartStatusRule>
@@ -21,12 +21,11 @@ public static class EquipStatusStaticRule
                 MainStatus = new List<Status>
                 {
                     Status.ATK,
-                    Status.MagicATK
+                    Status.AttackSpeed
                 },
                 //무기 보조 스테이터스 : 공격속도, 크리티컬확률
                 SubStatus = new List<Status>
                 {
-                    Status.AttackSpeed,
                     Status.CriticalChance
                 }
             }
@@ -39,12 +38,11 @@ public static class EquipStatusStaticRule
                 MainStatus = new List<Status>
                 {
                     Status.DEF,
-                    Status.MagicDEF
+                    Status.HP
                 },
                 //상의 보조 스테이터스 : 체력, 체력재생력
                 SubStatus = new List<Status>
                 {
-                    Status.HP,
                     Status.HPRegen
                 },
             }
@@ -62,7 +60,6 @@ public static class EquipStatusStaticRule
                 //하의 보조 스테이터스 : 마법저항력, 체력재생력
                 SubStatus = new List<Status>
                 {
-                    Status.MagicDEF,
                     Status.HPRegen
                 },
             }
@@ -75,13 +72,12 @@ public static class EquipStatusStaticRule
                 MainStatus = new List<Status>
                 {
                     Status.AttackSpeed,
-                    Status.MagicDEF
+                    Status.DEF
                 },
                 //장갑 보조 스테이터스 : 공격력, 마법공격력(미적용)
                 SubStatus = new List<Status>
                 {
-                    Status.ATK,
-                    Status.MagicATK
+                    Status.ATK
                 },
             }
         },
@@ -98,8 +94,7 @@ public static class EquipStatusStaticRule
                 //신발 보조 스테이터스 : 방어력, 체력
                 SubStatus = new List<Status>
                 {
-                    Status.HP,
-                    Status.DEF
+                    Status.HP
                 },
             }
         },
@@ -116,7 +111,6 @@ public static class EquipStatusStaticRule
                 //목걸이 보조 스테이터스 : 마법저항력, 체력재생력
                 SubStatus = new List<Status>
                 {
-                    Status.MagicDEF,
                     Status.HPRegen
                 },
             }
@@ -134,8 +128,7 @@ public static class EquipStatusStaticRule
                 //반지 보조 스테이터스 : 공격력, 마법공격력(미적용)
                 SubStatus = new List<Status>
                 {
-                    Status.ATK,
-                    Status.MagicATK
+                    Status.ATK
                 },
             }
         }

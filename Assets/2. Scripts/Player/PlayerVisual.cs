@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using System;
+using UnityEngine;
 
 
 
@@ -102,6 +103,11 @@ public class PlayerVisual : MonoBehaviour
         int i = index - 1;
         var g = _currentEffectGroup;
 
+        string attackSound = "attack" + index;
+        if(Enum.TryParse(attackSound, out SFXType sfx)){
+            SoundManager.Instance.PlaySFX(sfx);
+        }
+
         if (_odm.IsModeOn)
         {
             g.attackEffect3.transform.localPosition = _originAtkPos[i];
@@ -123,16 +129,13 @@ public class PlayerVisual : MonoBehaviour
         {
             case 1:
                 g.attackEffect1.Play(); g.hitEffect1.Play();
-                SoundManager.Instance.PlaySFX(SFXType.attack1);
                 break;
             case 2:
                 g.attackEffect2.Play(); g.hitEffect2.Play();
-                SoundManager.Instance.PlaySFX(SFXType.attack2);
                 break;
             case 3:
                 g.attackEffect3.Play();
                 g.hitEffect1.Play(); g.hitEffect2.Play(); g.hitEffect3.Play();
-                SoundManager.Instance.PlaySFX(SFXType.attack3);
                 break;
         }
     }

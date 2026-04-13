@@ -144,5 +144,11 @@ public class TimeManager : MonoBehaviour
 
         return (now - last).TotalSeconds;
     }
+
+    public double GetOfflineSecondsClamped(double maxSeconds)
+    {
+        double seconds = GetOfflineSeconds();
+        return Math.Clamp(seconds, 0, maxSeconds);
+    }
     #endregion
 }

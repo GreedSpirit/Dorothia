@@ -25,6 +25,18 @@ public class PlayerAttackState : IPlayerState<PlayerCtrl>
             return;
         }
 
+        if (player.IsAutoMode && !player.Anima.IsInTransition(0))
+        {
+            BaseSkill readySkill = SkillManager.Instance.PeekReadySkill();
+            if (readySkill != null)
+            {
+                player.ExecuteFullReset();                      // 콤보 즉시 정리
+                SkillManager.Instance.ConsumeReadySkill();
+                player.PerformSkill(readySkill);                // 스킬 상태로 전환
+                return;
+            }
+        }
+
         // 공격 중 타겟 바라보기 유지
         if (player.CurrentTarget != null)
         {

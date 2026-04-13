@@ -12,7 +12,7 @@ public class Stage_SectionData : ICSVLoad, ITableKey
     public int Stage_Id { get; set; }
 
     int ITableKey.Id => Stage_Section_Id;
-    string ITableKey.Key => Stage_Section_Id.ToString();
+    string ITableKey.Key => Section_Start.ToString();
 
     public void LoadFromCsv(string[] values)
     {

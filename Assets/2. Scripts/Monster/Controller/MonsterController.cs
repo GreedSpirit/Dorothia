@@ -197,10 +197,13 @@ public class MonsterController : MonoBehaviour, IMonster
         _isAttacking = false; // 공격
         _attackTimer = 0f;
 
-        if (_agent != null && !_agent.enabled)
-            _agent.enabled = true;
+        if (_stats.Archetype != Monster_Kind.Passive)
+        {
+            if (_agent != null && !_agent.enabled)
+                _agent.enabled = true;
 
-        ApplyNavMeshSettings();
+            ApplyNavMeshSettings();
+        }
 
         //히스테리시스
         _attackEnterRange = _stats.AttackRange * 0.9f;
@@ -231,10 +234,7 @@ public class MonsterController : MonoBehaviour, IMonster
     {
         if (_agent != null)
         {
-            _agent.speed = 0f;
-            _agent.isStopped = true;
-            _agent.updateRotation = false;
-            _agent.updatePosition = false;
+            _agent.enabled = false;
 
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
         }
@@ -612,8 +612,11 @@ public class MonsterController : MonoBehaviour, IMonster
             return;
         }
 
-        _agent.isStopped = true;
-        _agent.ResetPath();
+        if (gameObject.activeInHierarchy)
+        {
+            _agent.isStopped = true;
+            _agent.ResetPath();
+        }
 
         int deathIndex = 0;
 
@@ -717,6 +720,8 @@ public class MonsterController : MonoBehaviour, IMonster
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(amount * damageRate)); // 실제 피해량
 
         DamageTextManager.Instance.ShowDamage(finalDamage, transform.position, isCritical);
+
+        SoundManager.Instance?.PlayHitSFX();
 
         _hp -= finalDamage;
 

@@ -3,33 +3,6 @@ using UnityEngine;
 
 public static class ItemCalculator
 {
-    public static int SalvageScrapCalculate(Equipment equip)
-    {
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
-        return ((equip.equip_level + breakData.Equip_Break_Gold_Scrap) / 10);
-    }
-    public static int SalvageGoldCalculate(Equipment equip)
-    {
-        int gold = 0;
-        var breakData = DataManager.Instance.GetData<Equip_BreakData>(equip.equipment_Rarity);
-        //강화 수치가 0이 아닐 경우, 테이블로부터 강화 수치 기준 데이터를 받아와 골드에 공식을 적용합니다.
-        if (equip.equip_Upgrade > 0)
-        {
-            var upgradeData = DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade);
-            gold = Mathf.RoundToInt
-                (
-                    Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade).Equip_Upgrade_Value)) *
-                    breakData.Equip_Break_Gold / DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Success_Prob * 0.2f
-                );
-        }
-        //강화 수치가 0인 경우, 골드는 기본값으로 적용하고 스크랩만 계산하여 지급합니다.
-        if (equip.equip_Upgrade == 0)
-        {
-            gold = equip.equip_price;
-        }
-        return gold;
-    }
-
     public static int SellCalculate(Equipment equip)
     {
         //해당 장비의 강화 단계를 기준으로 데이터를 먼저 불러옵니다.
@@ -152,20 +125,21 @@ public static class ItemCalculator
     public static float RarityMultiplyerCalculation(int rarity)
     {
         float RarityMultiply = 1f;
-        switch(rarity)
+        switch((Rarity)rarity)
         {
-            case 40002:
+            case Rarity.Uncommon:
                 RarityMultiply = 1.1f;
                 break;
-            case 40003:
+            case Rarity.Rare:
                 RarityMultiply = 1.2f;
                 break;
-            case 40004:
+            case Rarity.Legendary:
                 RarityMultiply = 1.4f;
                 break;
-            case 40005:
+            case Rarity.Mythtic:
                 RarityMultiply = 1.7f;
                 break;
+            case Rarity.Normal:
             default:
                 RarityMultiply = 1;
                 break;
@@ -183,7 +157,6 @@ public static class ItemCalculator
         int score = 0;
         score += (int)(GetStatus(equip, Status.ATK) * 10);
         score += (int)(GetStatus(equip, Status.DEF) * 2);
-        score += (int)(GetStatus(equip, Status.MagicDEF) * 2);
         score += (int)(GetStatus(equip, Status.HP) * 3);
         score += (int)(GetStatus(equip, Status.HPRegen) * 1);
         score += (int)(GetStatus(equip, Status.AttackSpeed) * 8);
@@ -203,7 +176,7 @@ public static class ItemCalculator
 
         //레벨에 따른 상승량 값이 존재함에도 굳이 레벨*비율을 사용하는 이유는 혹시 모를 예외 상황에 대비하기 위함.
         return equip.equip_status.TryGetValue(equipStatus, out float value) ?
-            value * multiply * RarityMultiplyerCalculation(equip.equipment_Rarity)+ DataManager.Instance.GetData<Equip_LevelData>(equip.equip_level).Equip_Level_Value
+            value * multiply * RarityMultiplyerCalculation(equip.equipment_Rarity) * DataManager.Instance.GetData<Equip_LevelData>(equip.equip_level).Equip_Level_Value
             : 0f;
     }
 
@@ -274,10 +247,6 @@ public static class ItemCalculator
                 AddEquipStatus(equip, status, data.Equip_Atk);
                 break;
 
-            case Status.MagicATK:
-                AddEquipStatus(equip, status, data.Equip_Atk_M);
-                break;
-
             case Status.AttackSpeed:
                 AddEquipStatus(equip, status, data.Equip_Dps);
                 break;
@@ -292,10 +261,6 @@ public static class ItemCalculator
 
             case Status.DEF:
                 AddEquipStatus(equip, status, data.Equip_Def);
-                break;
-
-            case Status.MagicDEF:
-                AddEquipStatus(equip, status, data.Equip_Def_M);
                 break;
 
             case Status.HPRegen:

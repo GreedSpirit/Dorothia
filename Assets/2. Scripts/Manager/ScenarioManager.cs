@@ -15,7 +15,8 @@ public class ScenarioManager : MonoBehaviour
     //대사내용
     [SerializeField] private TextMeshProUGUI _dialogueText;
     //배경
-    [SerializeField] private CanvasGroup _backGroundImage;
+    [SerializeField] private CanvasGroup _backGroundCanvasGroup;
+    [SerializeField] private Image _backGroundImage;
     //캐릭터스탠딩이미지
     [SerializeField] private Image _portraitImage;
     //CG
@@ -26,6 +27,7 @@ public class ScenarioManager : MonoBehaviour
     //메모리 해제용 변수
     private string _currentPortraitKey;
     private string _currentCgKey;
+    private string _currentBackgroundKey;
 
     private void OnEnable()
     {
@@ -71,12 +73,14 @@ public class ScenarioManager : MonoBehaviour
         _dialoguePanel.SetActive(true);
         DisplayNextSentence();
         
+        /*
         //페이드인 완료 콜백받으면 대사창활성화
         StartCoroutine(FadeInBackground(() =>
         {
             _dialoguePanel.SetActive(true);
             DisplayNextSentence(); 
         }));
+        */
         
     }
 
@@ -102,6 +106,8 @@ public class ScenarioManager : MonoBehaviour
         UpdatePortrait(currentData.portrait);
 
         UpdateCG(currentData.cg);
+
+        UpdateBackground(currentData.background);
     }
 
     private void EndDialogue()
@@ -110,9 +116,40 @@ public class ScenarioManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
+    private void UpdateBackground(string bgKey)
+    {
+        //같은 배경이면 리턴
+        if (_currentBackgroundKey == bgKey) return;
+
+        // 기존 리소스 해제
+        if (!string.IsNullOrEmpty(_currentBackgroundKey))
+        {
+            AddressableManager.Instance.ReleaseAsset(_currentBackgroundKey);
+            _currentBackgroundKey = null;
+        }
+
+        // 키 없으면 숨김
+        if (string.IsNullOrEmpty(bgKey))
+        {
+            _backGroundImage.gameObject.SetActive(false);
+            return;
+        }
+
+        _currentBackgroundKey = bgKey;
+
+        AddressableManager.Instance.LoadAsset<Sprite>(bgKey, (sprite) =>
+        {
+            _backGroundImage.gameObject.SetActive(true);
+            _backGroundImage.sprite = sprite;
+
+            // 페이드 인 실행
+            StartCoroutine(FadeInBackground(null));
+        });
+    }
+
     private IEnumerator FadeInBackground(Action onComplete)
     {
-        _backGroundImage.alpha = 0f;
+        _backGroundCanvasGroup.alpha = 0f;
         _backGroundImage.gameObject.SetActive(true);
 
         float timer = 0f;
@@ -121,22 +158,22 @@ public class ScenarioManager : MonoBehaviour
         {            
             timer += Time.unscaledDeltaTime;
             //0~1범위에서만
-            _backGroundImage.alpha = Mathf.Clamp01(timer / 1.5f);
+            _backGroundCanvasGroup.alpha = Mathf.Clamp01(timer / 1.5f);
             yield return null;
         }
 
-        _backGroundImage.alpha = 1f;
+        _backGroundCanvasGroup.alpha = 1f;
         onComplete?.Invoke();
     }
 
 
     private void UpdatePortrait(string portraitKey)
     {
-        Debug.LogError(portraitKey);
+        Debug.Log(portraitKey);
         //이미 로드된 이미지가 있다면 메모리에서 해제
         if (!string.IsNullOrEmpty(_currentPortraitKey))
         {
-            AddressableManager.Instance.ReleaseAsset(portraitKey);
+            AddressableManager.Instance.ReleaseAsset(_currentPortraitKey);
             _currentPortraitKey = null;
         }
 
@@ -144,7 +181,7 @@ public class ScenarioManager : MonoBehaviour
         if (string.IsNullOrEmpty(portraitKey))
         {
             _portraitImage.gameObject.SetActive(false);
-            Debug.LogError(portraitKey);
+            Debug.Log(portraitKey);
             return;
         }
 
@@ -165,7 +202,7 @@ public class ScenarioManager : MonoBehaviour
         //이미 로드된 이미지가 있다면 메모리에서 해제
         if (!string.IsNullOrEmpty(_currentCgKey))
         {
-            AddressableManager.Instance.ReleaseAsset(cgKey);
+            AddressableManager.Instance.ReleaseAsset(_currentCgKey);
             _currentCgKey = null;
         }
 

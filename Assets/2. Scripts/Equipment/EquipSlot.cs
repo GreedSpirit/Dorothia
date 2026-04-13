@@ -24,6 +24,8 @@ public class EquipSlot : MonoBehaviour
     [SerializeField] EquipmentUI _equipmentUI;      // 장착 장비 UI입니다. 해당 슬롯의 장착 부위에 맞는 인벤토리 칸을 열기 위해 필요합니다.
     [SerializeField] InventoryPanel _inventoryPanel;
 
+    public Action OnSlotEquippedChanged;
+
     private void Awake()
     {
         if(slotType == SlotType.EquipSlot)

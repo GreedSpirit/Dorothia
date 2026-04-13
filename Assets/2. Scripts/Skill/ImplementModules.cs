@@ -271,6 +271,8 @@ public class DashModule : BaseSkillModule
         if (NavMesh.SamplePosition(destination, out var hit, 3f, NavMesh.AllAreas))
             destination = hit.position;
 
+        BaseSkill targetSkill = player.SkillState.TargetSkill;
+
         // 돌진 이펙트를 플레이어와 같이 이동할건지
         PlayMyEffect(player.gameObject, player.transform);
         // 돌진 이펙트를 플레이어와 따로 생성할건지
@@ -289,8 +291,7 @@ public class DashModule : BaseSkillModule
         // 돌진 완료 후 경로 캡슐로 처리
         if (hitCount > 0)
         {
-            float dmg = player.CalculateSkillDamage(player.SkillState.TargetSkill);
-
+            float dmg = player.CalculateSkillDamage(targetSkill);
             Collider[] cols = Physics.OverlapCapsule(
                 startPos, destination, radius,
                 LayerMask.GetMask("Monster"));
@@ -301,8 +302,6 @@ public class DashModule : BaseSkillModule
 
             if (HitTargets.Count > 0)
                 player.StartCoroutine(player.MultiHitRoutine(HitTargets, hitCount, dmg));
-
-            player.DisableAllAttackColliders();
         }
     }
 }

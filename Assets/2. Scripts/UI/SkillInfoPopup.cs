@@ -89,7 +89,7 @@ public class SkillInfoPopup : BaseUI
         btnText.text = "합성";
 
         reinforceBtn.interactable = !key.isScroll;
-        currentGold.text = $"{0:N0}G";
+        currentGold.text = GameUtility.NumberFormatterBigInt.FormatGold(0);
 
         // 희귀도 컬러 적용
         Color rarityColor = RarityColor.GetColor(key.rarity);
@@ -140,7 +140,8 @@ public class SkillInfoPopup : BaseUI
     private void RefreshReinforceUI()
     {
         BigInteger haveGold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
-        currentGold.text = $"{haveGold:N0}G";
+
+        currentGold.text = GameUtility.NumberFormatterBigInt.FormatGold(haveGold);
 
         var sm = SkillManager.Instance;
         if (!sm.UnlockedSkills.TryGetValue(key, out BaseSkill skill)) return;
@@ -149,7 +150,8 @@ public class SkillInfoPopup : BaseUI
 
 
         int nextCost = sm.GetReinforceCost(key);
-        needsGold.text = $"{nextCost:N0}G";
+        
+        needsGold.text = GameUtility.NumberFormatterBigInt.FormatGold((BigInteger)nextCost);
 
         bool isMaxLevel = skill.Level >= SkillManager.MAX_LEVEL;
         bool canAfford = haveGold >= nextCost;

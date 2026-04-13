@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,13 +26,25 @@ public class OptionPopup : BaseUI
         languageDropdown.onValueChanged.AddListener(LanaguageSettings);
 
         mainVolumeSlider.onValueChanged.RemoveAllListeners();
-        mainVolumeSlider.onValueChanged.AddListener(value => SoundManager.Instance.SetMainVolume(value));
+        mainVolumeSlider.onValueChanged.AddListener(value =>
+        {
+            SoundManager.Instance.SetMainVolume(value);
+            SettingManager.Instance.SetMain(value);
+        });
 
         bgmVolumeSlider.onValueChanged.RemoveAllListeners();
-        bgmVolumeSlider.onValueChanged.AddListener(value => SoundManager.Instance.SetBGMVolume(value));
+        bgmVolumeSlider.onValueChanged.AddListener(value =>
+        {
+            SoundManager.Instance.SetBGMVolume(value);
+            SettingManager.Instance.SetBGM(value);
+        });
 
         sfxVolumeSlider.onValueChanged.RemoveAllListeners();
-        sfxVolumeSlider.onValueChanged.AddListener(value => SoundManager.Instance.SetSFXVolume(value));
+        sfxVolumeSlider.onValueChanged.AddListener(value =>
+        {
+            SoundManager.Instance.SetSFXVolume(value);
+            SettingManager.Instance.SetSFX(value);
+        });
     }
 
     private void SaveOption()
@@ -40,6 +52,7 @@ public class OptionPopup : BaseUI
         //옵션저장하기 구현 
         //언어만 저장해주면 될 듯
         //사운드는 실시간
+        SettingManager.Instance.Save();
         UIManager.Instance.CloseTopPanel();
     }
 
@@ -58,6 +71,9 @@ public class OptionPopup : BaseUI
 
     protected override void OnOpen()
     {
+        mainVolumeSlider.SetValueWithoutNotify(SettingManager.Instance.MainVolume);
+        bgmVolumeSlider.SetValueWithoutNotify(SettingManager.Instance.BGMVolume);
+        sfxVolumeSlider.SetValueWithoutNotify(SettingManager.Instance.SFXVolume);
     }
 
     protected override void OnClose()

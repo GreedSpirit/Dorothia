@@ -16,6 +16,8 @@ public class FusePanel : BaseUI
     [SerializeField] InventoryPanel _inventoryPanel;    // 인벤토리를 열고 닫기 위한 패널입니다.
     [SerializeField] Toggle _useWeightToggle;           // 가중치를 사용할지 결정하기 위한 토글입니다.
     [SerializeField] TextMeshProUGUI _toggleText;
+    [SerializeField] TextMeshProUGUI _fuseWeightText;
+    [SerializeField] TextMeshProUGUI _rarityBonusText;
 
     private bool _isUsingWeight;
 
@@ -24,6 +26,7 @@ public class FusePanel : BaseUI
         //합성 버튼에 합성 기능을 추가합니다.
         fuseButton.onClick.AddListener(OnClickFuse);
         mainSlot.OnSlotClicked +=_inventoryPanel.SetTargetSlot;
+        mainSlot.OnSlotEquippedChanged += Refresh;
         mainSlot.gameObject.GetComponent<Button>().onClick.AddListener(() =>
         {
             mainSlot.OnClickSlot();
@@ -39,6 +42,7 @@ public class FusePanel : BaseUI
             subSlot2.OnClickSlot();
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
+        _fuseWeightText.enabled = false;
     }
 
     private void Start()
@@ -50,7 +54,20 @@ public class FusePanel : BaseUI
     {
         _isUsingWeight = value;
         _toggleText.text = value == true ? "On" : "Off";
+        _fuseWeightText.enabled = value;
+        if(value == true)
+        {
+            _fuseWeightText.text = $"(+{(mainSlot.equipped != null? mainSlot.equipped.equip_Fuse_Weight * 100: 0):F0}%)";
+        }
     }
+
+    private void Refresh()
+    {
+        _rarityBonusText.text = mainSlot.equipped != null?
+            $"메인 장비 등급 보너스 : {DataManager.Instance.GetData<Equip_RankData>(mainSlot.equipped.equipment_Rarity).Equip_Value * 100}%" : "메인 장비를 등록해 주세요.";
+        _fuseWeightText.text = $"(+{(mainSlot.equipped != null? mainSlot.equipped.equip_Fuse_Weight * 100: 0):F0}%)";
+    }
+
     private void OnClickFuse()
     {
         //합성 슬롯에 3개의 장비가 전부 채워지지 않으면 합성을 진행하지 않습니다.
@@ -162,6 +179,8 @@ public class FusePanel : BaseUI
             //실패한 등급 기준 가중치를 획득합니다.
             mainEquipment.equip_Fuse_Weight += DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity + 1).Equip_Rank_Failure * 100;
         }
+        
+        _rarityBonusText.text = $"메인 장비 등급 보너스 : {DataManager.Instance.GetData<Equip_RankData>(mainEquipment.equipment_Rarity).Equip_Value * 100}%";
 
         //재료로 넣은 장비 두 개를 슬롯에서 삭제합니다.
         subSlot1.ClearSlot();
@@ -173,6 +192,9 @@ public class FusePanel : BaseUI
 
         //저장!!
         SaveManager.Instance.OnSave?.Invoke();
+
+        //가중치 갱신 ( 합성의 가중치는 합성 이외로 증가할 방법이 없음 )
+        _fuseWeightText.text = $"(+{(mainEquipment.equip_Fuse_Weight * 100):F0}%)";
 
         //메인 슬롯에 합성 성공 여부를 확인할 수 있게 색상을 변화시킵니다.
         mainSlot.UpdatePartUI();
@@ -215,11 +237,9 @@ public class FusePanel : BaseUI
         return successRate;
     }
 
-
-
     protected override void OnOpen()
     {
-        
+        _rarityBonusText.text = $"메인 장비를 등록해 주십시오";
     }
 
     protected override void OnClose()

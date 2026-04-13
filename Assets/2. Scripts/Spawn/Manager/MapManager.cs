@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -8,7 +8,7 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager Instance { get; private set; }
 
-    private bool _eventsRegistered;
+    private bool _eventsRegistered = false;
 
     [SerializeField] private Transform _mapRoot;
 
@@ -115,6 +115,7 @@ public class MapManager : MonoBehaviour
     /// <param name="stageId"></param>
     private void HandleStageChanged(int stageId)
     {
+        Debug.Log("스테이지 변경 실행");
         LoadStageMap(stageId);
     }
 
@@ -154,16 +155,24 @@ public class MapManager : MonoBehaviour
         if (_currentDungeonId == dungeonId && _currentMapInstance != null)
             return;
 
-        if (!_dungeonMapTable.TryGetValue(dungeonId, out GameObject prefab))
+        var entry = _dungeonMaps.FirstOrDefault(x => x.DungeonId == dungeonId);
+
+        if (entry == null || entry.MapPrefab == null)
         {
             Debug.LogError($"[MapManager] Dungeon Map prefab 없음 dungeonId={dungeonId}");
             return;
         }
 
-        LoadMapCommon(prefab, isDungeon: true);
+        LoadMapCommon(entry.MapPrefab, isDungeon: true);
 
         _currentDungeonId = dungeonId;
         _currentStageId = -1;
+
+        // ★ 여기 추가
+        if (entry.BGM != null)
+        {
+            SoundManager.Instance.PlayBGM(entry.BGM);
+        }
 
         Debug.Log($"[MapManager] Dungeon 맵 로드 : {dungeonId}");
     }

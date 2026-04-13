@@ -1,5 +1,6 @@
 using System.Collections;
 using Unity.Hierarchy;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class OverdriveOrb : MonoBehaviour
@@ -10,6 +11,9 @@ public class OverdriveOrb : MonoBehaviour
     private OverDriveMode overDriveMode;
     private float duration = 1f;
     private AnimationCurve moveCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+    private const float ORB_VALUE = 10f;
+
     private void OnDisable()
     {
         StopAllCoroutines();
@@ -39,12 +43,9 @@ public class OverdriveOrb : MonoBehaviour
     {
         StopAllCoroutines();
 
-        //todo : 1. 스테이지매니저를 싱글톤으로만든다
-        //todo : 2. 셋업에서 스테이지매니저를 할당해준다
-        //todo : 3. Find로 가져온다(비추천);;
         if (overDriveMode != null)
         {
-            overDriveMode.Gauge += 30f;
+            overDriveMode.Gauge += ORB_VALUE;
         }
 
         if (_owner != null)

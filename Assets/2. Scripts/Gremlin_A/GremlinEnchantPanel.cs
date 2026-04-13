@@ -22,10 +22,17 @@ public class GremlinEnchantPanel : BaseUI
     float costGold;         // 소모 골드량
 
 
-    private void Awake()
+    private void Start()
     {
+        ExchangeManager.Instance.OnGoldChanged += OnGoldChanged;
         //패널이 열리고 나면 즉시 닫기
         Close();
+    }
+
+    void OnGoldChanged(BigInteger currentGold)
+    {
+        if (ExchangeManager.Instance != null)
+            _currentGold.text = $"{GameUtility.NumberFormatterBigInt.FormatGold(currentGold, (BigInteger)costGold)}";
     }
 
     public async void Init(Gremlin gremlin)
@@ -67,9 +74,12 @@ public class GremlinEnchantPanel : BaseUI
 
         //소모 골드 먼저 확인
         costGold = upgradeData.Gremlin_Upgrade_Cost * (1 + upgradeData.Up_Cost_Value * _targetGremlin._currentLevel);
-        _costGold.text = $"{costGold}G";
-        _currentGold.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) > (BigInteger)costGold?$"{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}G":
-            $"<color=red>{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}G</color>";
+
+        _costGold.text = GameUtility.NumberFormatterBigInt.FormatGold((BigInteger)costGold);
+
+        BigInteger gold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
+
+        _currentGold.text = GameUtility.NumberFormatterBigInt.FormatGold(gold, (BigInteger)costGold);
 
         //성공률 최소 수치 5% 보정
         successRate = (upgradeData.Gremlin_Upgrade_Prob / 100) + (upgradeData.Up_Prob_Value * gremlin._currentLevel) < 0.05f? 0.05f:

@@ -110,10 +110,10 @@ public class SkillManager : MonoBehaviour
     private void Update()
     {
         //신비게이지 테스트
-        //if (Keyboard.current.sKey.wasPressedThisFrame)
-        //{
-        //    MysteryGauge += 1000;
-        //}
+        if (Keyboard.current.sKey.wasPressedThisFrame)
+        {
+            MysteryGauge += 1000;
+        }
 
         float dt = Time.deltaTime;
         // 액티브 슬롯 쿨다운 업데이트
@@ -124,6 +124,27 @@ public class SkillManager : MonoBehaviour
 
         // 궁극기 쿨다운 업데이트
         UltimateSlot?.UpdateCooldown(dt);
+    }
+
+    // 게임 첫 시작 시 스타터 스킬 지급 및 장착
+    public void GiveStarterSkill(int skillId, int slotIndex = 0)
+    {
+        var sData = DataManager.Instance.GetData<SkillData>(skillId);
+        if (sData == null)
+        {
+            Debug.LogError($"[SkillManager] 스타터 스킬 데이터 없음: {skillId}");
+            return;
+        }
+
+        SkillKey key = new SkillKey(skillId, sData.Skill_Type, Rarity.Normal, false);
+
+        // 인스턴스 생성 + 인벤토리 추가 (내부적으로 UnlockAndAddItem 호출)
+        UnlockAndAddItem(key, 1);
+
+        // 액티브 슬롯 0번에 장착
+        EquipSkill(key, slotIndex);
+
+        Debug.Log($"[SkillManager] 스타터 스킬 장착 완료: {sData.Skill_Name} → 슬롯 {slotIndex}");
     }
 
     public List<SkillData> GetRandomScroll(int amount)
@@ -228,7 +249,7 @@ public class SkillManager : MonoBehaviour
     }
 
     public BaseSkill GetSkill(SkillKey key) => UnlockedSkills.TryGetValue(key, out BaseSkill bs) ? bs : null;
-    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity];
+    public Sprite GetSpriteByGrade(Rarity rarity) => grades[(int)rarity - 1];
     public int GetItemCount(SkillKey key) => _inventory.GetValueOrDefault(key, 0);
     public bool IsNewSkill(SkillKey key) => UnlockedSkills.ContainsKey(key);
 
@@ -267,7 +288,12 @@ public class SkillManager : MonoBehaviour
         if (rankData == null) return false;
 
         float successProb = rankData.Skill_Success_Prob;
-        if (isMysteryOn) successProb = Mathf.Min(successProb * 2, 1.0f); // 확률 상한선 제한
+        if (isMysteryOn)
+        {
+            successProb = Mathf.Min(successProb * 2, 1.0f); // 확률 상한선 
+            // 신비게이지 작동 시 게이지 선 소모
+            MysteryGauge = 0;
+        }
 
         // 합성 시도 횟수 계산 및 재료 선소모
         int attemptCount = currentAmount / 3;
@@ -659,9 +685,9 @@ public class SkillManager : MonoBehaviour
 
     #region Save & Load
 
-    public SaveSkillData GetSaveData()
+    public SkillSaveData GetSaveData()
     {
-        var data = new SaveSkillData();
+        var data = new SkillSaveData();
 
         // 인벤토리
         foreach (var (key, count) in _inventory)
@@ -702,7 +728,7 @@ public class SkillManager : MonoBehaviour
         return data;
     }
 
-    public void LoadFromSaveData(SaveSkillData data)
+    public void LoadFromSaveData(SkillSaveData data)
     {
         if (data == null) return;
 
@@ -719,7 +745,7 @@ public class SkillManager : MonoBehaviour
 
             BaseSkill skill = BaseSkill.Create(sData);
             skill.Rarity = key.rarity;
-            skill.Level = entry.level;          
+            skill.Level = entry.level;
             _unlockedSkills[key] = skill;
         }
 

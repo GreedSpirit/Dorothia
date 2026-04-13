@@ -72,6 +72,11 @@ public class CharactorPopup : BaseUI
 
     void UpdateStats(int currentLvl)
     {
+        int promotion = PlayerStats.Instance.CurrentPromotion;
+        Character_RankData rankData = DataManager.Instance.GetData<Character_RankData>(promotion);
+
+        rank.text = rankData.Character_Name;
+
         level.text = ($"Level. {currentLvl}");
         //정수 표시하고 소수점 첫째부터 내림
         hp.text = Mathf.FloorToInt((float)StatManager.Instance.GetStat(Status.HP)).ToString();

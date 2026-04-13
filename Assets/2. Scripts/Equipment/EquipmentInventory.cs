@@ -111,6 +111,12 @@ public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
 
     public async void LoadFromSaveData(InventorySaveData data)
     {
+        invDic.Clear();
+        //각 장착 부위마다 새롭게 인벤토리를 지정해줍니다.
+        foreach (Equip_Type part in System.Enum.GetValues(typeof(Equip_Type)))
+        {
+            invDic.Add(part, new List<Equipment>());
+        }
         //이제 받아온 세이브데이터의 모든 데이터를 대상으로 아래 코드를 실행합니다.
         foreach (var slot in data.EquipmentInventory)
         {
@@ -127,7 +133,12 @@ public class EquipmentInventory : MonoBehaviour, ISaveable<InventorySaveData>
 
             AddEquipment(equip);
         }
+        
+        //장착한 장비의 슬롯 이미지 갱신
         EquipmentUI ui = FindAnyObjectByType<EquipmentUI>(FindObjectsInactive.Include);
         ui.UpdateEquipState();
+
+        //장비 장착 이후 스탯 갱신
+        EquipmentSlotManager.Instance.ApplyEquipmentSet();
     }
 }

@@ -44,8 +44,9 @@ public abstract class BaseSkillModule : ISkillModule
     protected float ProjectileSpeed { get; private set; } = 15f;
     protected float CastRange { get; private set; } = 0f;
     protected float Delay { get; private set; } = 0f;
+    protected string EffectSFX { get; private set; } = string.Empty;
     protected Skill_Target TargetType { get; private set; } = Skill_Target.MySelf;
- 
+
     protected int GetHitCount(int i) => HitCounts[Mathf.Clamp(i, 0, HitCounts.Length - 1)];
     protected int GetRepeatCount(int i) => RepeatCount;
     protected float GetRepeatInterval(int i) => RepeatIntervals[Mathf.Clamp(i, 0, RepeatIntervals.Length - 1)];
@@ -67,6 +68,7 @@ public abstract class BaseSkillModule : ISkillModule
         CastRange = p.SkillCast_Range;
         Delay = p.First_Delay > 0 ? p.First_Delay : 0f;
         TargetType = p.Skill_Target;
+        EffectSFX = p.Skill_Sfx_Patch;
     }
 
     protected void PlayMyEffect(GameObject target, Transform parent = null)
@@ -74,6 +76,11 @@ public abstract class BaseSkillModule : ISkillModule
         if (string.IsNullOrEmpty(EffectName))
         {
             return;
+        }
+
+        if (!string.IsNullOrEmpty(EffectSFX))
+        {
+            SoundManager.Instance.PlaySFX(EffectSFX);
         }
 
         EffectManager.Instance.PlayEffect(
@@ -88,6 +95,11 @@ public abstract class BaseSkillModule : ISkillModule
         if (string.IsNullOrEmpty(EffectName))
         {
             return;
+        }
+
+        if (!string.IsNullOrEmpty(EffectSFX))
+        {
+            SoundManager.Instance.PlaySFX(EffectSFX);
         }
 
         EffectManager.Instance.PlayEffect(
@@ -111,6 +123,12 @@ public abstract class BaseSkillModule : ISkillModule
                                 centerPoint != Vector3.zero ?
                                 Quaternion.LookRotation(centerPoint - player.transform.position)
                                 : player.transform.rotation;
+
+        // 효과음이 있다면
+        if (!string.IsNullOrEmpty(EffectSFX))
+        {
+            SoundManager.Instance.PlaySFX(EffectSFX);
+        }
 
         EffectManager.Instance.PlayEffect(
             EffectName, EffectDuration,

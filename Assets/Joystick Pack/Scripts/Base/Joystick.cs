@@ -47,7 +47,7 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         baseRect = GetComponent<RectTransform>();
         canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
-            Debug.LogError("The Joystick is not placed inside a canvas");
+            Debug.LogError("조이스틱이 캔버스에 없음");
 
         Vector2 center = new Vector2(0.5f, 0.5f);
         background.pivot = center;

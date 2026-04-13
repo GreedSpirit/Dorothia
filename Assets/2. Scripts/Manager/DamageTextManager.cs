@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Pool;
 using TMPro;
 using GameUtility;
@@ -8,18 +8,24 @@ public class DamageTextManager : MonoBehaviour
     public static DamageTextManager Instance;
 
     [SerializeField] private GameObject _textPrefab; // TMP가 붙은 프리팹
-    private IObjectPool<GameObject> _pool;
+    private IObjectPool<FloatingText> _pool;
+
+    private Camera _mainCamera;
 
     private void Awake()
     {
         Instance = this;
+        _mainCamera = Camera.main;
 
-        // 유니티 내장 오브젝트 풀 초기화
-        _pool = new ObjectPool<GameObject>(
-            createFunc: CreateText,
-            actionOnGet: OnGetText,
-            actionOnRelease: OnReleaseText,
-            actionOnDestroy: OnDestroyText,
+        _pool = new ObjectPool<FloatingText>(
+            createFunc: () =>
+            {
+                var obj = Instantiate(_textPrefab, transform);
+                return obj.GetComponent<FloatingText>(); // 생성 시 한 번만
+            },
+            actionOnGet: ft => ft.gameObject.SetActive(true),
+            actionOnRelease: ft => ft.gameObject.SetActive(false),
+            actionOnDestroy: ft => Destroy(ft.gameObject),
             defaultCapacity: 20,
             maxSize: 50
         );
@@ -37,19 +43,13 @@ public class DamageTextManager : MonoBehaviour
 
     public void ShowDamage(int damage, Vector3 worldPos, bool isCritical = false)
     {
-        GameObject obj = _pool.Get();
-        obj.transform.position = worldPos + Vector3.up * 1.5f; // 몬스터 머리 위쯤
-        transform.LookAt(Camera.main.transform);
-        transform.forward = Camera.main.transform.forward;
+        FloatingText ft = _pool.Get(); 
+        ft.transform.position = worldPos + Vector3.up * 1.5f;
+        ft.transform.forward = _mainCamera.transform.forward;
 
-        FloatingText ft = obj.GetComponent<FloatingText>();
-
-        // 크리티컬 여부에 따른 설정
         Color color = isCritical ? Color.red : Color.white;
         float size = isCritical ? 6f : 4f;
-
         string formatted = NumberFormatterBigInt.Format(new System.Numerics.BigInteger(damage));
-
-        ft.Setup(formatted, color, size, (target) => _pool.Release(target));
+        ft.Setup(formatted, color, size, _ => _pool.Release(ft));
     }
 }

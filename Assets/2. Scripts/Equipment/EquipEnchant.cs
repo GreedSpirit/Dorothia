@@ -8,6 +8,7 @@ public class EquipEnchant : BaseUI
     [Header("인벤토리 창 관련")]
     [SerializeField] InventoryPanel _inventoryPanel;
     [SerializeField] Button _enchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
+    [SerializeField] Button _ringEnchantButton;                           // 장비 강화로 진입하기 위한 버튼. 장비창에서 인벤토리 오픈 시에 있는 버튼을 연결해 주십시오.
 
     [Header("강화 창 내의 강화 버튼")]
     [SerializeField] Button _proceedEnchantButton;                    // 실제 장비 강화를 진행하기 위한 버튼. 강화 창에서의 장비 강화 진행용 버튼을 연결해 주십시오.
@@ -23,13 +24,14 @@ public class EquipEnchant : BaseUI
     [Header("강화 관련 툴팁 표현용 TMP")]
     [SerializeField] TextMeshProUGUI _beforeEnchantUpgradeValueText;  // 장비의 현재 강화 수치를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _afterEnchantUpgradeValueText;   // 장비의 강화 성공 후 강화 수치를 보여주기 위한 텍스트입니다.
+    [SerializeField] TextMeshProUGUI _UpgradeBonusText;               // 장비의 강화 단계에 따른 스텟 보너스를 보여주기 위한 텍스트입니다.
+    [SerializeField] TextMeshProUGUI _UpgradeWeightText;               // 장비의 강화 단계에 따른 스텟 보너스를 보여주기 위한 텍스트입니다.
     [SerializeField] TextMeshProUGUI _currentGoldText;                // 현재 소지중인 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
     [SerializeField] TextMeshProUGUI _costGoldText;                   // 강화 시에 소모될 골드량을 보여주기 위한 텍스트입니다. 숫자 표기 부분을 연결해 주세요.
 
     private Equipment _equipment;                                     // 강화를 진행할 장비입니다. 장비를 선택한 채로 장비 강화 버튼을 누르면 해당 장비 정보를 담아두기 위함입니다.
     private bool _isUsingFailureCount = false;                        // 강화 실패로 쌓이게 된 보정값을 사용할지 여부를 결정합니다.
     private float _costGold;                                          // 강화 시에 사용하게 될 골드량입니다.
-
 
     private void Awake()
     {
@@ -45,6 +47,14 @@ public class EquipEnchant : BaseUI
                 RefreshEnchantPanel(_equipment);
             }
         });
+        _ringEnchantButton.onClick.AddListener(() =>
+        {
+            if (_inventoryPanel.CheckEquipmentSelected() == true)
+            {
+                GetEquipment(_inventoryPanel.GiveEquipmentData());
+                RefreshEnchantPanel(_equipment);
+            }
+        });
 
         //강화 진행 버튼에 다음 기능을 추가합니다.
         // - 장비 강화 진행
@@ -53,17 +63,28 @@ public class EquipEnchant : BaseUI
             Enchant(_equipment);
         });
         _useWeightToggle.onValueChanged.AddListener(UseWeight);
+        _UpgradeWeightText.enabled = false;
     }
 
     private void Start()
     {
+        //재화 매니저의 골드 변화가 발생할 경우의 이벤트에 다음 기능을 추가합니다.
+        // - 골드 변화시의 현재 보유량 표기
+        ExchangeManager.Instance.OnGoldChanged += OnGoldChanged;
+
         Close();
+    }
+    void OnGoldChanged(BigInteger currentGold)
+    {
+        if (ExchangeManager.Instance != null)
+            _currentGoldText.text = $"{GameUtility.NumberFormatterBigInt.FormatGold(currentGold, (BigInteger)_costGold)}";
     }
 
     private void UseWeight(bool value)
     {
         _isUsingFailureCount = value;
         _toggleText.text = value == true ? "On" : "Off";
+        _UpgradeWeightText.enabled = value;
     }
 
     /// <summary>
@@ -107,9 +128,13 @@ public class EquipEnchant : BaseUI
         _beforeEnchantUpgradeValueText.text = $"+{equip.equip_Upgrade}";
         _afterEnchantUpgradeValueText.text = equip.equip_Upgrade < 50? $"+{equip.equip_Upgrade + 1}" : "";
 
+        _UpgradeBonusText.text = equip.equip_Upgrade > 0 ? $"강화 보너스 : {DataManager.Instance.GetData<Equip_UpgradeData>(equip.equip_Upgrade).Equip_Value * 100}%" : "강화 보너스 : 100%";
+
         //장비의 골드 소모량은 전용 식이 존재합니다. 해당 식을 계산하기 위해 조건문을 작성하겠습니다.
         _costGold = equip.equip_Upgrade < 50?Mathf.RoundToInt(equip.equip_price * Mathf.Pow(equip.equip_Upgrade+1, DataManager.Instance.GetData<Equip_Upgrade_GoldData>(equip.equip_Upgrade+1).Equip_Upgrade_Value)
                 * ItemCalculator.GetEnchantWeightByRarity(DataManager.Instance.GetData<Equip_RankData>(equip.equipment_Rarity).Equip_Rank)): 99999999;
+
+        _UpgradeWeightText.text = $"(+{(equip.equip_Upgrade_Weight * 100):F0}%)";
 
         //소모될 골드의 텍스트는, 소모 골드량 값 뒤에 주황색 G를 붙여 표현합니다.
         if (equip.equip_Upgrade >= 50)
@@ -117,12 +142,15 @@ public class EquipEnchant : BaseUI
             _costGoldText.text = "<color=orange>G</color>";
         }
         else if(equip.equip_Upgrade < 50)
-            _costGoldText.text = $"{_costGold}<color=orange>G</color>";
+        {
+            _costGoldText.text = GameUtility.NumberFormatterBigInt.FormatGold((BigInteger)_costGold);
+        }
 
         //현재의 골드량은, (테스트를 위해 임시로 작성한 테스트용)소지 중인 골드 값 뒤에 주황색 G를 붙여 표현합니다.
-        _currentGoldText.text = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold) >= (BigInteger)_costGold?
-            $"{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>":
-            $"<color=red>{ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold)}<color=orange>G</color>";
+        BigInteger gold = ExchangeManager.Instance.GetMoneyAmount(MoneyType.Gold);
+
+        //기존 삼항 제거 -> Formatter로 통일
+        _currentGoldText.text = GameUtility.NumberFormatterBigInt.FormatGold(gold, (BigInteger)_costGold);
 
     }
 
@@ -159,7 +187,7 @@ public class EquipEnchant : BaseUI
         if(_isUsingFailureCount == true)
         {
             //보정값을 전부 사용하였을 때 100을 초과하지 않는다면 그냥 그 값을 그대로 더합니다.
-            if(successChance + equip.equip_Upgrade_Weight <= 100)
+            if(successChance + (equip.equip_Upgrade_Weight*100) <= 100)
             {
                 successChance += equip.equip_Upgrade_Weight * 100;
             }
